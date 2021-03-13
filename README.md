@@ -4,7 +4,7 @@ Wesley是一套为经销商量身定制的全业务流程渠道 分销管理系�
 
 ---
 
-功能:
+## 功能:
   - 业务管理: 
     details: 效率全面提升,业绩显著增长,移动开单,欠款提醒,门店拜访,奖励机制优化,实时了解经营状况，有效提醒与预测，让经销商决策更精准。
 
@@ -103,8 +103,8 @@ Wesley是一套为经销商量身定制的全业务流程渠道 分销管理系�
 [ZXing.Net.Mobile.Forms](https://)
 
 
-## 
+---
 
-点击链接加入群聊【DCMS新项目组】 [282402219](https://jq.qq.com/?_wv=1027&k=2R6HylVO)
+## 微信扫码交流
 
-<img style="width:300px;" :src="$withBase('/images/DCMS新项目组群聊二维码.png')" />
+![](https://github.com/dorisoy/Wesley/blob/main/weixing.png?raw=true)
