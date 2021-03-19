@@ -29,22 +29,12 @@ Wesley 计划开源打造国内首套基于Saas的轻量级新零售快消CRM/ER
 <img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(2).jpg" width="300"/>
 <img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(3).jpg" width="300"/>
 <img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(4).jpg" width="300"/>
-</figure>
-
-<center class="half">
 <img align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(5).jpg" width="300" />
 <img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(6).jpg" width="300"/>
 <img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(7).jpg" width="300"/>
 <img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(8).jpg" width="300"/>
 </figure>
 
-## 经销商管理端
-<center class="half">
-<img align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(1).jpg" width="300" />
-<img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(2).jpg" width="300"/>
-<img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(3).jpg" width="300"/>
-<img  align="left" src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(4).jpg" width="300"/>
-</figure>
 
 ## 开发环境
 
