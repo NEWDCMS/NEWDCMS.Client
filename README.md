@@ -125,6 +125,11 @@ Wesley 计划开源打造国内首套基于Saas的轻量级新零售快消CRM/ER
 
 
 
+| <div style="width:290px">property</div> | description                           |
+| --------------------------------------- | ------------------------------------- |
+| `border-bottom-right-radius`            | Defines the shape of the bottom-right |
+
+
 ## 销售模块
 
 | 功能 | PC | APP |
