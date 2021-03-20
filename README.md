@@ -40,6 +40,12 @@ Wesley 计划开源打造国内首套基于Saas的轻量级新零售快消CRM/ER
 <img align="left"   src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(9).jpg" width="255" vspace="20"/>
 <img src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(7).jpg" width="255" vspace="20"/>
 
+## 管理平台
+
+<img align="left"  src="https://raw.githubusercontent.com/dorisoy/Wesley/main/p%20(1).jpg" width="260" vspace="20"/>
+<img align="left"  src="https://raw.githubusercontent.com/dorisoy/Wesley/main/p%20(2).jpg" width="260" vspace="20"/>
+<img src="https://raw.githubusercontent.com/dorisoy/Wesley/main/p%20(3).jpg" width="260" vspace="20"/>
+
 
 ## 开发环境
 
