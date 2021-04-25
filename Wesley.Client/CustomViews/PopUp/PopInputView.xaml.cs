@@ -1,0 +1,65 @@
+﻿using Microsoft.AppCenter.Crashes;
+using System;
+using Xamarin.Forms;
+namespace Wesley.Client.CustomViews.Views
+{
+
+
+    public partial class PopInputView : ContentView
+    {
+
+        public PopInputView(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "请输入值...")
+        {
+            try { InitializeComponent(); } catch (Exception ex) { Crashes.TrackError(ex); }
+            BindingContext = new
+            {
+                Title = title,
+                Message = message,
+                DefaultValue = defaultValue,
+                PlaceHolder = placeHolder
+            };
+            txtInput.Keyboard = keyboard;
+        }
+
+        /// <summary>
+        /// 定义选择事件
+        /// </summary>
+        public event EventHandler<string> Picked;
+
+        /// <summary>
+        /// 焦点输入
+        /// </summary>
+        public void FocusEntry()
+        {
+            txtInput.Focus();
+        }
+
+        /// <summary>
+        /// 确认
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Confirm_Clicked(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(txtInput.Text))
+            {
+                Picked?.Invoke(this, txtInput.Text);
+            }
+        }
+
+        /// <summary>
+        /// 取消
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Cancel_Clicked(object sender, EventArgs e)
+        {
+            Picked?.Invoke(this, null);
+        }
+
+        private void TxtInput_Focused(object sender, FocusEventArgs e)
+        {
+            txtInput.Focus();
+        }
+    }
+}

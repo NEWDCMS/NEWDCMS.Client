@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<prism:PrismApplication xmlns="http://xamarin.com/schemas/2014/forms"
+                        xmlns:prism="http://prismlibrary.com"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                        xmlns:converters="clr-namespace:Wesley.Client.Converters;assembly=Wesley.Client"
+                        xmlns:valueConverters="clr-namespace:Wesley.Client.Styles.ValueConverters"
+                        x:Class="Wesley.Client.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!--颜色定义-->
+            <ResourceDictionary Source="Styles/Colors.xaml" />
+            <!--字体定义-->
+            <ResourceDictionary Source="Styles/Fonts.xaml" />
+            <!--控件样式定义-->
+            <ResourceDictionary Source="Styles/ControlStyles.xaml" />
+            <!--头模板-->
+            <ResourceDictionary Source="Pages/DataTemplates/ControlTemplates/ReportTemplates.xaml" />
+            <ResourceDictionary Source="Pages/DataTemplates/ControlTemplates/OrderTemplates.xaml" />
+            <ResourceDictionary Source="Pages/DataTemplates/ControlTemplates/BillTemplates.xaml" />
+            <!--全局定义-->
+            <Style x:Key="GBoxView" TargetType="BoxView">
+                <Setter Property="Margin" Value="0" />
+            </Style>
+            <Style x:Key="GEntry" TargetType="custom:CustomEntry">
+                <Setter Property="Padding" Value="0" />
+            </Style>
+            <Style x:Key="GGrid" TargetType="Grid">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="ColumnSpacing" Value="0" />
+                <Setter Property="RowSpacing" Value="0" />
+                <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+            </Style>
+            <Style x:Key="GLabel" TargetType="Label">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+            <Style x:Key="GStackLayout" TargetType="StackLayout">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Spacing" Value="0" />
+            </Style>
+            <!--转换器定义-->
+            <converters:MultiValueConverter x:Key="MultiValueConverter" />
+            <valueConverters:DateHUmanizerConverter x:Key="DatehumanizerConverter" />
+            <valueConverters:ImageResourceValueConverter x:Key="ImageResourceConverter" />
+            <valueConverters:IsNullConverter x:Key="IsNullValueConverter" />
+            <converters:DynamicResourceToColorConverter x:Key="DynamicResourceToColorConverter" />
+            <converters:SwichConverter x:Key="SwichConverter" />
+            <converters:DateTimeEmptyConverter x:Key="DateTimeEmptyConverter" />
+            <converters:DateTimeToStringConverter x:Key="DateTimeToStringConverter" />
+            <converters:WrongBoolConverter x:Key="WrongBoolConverter" />
+            <converters:ToLowerConverter x:Key="ToLowerConverter" />
+            <converters:ToUpperConverter x:Key="ToUpperConverter" />
+            <converters:ImageSourceConverter x:Key="ImageSourceConverter" />
+            <converters:EqualConverter x:Key="EqualConverter" />
+            <converters:TakeDieConverter x:Key="TakeDieConverter" />
+            <converters:MetersToMilesConverter x:Key="MetersToMilesConverter" />
+            <converters:NullableDecimalConverter x:Key="NullableDecimalConverter" />
+            <converters:NullableIntConverter x:Key="NullableIntConverter" />
+            <converters:TextChangedEventArgsConverter x:Key="TextChangedEventArgsConverter" />
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:IsNullConverter x:Key="IsNullConverter" />
+            <converters:NullToValueConverter x:Key="NullToValueConverter" />
+            <converters:SelectedItemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
+            <converters:ExceptionToImageSourceConverter x:Key="ExceptionToImageSourceConverter" />
+            <converters:SizeScalingByScreenConverter x:Key="SizeScalingByScreenConverter" />
+            <converters:PercentageValueToUnicodeConverter x:Key="IconConverter" />
+            <!--值常量-->
+            <x:Double x:Key="FT12">12</x:Double>
+            <x:Double x:Key="FT14">14</x:Double>
+            <x:Double x:Key="FT16">16</x:Double>
+            <x:Double x:Key="PM5">5</x:Double>
+            <x:Double x:Key="PM8">8</x:Double>
+            <x:Double x:Key="PM10">10</x:Double>
+            <x:Double x:Key="PM15">15</x:Double>
+            <x:Double x:Key="RH45">45</x:Double>
+            <!--Padding 定义-->
+            <Thickness x:Key="P5" Bottom="5" Left="5" Right="5" Top="5" />
+            <Thickness x:Key="P10" Bottom="10" Left="10" Right="10" Top="10" />
+            <Thickness x:Key="P15" Bottom="15" Left="15" Right="15" Top="15" />
+            <Thickness x:Key="PL10" Bottom="0" Left="10" Right="0" Top="0" />
+            <Thickness x:Key="PLR5" Bottom="0" Left="5" Right="5" Top="0" />
+            <Thickness x:Key="PLR10" Bottom="0" Left="10" Right="10" Top="0" />
+            <!--Margin 定义-->
+            <Thickness x:Key="M5" Bottom="5" Left="5" Right="5" Top="5" />
+            <Thickness x:Key="M10" Bottom="10" Left="10" Right="10" Top="10" />
+            <Thickness x:Key="M15" Bottom="15" Left="15" Right="15" Top="15" />
+            <Thickness x:Key="ML8" Bottom="0" Left="8" Right="0" Top="0" />
+            <Thickness x:Key="ML10" Bottom="0" Left="5" Right="0" Top="0" />
+            <Thickness x:Key="ML105" Bottom="0" Left="10" Right="5" Top="0" />
+            <Thickness x:Key="MR5" Bottom="0" Left="0" Right="5" Top="0" />
+            <Thickness x:Key="MR10" Bottom="0" Left="0" Right="10" Top="0" />
+        </ResourceDictionary>
+ </Application.Resources>
+</prism:PrismApplication>

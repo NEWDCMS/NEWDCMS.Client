@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseTabbedPage  xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:vews="clr-namespace:Wesley.Client.Pages.Order;assembly=Wesley.Client"
+                       xmlns:loading="clr-namespace:Wesley.Client.CustomViews.Views;assembly=Wesley.Client"
+                       xmlns:order="clr-namespace:Wesley.Client.Pages.Order;assembly=Wesley.Client"
+                       xmlns:lazyView="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="ViewBillTabPage"
+                       x:Class="Wesley.Client.Pages.Archive.ViewBillPage"
+                       Title="{Binding Title}"
+                       BarBackgroundColor="White"
+                       SelectedTabIndex="{Binding SelectedTab}"
+                       BarTextColor="#53a245"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:ViewBillPageViewModel">
+    <pages:BaseTabbedPage.Children>
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:SaleOrderView"
+                                  x:Name="SaleOrderPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:SaleView"
+                                  x:Name="SalePage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:ReturnOrderView"
+                                  x:Name="ReturnOrderPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:ReturnView"
+                                  x:Name="ReturnPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:AllocationView"
+                                  x:Name="AllocationPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:CashReceiptView"
+                                  x:Name="CashReceiptPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:CostExpenditureView"
+                                  x:Name="CostExpenditurePage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:AdvanceReceiptView"
+                                  x:Name="AdvanceReceiptPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:CostContractView"
+                                  x:Name="CostContractPage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:PurchaseView"
+                                  x:Name="PurchasePage" />
+        <lazyView:LazyContentPage Title="{Binding Title}"
+                                  x:TypeArguments="loading:LoadingContentView,order:InventoryReportView"
+                                  x:Name="InventoryReportViewPage" />
+    </pages:BaseTabbedPage.Children>
+</pages:BaseTabbedPage>

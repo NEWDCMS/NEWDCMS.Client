@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.AgreementPage"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AgreementPageViewModel">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical"
+                     Padding="15">
+            <custom:HtmlLabel Text="{Binding Path=AgreementText}"
+                              FontSize="{StaticResource FT14}"
+                              LineHeight="1.5"></custom:HtmlLabel>
+        </StackLayout>
+    </ContentPage.Content>
+</pages:BaseContentPage>

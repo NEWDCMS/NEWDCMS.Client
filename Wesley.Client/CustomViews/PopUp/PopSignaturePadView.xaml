@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:controls="clr-namespace:SignaturePad.Forms;assembly=SignaturePad.Forms"
+             x:Class="Wesley.Client.CustomViews.Views.PopSignaturePadView">
+    <StackLayout Margin="20"
+                 HorizontalOptions="Center"
+                 VerticalOptions="Center"
+                 BackgroundColor="Transparent"
+                 Spacing="0">
+        <yummy:PancakeView x:Name="FrameContainer"
+                           CornerRadius="10"
+                           BackgroundColor="White">
+            <StackLayout Spacing="0">
+                <Grid Style="{StaticResource GGrid}"
+                      HorizontalOptions="FillAndExpand"
+                      BackgroundColor="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".5" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0"
+                           Margin="15,0,0,0"
+                           Text="{Binding Title}"
+                           FontSize="{StaticResource FT14}"
+                           TextColor="{StaticResource PrimaryColor}"
+                           HorizontalOptions="Start"
+                           VerticalOptions="CenterAndExpand"></Label>
+                    <BoxView Grid.Row="1"
+                             Grid.Column="0"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+                <!--begin content-->
+                <StackLayout x:Name="slContent"
+                             Padding="0"
+                             Orientation="Horizontal">
+                    <!--签字板-->
+                    <controls:SignaturePadView x:Name="signaturePadView"
+                                               StrokeCompletedCommand="{Binding StrokeCompletedCommand}"
+                                               ClearedCommand="{Binding ClearedCommand}"
+                                               StrokeWidth="3"
+                                               CaptionTextColor="#B8860B"
+                                               ClearTextColor="#B8860B"
+                                               PromptTextColor="#B8860B"
+                                               SignatureLineColor="#ffffff"
+                                               PromptText=""
+                                               ClearText="清除"
+                                               BackgroundColor="#ffffff"
+                                               CaptionText=""
+                                               VerticalOptions="FillAndExpand"
+                                               HorizontalOptions="FillAndExpand"
+                                               HeightRequest="300" >
+                        <!--<controls:SignaturePadView.Behaviors>
+                            <local:CaptureSignaturePointsBehavior Points="{Binding CurrentSignature}" />
+                        </controls:SignaturePadView.Behaviors>-->
+                    </controls:SignaturePadView>
+                </StackLayout>
+                <!--end content-->
+                <!--footer-->
+                <Grid Style="{StaticResource GGrid}"
+                      VerticalOptions="End"
+                      BackgroundColor="White">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".5" />
+                        <RowDefinition Height="45" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width=".5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.Row="0"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}" />
+                    <!--取消-->
+                    <Button Grid.Row="1"
+                            Grid.Column="0"
+                            x:Name="CalcleBtn"
+                            Text="取消"
+                            FontSize="{StaticResource FT14}"
+                            CornerRadius="0"
+                            VerticalOptions="Center"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            BackgroundColor="#eeeeee"
+                            Clicked="Cancel_Clicked" />
+                    <BoxView Grid.Row="1"
+                             Grid.Column="1"
+                             Style="{StaticResource SeparatorVGrid}" />
+                    <!--确定-->
+                    <Button Grid.Row="1"
+                            Grid.Column="2"
+                            x:Name="ConfirmBtn"
+                            Text="确定"
+                            CornerRadius="0"
+                            FontSize="{StaticResource FT14}"
+                            VerticalOptions="Center"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            BackgroundColor="#eeeeee"
+                            Clicked="Confirm_Clicked" />
+                </Grid>
+            </StackLayout>
+        </yummy:PancakeView>
+    </StackLayout>
+</ContentView>

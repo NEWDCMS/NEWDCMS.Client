@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:zxing="clr-namespace:ZXing.Net.Mobile.Forms;assembly=ZXing.Net.Mobile.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.ScanBarcodePage"
+                       Title="{Binding Title}"
+                       x:TypeArguments="vms:ScanBarcodePageViewModel">
+    <Grid RowSpacing="0"
+          ColumnSpacing="0"
+          Padding="0"
+          Margin="0"
+          VerticalOptions="FillAndExpand"
+          HorizontalOptions="FillAndExpand"
+          BackgroundColor="Black" RowDefinitions="*,60">
+        <Label Grid.Row="0"
+               Grid.Column="0"
+               Grid.ColumnSpan="2"
+               Text="扫描条码/二维码"
+               Padding="20"
+               FontSize="Small"
+               HorizontalOptions="FillAndExpand"
+               VerticalOptions="Start"
+               HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center"
+               TextColor="White" />
+        <zxing:ZXingScannerView Grid.Row="0"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Grid.RowSpan="2"
+                                x:Name="zxing"
+                                IsScanning="{Binding IsScanning}"
+                                IsAnalyzing="{Binding IsAnalyzing}"
+                                Options="{Binding Options}"
+                                ScanResultCommand="{Binding ScanResultCommand}"
+                                IsTorchOn="False"
+                                HeightRequest="500"
+                                VerticalOptions="CenterAndExpand"
+                                HorizontalOptions="FillAndExpand" />
+        <AbsoluteLayout  Grid.Row="0"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="2"
+                         Grid.RowSpan="2">
+            <Image x:Name="redline"
+                   AbsoluteLayout.LayoutFlags="SizeProportional"
+                   AbsoluteLayout.LayoutBounds="1, 0, 1, 1"
+                   WidthRequest="150"
+                   Source="saomiao.png">
+            </Image>
+        </AbsoluteLayout>
+
+        <StackLayout Grid.Column="0"
+                     Grid.Row="1">
+            <Button CornerRadius="50"
+                    WidthRequest="50"
+                    HorizontalOptions="Center"
+                    Text="&#xf029;"
+                    FontFamily="FAS"
+                    Padding="5"
+                    FontSize="25"
+                    Opacity="0.7"
+                    TextColor="White" />
+        </StackLayout>
+        <StackLayout Grid.Column="1"
+                     Grid.Row="1">
+            <Button CornerRadius="50"
+                    WidthRequest="50"
+                    HorizontalOptions="Center"
+                    Text="&#xf03e;"
+                    FontFamily="FAS"
+                    Padding="5"
+                    FontSize="25"
+                    Opacity="0.7"
+                    TextColor="White" />
+        </StackLayout>
+    </Grid>
+</pages:BaseContentPage>

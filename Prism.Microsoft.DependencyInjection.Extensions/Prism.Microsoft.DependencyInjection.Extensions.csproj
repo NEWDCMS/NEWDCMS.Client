@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageTags>prism di iserviceprovider iservicecollection microsoft-dependencyinjection</PackageTags>
+    <Authors>dansiegel</Authors>
+    <Description>Prism Container Extensions for the Microsoft.Extensions.DependencyInjection implementations of IServiceCollection / IServiceProvider</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="build\**\*.cs" />
+    <None Include="build\**" Pack="true" PackagePath="build" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Prism.Container.Extensions\Prism.Container.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

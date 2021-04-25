@@ -1,0 +1,674 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:Selectors="clr-namespace:Wesley.Client.Selector;assembly=Wesley.Client"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.Archive.ReconciliationORreceivablesPage"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:ReconciliationORreceivablesPageViewModel">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--销售收款-->
+            <DataTemplate x:Key="SaleBillDataTemplate">
+                <Grid Padding="10,10,10,0"
+                      Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="50" />
+                    </Grid.ColumnDefinitions>
+                    <!--Row 0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Text="{Binding BillTypeName}"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding SaleBillCount,StringFormat='待交账：{0} 张'}"
+                           TextColor="{StaticResource PrimaryDarkColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{Binding TotalSaleAmountSum,StringFormat='{0:F2}'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End" />
+                    <Label Grid.Row="0"
+                           Grid.Column="3"
+                           Grid.RowSpan="4"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}"></Label>
+                    <!--Row 1-->
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalSaleAmount,StringFormat='= 销售金额：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <Label Grid.Row="1"
+                           Grid.Column="2"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalSaleAdvanceReceiptAmount,StringFormat='- 预收款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="End" />
+                    <!--Row 2-->
+                    <Label Grid.Row="2"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalSaleOweCashAmount,StringFormat='- 欠款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <Label Grid.Row="2"
+                           Grid.Column="2"
+                           FontSize="{StaticResource FT12}"
+                           Text="- 定货款：0.00"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="End" />
+                    <!--Row 3-->
+                    <BoxView Grid.Row="3"
+                             Grid.ColumnSpan="4"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+            </DataTemplate>
+            <!--退货款-->
+            <DataTemplate x:Key="ReturnBillDataTemplate">
+                <Grid Style="{StaticResource GGrid}"
+                      Padding="10,10,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="50" />
+                    </Grid.ColumnDefinitions>
+                    <!--Row 0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding BillTypeName}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding ReturnBillCount,StringFormat='待交账：{0} 张'}"
+                           TextColor="{StaticResource PrimaryDarkColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{Binding TotalReturnAmountSum,StringFormat='{0:F2}'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End" />
+                    <Label Grid.Row="0"
+                           Grid.Column="3"
+                           Grid.RowSpan="4"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}"></Label>
+                    <!--Row 1-->
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalReturnAmount,StringFormat='= 退货金额：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <Label Grid.Row="1"
+                           Grid.Column="2"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalReturnAdvanceReceiptAmount,StringFormat='- 预收款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="End" />
+                    <!--Row 2-->
+                    <Label Grid.Row="2"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalReturnOweCashAmount,StringFormat='- 欠款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <!--Row 3-->
+                    <BoxView Grid.Row="3"
+                             Grid.ColumnSpan="4"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+            </DataTemplate>
+            <!--收欠款-->
+            <DataTemplate x:Key="CashReceiptBillDataTemplate">
+                <Grid Padding="10,10,10,0"
+                      Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="50" />
+                    </Grid.ColumnDefinitions>
+                    <!--Row 0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding BillTypeName}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding ReceiptCashOweCashBillCount,StringFormat='待交账：{0} 张'}"
+                           TextColor="{StaticResource PrimaryDarkColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{Binding TotalReceiptCashOweCashAmountSum,StringFormat='{0:F2}'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End" />
+                    <Label Grid.Row="0"
+                           Grid.Column="3"
+                           Grid.RowSpan="3"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}"></Label>
+                    <!--Row 1-->
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalReceiptCashReceivableAmount,StringFormat='= 应收金额：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <Label Grid.Row="1"
+                           Grid.Column="2"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalReceiptCashAdvanceReceiptAmount,StringFormat='- 预收款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="End" />
+                    <!--Row 2-->
+                    <BoxView Grid.Row="2"
+                             Grid.ColumnSpan="4"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+            </DataTemplate>
+            <!--收预收款-->
+            <DataTemplate x:Key="AdvanceReceiptBillDataTemplate">
+                <Grid Padding="10,10,10,0"
+                      Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="50" />
+                    </Grid.ColumnDefinitions>
+                    <!--Row 0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding BillTypeName}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding AdvanceReceiptBillCount,StringFormat='待交账：{0} 张'}"
+                           TextColor="{StaticResource PrimaryDarkColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{Binding TotalAdvanceReceiptSum,StringFormat='{0:F2}'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End" />
+                    <Label Grid.Row="0"
+                           Grid.Column="3"
+                           Grid.RowSpan="2"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}"></Label>
+                    <!--Row 1-->
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalAdvanceReceiptAmount,StringFormat='= 预收金额：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <Label Grid.Row="1"
+                           Grid.Column="2"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalAdvanceReceiptOweCashAmount,StringFormat='- 欠款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="End" />
+                    <!--Row 2-->
+                    <BoxView Grid.Row="2"
+                             Grid.ColumnSpan="4"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+            </DataTemplate>
+            <!--费用支出-->
+            <DataTemplate x:Key="CostExpenditureBillDataTemplate">
+                <Grid Padding="10,10,10,0"
+                      Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="50" />
+                    </Grid.ColumnDefinitions>
+                    <!--Row 0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding BillTypeName}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT14}"
+                           Text="{Binding CostExpenditureBillCount,StringFormat='待交账：{0} 张'}"
+                           TextColor="{StaticResource PrimaryDarkColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{Binding TotalCostExpenditureSum,StringFormat='{0:F2}'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End" />
+                    <Label Grid.Row="0"
+                           Grid.Column="3"
+                           Grid.RowSpan="2"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}"></Label>
+                    <!--Row 1-->
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalCostExpenditureAmount,StringFormat='= 支出金额：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}" />
+                    <Label Grid.Row="1"
+                           Grid.Column="2"
+                           FontSize="{StaticResource FT12}"
+                           Text="{Binding TotalCostExpenditureOweCashAmount,StringFormat='- 欠款：{0:F2}'}"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="End" />
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="ValidDataTemplate">
+                <StackLayout>
+                    <Label Text="{Binding BillTypeName}" />
+                </StackLayout>
+            </DataTemplate>
+            <Selectors:CustomBillTemplateSelector x:Key="BillsTemplate"
+                                                  ValidTemplate="{StaticResource ValidDataTemplate}"
+                                                  SaleBillTemplate="{StaticResource SaleBillDataTemplate}"
+                                                  ReturnBillTemplate="{StaticResource ReturnBillDataTemplate}"
+                                                  CashReceiptBillTemplate="{StaticResource CashReceiptBillDataTemplate}"
+                                                  AdvanceReceiptBillTemplate="{StaticResource AdvanceReceiptBillDataTemplate}"
+                                                  CostExpenditureBillTemplate="{StaticResource CostExpenditureBillDataTemplate}" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <AbsoluteLayout>
+        <ScrollView  AbsoluteLayout.LayoutBounds="0,0,1,1"
+                     AbsoluteLayout.LayoutFlags="All">
+            <StackLayout VerticalOptions="Start"
+                         Padding="0,0,0,45"
+                         Spacing="0">
+                <Grid Style="{StaticResource GGrid}"
+                      HorizontalOptions="FillAndExpand"
+                      VerticalOptions="Start">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackLayout Orientation="Horizontal"
+                                 HeightRequest="{StaticResource RH45}"
+                                 Spacing="0"
+                                 Grid.Row="0"
+                                 Grid.Column="0">
+                        <Label HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="{StaticResource ML10}"
+                               Text="员工:"
+                               FontSize="{StaticResource FT14}" />
+                        <custom:CustomEntry x:Name="DeliverEntry"
+                                            Placeholder="请选择..."
+                                            Text="{Binding Filter.BusinessUserName,Mode=TwoWay}"
+                                            Margin="{StaticResource ML10}"
+                                            HorizontalOptions="FillAndExpand"
+                                            VerticalOptions="CenterAndExpand"
+                                            ShowVirtualKeyboardOnFocus="False"
+                                            Style="{StaticResource DefaultEntry}">
+                            <custom:CustomEntry.Behaviors>
+                                <b:EventToCommandBehavior EventName="Focused"
+                                                          Command="{Binding Path=BindingContext.DeliverSelected,Source={x:Reference CurrentContentView}}" />
+                            </custom:CustomEntry.Behaviors>
+                        </custom:CustomEntry>
+                    </StackLayout>
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Style="{StaticResource DownArrow}"
+                           Margin="{StaticResource MR10}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Path=DeliverSelected}"></TapGestureRecognizer>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+                <BoxView VerticalOptions="Start"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Grid Style="{StaticResource GGrid}"
+                      BackgroundColor="#eeeeee">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.Row="0"
+                             Grid.Column="0"
+                             Grid.RowSpan="2"
+                             HeightRequest="4"
+                             BackgroundColor="{StaticResource PrimaryColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Margin="{StaticResource ML10}"
+                           Text="收款来源"
+                           
+                           FontSize="{StaticResource FT14}"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Center" />
+                </Grid>
+                <!--汇总列表-->
+                <CollectionView ItemsSource="{Binding Bills,Mode=TwoWay}"
+                                x:Name="BillItems"
+                                VerticalOptions="Start"
+                                SelectionMode="Single"
+                                HeightRequest="475"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                ItemTemplate="{StaticResource BillsTemplate}">
+                    <CollectionView.EmptyView>
+                        <StackLayout>
+                            <Label Text="稍等，数据加载中...."
+                                   FontSize="{StaticResource FT14}"
+                                   Margin="10"
+                                   VerticalOptions="CenterAndExpand"
+                                   HorizontalOptions="CenterAndExpand" />
+                        </StackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+                <!--收款方式-->
+                <Grid Style="{StaticResource GGrid}"
+                      BackgroundColor="#eeeeee">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.Row="0"
+                             Grid.Column="0"
+                             Grid.RowSpan="2"
+                             HeightRequest="4"
+                             BackgroundColor="{StaticResource PrimaryColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Margin="{StaticResource ML10}"
+                           Text="收款方式"
+                           
+                           FontSize="{StaticResource FT14}"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Center" />
+                </Grid>
+                <CollectionView ItemsSource="{Binding Payments,Mode=OneWay}"
+                                x:Name="Payments"
+                                HeightRequest="{Binding HeightRequest}"
+                                VerticalOptions="Start"
+                                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <StackLayout>
+                            <Label Text="稍等，数据加载中...."
+                                   FontSize="{StaticResource FT14}"
+                                   Margin="10" />
+                        </StackLayout>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}"
+                                  Margin="{StaticResource PLR10}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       Margin="10,0,0,0"
+                                       TextColor="{StaticResource SecondaryTextColor}"
+                                       HorizontalOptions="StartAndExpand"
+                                       VerticalOptions="Center"
+                                       FontSize="{StaticResource FT14}" />
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding CollectionAmount,StringFormat='{0:F2}'}"
+                                       TextColor="{StaticResource PrimaryDarkColor}"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center"
+                                       FontSize="{StaticResource FT14}" />
+                                <BoxView Grid.Row="1"
+                                         Grid.Column="0"
+                                         Grid.ColumnSpan="3"
+                                         Style="{StaticResource SeparatorGrid}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <!--商品汇总-->
+                <Grid Style="{StaticResource GGrid}"
+                      BackgroundColor="#eeeeee">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.Row="0"
+                             Grid.Column="0"
+                             Grid.RowSpan="2"
+                             HeightRequest="4"
+                             BackgroundColor="{StaticResource PrimaryColor}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Margin="{StaticResource ML10}"
+                           Text="商品汇总"
+                           
+                           FontSize="{StaticResource FT14}"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Center" />
+                </Grid>
+                <Grid Style="{StaticResource GGrid}"
+                      Margin="{StaticResource PLR10}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".7" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".7" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="50" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Text="销售商品"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="StartAndExpand"
+                           VerticalOptions="Center"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Text="{Binding SaleProductCount,StringFormat='{0} 种'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ViewProducts}"
+                                                  CommandParameter="SaleProducts"></TapGestureRecognizer>
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <BoxView Grid.Row="1"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             VerticalOptions="Start"
+                             Style="{StaticResource SeparatorGrid}" />
+                    <Label Grid.Row="2"
+                           Grid.Column="0"
+                           Text="赠送商品"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="StartAndExpand"
+                           VerticalOptions="Center"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="2"
+                           Grid.Column="1"
+                           Text="{Binding GiftProductCount,StringFormat='{0} 种'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="2"
+                           Grid.Column="2"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ViewProducts}"
+                                                  CommandParameter="GiftProducts"></TapGestureRecognizer>
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <BoxView Grid.Row="3"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             VerticalOptions="Start"
+                             Style="{StaticResource SeparatorGrid}" />
+                    <Label Grid.Row="4"
+                           Grid.Column="0"
+                           Text="退货商品"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="StartAndExpand"
+                           VerticalOptions="Center"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="4"
+                           Grid.Column="1"
+                           Text="{Binding ReturnProductCount,StringFormat='{0} 种'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Grid.Row="4"
+                           Grid.Column="2"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ViewProducts}"
+                                                  CommandParameter="ReturnProducts"></TapGestureRecognizer>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </StackLayout>
+        </ScrollView>
+        <!--footer-->
+        <Grid HeightRequest="{StaticResource RH45}"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <Label Grid.Row="1"
+                   Grid.Column="0"
+                   Text="{Binding TotalCount,StringFormat='总计：{0}'}"
+                   HorizontalOptions="Start"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="10,5,0,5" />
+            <Label Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding TotalAmount,StringFormat='待交金额：{0:F2}'}"
+                   HorizontalOptions="End"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="0,5,10,5" />
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

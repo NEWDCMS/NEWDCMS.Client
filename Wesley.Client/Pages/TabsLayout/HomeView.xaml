@@ -1,0 +1,535 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tintedImages="clr-namespace:Wesley.Client.Plugin;assembly=Wesley.Client"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             xmlns:skiaRate="clr-namespace:SkiaRate;assembly=Wesley.Client"
+             xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Name="CurrentContentView"
+             x:Class="Wesley.Client.Pages.HomeView">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <!--App Button-->
+            <Style x:Key="AppButtonStyle30"
+                   TargetType="Button">
+                <Setter Property="FontFamily"
+                        Value="FAS" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="FontSize"
+                        Value="14" />
+                <Setter Property="BackgroundColor"
+                        Value="#ffffff" />
+                <Setter Property="BorderColor"
+                        Value="{StaticResource DividerColor}" />
+                <Setter Property="BorderRadius"
+                        Value="50" />
+                <Setter Property="CornerRadius"
+                        Value="50" />
+                <Setter Property="BorderWidth"
+                        Value="0.2" />
+                <Setter Property="HeightRequest"
+                        Value="30" />
+                <Setter Property="WidthRequest"
+                        Value="30" />
+                <Setter Property="HorizontalOptions"
+                        Value="Center" />
+            </Style>
+            <Style x:Key="AppButtonNameLabel10"
+                   TargetType="Label">
+                <Setter Property="TextColor"
+                        Value="#7D7D7D" />
+                <Setter Property="Margin"
+                        Value="0,-2,0,0" />
+                <Setter Property="HorizontalTextAlignment"
+                        Value="Center" />
+                <Setter Property="FontSize"
+                        Value="14" />
+            </Style>
+            <!--tool bar button-->
+            <Style x:Key="ToolBarStyle"
+                   TargetType="Button">
+                <Setter Property="FontFamily"
+                        Value="FAS" />
+                <Setter Property="TextColor"
+                        Value="#ffffff" />
+                <Setter Property="FontSize"
+                        Value="23" />
+                <Setter Property="WidthRequest"
+                        Value="60" />
+                <Setter Property="BackgroundColor"
+                        Value="Transparent" />
+                <Setter Property="BorderColor"
+                        Value="Transparent" />
+                <Setter Property="HorizontalOptions"
+                        Value="End" />
+                <Setter Property="VerticalOptions"
+                        Value="End" />
+            </Style>
+            <!--GGrid-->
+            <Style x:Key="GGrid"
+                   TargetType="Grid">
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="Margin"
+                        Value="0" />
+                <Setter Property="ColumnSpacing"
+                        Value="0" />
+                <Setter Property="RowSpacing"
+                        Value="0" />
+                <Setter Property="HorizontalOptions"
+                        Value="FillAndExpand" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+    <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="{StaticResource PrimaryDarkColor}">
+        <ScrollView>
+            <StackLayout BackgroundColor="#f6f6f6"
+                         Orientation="Vertical">
+                <!--头部导航栏 -->
+                <Grid VerticalOptions="FillAndExpand"
+                      BackgroundColor="#3B5998"
+                      Style="{StaticResource GGrid}"
+                      HeightRequest="140"
+                      Padding="0,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45" />
+                        <RowDefinition Height="45" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!--头像-->
+                    <ffimageloading:CachedImage Grid.Row="0"
+                                                Grid.Column="0"
+                                                Grid.RowSpan="2"
+                                                HorizontalOptions="Start"
+                                                VerticalOptions="Start"
+                                                LoadingPlaceholder="profile_placeholder.png"
+                                                ErrorPlaceholder="profile_placeholder.png"
+                                                DownsampleToViewSize="true"
+                                                Aspect="AspectFill"
+                                                Margin="20,20,0,0"
+                                                HeightRequest="40"
+                                                WidthRequest="40"
+                                                Source="{Binding UserFace}">
+                        <ffimageloading:CachedImage.Transformations>
+                            <fftransformations:CircleTransformation BorderSize="2"
+                                                                    BorderHexColor="#ffffff" />
+                        </ffimageloading:CachedImage.Transformations>
+                        <ffimageloading:CachedImage.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                  CommandParameter="MyInfoPage" />
+                        </ffimageloading:CachedImage.GestureRecognizers>
+                    </ffimageloading:CachedImage>
+                    <!--名称-->
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="1"
+                                 Orientation="Horizontal"
+                                 Spacing="0">
+                        <Label Text="{Binding UserName,Mode=OneWay}"
+                               
+                               TextColor="#ffffff"
+                               FontSize="{StaticResource FT16}"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Start"
+                               VerticalOptions="Start"
+                               Margin="0,20,10,0"
+                               Style="{StaticResource H3-Semibold}" />
+                        <yummy:PancakeView CornerRadius="50"
+                                           BackgroundColor="#53a245"
+                                         
+                                           HorizontalOptions="End"
+                                           VerticalOptions="Center"
+                                           Padding="5,2,5,2"
+                                           Margin="0,20,0,0">
+                            <Label Text="{Binding DefaultRole}"
+                                   FontSize="8"
+                                   TextColor="White" />
+                        </yummy:PancakeView>
+                    </StackLayout>
+                    <!--工具-->
+                    <Button Grid.Row="0"
+                            Grid.Column="2"
+                            VerticalOptions="End"
+                            Text="&#xf055;"
+                            Margin="0,0,50,-10"
+                            Style="{StaticResource ToolBarStyle}"
+                            Command="{x:Binding AddAPPCommand}" />
+                    <Button Grid.Row="0"
+                            Grid.Column="2"
+                            VerticalOptions="End"
+                            Text="&#xf029;"
+                            Style="{StaticResource ToolBarStyle}"
+                            Command="{x:Binding ScanBarcodeCommand}"
+                            Margin="0,0,0,-10" />
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           Text="{Binding StoreName,Mode=OneWay}"
+                           LineBreakMode="TailTruncation"
+                           TextColor="#ffffff"
+                           WidthRequest="180"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Start"
+                           FontSize="{StaticResource FT14}" />
+                    <!--星级-->
+                    <StackLayout Grid.Row="1"
+                                 Grid.Column="2"
+                                 Spacing="0"
+                                 Orientation="Horizontal">
+                        <Label Text="星级："
+                               TextColor="#ffffff"
+                               Margin="0,5,0,0"
+                               FontSize="8"
+                               VerticalOptions="Start"
+                               HorizontalOptions="EndAndExpand" />
+                        <skiaRate:RatingView  HorizontalOptions="End"
+                                              VerticalOptions="Start"
+                                              Margin="0,5,0,0"
+                                              WidthRequest="80"
+                                              HeightRequest="10"
+                                              ColorOn="Yellow"
+                                              Count="5"
+                                              OutlineOffColor="Transparent"
+                                              OutlineOnColor="Yellow"
+                                              RatingType="Floating"
+                                              StrokeWidth="1"
+                                              Value="5" />
+                    </StackLayout>
+                </Grid>
+                <!--  统计数 &#xf201;&#xf080;&#xf200;&#xf1fe; -->
+                <yummy:PancakeView  Margin="20,-60,20,0"
+                                    HeightRequest="100"
+                                    VerticalOptions="Start"
+                                    Padding="0,5,0,5"
+                                   CornerRadius="5"
+                                   BackgroundColor="White">
+                    <Grid Style="{StaticResource GGrid}"
+                          VerticalOptions="CenterAndExpand">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Orientation="Vertical"
+                                     Spacing="0"
+                                     HorizontalOptions="CenterAndExpand">
+                            <Button Text="&#xf201;"
+                                    WidthRequest="30"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding CmdSelectedCommand}"
+                                    CommandParameter="NewOrderPage" />
+                            <Label Text="{Binding TodayOrderQuantity}"
+                                   TextColor="#3B5998"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center" />
+                            <Label Text="今日订单"
+                                   TextColor="#7D7D7D"
+                                   FontSize="{StaticResource FT14}"
+                                   HorizontalOptions="Center" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                      CommandParameter="NewOrderPage" />
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                        <StackLayout Grid.Column="1"
+                                     Orientation="Vertical"
+                                     Spacing="0"
+                                     HorizontalOptions="CenterAndExpand">
+                            <Button Text="&#xf080;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding CmdSelectedCommand}"
+                                    CommandParameter="VisitingRatePage" />
+                            <Label Text="{Binding TodayVisitQuantity}"
+                                   TextColor="#3B5998"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center" />
+                            <Label Text="今日拜访"
+                                   TextColor="#7D7D7D"
+                                   FontSize="{StaticResource FT14}"
+                                   HorizontalOptions="Center" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                      CommandParameter="VisitingRatePage" />
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                        <StackLayout Grid.Column="2"
+                                     Orientation="Vertical"
+                                     Spacing="0"
+                                     HorizontalOptions="CenterAndExpand">
+                            <Button Text="&#xf200;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding CmdSelectedCommand}"
+                                    CommandParameter="SalesRatePage" />
+                            <Label Text="{Binding TodaySaleAmount,StringFormat='{0:F2}'}"
+                                   TextColor="#3B5998"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center" />
+                            <Label Text="销售净额"
+                                   TextColor="#7D7D7D"
+                                   FontSize="{StaticResource FT14}"
+                                   HorizontalOptions="Center" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                      CommandParameter="SalesRatePage" />
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                        <StackLayout Grid.Column="3"
+                                     Orientation="Vertical"
+                                     Spacing="0"
+                                     HorizontalOptions="CenterAndExpand">
+                            <Button Text="&#xf1fe;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding CmdSelectedCommand}"
+                                    CommandParameter="NewCustomersPage" />
+                            <Label Text="{Binding TodayAddTerminalQuantity}"
+                                   TextColor="#3B5998"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center" />
+                            <Label Text="新增客户"
+                                   TextColor="#7D7D7D"
+                                   FontSize="{StaticResource FT14}"
+                                   HorizontalOptions="Center" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                      CommandParameter="NewCustomersPage" />
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                    </Grid>
+                    <yummy:PancakeView.Shadow>
+                        <yummy:DropShadow  BlurRadius="2" />
+                    </yummy:PancakeView.Shadow>
+                </yummy:PancakeView>
+                
+                <!--常用-->
+                <CollectionView Margin="15,0,15,0"
+                                HeightRequest="240"
+                                ItemsSource="{Binding TopAppSeries}"
+                                SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"
+                                         Span="4" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Orientation="Vertical"
+                                         Padding="10"
+                                         HorizontalOptions="Center">
+                                <Button Text="{Binding Icon,Converter={StaticResource IconConverter}}"
+                                        Style="{StaticResource AppButtonStyle30}"
+                                        Command="{Binding Path=BindingContext.InvokeAppCommand,Source={x:Reference CurrentContentView}}"
+                                        CommandParameter="{Binding .}" />
+                                <Label Style="{StaticResource AppButtonNameLabel10}"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation"
+                                       Margin="0,5,0,0"
+                                       Text="{Binding Name}" />
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <StackLayout>
+                            <Label Text="还没添加哦~"
+                                   HorizontalOptions="CenterAndExpand"
+                                   VerticalOptions="CenterAndExpand" />
+                        </StackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+                <!--活动-->
+                <StackLayout Margin="20,5,20,5"
+                             VerticalOptions="Start"
+                             Orientation="Horizontal">
+                    <Label Text="活动"
+                           TextColor="{StaticResource PrimaryTextColor}"
+                           
+                           FontSize="{StaticResource FT16}"
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           HorizontalOptions="FillAndExpand">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                  CommandParameter="NewsPage" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <tintedImages:TintedImage VerticalOptions="Center"
+                                              HorizontalOptions="EndAndExpand"
+                                              Source="More.png"
+                                              TintColor="{StaticResource DividerColor}"
+                                              WidthRequest="15" />
+                </StackLayout>
+                <CollectionView Margin="15,0,15,0"
+                                HeightRequest="220"
+                                ItemsSource="{Binding NewsSeries}"
+                                SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"
+                                         Span="2"
+                                         HorizontalItemSpacing="10"
+                                         VerticalItemSpacing="0" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Margin="0,10,0,0">
+                                <yummy:PancakeView CornerRadius="5">
+                                    <ffimageloading:CachedImage Aspect="AspectFill"
+                                                                HeightRequest="100"
+                                                                Source="{Binding PicturePath}"
+                                                                CacheType="Disk"
+                                                                LoadingPlaceholder="CacheBG.jpg"
+                                                                ErrorPlaceholder="CacheBG.jpg" />
+                                </yummy:PancakeView>
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                            Command="{Binding Path=BindingContext.CmdSelectedCommand,Source={x:Reference CurrentContentView}}"
+                                                          CommandParameter="NewsPage" />
+                                </StackLayout.GestureRecognizers>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <!--工具-->
+                <StackLayout Margin="20,5,20,5"
+                             VerticalOptions="Start"
+                             Orientation="Horizontal">
+                    <Label Text="工具"
+                           TextColor="{StaticResource PrimaryTextColor}"
+                           
+                           FontSize="{StaticResource FT16}"
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           HorizontalOptions="FillAndExpand" />
+                    <tintedImages:TintedImage VerticalOptions="Center"
+                                              HorizontalOptions="EndAndExpand"
+                                              Source="More.png"
+                                              TintColor="{StaticResource DividerColor}"
+                                              WidthRequest="15" />
+                </StackLayout>
+                <yummy:PancakeView HeightRequest="90"
+                                   Margin="15,0,15,0"
+                                   IsClippedToBounds="true"
+                                   CornerRadius="5"
+                                   BackgroundColor="White">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Grid.Column="0"
+                                     Orientation="Vertical"
+                                     HorizontalOptions="CenterAndExpand"
+                                     VerticalOptions="CenterAndExpand">
+                            <Button Text="&#xf1c0;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding Path=BindingContext.CmdSelectedCommand,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="InventoryReportPage" />
+                            <Label Style="{StaticResource AppButtonNameLabel10}"
+                                   VerticalOptions="Center"
+                                   Margin="0,5,0,0"
+                                   Text="库存上报" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1"
+                                     Orientation="Vertical"
+                                     HorizontalOptions="CenterAndExpand"
+                                     VerticalOptions="CenterAndExpand">
+                            <Button Text="&#xf0d1;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding Path=BindingContext.CmdSelectedCommand,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="VisitStorePage" />
+                            <Label Style="{StaticResource AppButtonNameLabel10}"
+                                   VerticalOptions="Center"
+                                   Margin="0,5,0,0"
+                                   Text="拜访门店" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="2"
+                                     Orientation="Vertical"
+                                     HorizontalOptions="CenterAndExpand"
+                                     VerticalOptions="CenterAndExpand">
+                            <Button Text="&#xf274;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding Path=BindingContext.CmdSelectedCommand,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="DeliveryReceiptPage" />
+                            <Label Style="{StaticResource AppButtonNameLabel10}"
+                                   VerticalOptions="Center"
+                                   Margin="0,5,0,0"
+                                   Text="签收" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="3"
+                                     Orientation="Vertical"
+                                     HorizontalOptions="CenterAndExpand"
+                                     VerticalOptions="CenterAndExpand">
+                            <Button Text="&#xf0ce;"
+                                    TextColor="#53a245"
+                                    Style="{StaticResource AppButtonStyle30}"
+                                    Command="{Binding Path=BindingContext.CmdSelectedCommand,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="MyReportingPage" />
+                            <Label Style="{StaticResource AppButtonNameLabel10}"
+                                   VerticalOptions="Center"
+                                   Margin="0,5,0,0"
+                                   Text="我的报表" />
+                        </StackLayout>
+                    </Grid>
+                </yummy:PancakeView>
+                <!--我是有底线的-->
+                <Grid Margin="20,0,20,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="0"
+                                 VerticalOptions="Center">
+                        <BoxView HeightRequest=".7"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="FillAndExpand"
+                                 BackgroundColor="#dddddd"></BoxView>
+                    </StackLayout>
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="1"
+                                 WidthRequest="80"
+                                 VerticalOptions="Center">
+                        <Label Text="我是有底线的"
+                               FontSize="10"
+                               TextColor="#BCBCBC"
+                               VerticalOptions="CenterAndExpand"
+                               HorizontalOptions="CenterAndExpand" />
+                    </StackLayout>
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="2"
+                                 VerticalOptions="Center">
+                        <BoxView HeightRequest=".7"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="FillAndExpand"
+                                 BackgroundColor="#dddddd" />
+                    </StackLayout>
+                </Grid>
+            </StackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentView>

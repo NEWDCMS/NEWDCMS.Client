@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.SelectUserPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:SelectUserPageViewModel">
+    <StackLayout Spacing="0">
+        <!--header-->
+        <Grid Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="Start">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH40}"
+                         VerticalOptions="FillAndExpand"
+                         Margin="{StaticResource PLR10}"
+                         Grid.Row="0"
+                         Spacing="0"
+                         Grid.Column="0">
+                <custom:CustomEntry x:Name="SearchBar"
+                                    HorizontalOptions="Start"
+                                    TextChanged="SearchBar_TextChanged"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    FontSize="{StaticResource FT14}"
+                                    Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                                    Placeholder="业务员首拼/编号/电话" />
+                <!--搜索-->
+                <Label Style="{StaticResource SearchArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=SerchCommand}"
+                                              CommandParameter="{Binding Text,Source={x:Reference SearchBar}}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <BoxView   Grid.Row="1"
+                       VerticalOptions="Start"
+                       Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                     Command="{Binding RefreshCommand}"
+                     RefreshColor="{StaticResource PrimaryDarkColor}">
+            <ScrollView>
+                <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                                       ViewModelLoader="{Binding BusinessVisitLoader}">
+                    <CollectionView ItemsSource="{Binding BusinessUsers}"
+                                    Margin="0,-5,0,0"
+                                    x:Name="businessusers"
+                                    ItemSizingStrategy="MeasureAllItems"
+                                    SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                    SelectionChangedCommand="{Binding ItemSelectedCommand, Mode=TwoWay}"
+                                    SelectionChangedCommandParameter="{x:Reference businessusers}"
+                                    SelectionMode="Single">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Style="{StaticResource GGrid}"
+                                      Margin="0,5,0,0"
+                                      VerticalOptions="CenterAndExpand"
+                                      HorizontalOptions="FillAndExpand">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="60" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ffimageloading:CachedImage Grid.Row="0"
+                                                                Grid.Column="0"
+                                                                Margin="0,8,0,0"
+                                                                HorizontalOptions="Center"
+                                                                VerticalOptions="Start"
+                                                                LoadingPlaceholder="profile_placeholder.png"
+                                                                ErrorPlaceholder="profile_placeholder.png"
+                                                                DownsampleToViewSize="True"
+                                                                Aspect="AspectFill"
+                                                                HeightRequest="50"
+                                                                WidthRequest="50"
+                                                                Source="profile_placeholder.png">
+                                        <ffimageloading:CachedImage.Transformations>
+                                            <fftransformations:CircleTransformation BorderSize="0"
+                                                                                    BorderHexColor="#ffffff" />
+                                        </ffimageloading:CachedImage.Transformations>
+                                    </ffimageloading:CachedImage>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Text="{Binding BusinessUserName}"
+                                           HorizontalOptions="Start"
+                                           TextColor="{StaticResource PrimaryTextColor}"
+                                           VerticalOptions="CenterAndExpand"
+                                           Margin="{StaticResource ML10}"></Label>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="2"
+                                           FontSize="{StaticResource FT14}"
+                                           Text="{Binding ExceptVisitCount,StringFormat='异常: {0}'}"
+                                           HorizontalOptions="End"
+                                           VerticalOptions="CenterAndExpand"
+                                           TextColor="{StaticResource DividerColor}" />
+                                    <Label Grid.Row="0"
+                                           Grid.Column="3"
+                                           Text="{Binding VisitedCount,StringFormat='拜访: {0}'}"
+                                           HorizontalOptions="End"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="CenterAndExpand"
+                                           Margin="5,0,0,0" />
+                                    <Label Grid.Row="0"
+                                           Grid.Column="4"
+                                           Text="{Binding NoVisitedCount,StringFormat='未拜: {0}'}"
+                                           HorizontalOptions="End"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="CenterAndExpand"
+                                           Margin="5,0,10,0" />
+                                    <BoxView Grid.ColumnSpan="5"
+                                             VerticalOptions="Start"
+                                             Style="{StaticResource SeparatorGrid}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </custom:TaskLoaderView>
+            </ScrollView>
+        </RefreshView>
+    </StackLayout>
+</pages:BaseContentPage>
+
+

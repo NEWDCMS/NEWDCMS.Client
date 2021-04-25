@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:controls="clr-namespace:Wesley.Client.CustomViews"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.FeedbackPage"
+                       Title="{Binding Title}"
+                       Padding="15"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:FeedbackPageViewModel">
+    <Grid Style="{StaticResource GGrid}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="200" />
+            <RowDefinition Height="65" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Label Text="问题类型 *"
+               FontSize="{StaticResource FT16}"
+               
+               Grid.Row="0"
+               Grid.Column="0"
+               VerticalOptions="Center" />
+        <yummy:PancakeView Grid.Row="1"
+                           Grid.Column="0"
+                           CornerRadius="10"
+                       
+                           HorizontalOptions="FillAndExpand"
+                           VerticalOptions="Center"
+                           Padding="0">
+            <controls:SegmentedTabControl  UnselectedSegmentBackgroundColor="#eeeeee"
+                                           TintColor="{StaticResource PrimaryColor}"
+                                           SelectedSegment="{Binding SelectedSegment}"
+                                           SelectedSegmentTextColor="White"
+                                           UnselectedSegmentTextColor="{StaticResource PrimaryTextColor}"
+                                           RowSpacing="0"
+                                           ColumnSpacing="0"
+                                           HeightRequest="40"
+                                           Padding="0">
+                <controls:SegmentedTabControl.Children>
+                    <Label Text="功能异常"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Text="体验改善"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Text="意见建议"
+                           FontSize="{StaticResource FT14}" />
+                    <Label Text="其它"
+                           FontSize="{StaticResource FT14}" />
+                </controls:SegmentedTabControl.Children>
+            </controls:SegmentedTabControl>
+        </yummy:PancakeView>
+        <Label Text="问题描述 *"
+               FontSize="{StaticResource FT16}"
+               
+               Grid.Row="2"
+               Grid.Column="0"
+               VerticalOptions="Center" />
+        <StackLayout Grid.Row="3"
+                     Grid.Column="0">
+            <yummy:PancakeView CornerRadius="10"
+                               BackgroundColor="#eeeeee"
+                    
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Padding="10">
+                <StackLayout>
+                    <controls:CustomEditor Placeholder="请至少用10个字描述问题，并添加最多5张截图，这有帮助我们快速解决问题。"
+                                           Text="{Binding IssueDescribe,Mode=TwoWay}"
+                                           CharacterSpacing="0"
+                                           FontSize="{StaticResource FT14}"
+                                           HeightRequest="150"
+                                           VerticalOptions="Start">
+                        <controls:CustomEditor.Behaviors>
+                            <b:EventToCommandBehavior EventName="TextChanged"
+                                                      Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
+                                                      CommandParameter="" />
+                        </controls:CustomEditor.Behaviors>
+                    </controls:CustomEditor>
+                    <Label Text="{Binding TextCounterTxt}"
+                           HorizontalOptions="End"
+                           FontSize="{StaticResource FT12}" />
+                </StackLayout>
+            </yummy:PancakeView>
+        </StackLayout>
+        <StackLayout Grid.Row="4"
+                     Grid.Column="0"
+                     Orientation="Horizontal">
+            <CollectionView HorizontalOptions="End"
+                            ItemsSource="{Binding DisplayPhotos}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ffimageloading:CachedImage Grid.Row="0"
+                                                        Grid.Column="0"
+                                                        WidthRequest="45"
+                                                        HeightRequest="{StaticResource RH45}"
+                                                        VerticalOptions="Start"
+                                                        HorizontalOptions="Start"
+                                                        DownsampleToViewSize="true"
+                                                        Source="{Binding DisplayPath,Mode=OneWay}">
+                                <ffimageloading:CachedImage.Transformations>
+                                    <fftransformations:RoundedTransformation BorderSize="4"
+                                                                             BorderHexColor="#ffffff" />
+                                </ffimageloading:CachedImage.Transformations>
+                            </ffimageloading:CachedImage>
+                            <Button Grid.Row="0"
+                                    Grid.Column="0"
+                                    Text="&#xf057;"
+                                    FontFamily="FAS"
+                                    VerticalOptions="End"
+                                    HorizontalOptions="End"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource PrimaryDarkColor}"
+                                    FontSize="20"
+                                    WidthRequest="50"
+                                    Margin="25,0,0,0"
+                                    Command="{Binding Path=BindingContext.RemoveCommand,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="{Binding DisplayPath}"></Button>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="&#xf067;"
+                    TextColor="White"
+                    CornerRadius="10"
+                    FontSize="25"
+                    HorizontalOptions="Start"
+                    BackgroundColor="#eeeeee"
+                    FontFamily="FAS"
+                    WidthRequest="45"
+                    Margin="0,0,0,20"
+                    Command="{Binding CameraPhotoCmd}" />
+        </StackLayout>
+        <Label Text="联系方式 *"
+               FontSize="{StaticResource FT16}"
+               
+               Grid.Row="5"
+               Grid.Column="0"
+               VerticalOptions="Center" />
+        <StackLayout Grid.Row="6"
+                     Grid.Column="0">
+            <yummy:PancakeView CornerRadius="10"
+                               BackgroundColor="#eeeeee"
+                              
+                               HorizontalOptions="FillAndExpand"
+                               VerticalOptions="Center"
+                               Padding="10">
+                <controls:CustomEntry Text="{Binding Contacts,Mode=TwoWay}"
+                                      Placeholder="请输入手机号或者邮箱"
+                                      FontSize="{StaticResource FT14}"></controls:CustomEntry>
+            </yummy:PancakeView>
+        </StackLayout>
+        <StackLayout Grid.Row="7"
+                     Grid.Column="0"
+                     Padding="0,20,0,0">
+            <Button Text="check-circle 提交"
+                    TextColor="White"
+                    CornerRadius="50"
+                    FontFamily="FAS"
+                    FontSize="{StaticResource FT14}"
+                    HeightRequest="45"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="EndAndExpand"
+                    BackgroundColor="{StaticResource PrimaryColor}"
+                    Command="{Binding SubmitCommand}"
+                    IsEnabled="{Binding IsEnabled}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding IsEnabled}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="#53a245" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding IsEnabled}"
+                                 Value="False">
+                        <Setter Property="BackgroundColor"
+                                Value="#eeeeee" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </StackLayout>
+    </Grid>
+</pages:BaseContentPage>

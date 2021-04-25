@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:Wesley.Client.Pages"
+             xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             
+             xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.AddCostPage"
+             x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AddCostPageViewModel">
+
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="TableToolButtonStyle"
+                   TargetType="Button">
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="FontSize"
+                        Value="12" />
+                <Setter Property="BackgroundColor"
+                        Value="#ffffff" />
+                <Setter Property="BorderColor"
+                        Value="{StaticResource DividerColor}" />
+                <Setter Property="BorderRadius"
+                        Value="50" />
+                <Setter Property="CornerRadius"
+                        Value="50" />
+                <Setter Property="BorderWidth"
+                        Value="0.7" />
+                <Setter Property="HeightRequest"
+                        Value="25" />
+                <Setter Property="WidthRequest"
+                        Value="50" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="HorizontalOptions"
+                        Value="Center" />
+            </Style>
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+
+    <AbsoluteLayout>
+        <StackLayout  VerticalOptions="Start"
+                      Orientation="Vertical" Spacing="0" Margin="0"
+                      AbsoluteLayout.LayoutBounds="0,0,1,1"
+                      AbsoluteLayout.LayoutFlags="All">
+
+            <!--费用类别-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}" Spacing="0" Margin="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="费用类别："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry 
+                                    HorizontalOptions="FillAndExpand"
+                                    Placeholder="选择费用类别..."
+                                    Text="{Binding Model.AccountingOptionName,Mode=OneWay}"
+                                    Margin="10,0,0,0"
+                                    Padding="0,0,0,0"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                Command="{Binding Path=BindingContext.AccountingSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource SearchArrow}"
+                                   Margin="0,0,10,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=AccountingSelected}"></TapGestureRecognizer>
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+
+
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                  Margin="0" />
+            
+            <!--合同-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}" Spacing="0" Margin="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="合同："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry 
+                                    HorizontalOptions="FillAndExpand"
+                                    Placeholder="选择合同:"
+                                    Text="{Binding Model.CostContractName,Mode=TwoWay}"
+                                    Margin="10,0,0,0"
+                                    Padding="0,0,0,0"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                             Command="{Binding Path=BindingContext.ContractSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource SearchArrow}"
+                                   Margin="0,0,10,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=ContractSelected}"></TapGestureRecognizer>
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                  Margin="0" />
+
+            <!--金额-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}" Spacing="0" Margin="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="金额："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry HorizontalOptions="FillAndExpand"
+                                    Placeholder="请输入金额..."
+                                    Text="{Binding Model.Amount,Mode=TwoWay,Converter={StaticResource NullableDecimalConverter}}"
+                                    Margin="10,0,0,0"
+                                    Padding="0,0,0,0"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}">
+                </custom:CustomEntry>
+            </StackLayout>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                  Margin="0" />
+
+
+            <!--余额-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}" Spacing="0" Margin="0"
+                         IsVisible="{Binding Model.ShowBalance}">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="合同剩余金额："
+                       FontSize="{StaticResource FT14}" />
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="{Binding Model.Balance}"
+                       FontSize="{StaticResource FT14}" />
+            </StackLayout>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     IsVisible="{Binding Model.ShowBalance}" />
+
+            <!--备注-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}" Spacing="0" Margin="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="备注："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry HorizontalOptions="FillAndExpand"
+                                    Placeholder="填写备注..."
+                                    Text="{Binding Model.Remark,Mode=TwoWay}"
+                                    Margin="10,0,0,0"
+                                    Padding="0,0,0,0"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}">
+                </custom:CustomEntry>
+            </StackLayout>
+
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                  Margin="0" />
+
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}" Spacing="0" Margin="0">
+
+                <Label Text="{StaticResource FontAwesomeMap}" FontFamily="FAS"
+                                   HorizontalOptions="Start"
+                                    TextColor="#dddddd"
+                                    FontSize="12"
+                                    Margin="10,0,0,0" />
+                
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       TextColor="#dddddd"
+                       Text="提示：类别和金额必填！"
+                       FontSize="{StaticResource FT14}" />
+
+            </StackLayout>
+
+        </StackLayout>
+
+        <!--footer-->
+        <Grid Margin="0"
+              HeightRequest="45" Style="{StaticResource GGrid}" HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="45" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <BoxView Grid.Row="0"
+                  Style="{StaticResource SeparatorGrid}"
+                  Margin="0" />
+            <Button Grid.Row="1"
+                    x:Name="RemoveOrCancel"
+                    Grid.Column="0"
+                    Margin="5"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    Command="{Binding Path=RemoveCommand}"
+                    CommandParameter="{Binding .}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding IsRemoveing}"
+                                 Value="True">
+                        <Setter Property="Text"
+                                Value="删除" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding IsRemoveing}"
+                                 Value="False">
+                        <Setter Property="Text"
+                                Value="返回" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <Button Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="5"
+                    Text="确定"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    Command="{Binding Path=SaveCommand}"
+                    CommandParameter="{Binding .}">
+            </Button>
+
+        </Grid>
+
+    </AbsoluteLayout>
+</pages:BaseContentPage>

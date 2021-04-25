@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:local="clr-namespace:Wesley.Client.Pages.CustomControls"
+             xmlns:pancakeView="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             x:Class="Wesley.Client.Pages.CustomControls.ToggleButton"
+             x:Name="ToggleButton_892">
+
+  <ContentView.Content>
+      <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.Resources>
+                <ResourceDictionary>
+                    <Style TargetType="Label"
+                           BasedOn="{StaticResource BaseLabelStyle}">
+                        <Setter Property="FontFamily"
+                                Value="BSR" />
+                        <Setter Property="Margin"
+                                Value="12,5" />
+                    </Style>
+                    <Style TargetType="pancakeView:PancakeView">
+                        <Setter Property="CornerRadius"
+                                Value="12" />
+                        <Setter Property="BackgroundColor"
+                                Value="#eeeeee" />
+                    </Style>
+                </ResourceDictionary>
+            </Grid.Resources>
+
+            <pancakeView:PancakeView BackgroundColor="{StaticResource AccentColor}"
+                                     HeightRequest="{Binding HeightRequest,Source={x:Reference isToggledOption}}"
+                                     WidthRequest="{Binding WidthRequest, Source={x:Reference isToggledOption}}"
+                                     Margin="1,5,1,-3"
+                                     Shadow="{OnPlatform Android=False, iOS=True}">
+                <pancakeView:PancakeView.Triggers>
+                    <DataTrigger TargetType="pancakeView:PancakeView"
+                                 Value="False"
+                                 Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        <Setter Property="IsVisible"
+                                Value="False" />
+                    </DataTrigger>
+                </pancakeView:PancakeView.Triggers>
+            </pancakeView:PancakeView>
+
+            <pancakeView:PancakeView x:Name="isToggledOption"
+                                     Margin="5"
+                                    
+                                     BackgroundColor="#eeeeee">
+                <pancakeView:PancakeView.Triggers>
+                    <DataTrigger TargetType="pancakeView:PancakeView"
+                                 Value="True"
+                                 Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        <Setter Property="Scale"
+                                Value="1.2" />
+                        <Setter Property="BackgroundColor"
+                                Value="White" />
+                        <!--<Setter Property="HasShadow" Value="{OnPlatform iOS=False}"/>-->
+                    </DataTrigger>
+                </pancakeView:PancakeView.Triggers>
+
+                <pancakeView:PancakeView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                </pancakeView:PancakeView.GestureRecognizers>
+
+                <Label x:Name="toggledLabel"
+                       Text="{Binding Source={x:Reference ToggleButton_892}, Path=ToggleOptionTitle}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Value="True"
+                                     Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Value="False"
+                                     Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+
+            </pancakeView:PancakeView>
+
+
+            <pancakeView:PancakeView BackgroundColor="{StaticResource AccentColor}"
+                                     Shadow="{StaticResource LightShadow}"
+                                     HeightRequest="{Binding HeightRequest,Source={x:Reference notToggledOption}}"
+                                     WidthRequest="{Binding WidthRequest, Source={x:Reference notToggledOption}}"
+                                     Margin="1,5,1,-3"
+                                     Grid.Column="1">
+                <pancakeView:PancakeView.Triggers>
+                    <DataTrigger TargetType="pancakeView:PancakeView"
+                                 Value="True"
+                                 Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        <Setter Property="IsVisible"
+                                Value="False" />
+                    </DataTrigger>
+                </pancakeView:PancakeView.Triggers>
+            </pancakeView:PancakeView>
+          
+            <pancakeView:PancakeView x:Name="notToggledOption"
+                                     Grid.Column="1"
+       
+                                     Margin="5">
+                <pancakeView:PancakeView.Triggers>
+                    <DataTrigger TargetType="pancakeView:PancakeView"
+                                 Value="False"
+                                 Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        <Setter Property="Scale"
+                                Value="1.2" />
+                        <Setter Property="BackgroundColor"
+                                Value="White" />
+                        <!--<Setter Property="HasShadow" Value="{OnPlatform Android=True}"/>-->
+                    </DataTrigger>
+                </pancakeView:PancakeView.Triggers>
+
+                <pancakeView:PancakeView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_1"/>
+                </pancakeView:PancakeView.GestureRecognizers>
+
+                <Label x:Name="notToggledLabel"
+                       Text="{Binding Source={x:Reference ToggleButton_892}, Path=NotToggledOptionTitle}" >
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Value="False" 
+                                     Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Value="True"
+                                     Binding="{Binding Source={x:Reference ToggleButton_892}, Path=IsToggled}">
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </pancakeView:PancakeView>
+        </Grid>
+  </ContentView.Content>
+</ContentView>

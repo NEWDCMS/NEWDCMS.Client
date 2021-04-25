@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:ffimageLoader="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:ffimageTransform="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Archive.ProductArchivesPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:ProductArchivesPageViewModel">
+    <!--header-->
+    <Grid Style="{StaticResource GGrid}"
+          HorizontalOptions="FillAndExpand"
+          VerticalOptions="Start">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height=".7" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <!--row 0-->
+        <StackLayout Orientation="Horizontal"
+                     HeightRequest="{StaticResource RH45}"
+                     VerticalOptions="FillAndExpand"
+                     Grid.Row="0"
+                     Grid.Column="0">
+            <custom:CustomEntry x:Name="SearchBar"
+                                HorizontalOptions="Start"
+                                Margin="5,10,0,0"
+                                VerticalOptions="StartAndExpand"
+                                Style="{StaticResource DefaultEntry}"
+                                FontSize="{StaticResource FT14}"
+                                Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                                Placeholder="商品首拼/编号" />
+            <!--搜索-->
+            <Label Style="{StaticResource SearchArrow}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Path=SerchCommand}"
+                                          CommandParameter="{Binding Text,Source={x:Reference SearchBar}}" />
+                </Label.GestureRecognizers>
+            </Label>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal"
+                     HeightRequest="{StaticResource RH45}"
+                     VerticalOptions="FillAndExpand"
+                     Grid.Row="0"
+                     Grid.Column="1">
+            <custom:CustomEntry x:Name="SelectBrand"
+                                Margin="{StaticResource ML10}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="CenterAndExpand"
+                                Style="{StaticResource DefaultEntry}"
+                                FontSize="{StaticResource FT14}"
+                                ShowVirtualKeyboardOnFocus="False"
+                                Text="{Binding Filter.BrandName,Mode=TwoWay}"
+                                Placeholder="请选择品牌">
+                <custom:CustomEntry.Behaviors>
+                    <!--<behaviors:EventHandlerBehavior  EventName="Focused">
+                            <behaviors:ActionCollection>
+                                <behaviors:InvokeCommandAction Command="{Binding Path=BrandSelected}"/>
+                            </behaviors:ActionCollection>
+                        </behaviors:EventHandlerBehavior>-->
+                    <b:EventToCommandBehavior EventName="Focused"
+                                              Command="{Binding Path=BindingContext.BrandSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="0" />
+                </custom:CustomEntry.Behaviors>
+            </custom:CustomEntry>
+            <Label Style="{StaticResource DownArrow}"
+                   Margin="{StaticResource MR10}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Path=BrandSelected}"></TapGestureRecognizer>
+                </Label.GestureRecognizers>
+            </Label>
+        </StackLayout>
+        <!--row 1-->
+        <BoxView Style="{StaticResource SeparatorGrid}"
+                 Grid.Row="1"
+                 Grid.ColumnSpan="2" />
+        <!--row 2-->
+        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                     Command="{Binding RefreshCommand}"
+                     RefreshColor="{StaticResource PrimaryDarkColor}"
+                     Grid.Row="2"
+                     Grid.ColumnSpan="2">
+            <ScrollView HorizontalOptions="FillAndExpand"
+                        VerticalOptions="FillAndExpand"
+                        VerticalScrollBarVisibility="Always"
+                        BackgroundColor="White">
+                <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                                       ViewModelLoader="{Binding ProductSeriesLoader}">
+                    <CollectionView ItemsSource="{Binding ProductSeries}"
+                                    Margin="0,0,0,0"
+                                    x:Name="productseries"
+                                    ItemSizingStrategy="MeasureAllItems"
+                                    SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                    RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                                    RemainingItemsThreshold="{Binding ItemTreshold}"
+                                    SelectionMode="Single">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Style="{StaticResource GGrid}"
+                                      HorizontalOptions="FillAndExpand">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height=".7" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackLayout Grid.Row="0"
+                                                 Grid.Column="0"
+                                                 Grid.RowSpan="2"
+                                                 Spacing="0"
+                                                 Padding="10">
+                                        <yummy:PancakeView CornerRadius="10"
+                                                           BackgroundColor="#eeeeee">
+                                            <ffimageLoader:CachedImage HorizontalOptions="Center"
+                                                                       VerticalOptions="Start"
+                                                                       HeightRequest="{OnPlatform Android=60, iOS=50}"
+                                                                       WidthRequest="{OnPlatform Android=60, iOS=50}"
+                                                                       Source="nophoto.png"
+                                                                       Aspect="AspectFill">
+                                                <ffimageLoader:CachedImage.Transformations>
+                                                    <ffimageTransform:CircleTransformation />
+                                                </ffimageLoader:CachedImage.Transformations>
+                                            </ffimageLoader:CachedImage>
+                                        </yummy:PancakeView>
+                                    </StackLayout>
+                                    <!--商品名称-->
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding Name}"
+                                           
+                                           FontSize="{StaticResource FT14}"
+                                           LineBreakMode="WordWrap"
+                                           HorizontalOptions="FillAndExpand"
+                                           TextColor="{StaticResource PrimaryTextColor}"
+                                           VerticalOptions="Center"
+                                           Margin="0,5,10,0" />
+                                    <Label Grid.Row="1"
+                                           Grid.Column="1"
+                                           Text="转换"
+                                           HorizontalOptions="Start"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           Margin="{StaticResource ML10}" />
+                                    <Label Grid.Row="1"
+                                           Grid.Column="2"
+                                           Text="{Binding UnitConversion,StringFormat='{0}'}"
+                                           HorizontalOptions="End"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           Margin="{StaticResource MR10}" />
+                                    <Label Grid.Row="2"
+                                           Grid.Column="1"
+                                           HorizontalOptions="Start"
+                                           Text="{Binding SmallPriceUnit.Price,StringFormat='￥{0}'}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource PrimaryColor}"
+                                           VerticalOptions="CenterAndExpand" />
+                                    <Label Grid.Row="2"
+                                           Grid.Column="2"
+                                           Margin="{StaticResource MR10}"
+                                           HorizontalOptions="End"
+                                           Text="{Binding SmallPriceUnit.UnitName,StringFormat='/ {0}'}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="CenterAndExpand" />
+                                    <Label Grid.Row="3"
+                                           Grid.Column="1"
+                                           HorizontalOptions="Start"
+                                           Text="{Binding BigPriceUnit.Price,StringFormat='￥{0}'}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource PrimaryColor}"
+                                           VerticalOptions="CenterAndExpand" />
+                                    <Label Grid.Row="3"
+                                           Grid.Column="2"
+                                           Margin="{StaticResource MR10}"
+                                           HorizontalOptions="End"
+                                           Text="{Binding BigPriceUnit.UnitName,StringFormat='/ {0}'}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="CenterAndExpand" />
+                                    <BoxView Grid.Row="4"
+                                             Grid.ColumnSpan="3"
+                                             Style="{StaticResource SeparatorGrid}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </custom:TaskLoaderView>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+</pages:BaseContentPage>

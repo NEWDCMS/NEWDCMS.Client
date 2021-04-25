@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       x:Class="Wesley.Client.Pages.Archive.VisitRecordsPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:VisitRecordsPageViewModel">
+    <RelativeLayout>
+        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                     Command="{Binding RefreshCommand}"
+                     RefreshColor="{StaticResource PrimaryDarkColor}"
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
+                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+                     Padding="0,0,0,50">
+            <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                                   ViewModelLoader="{Binding VisitStoresLoader}">
+                <CollectionView ItemsSource="{Binding VisitStores}"
+                                VerticalScrollBarVisibility="Never"
+                                VerticalOptions="Start"
+                                IsGrouped="True">
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate>
+                            <StackLayout Padding="20"
+                                         Orientation="Horizontal">
+                                <!--头像-->
+                                <ffimageloading:CachedImage Grid.Row="0"
+                                                            Grid.Column="0"
+                                                            Grid.RowSpan="2"
+                                                            HorizontalOptions="Start"
+                                                            VerticalOptions="Start"
+                                                            LoadingPlaceholder="profile_placeholder.png"
+                                                            ErrorPlaceholder="profile_placeholder.png"
+                                                            DownsampleToViewSize="true"
+                                                            Aspect="AspectFill"
+                                                            Margin="0,0,0,0"
+                                                            HeightRequest="40"
+                                                            WidthRequest="40"
+                                                            Source="{Binding FaceImage}">
+                                    <ffimageloading:CachedImage.Transformations>
+                                        <fftransformations:CircleTransformation BorderSize="2"
+                                                                                BorderHexColor="#ffffff" />
+                                    </ffimageloading:CachedImage.Transformations>
+                                    <ffimageloading:CachedImage.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CmdSelectedCommand}"
+                                                              CommandParameter="MyInfoPage" />
+                                    </ffimageloading:CachedImage.GestureRecognizers>
+                                </ffimageloading:CachedImage>
+                                <Label Text="{Binding BusinessUserName}"
+                                       FontAttributes="Bold"
+                                       TextColor="#535257"
+                                       FontSize="16"
+                                       Margin="15,0,0,0" />
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid RowDefinitions="Auto, Auto"
+                                  ColumnDefinitions="Auto, *"
+                                  RowSpacing="0">
+                                <!-- 拜访时间-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding SigninDateTime, StringFormat='{0:MM/dd}'}"
+                                       TextColor="#bfc0c0"
+                                       VerticalOptions="Start"
+                                       Margin="20,0,0,0" />
+                                <!--分割线-->
+                                <BoxView Grid.Row="1"
+                                         Grid.Column="0"
+                                         WidthRequest="1"
+                                         Color="#eeeeee"
+                                         HeightRequest="120"
+                                         Margin="40,0,30,0" />
+                                <!-- Card -->
+                                <yummy:PancakeView Grid.Row="0"
+                                                   Grid.RowSpan="2"
+                                                   Grid.Column="1"
+                                                   CornerRadius="10"
+                                                   Margin="5,0,20,10"
+                                                   BackgroundColor="#eeeeee"
+                                                   Padding="10">
+                                    <StackLayout Spacing="0">
+                                        <Label Text="{Binding TerminalName}"
+                                               FontAttributes="Bold"
+                                               TextColor="#535257"
+                                               FontSize="16" />
+                                        <Label Text="{Binding Remark}"
+                                               TextColor="Silver"
+                                               FontSize="14" />
+                                        <Label TextColor="Silver"
+                                               FontSize="14">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="位置：" />
+                                                    <Span Text="{Binding Latitude,StringFormat='{0},'}" />
+                                                    <Span Text="{Binding Longitude}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label 
+                                               TextColor="#bfc0c0"
+                                               FontSize="14"
+                                               VerticalOptions="Start"
+                                               Margin="0,0,0,0">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="时间：" />
+                                                    <Span Text="{Binding SigninDateTime}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <!-- Features-->
+                                        <CollectionView ItemsSource="{Binding DisplayPhotos}"
+                                                        Margin="0,10,0,0"
+                                                        HorizontalScrollBarVisibility="Never"
+                                                        HeightRequest="55"
+                                                        ItemsLayout="HorizontalList">
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackLayout Margin="0,0,10,0">
+                                                        <ffimageloading:CachedImage WidthRequest="40"
+                                                                                    HeightRequest="40"
+                                                                                    VerticalOptions="Center"
+                                                                                    HorizontalOptions="Start"
+                                                                                    DownsampleToViewSize="true"
+                                                                                    Source="{Binding DisplayPath,Mode=OneWay}">
+                                                            <ffimageloading:CachedImage.Transformations>
+                                                                <fftransformations:CircleTransformation BorderSize="2"
+                                                                                                        BorderHexColor="#ffffff" />
+                                                            </ffimageloading:CachedImage.Transformations>
+                                                        </ffimageloading:CachedImage>
+                                                    </StackLayout>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                        <Grid ColumnDefinitions="*,*"
+                                              RowDefinitions="35,35"
+                                                     Padding="0,10,0,0">
+                                            <yummy:PancakeView Grid.Row="0" Grid.Column="0" CornerRadius="50"
+                                        
+                                                               BackgroundColor="White"
+                                                               Padding="5,0,5,0">
+                                                <Label FontSize="14"
+                                                       TextColor="{StaticResource PrimaryColor}" HorizontalOptions="Center">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="销单 : " />
+                                                            <Span
+                                                                    Text="{Binding SaleAmount,Converter={StaticResource NullableDecimalConverter}}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </yummy:PancakeView>
+                                            <yummy:PancakeView Grid.Row="0"
+                                                               Grid.Column="1"
+                                                               CornerRadius="50"
+                                                              
+                                                               BackgroundColor="White"
+                                                               Padding="5,0,5,0">
+                                                <Label FontSize="14"
+                                                       TextColor="{StaticResource PrimaryColor}"
+                                                       HorizontalOptions="Center">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="定单 : " />
+                                                            <Span
+                                                                    Text="{Binding SaleOrderAmount,Converter={StaticResource NullableDecimalConverter}}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </yummy:PancakeView>
+                                            <yummy:PancakeView  Grid.Row="1"
+                                                                Grid.Column="0"
+                                                                CornerRadius="50"
+                                                          
+                                                               BackgroundColor="White"
+                                                               Padding="5,0,5,0">
+                                                <Label FontSize="14"
+                                                       TextColor="{StaticResource PrimaryColor}"
+                                                       HorizontalOptions="Center">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="退单 : " />
+                                                            <Span
+                                                                    Text="{Binding ReturnAmount,Converter={StaticResource NullableDecimalConverter}}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </yummy:PancakeView>
+                                            <yummy:PancakeView Grid.Row="1"
+                                                               Grid.Column="1"
+                                                               CornerRadius="50"
+                                                              
+                                                               BackgroundColor="White"
+                                                               Padding="5,0,5,0">
+                                                <Label FontSize="14"
+                                                       TextColor="{StaticResource PrimaryColor}"
+                                                       HorizontalOptions="Center">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="退定 : " />
+                                                            <Span
+                                                                    Text="{Binding ReturnOrderAmount,Converter={StaticResource NullableDecimalConverter}}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </yummy:PancakeView>
+                                        </Grid>
+                                    </StackLayout>
+                                </yummy:PancakeView>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </custom:TaskLoaderView>
+        </RefreshView>
+        <!--footer-->
+        <Grid HeightRequest="{StaticResource RH45}"
+              Style="{StaticResource GGrid}"
+              VerticalOptions="End"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1}"
+              RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.90}"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.1}"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   Text="{Binding TotalOnTime,StringFormat='累计停留：{0}分钟'}"
+                   HorizontalOptions="EndAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   Text="{Binding TotalAmount,StringFormat='销售￥{0:F2}'}"
+                   HorizontalOptions="EndAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5,5,10,5" />
+        </Grid>
+    </RelativeLayout>
+</pages:BaseContentPage>

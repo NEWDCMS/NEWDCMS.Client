@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0063: 使用简单的 "using" 语句
+csharp_prefer_simple_using_statement = false:suggestion

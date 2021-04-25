@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:xe="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.SecurityPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:SecurityPageViewModel">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical">
+            <Grid Style="{StaticResource GGrid}"
+                  VerticalOptions="Start"
+                  RowDefinitions="*,*,*"
+                  ColumnDefinitions="*">
+                <Grid Grid.Row="0"
+                      xe:TouchEffect.Color="LightGray"
+                      Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <StackLayout Grid.Row="0"
+                                 Orientation="Horizontal"
+                                 Margin="0"
+                                 VerticalOptions="Center">
+                        <Label Text="手势密码"
+                               TextColor="{StaticResource PrimaryTextColor}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               Style="{StaticResource H4-Regular}"
+                               Margin="10,0,0,0" />
+                        <Switch VerticalOptions="Center"
+                                HorizontalOptions="EndAndExpand"
+                                Margin="0,0,10,0"
+                                OnColor="#53a245"
+                                ThumbColor="#53a245" />
+                    </StackLayout>
+                    <BoxView Style="{StaticResource SeparatorGrid}"
+                             Grid.Row="1" />
+                </Grid>
+                <Grid Grid.Row="1"
+                      xe:TouchEffect.Color="LightGray"
+                      Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <StackLayout Grid.Row="0"
+                                 Orientation="Horizontal"
+                                 Margin="0">
+                        <Label Text="指纹解锁"
+                               TextColor="{StaticResource PrimaryTextColor}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               Style="{StaticResource H4-Regular}"
+                               Margin="10,0,0,0" />
+                        <Switch VerticalOptions="Center"
+                                HorizontalOptions="EndAndExpand"
+                                Margin="0,0,10,0"
+                                OnColor="#53a245"
+                                ThumbColor="#53a245" />
+                    </StackLayout>
+                    <BoxView Style="{StaticResource SeparatorGrid}"
+                             Grid.Row="1" />
+                </Grid>
+                <Grid Grid.Row="2"
+                      Style="{StaticResource GGrid}"
+                      xe:TouchEffect.Color="LightGray"
+                      xe:Commands.Tap="{Binding BindingContext.UpdatePasswordCommand, Source={x:Reference CurrentContentView}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <StackLayout Grid.Row="0"
+                                 Orientation="Horizontal"
+                                 Margin="0">
+                        <Label Text="修改密码"
+                               TextColor="{StaticResource PrimaryTextColor}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               Style="{StaticResource H4-Regular}"
+                               Margin="10,0,0,0" />
+                        <Label Text="{StaticResource FontAwesomeRight}"
+                               FontFamily="FAS"
+                               VerticalOptions="Center"
+                               HorizontalOptions="EndAndExpand"
+                               TextColor="{StaticResource PrimaryDarkColor}"
+                               FontSize="20"
+                               Margin="0,0,20,0" />
+                    </StackLayout>
+                    <BoxView Style="{StaticResource SeparatorGrid}"
+                             HeightRequest=".7"
+                             Grid.Row="1" />
+                </Grid>
+            </Grid>
+            <!--footer-->
+            <Grid Margin="0"
+                  Style="{StaticResource GGrid}"
+                  HorizontalOptions="FillAndExpand"
+                  VerticalOptions="EndAndExpand">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <!--退出账号-->
+                <StackLayout Grid.Row="0"
+                             Grid.Column="0"
+                             HorizontalOptions="FillAndExpand"
+                             VerticalOptions="Center"
+                             Padding="5">
+                    <Button Text="power-off 注销退出"
+                            CornerRadius="50"
+                            HorizontalOptions="FillAndExpand"
+                            Style="{StaticResource CustomIconButtonStyle}"
+                            FontFamily="FAS"
+                            Command="{Binding Path=SignOutCommand}" />
+                </StackLayout>
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</pages:BaseContentPage>

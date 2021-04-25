@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+        xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+        xmlns:converters="clr-namespace:Wesley.Client.Converters;assembly=Wesley.Client"
+        xmlns:pancakeView="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" mc:Ignorable="d"
+        x:Class="Wesley.Client.Styles.ControlStyles">
+    
+    <ResourceDictionary Source="Fonts.xaml" />
+    <ResourceDictionary Source="Colors.xaml" />
+    <converters:ExceptionToImageSourceConverter x:Key="ExceptionToImageSourceConverter" />
+    <!--#分割线-->
+    <Style x:Key="SeparatorGrid" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="0.7" />
+        <Setter Property="BackgroundColor" Value="#ebecef" />
+    </Style>
+    <Style x:Key="SeparatorVGrid" TargetType="BoxView">
+        <Setter Property="WidthRequest" Value="0.7" />
+        <Setter Property="BackgroundColor" Value="#ebecef" />
+        <Setter Property="VerticalOptions" Value="FillAndExpand" />
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    
+    <Style x:Key="WesleyTaskLoader" TargetType="custom:TaskLoaderView">
+        <Setter Property="AccentColor" Value="{StaticResource Accent}" />
+        <Setter Property="EmptyStateImageUrl" Value="the_internet.gif" />
+        <Setter Property="RetryButtonText" Value="抱歉，出错啦！" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}" />
+        <Setter Property="ErrorImageConverter" Value="{StaticResource ExceptionToImageSourceConverter}" />
+    </Style>
+    <Style TargetType="Label" x:Key="TabLabelStyle">
+        <Setter Property="FontFamily" Value="FAR" />
+        <Setter Property="TextColor" Value="{StaticResource SecondaryAccentColor}" />
+        <Setter Property="Scale" Value="0.9" />
+        <Setter Property="FontSize" Value="{OnPlatform Android=25, iOS=25}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="Margin" Value="0,15,0,0" />
+    </Style>
+    <!--导航栏样式 3B5998-->
+    <Style TargetType="NavigationPage">
+        <Setter Property="BarBackgroundColor" Value="#3B5998" />
+        <Setter Property="BarTextColor" Value="#ffffff" />
+    </Style>
+    <Style x:Key="AppButtonNameLabel" TargetType="Label">
+        <Setter Property="TextColor" Value="#333333" />
+        <Setter Property="Margin" Value="0,-2,0,0" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <!--App Button-->
+    <Style x:Key="AppButtonStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="FAS" />
+        <Setter Property="TextColor" Value="#53a245" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="BackgroundColor" Value="#ffffff" />
+        <Setter Property="BorderColor" Value="{StaticResource DividerColor}" />
+        <Setter Property="BorderRadius" Value="50" />
+        <Setter Property="CornerRadius" Value="50" />
+        <Setter Property="BorderWidth" Value="0.2" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="WidthRequest" Value="40" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+    
+    <Style x:Key="PrimaryToolBarButton" TargetType="Button">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
+        <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}" />
+        <Setter Property="BorderRadius" Value="25" />
+        <Setter Property="BorderWidth" Value=".5" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    
+    <!--主按钮-->
+    <Style x:Key="PrimaryButton" TargetType="custom:RoundedButton">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="BorderColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="BorderRadius" Value="25" />
+        <Setter Property="BorderWidth" Value=".5" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <!--footer toolbar button-->
+    <Style x:Key="FooterButtonStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="FAS" />
+        <Setter Property="TextColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="BackgroundColor" Value="#ffffff" />
+        <Setter Property="BorderColor" Value="{StaticResource DividerColor}" />
+        <Setter Property="BorderRadius" Value="5" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="BorderWidth" Value="0.7" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="VerticalOptions" Value="CenterAndExpand" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="Margin" Value="0,0,5,0" />
+    </Style>
+    <!--表格列-->
+    <Style x:Key="GridCellStyle" TargetType="Label">
+        <Setter Property="Margin" Value="0,5,0,5" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HorizontalOptions" Value="CenterAndExpand" />
+        <Setter Property="VerticalOptions" Value="CenterAndExpand" />
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}" />
+    </Style>
+    <Style x:Key="PrimaryWhiteButton" TargetType="custom:RoundedButton">
+        <Setter Property="TextColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="BorderColor" Value="White" />
+        <Setter Property="BorderRadius" Value="25" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style x:Key="DefaultButton" TargetType="custom:RoundedButton">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="BackgroundColor" Value="{StaticResource DividerColor}" />
+        <Setter Property="BorderColor" Value="{StaticResource DividerColor}" />
+        <Setter Property="BorderRadius" Value="25" />
+        <Setter Property="BorderWidth" Value="2" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style x:Key="TransparentButton" TargetType="custom:RoundedButton">
+        <Setter Property="TextColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="BorderRadius" Value="25" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="FontSize" Value="110.5" />
+    </Style>
+    <Style x:Key="DownArrow" TargetType="Label">
+        <Setter Property="Text" Value="{StaticResource FontAwesomeDown}" />
+        <Setter Property="FontFamily" Value="FAS" />
+        <Setter Property="TextColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="EndAndExpand" />
+        <Setter Property="Margin" Value="0,0,10,0" />
+    </Style>
+    <Style x:Key="SearchArrow" TargetType="Label">
+        <Setter Property="Text" Value="{StaticResource FontAwesomeSearch}" />
+        <Setter Property="FontFamily" Value="FAS" />
+        <Setter Property="TextColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="EndAndExpand" />
+        <Setter Property="Margin" Value="0,0,10,0" />
+    </Style>
+    <Style x:Key="CommonButton" TargetType="custom:RoundedButton">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="BorderColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="BorderRadius" Value="25" />
+        <Setter Property="BorderWidth" Value=".5" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <!--Pancake view-->
+    <OnPlatform x:TypeArguments="pancakeView:DropShadow" x:Key="LightShadow">
+        <On Platform="Android">
+            <On.Value>
+                <pancakeView:DropShadow Color="LightGray" Opacity="0.6" />
+            </On.Value>
+        </On>
+    </OnPlatform>
+    <Style TargetType="pancakeView:PancakeView" x:Key="LightShadowPancakeViewStyle">
+        <Setter Property="Shadow" Value="{StaticResource LightShadow}"></Setter>
+    </Style>
+    <!--Labels-->
+    <Style x:Key="BaseLabelStyle" TargetType="{x:Type Label}">
+        <Setter Property="FontSize" Value="Body" />
+        <Setter Property="FontFamily" Value="BSR" />
+        <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+    </Style>
+    <Style BasedOn="{StaticResource BaseLabelStyle}" TargetType="{x:Type Label}" />
+    <Style TargetType="Label" x:Key="PageTitleLabel">
+        <Setter Property="Margin">
+            <Setter.Value>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android" Value="0,10,0,0" />
+                    <On Platform="iOS" Value="5,5,0,0" />
+                </OnPlatform>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="FontSize"
+                Value="Title" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+    <!--Swipeviews-->
+    <Style TargetType="SwipeView" x:Key="MessageBubbleSwipeViewStyle">
+        <Setter Property="Padding">
+            <Setter.Value>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="iOS" Value="0,10" />
+                </OnPlatform>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Margin">
+            <Setter.Value>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="iOS" Value="0,7" />
+                </OnPlatform>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
+    </Style>
+    <!--popup 工具栏-->
+    <Style x:Key="CustomIconButtonStyle2" TargetType="controls:IconButton">
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="CornerRadius" Value="2" />
+    </Style>
+    <!--自定义图标文本按钮-->
+    <Style x:Key="CustomIconButtonStyle" TargetType="Button">
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+    <!--#region Entry -->
+    <Style x:Key="DefaultEntry" TargetType="custom:CustomEntry">
+        <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource DividerColor}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="0,0,0,0" />
+        <Setter Property="Padding" Value="0,0,0,0" />
+    </Style>
+    <Style x:Key="FormEntry" TargetType="custom:CustomEntry">
+        <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource DividerColor}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="0,0,0,0" />
+        <Setter Property="Padding" Value="0,0,0,0" />
+    </Style>
+    <!--#endregion-->
+    <!--  Common style for labels  -->
+    <Style x:Key="LabelStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="#606a7b" />
+        <Setter Property="FontFamily" Value="BSR" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="{OnPlatform Android=1.5, Default=-1}" />
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="Start" />
+    </Style>
+    <Style x:Key="IconLabelStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="#788396" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontFamily" Value="FAR" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HeightRequest" Value="32" />
+        <Setter Property="WidthRequest" Value="32" />
+    </Style>
+    
+    
+    
+</ResourceDictionary>

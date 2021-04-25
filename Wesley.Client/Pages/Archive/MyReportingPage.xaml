@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:chart="clr-namespace:Wesley.Easycharts.Forms;assembly=Wesley.Easycharts.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Archive.MyReportingPage"
+                       Title="{Binding Title}"
+                       x:TypeArguments="vms:MyReportingPageViewModel">
+
+    <ScrollView VerticalScrollBarVisibility="Always">
+
+        <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                               ViewModelLoader="{Binding ChartsLoader}">
+            <CollectionView x:Name="ChartsRepeater"
+                            ItemsSource="{Binding ChartDatas,Mode=OneWay}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout 
+                                     HeightRequest="245"
+                                     VerticalOptions="Start">
+                            <StackLayout Orientation="Horizontal"  
+                                         HeightRequest="{StaticResource RH45}" BackgroundColor="#eeeeee">
+                                <BoxView 
+                                         WidthRequest="4"
+                                         BackgroundColor="{StaticResource PrimaryColor}" />
+                                <Label Text="{Binding Title}"
+                                       
+                                       FontSize="{StaticResource FT16}"
+                                       FontAttributes="Bold"
+                                       Margin="{StaticResource ML10}"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="StartAndExpand" />
+                                <Label Text="(今日)"
+                                       TextColor="{StaticResource PrimaryDarkColor}"
+                                       FontSize="{StaticResource FT14}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       Margin="{StaticResource MR10}"
+                                       HorizontalOptions="End" />
+                            </StackLayout>
+
+                            <chart:ChartView 
+                                                  HeightRequest="200"
+                                                  BackgroundColor="White"
+                                                  Chart="{Binding ChartData}" />
+
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <custom:NullView />
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </custom:TaskLoaderView>
+    </ScrollView>
+
+</pages:BaseContentPage>

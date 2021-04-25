@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+  <dimen name="textsize_badge_count">13sp</dimen>
+  <!-- Height of the bottom navigation / system bar. -->
+  <dimen name="navigation_bar_height">30dp</dimen>
+</resources>

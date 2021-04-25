@@ -1,0 +1,394 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Archive.OrderQuantityAnalysisPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:OrderQuantityAnalysisPageViewModel">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="StatsNumberLabel"
+                   TargetType="Label">
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="HorizontalTextAlignment"
+                        Value="Center" />
+                <Setter Property="FontAttributes"
+                        Value="Bold" />
+                <Setter Property="FontSize"
+                        Value="12" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <StackLayout VerticalOptions="Start"
+                 Spacing="0">
+        <!--图表-->
+        <StackLayout Orientation="Vertical"
+                     Padding="5"
+                     Spacing="0">
+            <yummy:PancakeView IsClippedToBounds="true"
+                               CornerRadius="10"
+                               BackgroundColor="#eeeeee"
+                             
+                               HorizontalOptions="FillAndExpand"
+                               Margin="5">
+                <StackLayout Padding="5">
+                    <Grid Style="{StaticResource GGrid}"
+                          Margin="8,8,8,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="110" />
+                            <RowDefinition Height="30" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <custom:CircleProgress Grid.Row="0"
+                                               Grid.Column="0"
+                                               WidthRequest="100"
+                                               HeightRequest="100"
+                                               Maximun="100"
+                                               Minimun="0"
+                                               Value="90"
+                                               BackColor="LightGray"
+                                               ForeColor="#53a245"
+                                               TextColor="#3B5998"
+                                               AnimationDuration="1000"
+                                               Text="{Binding TodayNetAmount}"
+                                               TextSize="35"
+                                               VerticalOptions="CenterAndExpand"
+                                               HorizontalOptions="CenterAndExpand" />
+                        <custom:CircleProgress Grid.Row="0"
+                                               Grid.Column="1"
+                                               WidthRequest="100"
+                                               HeightRequest="100"
+                                               Maximun="100"
+                                               Minimun="0"
+                                               Value="88"
+                                               BackColor="LightGray"
+                                               ForeColor="#3B5998"
+                                               TextColor="#53a245"
+                                               AnimationDuration="1000"
+                                               Text="{Binding NetAmountBalance}"
+                                               TextSize="35"
+                                               VerticalOptions="CenterAndExpand"
+                                               HorizontalOptions="CenterAndExpand" />
+                        <custom:CircleProgress Grid.Row="0"
+                                               Grid.Column="2"
+                                               WidthRequest="100"
+                                               HeightRequest="100"
+                                               Maximun="100"
+                                               Minimun="0"
+                                               Value="67"
+                                               BackColor="LightGray"
+                                               ForeColor="#22a245"
+                                               TextColor="#3B5998"
+                                               AnimationDuration="1000"
+                                               Text="{Binding LastWeekSameNetAmount}"
+                                               TextSize="35"
+                                               VerticalOptions="CenterAndExpand"
+                                               HorizontalOptions="CenterAndExpand" />
+                        <Label Grid.Row="1"
+                               Grid.Column="0"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Start"
+                               Text="今日净额"
+                               FontAttributes="Bold"
+                               FontSize="{StaticResource FT14}" />
+                        <Label Grid.Row="1"
+                               Grid.Column="1"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Start"
+                               Text="相比减少"
+                               FontAttributes="Bold"
+                               FontSize="{StaticResource FT14}" />
+                        <Label Grid.Row="1"
+                               Grid.Column="2"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Start"
+                               Text="上周同期"
+                               FontAttributes="Bold"
+                               FontSize="{StaticResource FT14}" />
+                    </Grid>
+                </StackLayout>
+            </yummy:PancakeView>
+        </StackLayout>
+        <!--统计数-->
+        <ScrollView HorizontalOptions="FillAndExpand">
+            <Grid Margin="10,0,10,0"
+                  Style="{StaticResource GGrid}"
+                  RowDefinitions="45,.7,45,.7,45,.7,45,.7,45,.7,45,.7,45,.7,45,.7,45,.7,45,.7"
+                  ColumnDefinitions="*,*,*">
+                <!--TH-->
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="StartAndExpand"
+                       FontSize="{StaticResource FT14}"
+                       Style="{StaticResource StatsNumberLabel}"
+                       Text="日期" />
+                <Label Grid.Row="0"
+                       Grid.Column="2"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="EndAndExpand"
+                       Style="{StaticResource StatsNumberLabel}"
+                       Text="净额"
+                       FontSize="{StaticResource FT14}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="1"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="今日"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="2"
+                       Grid.Column="1"
+                       Text="&#xf062;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="2"
+                       Grid.Column="2"
+                       HorizontalOptions="EndAndExpand"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.Today.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="3"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="4"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="昨日"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="4"
+                       Grid.Column="1"
+                       Text="&#xf062;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="4"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.Yesterday.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="5"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="6"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="前天"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="6"
+                       Grid.Column="1"
+                       Text="&#xf063;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryBaseColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="6"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.BeforeYesterday.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="7"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="8"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="上周"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="8"
+                       Grid.Column="1"
+                       Text="&#xf063;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryBaseColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="8"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.LastWeek.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="9"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="10"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="本周"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="10"
+                       Grid.Column="1"
+                       Text="&#xf062;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="10"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.ThisWeek.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="11"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="12"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="上月"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="12"
+                       Grid.Column="1"
+                       Text="&#xf063;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryBaseColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="12"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.LastMonth.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="13"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="14"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="本月"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="14"
+                       Grid.Column="1"
+                       Text="&#xf062;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="14"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.ThisMonth.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <BoxView Grid.Row="15"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="16"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="本季"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="16"
+                       Grid.Column="1"
+                       Text="&#xf063;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryBaseColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="16"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.ThisYear.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <!--TR-->
+                <BoxView Grid.Row="17"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+                <Label Grid.Row="18"
+                       Grid.Column="0"
+                       HorizontalOptions="StartAndExpand"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="本年"
+                       FontSize="{StaticResource FT14}" />
+                <Label Grid.Row="18"
+                       Grid.Column="1"
+                       Text="&#xf062;"
+                       FontFamily="FAS"
+                       HorizontalOptions="Center"
+                       FontSize="{StaticResource FT14}"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,5,0,5" />
+                <Label Grid.Row="18"
+                       Grid.Column="2"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Style="{StaticResource GridCellStyle}"
+                       Text="{Binding ChartData.ThisYear.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Margin="{StaticResource MR10}" />
+                <BoxView Grid.Row="19"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Style="{StaticResource SeparatorGrid}" />
+            </Grid>
+        </ScrollView>
+    </StackLayout>
+</pages:BaseContentPage>

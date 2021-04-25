@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+        xmlns:tintedImages="clr-namespace:Wesley.Client.Plugin;assembly=Wesley.Client"
+        xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+        xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms" prism:ViewModelLocator.AutowireViewModel="True"
+        x:Name="CurrentContentView" x:Class="Wesley.Client.Pages.ProfileView" BackgroundColor="White">
+    <AbsoluteLayout HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand"
+                
+                    Padding="0,0,0,0"
+                    BackgroundColor="#3B5998">
+        <StackLayout AbsoluteLayout.LayoutFlags="All"
+                     AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                     Spacing="0"
+                     BackgroundColor="White">
+            <!--姓名标头 大-->
+            <Grid Style="{StaticResource GGrid}" Margin="0,45,0,0" HeightRequest="150" VerticalOptions="Start"
+                    BackgroundColor="#3B5998">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackLayout Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" VerticalOptions="Start"
+                        Margin="{StaticResource PLR10}">
+                    <ffimageloading:CachedImage HorizontalOptions="Center" VerticalOptions="Center"
+                            LoadingPlaceholder="profile_placeholder.png" ErrorPlaceholder="profile_placeholder.png"
+                            DownsampleToViewSize="true" Aspect="AspectFill" HeightRequest="60" WidthRequest="60"
+                            Source="{Binding UserFace}">
+                        <ffimageloading:CachedImage.Transformations>
+                            <fftransformations:CircleTransformation BorderSize="4" BorderHexColor="#ffffff" />
+                        </ffimageloading:CachedImage.Transformations>
+                    </ffimageloading:CachedImage>
+                </StackLayout>
+                <Label Grid.Row="0" Grid.Column="1" Text="{Binding ProfileName, Mode=OneWay}" TextColor="#ffffff"
+                        Style="{StaticResource H3-Semibold}" />
+                <StackLayout Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalOptions="Start">
+                    <custom:HtmlLabel Text="{Binding UserMobile}" VerticalOptions="Center" TextColor="#ffffff"
+                            FontSize="{StaticResource FT14}" />
+                </StackLayout>
+                <Grid Grid.Row="2" Grid.Column="1" Grid.RowSpan="2" VerticalOptions="Start"
+                        Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackLayout Grid.Column="0" Spacing="3">
+                        <Label Text="{Binding Analysis.TodayAddTerminalQuantity, Mode=OneWay}"
+                                HorizontalTextAlignment="Start" TextColor="#ffffff" FontAttributes="Bold"
+                                FontSize="{StaticResource FT14}" />
+                        <Label Text="新增客户" FontSize="{StaticResource FT14}" HorizontalTextAlignment="Start"
+                                TextColor="#ffffff" Style="{StaticResource H5-Regular}" />
+                    </StackLayout>
+                    <StackLayout Grid.Column="1" Spacing="3">
+                        <Label Text="{Binding Analysis.TodayVisitQuantity, Mode=OneWay}" HorizontalTextAlignment="Start"
+                                TextColor="#ffffff" FontAttributes="Bold" FontSize="{StaticResource FT14}" />
+                        <Label Text="拜访客户" FontSize="{StaticResource FT14}" HorizontalTextAlignment="Start"
+                                TextColor="#ffffff" Style="{StaticResource H5-Regular}" />
+                    </StackLayout>
+                    <StackLayout Grid.Column="2" Spacing="3">
+                        <Label Text="{Binding Analysis.TodaySaleAmount,StringFormat='{0:F2}'}"
+                                HorizontalTextAlignment="Start" TextColor="#ffffff" FontAttributes="Bold"
+                                FontSize="{StaticResource FT14}" />
+                        <Label Text="销售额" FontSize="{StaticResource FT14}" HorizontalTextAlignment="Start"
+                                TextColor="#ffffff" Style="{StaticResource H5-Regular}" />
+                    </StackLayout>
+                </Grid>
+            </Grid>
+            <!--菜单-->
+            <CollectionView ItemsSource="{Binding Menus}" SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                    SelectionMode="Single" IsGrouped="True" HorizontalOptions="FillAndExpand" VerticalOptions="Start">
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <BoxView BackgroundColor="#f6f7f8" HeightRequest="20" />
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Style="{StaticResource GGrid}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="55" />
+                                <RowDefinition Height=".7" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <!--  icon  -->
+                            <Label Grid.Row="0" Grid.Column="0"
+                                    Text="{Binding Icon,Converter={StaticResource IconConverter}}" FontFamily="FAS"
+                                    VerticalOptions="Center" TextColor="{StaticResource PrimaryDarkColor}" FontSize="20"
+                                    Margin="16,0,16,0" />
+                            <!-- text label  -->
+                            <Label Grid.Column="1"  TextColor="{StaticResource PrimaryTextColor}"
+                                    Text="{Binding Name}" VerticalOptions="Center" />
+                            <!--  Navigation icon  -->
+                            <Label Grid.Column="2" FontFamily="FAS" Style="{StaticResource IconLabelStyle}"
+                                    Text="&#xf105;" />
+                            <BoxView Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                    IsVisible="{Binding ShowSeparator}" Style="{StaticResource SeparatorGrid}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+        <!--工具栏-->
+        <ContentView AbsoluteLayout.LayoutFlags="PositionProportional,WidthProportional"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 45" BackgroundColor="#3B5998">
+            <Grid Style="{StaticResource GGrid}" VerticalOptions="CenterAndExpand">
+                <Grid.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="iOS" Value="0,15,0,0" />
+                    </OnPlatform>
+                </Grid.Margin>
+                <tintedImages:TintedImage Source="Settings.png" TintColor="#ffffff" HorizontalOptions="End"
+                        VerticalOptions="Center" HeightRequest="20" WidthRequest="20" Margin="15,0,15,0" />
+            </Grid>
+        </ContentView>
+    </AbsoluteLayout>
+</ContentView>

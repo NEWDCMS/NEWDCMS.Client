@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:xe="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.Home.NewCustomersPage"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:NewCustomersPageViewModel" 
+                       BackgroundColor="White">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="StatsNumberLabel"
+                   TargetType="Label">
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="HorizontalTextAlignment"
+                        Value="Center" />
+                <Setter Property="FontAttributes"
+                        Value="Bold" />
+                <Setter Property="FontSize"
+                        Value="14" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <StackLayout VerticalOptions="Start">
+        <!--图表-->
+        <custom:ChartBar BindingContext="{Binding}" />
+        <ScrollView>
+            <StackLayout Padding="0"
+                         Spacing="0"
+                         Margin="{StaticResource PLR10}">
+                <!--统计数-->
+        <Grid RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <!--TH-->
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource StatsNumberLabel}"
+                           Text="日期"
+                           />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="EndAndExpand"
+                   Style="{StaticResource StatsNumberLabel}"
+                           Text="新增客户"
+                            />
+                    <BoxView  Grid.Row="1"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              Style="{StaticResource SeparatorGrid}"  />
+                </Grid>
+        <!--今日-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="今日"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="EndAndExpand"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.Today.Count}"
+                            />
+                    <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--昨日-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="昨日"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.Yesterday.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--前天-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="前天"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.BeforeYesterday.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--上周-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="上周"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.LastWeek.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--本周-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="本周"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.ThisWeek.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--上月-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <!--TR-->
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="上月"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.LastMonth.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--本月-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="本月"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.ThisMonth.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--本年-->
+        <Grid xe:TouchEffect.Color="LightGray"
+              xe:Commands.Tap="{Binding BindingContext.HistoryCommand, Source={x:Reference CurrentContentView}}"
+              xe:Commands.TapParameter="1"
+              RowDefinitions="45,.7"
+                      ColumnDefinitions="*,*"
+                      Style="{StaticResource GGrid}">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource GridCellStyle}"
+                           Text="本年"
+                           />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Style="{StaticResource GridCellStyle}"
+                           Text="{Binding Data.ThisYear.Count}"
+                            />
+                    <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        </StackLayout>
+        </ScrollView>
+    </StackLayout>
+</pages:BaseContentPage>

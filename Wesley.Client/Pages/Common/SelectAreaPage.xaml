@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.Common.SelectAreaPage"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:SelectAreaPageViewModel">
+    <RelativeLayout>
+        <!--列表-->
+        <ContentView BackgroundColor="#ffffff">
+            <CollectionView ItemsSource="{Binding Districts}"
+                            Margin="0,0,0,0"
+                            x:Name="Districts"
+                            ItemSizingStrategy="MeasureAllItems"
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                            SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnSpacing="0"
+                              RowSpacing="0"
+                              Padding="0,0,0,0"
+                              Margin="0,0,0,0"
+                              VerticalOptions="CenterAndExpand"
+                              HorizontalOptions="FillAndExpand"
+                              BackgroundColor="White">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height=".7" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="50" />
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0"
+                                   Margin="10,0,0,0"
+                                   Text="{Binding Name}"
+                                   TextColor="#333333"
+                                   HorizontalOptions="StartAndExpand"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}" />
+                            <CheckBox Grid.Column="1"
+                                      Margin="0,0,10,0"
+                                      HorizontalOptions="End"
+                                      VerticalOptions="CenterAndExpand"
+                                      IsChecked="{Binding Selected,Mode=TwoWay}" />
+                            <BoxView Grid.Row="1"
+                                     Grid.ColumnSpan="2"
+                                     Style="{StaticResource SeparatorGrid}"
+                                     HeightRequest=".7"
+                                     Margin="0" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ContentView>
+        <!--footer-->
+        <Grid Margin="0"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="EndAndExpand"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+                                                                       Property=Height,
+                                                                       Factor=1,
+                                                                       Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+                                                                      Property=Width,
+                                                                      Factor=1,
+                                                                      Constant=0}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!--清除-->
+            <StackLayout Grid.Row="0"
+                         Grid.Column="0"
+                         Spacing="0"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="Center"
+                         Padding="5">
+                <Button Text="清除"
+                        Style="{StaticResource CustomIconButtonStyle}"
+                        Command="{Binding Path=DeleteCommand}" />
+            </StackLayout>
+            <!--取消-->
+            <StackLayout Grid.Row="0"
+                         Grid.Column="1"
+                         Spacing="0"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="Center"
+                         Padding="5">
+                <Button Text="取消"
+                        Style="{StaticResource CustomIconButtonStyle}"
+                        Command="{Binding Path=CancelCommand}" />
+            </StackLayout>
+            <!--确定-->
+            <StackLayout Grid.Row="0"
+                         Grid.Column="2"
+                         Spacing="0"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="Center"
+                         Padding="5">
+                <Button Text="确定"
+                        Style="{StaticResource CustomIconButtonStyle}"
+                        Command="{Binding Path=CheckCommand}" />
+            </StackLayout>
+        </Grid>
+    </RelativeLayout>
+</pages:BaseContentPage>

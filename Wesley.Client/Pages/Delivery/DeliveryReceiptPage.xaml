@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseTabbedPage  xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:loading="clr-namespace:Wesley.Client.CustomViews.Views;assembly=Wesley.Client"
+                       xmlns:market="clr-namespace:Wesley.Client.Pages.Market;assembly=Wesley.Client"
+                       xmlns:lazyView="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="DeliveryReceiptTabPage"
+                       x:Class="Wesley.Client.Pages.Market.DeliveryReceiptPage"
+                       Title="{Binding Title}"
+                       BarBackgroundColor="White"
+                       SelectedTabIndex="{Binding SelectedTab}"
+                       BarTextColor="#53a245"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:DeliveryReceiptPageViewModel">
+    <pages:BaseTabbedPage.Children>
+        <lazyView:LazyContentPage Title="订单签收"
+                                  x:TypeArguments="loading:LoadingContentView,market:UnOrderView"
+                                  x:Name="UnOrderPage" />
+        <lazyView:LazyContentPage Title="费用签收"
+                                  x:TypeArguments="loading:LoadingContentView,market:UnCostExpenditureView"
+                                  x:Name="UnCostExpenditurePage" />
+        <lazyView:LazyContentPage Title="销单签收"
+                                  x:TypeArguments="loading:LoadingContentView,market:UnSaleView"
+                                  x:Name="UnSalePage" />
+        <lazyView:LazyContentPage  Title="已签收"
+                                   x:TypeArguments="loading:LoadingContentView,market:DeliveriedView"
+                                   x:Name="DeliveriedPage" />
+    </pages:BaseTabbedPage.Children>
+</pages:BaseTabbedPage>

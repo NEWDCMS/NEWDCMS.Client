@@ -1,0 +1,540 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:res="clr-namespace:Wesley.BitImageEditor.Resources"
+             x:Class="Wesley.BitImageEditor.EditorPage.ImageEditorPage"
+             xmlns:editorpage="clr-namespace:Wesley.BitImageEditor.EditorPage"
+             xmlns:helper="clr-namespace:Wesley.BitImageEditor.Helper"
+             xmlns:tt="clr-namespace:Wesley.BitImageEditor.TouchTracking"
+             xmlns:controls="clr-namespace:Wesley.BitImageEditor.Controls"
+             xmlns:forms="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms"
+             xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+             ios:Page.PrefersHomeIndicatorAutoHidden="True"
+             ios:Page.PrefersStatusBarHidden="True"
+             ios:Page.PreferredStatusBarUpdateAnimation="Fade"
+             x:Name="ThisEditorPage"
+             x:ClassModifier="internal">
+    <!--ios:Page.PrefersStatusBarHidden="True"
+             ios:Page.PreferredStatusBarUpdateAnimation="Fade"
+             ios:Page.PrefersHomeIndicatorAutoHidden="True"-->
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <editorpage:ImageSourceConverter x:Key="SourceConverter" />
+            <Style TargetType="Grid">
+                <Setter Property="VerticalOptions"
+                        Value="End" />
+                <Setter Property="HorizontalOptions"
+                        Value="FillAndExpand" />
+                <Setter Property="RowSpacing"
+                        Value="0" />
+                <Setter Property="ColumnSpacing"
+                        Value="0" />
+                <Setter Property="Margin"
+                        Value="0" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="BackgroundColor"
+                        Value="LightGray" />
+            </Style>
+            <Style TargetType="StackLayout">
+                <Setter Property="VerticalOptions"
+                        Value="FillAndExpand" />
+                <Setter Property="HorizontalOptions"
+                        Value="FillAndExpand" />
+                <Setter Property="Margin"
+                        Value="15,0,15,0" />
+                <Setter Property="Orientation"
+                        Value="Horizontal" />
+                <Setter Property="BackgroundColor"
+                        Value="Transparent" />
+            </Style>
+            <Style TargetType="CollectionView">
+                <Setter Property="HorizontalOptions"
+                        Value="FillAndExpand" />
+                <Setter Property="Margin"
+                        Value="0,10,0,0" />
+                <Setter Property="VerticalOptions"
+                        Value="Center" />
+                <Setter Property="HorizontalScrollBarVisibility"
+                        Value="Never" />
+                <Setter Property="VerticalScrollBarVisibility"
+                        Value="Never" />
+                <Setter Property="ItemSizingStrategy"
+                        Value="MeasureFirstItem" />
+                <Setter Property="HeightRequest"
+                        Value="44" />
+            </Style>
+            <Style TargetType="ImageButton">
+                <Setter Property="HorizontalOptions"
+                        Value="Start" />
+                <Setter Property="VerticalOptions"
+                        Value="Center" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="WidthRequest"
+                        Value="40" />
+                <Setter Property="HeightRequest"
+                        Value="40" />
+                <Setter Property="Margin"
+                        Value="5" />
+                <Setter Property="BackgroundColor"
+                        Value="Transparent" />
+                <Setter Property="BorderColor"
+                        Value="Transparent" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <Grid VerticalOptions="FillAndExpand"
+              BackgroundColor="#eeeeee">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid VerticalOptions="FillAndExpand"
+                  BackgroundColor="#eeeeee">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid x:Name="canvasTop"
+                      Grid.Row="0"
+                      BackgroundColor="Transparent"
+                      VerticalOptions="FillAndExpand"
+                      HorizontalOptions="FillAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid x:Name="canvasCropViewHost"
+                          Grid.Row="0"
+                          BackgroundColor="Transparent"
+                          VerticalOptions="FillAndExpand"
+                          IsVisible="{Binding CropVisible}"
+                          IsEnabled="{Binding CropVisible}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                    <Grid x:Name="canvasMainViewHost"
+                          Grid.Row="0"
+                          BackgroundColor="Transparent"
+                          VerticalOptions="FillAndExpand"
+                          IsVisible="{Binding MainVisible}"
+                          IsEnabled="{Binding MainVisible}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                    <Grid.Effects>
+                        <tt:TouchEffect Capture="True"
+                                        TouchAction="TouchEffect_TouchAction" />
+                    </Grid.Effects>
+                </Grid>
+                <Grid Grid.Row="1"
+                      VerticalOptions="End"
+                      IsVisible="{Binding CropVisible}"
+                      IsEnabled="{Binding CropVisible}"
+                      BackgroundColor="{x:Static helper:SkiaHelper.backgroundColorHex}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!--裁切比例-->
+                    <!--<CollectionView Grid.Row="0" ItemSizingStrategy="MeasureFirstItem"  ItemsSource="{Binding CropCollect}" >
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal" SnapPointsType="Mandatory" SnapPointsAlignment="Start" ItemSpacing="0" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout HorizontalOptions="Center" Margin="0" Padding="0" Spacing="2">
+                                    <Image Grid.Column="0" Margin="0" WidthRequest="42" HeightRequest="44" Aspect="AspectFit" VerticalOptions="Center" HorizontalOptions="Center" Source="{Binding ImageName, Converter={StaticResource SourceConverter}}"  >
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding BindingContext.SelectItemCommand, Source={x:Reference ThisEditorPage}}" CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>-->
+                    <ImageButton Grid.Row="1"
+                                 Source="{res:ImageResource done}"
+                                 Command="{Binding ApplyChangesCommand}"
+                                 CommandParameter="Apply"
+                                 HorizontalOptions="EndAndExpand">
+                        <ImageButton.Margin>
+                            <OnPlatform x:TypeArguments="Thickness"
+                                        iOS="0,0,10,25"
+                                        Android="0,0,10,20" />
+                        </ImageButton.Margin>
+                    </ImageButton>
+                </Grid>
+                <!--添加文字-->
+                <Grid VerticalOptions="FillAndExpand"
+                      BackgroundColor="Transparent"
+                      IsVisible="{Binding TextVisible}"
+                      IsEnabled="{Binding TextVisible}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.RowSpan="3"
+                             BackgroundColor="Black"
+                             Opacity="0.7" />
+                    <ImageButton Grid.Row="0"
+                                 Source="{res:ImageResource done}"
+                                 Command="{Binding ApplyChangesCommand}"
+                                 CommandParameter="Apply"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Start">
+                        <ImageButton.Margin>
+                            <OnPlatform x:TypeArguments="Thickness"
+                                        iOS="0,32,10,0"
+                                        Android="0,20,10,0" />
+                        </ImageButton.Margin>
+                    </ImageButton>
+                    <ImageButton Grid.Row="0"
+                                 x:Name="typeTextButton"
+                                 Source="{res:ImageResource text_not_fill}"
+                                 Command="{Binding ChangeTextTypeCommand}"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="Start">
+                        <ImageButton.Margin>
+                            <OnPlatform x:TypeArguments="Thickness"
+                                        iOS="0,32,10,0"
+                                        Android="0,20,10,0" />
+                        </ImageButton.Margin>
+                    </ImageButton>
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding ColorCollect}"
+                                    HeightRequest="32">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal"
+                                               SnapPointsType="Mandatory"
+                                               SnapPointsAlignment="Start"
+                                               ItemSpacing="2" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout HorizontalOptions="Start"
+                                             VerticalOptions="Start"
+                                             HeightRequest="30"
+                                             WidthRequest="30"
+                                             Margin="0"
+                                             Padding="0"
+                                             Spacing="0">
+                                    <Button BackgroundColor="{Binding .}"
+                                            Command="{Binding BindingContext.SelectItemCommand, Source={x:Reference ThisEditorPage}}"
+                                            Padding="0"
+                                            FontSize="1"
+                                            Margin="0"
+                                            BorderColor="Transparent"
+                                            BorderWidth="1"
+                                            CommandParameter="{Binding .}"
+                                            VerticalOptions="Start"
+                                            HorizontalOptions="Start"
+                                            CornerRadius="15"
+                                            HeightRequest="30"
+                                            WidthRequest="30" />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <controls:CustomEditor x:Name="textEditor"
+                                           Grid.Row="2"
+                                           IsVisible="{Binding TextVisible}"
+                                           Text="{Binding CurrentText}"
+                                           TextColor="{Binding CurrentColor}"
+                                           FontSize="23"
+                                           Keyboard="Plain"
+                                           BackgroundColor="Transparent"
+                                           Margin="10,8,10,4"
+                                           VerticalOptions="FillAndExpand"
+                                           HorizontalOptions="FillAndExpand" />
+                </Grid>
+                <Grid VerticalOptions="FillAndExpand"
+                      BackgroundColor="Transparent"
+                      IsVisible="{Binding InfoVisible}"
+                      IsEnabled="{Binding InfoVisible}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView BackgroundColor="Black"
+                             Opacity="0.7" />
+                    <Label Text="{Binding Message}"
+                           FontSize="23"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           VerticalOptions="FillAndExpand"
+                           HorizontalOptions="FillAndExpand"
+                           VerticalTextAlignment="Center"
+                           HorizontalTextAlignment="Center" />
+                </Grid>
+                <Grid VerticalOptions="StartAndExpand"
+                      BackgroundColor="Transparent"
+                      IsVisible="{Binding PaintVisible}"
+                      IsEnabled="{Binding PaintVisible}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ImageButton Grid.Row="0"
+                                 Source="{res:ImageResource undo}"
+                                 Command="{Binding CancelCommand}"
+                                 CommandParameter="Apply"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="Start">
+                        <ImageButton.Margin>
+                            <OnPlatform x:TypeArguments="Thickness"
+                                        iOS="10,32,0,0"
+                                        Android="10,20,0,0" />
+                        </ImageButton.Margin>
+                    </ImageButton>
+                    <ImageButton Grid.Row="0"
+                                 Source="{res:ImageResource done}"
+                                 Command="{Binding ApplyChangesCommand}"
+                                 CommandParameter="Apply"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Start">
+                        <ImageButton.Margin>
+                            <OnPlatform x:TypeArguments="Thickness"
+                                        iOS="0,32,10,0"
+                                        Android="0,20,10,0" />
+                        </ImageButton.Margin>
+                    </ImageButton>
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding ColorCollect}"
+                                    HeightRequest="32">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal"
+                                               SnapPointsType="Mandatory"
+                                               SnapPointsAlignment="Start"
+                                               ItemSpacing="2" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout HorizontalOptions="Start"
+                                             VerticalOptions="Start"
+                                             HeightRequest="30"
+                                             WidthRequest="30"
+                                             Margin="0"
+                                             Padding="0"
+                                             Spacing="0">
+                                    <Button BackgroundColor="{Binding .}"
+                                            Command="{Binding BindingContext.SelectItemCommand, Source={x:Reference ThisEditorPage}}"
+                                            Padding="0"
+                                            FontSize="1"
+                                            Margin="0"
+                                            BorderColor="Transparent"
+                                            BorderWidth="1"
+                                            CommandParameter="{Binding .}"
+                                            VerticalOptions="Start"
+                                            HorizontalOptions="Start"
+                                            CornerRadius="15"
+                                            HeightRequest="30"
+                                            WidthRequest="30" />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+                <!--笔触样式-->
+                <Grid VerticalOptions="FillAndExpand"
+                      BackgroundColor="Transparent"
+                      IsVisible="{Binding StickersVisible}"
+                      IsEnabled="{Binding StickersVisible}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <!--<RowDefinition Height="*" />-->
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.RowSpan="2"
+                             BackgroundColor="Black"
+                             Opacity="0.7" />
+                    <ImageButton Grid.Row="0"
+                                 Source="{res:ImageResource clear}"
+                                 Command="{Binding ApplyChangesCommand}"
+                                 HorizontalOptions="EndAndExpand">
+                        <ImageButton.Margin>
+                            <OnPlatform x:TypeArguments="Thickness"
+                                        iOS="0,32,10,0"
+                                        Android="0,20,10,0" />
+                        </ImageButton.Margin>
+                    </ImageButton>
+                    <CollectionView Grid.Row="1"
+                                    Margin="0"
+                                    ItemSizingStrategy="MeasureFirstItem"
+                                    ItemsSource="{Binding Config.Stickers}"
+                                    VerticalOptions="FillAndExpand"
+                                    BackgroundColor="Transparent">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical"
+                                             Span="2"
+                                             HorizontalItemSpacing="0"
+                                             VerticalItemSpacing="0" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid VerticalOptions="Center"
+                                      HorizontalOptions="Center"
+                                      Margin="0"
+                                      BackgroundColor="Transparent"
+                                      Padding="0"
+                                      RowSpacing="0"
+                                      ColumnSpacing="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Row="0"
+                                           Source="{Binding .}"
+                                           Aspect="AspectFit"
+                                           VerticalOptions="CenterAndExpand"
+                                           HorizontalOptions="CenterAndExpand"
+                                           Margin="5"
+                                           HeightRequest="100"
+                                           WidthRequest="100" />
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Path=BindingContext.SelectItemCommand, Source={x:Reference ThisEditorPage}}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+                <!--删除-->
+                <ImageButton Source="{res:ImageResource clear}"
+                             Command="{Binding EditFinishCommand}"
+                             IsVisible="{Binding ButtonsVisible}"
+                             IsEnabled="{Binding ButtonsVisible}"
+                             VerticalOptions="Start"
+                             HorizontalOptions="Start">
+                    <ImageButton.Margin>
+                        <OnPlatform x:TypeArguments="Thickness"
+                                    iOS="10,32,0,0"
+                                    Android="10,20,0,0" />
+                    </ImageButton.Margin>
+                </ImageButton>
+                <StackLayout VerticalOptions="Start"
+                             Orientation="Vertical"
+                             IsVisible="{Binding ButtonsVisible}"
+                             IsEnabled="{Binding ButtonsVisible}"
+                             HorizontalOptions="End">
+                    <StackLayout.Margin>
+                        <OnPlatform x:TypeArguments="Thickness"
+                                    iOS="0,32,10,0"
+                                    Android="0,20,10,0" />
+                    </StackLayout.Margin>
+                    <!--裁切-->
+                    <ImageButton Source="{res:ImageResource crop_rotate}"
+                                 Command="{Binding SelectItemCommand}"
+                                 CommandParameter="{x:Static editorpage:ImageEditType.CropRotate}"
+                                 HorizontalOptions="End" />
+                    <!--字体-->
+                    <ImageButton Source="{res:ImageResource format_shapes}"
+                                 IsVisible="{Binding Config.CanAddText}"
+                                 Command="{Binding SelectItemCommand}"
+                                 CommandParameter="{x:Static editorpage:ImageEditType.Text}"
+                                 HorizontalOptions="End" />
+                    <!--划线-->
+                    <ImageButton Source="{res:ImageResource stickers}"
+                                 IsVisible="{Binding Config.CanAddStickers}"
+                                 Command="{Binding SelectItemCommand}"
+                                 CommandParameter="{x:Static editorpage:ImageEditType.Stickers}"
+                                 HorizontalOptions="End" />
+                    <!--画笔-->
+                    <ImageButton Source="{res:ImageResource gesture}"
+                                 IsVisible="{Binding Config.CanFingerPaint}"
+                                 Command="{Binding SelectItemCommand}"
+                                 CommandParameter="{x:Static editorpage:ImageEditType.Paint}"
+                                 HorizontalOptions="End" />
+                </StackLayout>
+                <!--保存照片-->
+                <!--<StackLayout VerticalOptions="End"
+                             Orientation="Vertical"
+                             IsVisible="{Binding ButtonsVisible}"
+                             IsEnabled="{Binding ButtonsVisible}"
+                             HorizontalOptions="Start"
+                             Margin="0"
+                             Padding="0"
+                             Spacing="0">
+                 
+                    <ImageButton Source="{res:ImageResource save}"
+                                 Command="{Binding SaveCommand}"
+                                 IsVisible="{Binding Config.CanSaveImage}"
+                                 CommandParameter="Save"
+                                 VerticalOptions="End"
+                                 HorizontalOptions="Start"
+                                 Margin="0"
+                                 Padding="0"></ImageButton>
+                    <StackLayout.Margin>
+                        <OnPlatform x:TypeArguments="Thickness"
+                                    iOS="20,0,0,30"
+                                    Android="20,0,0,20" />
+                    </StackLayout.Margin>
+                </StackLayout>-->
+                <!--保存发布-->
+                <Button Command="{Binding EditFinishCommand}"
+                        Text="保存"
+                        HorizontalOptions="EndAndExpand"
+                        VerticalOptions="End"
+                        IsVisible="{Binding ButtonsVisible}"
+                        IsEnabled="{Binding ButtonsVisible}">
+                    <Button.Margin>
+                        <OnPlatform x:TypeArguments="Thickness"
+                                    iOS="0,0,20,30"
+                                    Android="0,0,20,20" />
+                    </Button.Margin>
+                </Button>
+                <Image Source="{res:ImageResource trash}"
+                       IsVisible="{Binding TrashVisible}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       WidthRequest="{x:Static helper:SkiaHelper.trashSize}"
+                       HeightRequest="{x:Static helper:SkiaHelper.trashSize}"
+                       Margin="{x:Static helper:SkiaHelper.trashMargin}" />
+                <Image Source="{res:ImageResource trash_open}"
+                       IsVisible="{Binding TrashBigVisible}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       WidthRequest="{x:Static helper:SkiaHelper.trashBigSize}"
+                       HeightRequest="{x:Static helper:SkiaHelper.trashBigSize}"
+                       Margin="{x:Static helper:SkiaHelper.trashMargin}" />
+            </Grid>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

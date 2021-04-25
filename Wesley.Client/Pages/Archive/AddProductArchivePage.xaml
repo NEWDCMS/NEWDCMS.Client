@@ -1,0 +1,551 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                                 xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                                 xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                                 xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                                 xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                                 prism:ViewModelLocator.AutowireViewModel="True"
+                                 x:Class="Wesley.Client.Pages.Common.AddProductArchivePage"
+                                 x:Name="CurrentContentView"
+                                 Title="{Binding Title}"
+                                 xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                                 x:TypeArguments="vms:AddProductArchivePageViewModel">
+    <ScrollView>
+        <Grid VerticalOptions="Start"
+              Style="{StaticResource GGrid}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!--0-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="0"
+                         Grid.Column="0"
+                         BackgroundColor="#eeeeee">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         WidthRequest="4"
+                         BackgroundColor="{StaticResource PrimaryColor}" />
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="基本信息"
+                       FontSize="{StaticResource FT14}"
+                       Margin="{StaticResource ML10}"
+                        />
+            </StackLayout>
+            <!--1 商品名称-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Margin="10,0,10,0"
+                         Grid.Row="1"
+                         Grid.Column="0">
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="名称："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry HorizontalOptions="FillAndExpand"
+                                    Text="{Binding Product.Name,Mode=TwoWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}" />
+            </StackLayout>
+            <!--2-->
+            <BoxView Grid.Row="2"
+                     Style="{StaticResource SeparatorGrid}"
+                     Margin="10,0,10,0" />
+            <!--3 商品注记名-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Margin="10,0,10,0"
+                         Grid.Row="3"
+                         Grid.Column="0">
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="注记："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry HorizontalOptions="FillAndExpand"
+                                    Text="{Binding Product.MnemonicCode,Mode=TwoWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}" />
+            </StackLayout>
+            <!--4-->
+            <BoxView Grid.Row="4"
+                     Style="{StaticResource SeparatorGrid}"
+                     Margin="10,0,10,0" />
+            <!--5 编号-->
+            <StackLayout Grid.Row="5"
+                         Grid.Column="0"
+                         Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Margin="10,0,10,0">
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="编号："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry HorizontalOptions="FillAndExpand"
+                                    Text="{Binding Product.ProductCode,Mode=OneWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}" />
+            </StackLayout>
+            <!--6-->
+            <BoxView Grid.Row="6"
+                     Style="{StaticResource SeparatorGrid}"
+                     Margin="10,0,10,0" />
+            <!--7 类别-->
+            <StackLayout Grid.Row="7"
+                         Grid.Column="0"
+                         Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Margin="10,0,10,0">
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="类别："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry x:Name="Product_CategoryName"
+                                    HorizontalOptions="FillAndExpand"
+                                    Text="{Binding Product.CategoryName,Mode=TwoWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.CatagorySelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource DownArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CatagorySelected}"
+                                              CommandParameter="{Binding Product.Id}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <!--8-->
+            <BoxView Grid.Row="8"
+                     Style="{StaticResource SeparatorGrid}"
+                     Margin="10,0,10,0" />
+            <!--9 品牌-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Margin="10,0,10,0"
+                         Grid.Row="9"
+                         Grid.Column="0">
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="品牌："
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry x:Name="Product_BrandName"
+                                    HorizontalOptions="FillAndExpand"
+                                    Text="{Binding Product.BrandName,Mode=TwoWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.BrandSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource DownArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding BrandSelected}"
+                                              CommandParameter="{Binding Product.Id}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <!--10 小单位-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="10"
+                         Grid.Column="0"
+                         BackgroundColor="#eeeeee">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         WidthRequest="4"
+                         BackgroundColor="{StaticResource PrimaryColor}" />
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="小单位"
+                       FontSize="{StaticResource FT14}"
+                       Margin="{StaticResource ML10}"
+                        />
+            </StackLayout>
+            <!--11-->
+            <Grid  Grid.Row="11"
+                   Grid.Column="0"
+                   Style="{StaticResource GGrid}"
+                   Margin="{StaticResource PLR10}"
+                   RowDefinitions="40,.7,40,.7,40"
+                   ColumnDefinitions="*,*,*,*,*,*,*">
+                <!--单位-->
+                <custom:CustomEntry x:Name="SmallProductPrices_UnitName"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Keyboard="Numeric"
+                                    Placeholder="选择"
+                                    Text="{Binding Product.SmallProductPrices.UnitName}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.SmallUnitSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Grid.Row="0"
+                       Grid.Column="1"
+                       Style="{StaticResource DownArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.SmallUnitSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="{Binding Id}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <custom:CustomEntry Grid.Row="0"
+                                    Grid.Column="5"
+                                    x:Name="SmallProductPrices_Price"
+                                    Keyboard="Numeric"
+                                    Placeholder="单价"
+                                    Text="{Binding Product.SmallProductPrices.TradePrice, Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}"
+                                    TextChanged="CalcPrice_TextChanged" />
+                <Label  Grid.Row="0"
+                        Grid.Column="6"
+                        Text="{Binding Product.SmallProductPrices.UnitName,StringFormat='元/{0}'}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"
+                        FontSize="{StaticResource FT14}"></Label>
+                <BoxView  Grid.Row="1"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="7"
+                          VerticalOptions="Start"
+                          Style="{StaticResource SeparatorGrid}" />
+                <!--进价-->
+                <StackLayout Grid.Row="2"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="7"
+                             Orientation="Horizontal"
+                             HorizontalOptions="FillAndExpand">
+                    <custom:CustomEntry x:Name="SmallProductPrices_PurchasePrice"
+                                        Placeholder="进价"
+                                        Keyboard="Numeric"
+                                        Text="{Binding Product.SmallProductPrices.PurchasePrice, Mode=TwoWay}"
+                                        HorizontalOptions="FillAndExpand"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource FormEntry}"
+                                        TextChanged="CalcPrice_TextChanged" />
+                </StackLayout>
+                <BoxView Grid.Row="3"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="7"
+                         VerticalOptions="Start"
+                         Style="{StaticResource SeparatorGrid}" />
+                <!--条码-->
+                <StackLayout Grid.Row="4"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="7"
+                             Orientation="Horizontal"
+                             HorizontalOptions="FillAndExpand">
+                    <custom:CustomEntry x:Name="SmallPriceUnit_Price"
+                                        Placeholder="条码"
+                                        Keyboard="Numeric"
+                                        Text="{Binding Product.SmallBarCode,Mode=TwoWay}"
+                                        HorizontalOptions="FillAndExpand"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource FormEntry}" />
+                    <Label Text="&#xf029;"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="16">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Path=BindingContext.ScanCode,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="{Binding Id}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+            </Grid>
+            <!--12 中单位-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="12"
+                         Grid.Column="0"
+                         BackgroundColor="#eeeeee">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         WidthRequest="4"
+                         BackgroundColor="{StaticResource PrimaryColor}" />
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="中单位"
+                       FontSize="{StaticResource FT14}"
+                       Margin="{StaticResource ML10}"
+                        />
+            </StackLayout>
+            <!--13-->
+            <Grid Grid.Row="13"
+                  Grid.Column="0"
+                  Style="{StaticResource GGrid}"
+                  Margin="{StaticResource PLR10}"
+                  RowDefinitions="40,.7,40,.7,40"
+                  ColumnDefinitions="*,*,*,*,*,*,*">
+                <!--单位-->
+                <custom:CustomEntry x:Name="StrokeProductPrices_UnitName"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Placeholder="选择"
+                                    Text="{Binding Product.StrokeProductPrices.UnitName}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.StrokeUnitSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Grid.Row="0"
+                       Grid.Column="1"
+                       Style="{StaticResource DownArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.StrokeUnitSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="{Binding Id}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Row="0"
+                       Grid.Column="2"
+                       Text="="
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="{StaticResource FT14}"></Label>
+                <custom:CustomEntry x:Name="Product_StrokeQuantity"
+                                    Grid.Row="0"
+                                    Grid.Column="3"
+                                    Placeholder="换算量"
+                                    Keyboard="Numeric"
+                                    Text="{Binding Product.StrokeQuantity,Converter={StaticResource NullableIntConverter},Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}"
+                                    TextChanged="CalcPrice_TextChanged" />
+                <Label Grid.Row="0"
+                       Grid.Column="4"
+                       Text="{Binding Product.SmallProductPrices.UnitName}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="{StaticResource FT14}"></Label>
+                <custom:CustomEntry x:Name="StrokeProductPrices_Price"
+                                    Grid.Row="0"
+                                    Grid.Column="5"
+                                    Placeholder="单价"
+                                    Keyboard="Numeric"
+                                    Text="{Binding Product.StrokeProductPrices.TradePrice,Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}"
+                                    TextChanged="CalcPrice_TextChanged" />
+                <Label Grid.Row="0"
+                       Grid.Column="6"
+                       Text="{Binding Product.StrokeProductPrices.UnitName,StringFormat='元/{0}'}"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       FontSize="{StaticResource FT14}"></Label>
+                <BoxView VerticalOptions="Start"
+                         Grid.Row="1"
+                         Grid.ColumnSpan="7"
+                         Style="{StaticResource SeparatorGrid}" />
+                <!--进价-->
+                <StackLayout Grid.Row="2"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="7"
+                             Orientation="Horizontal"
+                             HorizontalOptions="FillAndExpand">
+                    <custom:CustomEntry x:Name="StrokeProductPrices_PurchasePrice"
+                                        Placeholder="进价"
+                                        Keyboard="Numeric"
+                                        Text="{Binding Product.StrokeProductPrices.PurchasePrice, Mode=TwoWay}"
+                                        HorizontalOptions="FillAndExpand"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource FormEntry}"
+                                        TextChanged="CalcPrice_TextChanged" />
+                </StackLayout>
+                <BoxView VerticalOptions="Start"
+                         Grid.Row="3"
+                         Grid.ColumnSpan="7"
+                         Style="{StaticResource SeparatorGrid}" />
+                <!--条码-->
+                <StackLayout Grid.Row="4"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="7"
+                             Orientation="Horizontal"
+                             HorizontalOptions="FillAndExpand">
+                    <custom:CustomEntry Placeholder="条码"
+                                        Keyboard="Numeric"
+                                        Text="{Binding Product.StrokeBarCode,Mode=TwoWay}"
+                                        HorizontalOptions="FillAndExpand"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource FormEntry}" />
+                    <Label Text="&#xf029;"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="16">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Path=BindingContext.ScanCode,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="{Binding Id}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+            </Grid>
+            <!--14 大单位-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="14"
+                         Grid.Column="0"
+                         BackgroundColor="#eeeeee">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         WidthRequest="4"
+                         BackgroundColor="{StaticResource PrimaryColor}" />
+                <Label VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Text="大单位"
+                       FontSize="{StaticResource FT14}"
+                       Margin="{StaticResource ML10}"
+                        />
+            </StackLayout>
+            <!--15-->
+            <Grid Grid.Row="15"
+                  Grid.Column="0"
+                  Style="{StaticResource GGrid}"
+                  Margin="{StaticResource PLR10}"
+                  RowDefinitions="40,.7,40,.7,40"
+                  ColumnDefinitions="*,*,*,*,*,*,*">
+                <!--单位-->
+                <custom:CustomEntry x:Name="BigProductPrices_UnitName"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Placeholder="选择"
+                                    Text="{Binding Product.BigProductPrices.UnitName}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.BigUnitSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Grid.Row="0"
+                       Grid.Column="1"
+                       Style="{StaticResource DownArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.BigUnitSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="{Binding Id}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Row="0"
+                       Grid.Column="2"
+                       Text="="
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="{StaticResource FT14}"></Label>
+                <custom:CustomEntry x:Name="Product_BigQuantity"
+                                    Grid.Row="0"
+                                    Grid.Column="3"
+                                    Placeholder="换算量"
+                                    Keyboard="Numeric"
+                                    Text="{Binding Product.BigQuantity,Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}"
+                                    TextChanged="CalcPrice_TextChanged" />
+                <Label Grid.Row="0"
+                       Grid.Column="4"
+                       Text="{Binding Product.SmallProductPrices.UnitName}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="{StaticResource FT14}"></Label>
+                <custom:CustomEntry x:Name="BigProductPrices_Price"
+                                    Grid.Row="0"
+                                    Grid.Column="5"
+                                    Placeholder="单价"
+                                    Keyboard="Numeric"
+                                    Text="{Binding Product.BigProductPrices.TradePrice, Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource FormEntry}"
+                                    TextChanged="CalcPrice_TextChanged" />
+                <Label Grid.Row="0"
+                       Grid.Column="6"
+                       Text="{Binding Product.BigProductPrices.UnitName,StringFormat='元/{0}'}"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       FontSize="{StaticResource FT14}"></Label>
+                <BoxView VerticalOptions="Start"
+                         Grid.Row="1"
+                         Grid.ColumnSpan="7"
+                         Style="{StaticResource SeparatorGrid}" />
+                <!--进价-->
+                <StackLayout Grid.Row="2"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="7"
+                             Orientation="Horizontal"
+                             HorizontalOptions="FillAndExpand">
+                    <custom:CustomEntry x:Name="BigProductPrices_PurchasePrice"
+                                        Placeholder="进价"
+                                        Keyboard="Numeric"
+                                        Text="{Binding Product.BigProductPrices.PurchasePrice, Mode=TwoWay}"
+                                        HorizontalOptions="FillAndExpand"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource FormEntry}"
+                                        TextChanged="CalcPrice_TextChanged" />
+                </StackLayout>
+                <BoxView VerticalOptions="Start"
+                         Grid.Row="3"
+                         Grid.ColumnSpan="7"
+                         Style="{StaticResource SeparatorGrid}" />
+                <!--条码-->
+                <StackLayout Grid.Row="4"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="7"
+                             Orientation="Horizontal"
+                             HorizontalOptions="FillAndExpand">
+                    <custom:CustomEntry Placeholder="条码"
+                                        Keyboard="Numeric"
+                                        Text="{Binding Product.BigBarCode,Mode=TwoWay}"
+                                        HorizontalOptions="FillAndExpand"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource FormEntry}" />
+                    <Label Text="&#xf029;"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="16">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer
+                                    Command="{Binding Path=BindingContext.ScanCode,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="{Binding Id}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+            </Grid>
+        </Grid>
+    </ScrollView>
+</pages:BaseContentPage>

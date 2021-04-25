@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+        x:Class="Wesley.Client.CustomViews.Views.PopMediaSelectView">
+    <StackLayout Margin="20" HorizontalOptions="Center" VerticalOptions="Center" BackgroundColor="Transparent"
+            Spacing="0">
+        <yummy:PancakeView CornerRadius="10" BackgroundColor="White">
+                        <StackLayout Spacing="0">
+                            <Grid Style="{StaticResource GGrid}" HorizontalOptions="FillAndExpand" BackgroundColor="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".5" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="15,0,0,0" Text="{Binding Title}" FontSize="{StaticResource FT14}"
+                            TextColor="{StaticResource PrimaryColor}" HorizontalOptions="Start"
+                            VerticalOptions="CenterAndExpand" FontAttributes="Bold" />
+                    <BoxView Grid.Row="1" Grid.Column="0" Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+                <!--begin content-->
+                <StackLayout Orientation="Vertical" Spacing="0">
+                    <!--从相册选择-->
+                    <Frame HasShadow="False" BorderColor="Transparent" CornerRadius="0"
+                            HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="PickMediaOptions_Tapped" />
+                        </Frame.GestureRecognizers>
+                        <Grid Style="{StaticResource GGrid}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ContentView Grid.Column="0" VerticalOptions="CenterAndExpand"
+                                    HorizontalOptions="FillAndExpand" Padding="{StaticResource PL10}">
+                                <Label Text="&#xf03e;" FontFamily="FAS" VerticalOptions="CenterAndExpand"
+                                        HorizontalOptions="Center" TextColor="{StaticResource PrimaryDarkColor}"
+                                        FontSize="20" />
+                            </ContentView>
+                            <ContentView Grid.Column="1" VerticalOptions="CenterAndExpand"
+                                    HorizontalOptions="FillAndExpand" Padding="{StaticResource PL10}">
+                                <Label Text="从相册选择" TextColor="{StaticResource DividerColor}"
+                                        VerticalOptions="CenterAndExpand" Style="{StaticResource H4-Regular}" />
+                            </ContentView>
+                            <ContentView Grid.Column="2" VerticalOptions="CenterAndExpand"
+                                    HorizontalOptions="FillAndExpand" Padding="0,0,10,0">
+                                <Label Text="{StaticResource FontAwesomeRight}" FontFamily="FAS"
+                                        VerticalOptions="Center" HorizontalOptions="End"
+                                        TextColor="{StaticResource PrimaryDarkColor}" FontSize="20" />
+                            </ContentView>
+                        </Grid>
+                    </Frame>
+                    <BoxView Style="{StaticResource SeparatorGrid}" />
+                    <!--拍照-->
+                    <Frame HasShadow="False" BorderColor="Transparent" CornerRadius="0"
+                            HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="StoreCameraMediaOptions_Tapped" />
+                        </Frame.GestureRecognizers>
+                        <Grid Style="{StaticResource GGrid}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ContentView Grid.Column="0" VerticalOptions="CenterAndExpand"
+                                    HorizontalOptions="FillAndExpand" Padding="{StaticResource PL10}">
+                                <Label Text="&#xf030;" FontFamily="FAS" VerticalOptions="CenterAndExpand"
+                                        HorizontalOptions="Center" TextColor="{StaticResource PrimaryDarkColor}"
+                                        FontSize="20" />
+                            </ContentView>
+                            <ContentView Grid.Column="1" VerticalOptions="CenterAndExpand"
+                                    HorizontalOptions="FillAndExpand" Padding="{StaticResource PL10}">
+                                <Label Text="拍照" TextColor="{StaticResource DividerColor}"
+                                        VerticalOptions="CenterAndExpand" Style="{StaticResource H4-Regular}" />
+                            </ContentView>
+                            <ContentView Grid.Column="2" VerticalOptions="CenterAndExpand"
+                                    HorizontalOptions="FillAndExpand" Padding="0,0,10,0">
+                                <Label Text="{StaticResource FontAwesomeRight}" FontFamily="FAS"
+                                        VerticalOptions="Center" HorizontalOptions="End"
+                                        TextColor="{StaticResource PrimaryDarkColor}" FontSize="20" />
+                            </ContentView>
+                        </Grid>
+                    </Frame>
+                </StackLayout>
+                <!--end content-->
+                <!--footer-->
+                <Grid Style="{StaticResource GGrid}" VerticalOptions="End" BackgroundColor="White">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".5" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width=".5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource SeparatorGrid}" />
+                    <!--取消-->
+                    <Button Grid.Row="1" Grid.Column="0" x:Name="CalcleBtn" Text="取消" FontSize="{StaticResource FT14}"
+                            CornerRadius="0" VerticalOptions="Center" TextColor="{StaticResource PrimaryDarkColor}"
+                            BackgroundColor="#eeeeee" Clicked="Cancel_Clicked" />
+                    <BoxView Grid.Row="1" Grid.Column="1" Style="{StaticResource SeparatorVGrid}" />
+                    <!--确定-->
+                    <Button Grid.Row="1" Grid.Column="2" x:Name="ConfirmBtn" Text="确定" CornerRadius="0"
+                            FontSize="{StaticResource FT14}" VerticalOptions="Center"
+                            TextColor="{StaticResource PrimaryDarkColor}" BackgroundColor="#eeeeee"
+                            Clicked="Confirm_Clicked" />
+                </Grid>
+            </StackLayout>
+        </yummy:PancakeView>
+    </StackLayout>
+</ContentView>

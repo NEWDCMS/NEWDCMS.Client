@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:loading="clr-namespace:Wesley.Client.CustomViews.Views;assembly=Wesley.Client"
+                 xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                 xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                 xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                 xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                 prism:ViewModelLocator.AutowireViewModel="True"
+                 x:Class="Wesley.Client.Pages.PopCheckBoxView" >
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="SeparatorVGrid"
+                   TargetType="BoxView">
+                <Setter Property="WidthRequest"
+                        Value="0.7" />
+                <Setter Property="BackgroundColor"
+                        Value="#ebecef" />
+                <Setter Property="VerticalOptions"
+                        Value="FillAndExpand" />
+                <Setter Property="Opacity"
+                        Value="0.5" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <StackLayout 
+                 Margin="20"
+                 HorizontalOptions="Center"
+                 VerticalOptions="Center"
+                 BackgroundColor="Transparent">
+
+        <yummy:PancakeView CornerRadius="10"
+                           BackgroundColor="White">
+            <StackLayout Spacing="0">
+
+                <!--header-->
+                <Grid Style="{StaticResource GGrid}" HorizontalOptions="FillAndExpand"
+                      BackgroundColor="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".5" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0"
+                           Margin="15,0,0,0"
+                           Text="{Binding Title}"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}"
+                           TextColor="{StaticResource PrimaryColor}"
+                           HorizontalOptions="Start"
+                           VerticalOptions="CenterAndExpand"></Label>
+                    <BoxView   Grid.Row="1"
+                            Grid.Column="0"
+                            Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+
+                <!--body-->
+                <CollectionView ItemsSource="{Binding Options,Mode=TwoWay}"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                SelectionMode="Single"
+                                x:Name="RepeaterOptions"
+                                HeightRequest="300">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="36.3" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectedCommand}"
+                                                          CommandParameter="{Binding Id}" />
+                                </Grid.GestureRecognizers>
+                                <StackLayout Orientation="Horizontal"
+                                             Padding="{StaticResource PL10}">
+                                    <CheckBox IsChecked="{Binding Selected,Mode=TwoWay}" />
+                                    <Label  Text="{Binding Column}"
+                                            IsVisible="{Binding ColumnEnable}"
+                                            
+                                            VerticalOptions="CenterAndExpand"
+                                            HorizontalOptions="Start" />
+                                    <Label  Text="{Binding Column1}"
+                                            IsVisible="{Binding Column1Enable}"
+                                            Margin="0,5,15,0"
+                                            VerticalOptions="CenterAndExpand"
+                                            HorizontalOptions="EndAndExpand" />
+
+                                </StackLayout>
+
+                                <BoxView Grid.Row="1"
+                                         Style="{StaticResource SeparatorGrid}"
+                                          />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <loading:Loading VerticalOptions="CenterAndExpand"
+                                                    BindingContext="{Binding .}" />
+                        <!--<StackLayout VerticalOptions="CenterAndExpand"
+                                     HorizontalOptions="CenterAndExpand">
+                            <ffimageloading:CachedImage x:Name="loadingImage"
+                                                        HorizontalOptions="Center"
+                                                        VerticalOptions="Center"
+                                                        WidthRequest="100"
+                                                        HeightRequest="100"
+                                                        DownsampleToViewSize="true"
+                                                        Source="loading.gif"
+                                                        IsVisible="{Binding IsNull}" />
+                            <Label Text="努力加载中..."
+                                   FontSize="{StaticResource FT14}"
+                                   TextColor="{StaticResource SecondaryAccentColor}"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsNull}"
+                                                 Value="False">
+                                        <Setter Property="Text"
+                                                Value="前不见古人，后不见来者！" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsNull}"
+                                                 Value="True">
+                                        <Setter Property="Text"
+                                                Value="努力加载中..." />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </StackLayout>-->
+                    </CollectionView.EmptyView>
+                </CollectionView>
+
+
+                <!--footer-->
+                <Grid HorizontalOptions="FillAndExpand" Style="{StaticResource GGrid}" BackgroundColor="White">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".5" />
+                        <RowDefinition Height="45" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width=".5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView   Grid.Row="0"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="3"
+                               Style="{StaticResource SeparatorGrid}" />
+                    <!--取消-->
+                    <StackLayout Grid.Row="1"
+                                 Grid.Column="0"
+                                 HorizontalOptions="FillAndExpand"
+                                 VerticalOptions="Center">
+                        <Button x:Name="CalcleBtn"
+                                Text="取消"
+                                FontSize="{StaticResource FT14}"
+                                CornerRadius="0"
+                                VerticalOptions="Center"
+                                TextColor="{StaticResource PrimaryDarkColor}"
+                                BackgroundColor="#eeeeee"
+                                Clicked="Cancel_Clicked" />
+                    </StackLayout>
+                    <BoxView   Grid.Row="1"
+                               Grid.Column="1"
+                               Style="{StaticResource SeparatorVGrid}" />
+                    <!--确定-->
+                    <StackLayout Grid.Row="1"
+                                 Grid.Column="2"
+                                 HorizontalOptions="FillAndExpand"
+                                 VerticalOptions="Center">
+                        <Button x:Name="ConfirmBtn"
+                                Text="确定"
+                                CornerRadius="0"
+                                FontSize="{StaticResource FT14}"
+                                VerticalOptions="Center"
+                                TextColor="{StaticResource PrimaryDarkColor}"
+                                BackgroundColor="#eeeeee"
+                                Clicked="Confirm_Clicked" />
+                    </StackLayout>
+                </Grid>
+
+            </StackLayout>
+
+        </yummy:PancakeView>
+    </StackLayout>
+</pages:PopupPage>

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<assembly fullname="Acr.UserDialogs">
+		<namespace fullname="*" />
+	</assembly>
+     <assembly fullname="Wesley.Easycharts">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Wesley.Easycharts.Forms">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Wesley.SlideOverKit">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="EasyNetQ">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Newtonsoft.Json">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Prism.Plugin.Popups">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Shiny.Core">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Shiny.Notifications">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Prism.DryIoc.Forms">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Xamarin.Forms.PancakeView">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="SkiaSharp.Views.Forms">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="System.Reactive">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="ZXing.Net.Mobile.Forms">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="BaiduMapBinding">
+		<namespace fullname="*" />
+	</assembly>
+	<assembly fullname="Wesley.BitImageEditor">
+		<namespace fullname="*" />
+	</assembly>
+</linker>
+
+
+
+
+
+

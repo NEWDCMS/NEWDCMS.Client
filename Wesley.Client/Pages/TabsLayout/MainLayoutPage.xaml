@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:prism="http://prismlibrary.com"
+            prism:ViewModelLocator.AutowireViewModel="True"
+            xmlns:pages="clr-namespace:Wesley.Client.Pages"
+            xmlns:loading="clr-namespace:Wesley.Client.CustomViews.Views;assembly=Wesley.Client"
+            UnselectedTabColor="#78919f"
+            BackgroundColor="White"
+            SelectedTabColor="#53a245"
+            xmlns:lazyView="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+            x:Class="Wesley.Client.Pages.MainLayoutPage">
+
+    <lazyView:LazyContentPage Title="主页"
+                              x:TypeArguments="loading:LoadingContentView,pages:HomeView"
+                              Icon="Home.png" />
+    <lazyView:LazyContentPage Title="消息"
+                              x:TypeArguments="loading:LoadingContentView,pages:MessagesView"
+                              Icon="Message.png" />
+    <lazyView:LazyContentPage Title="全部"
+                              x:TypeArguments="loading:LoadingContentView,pages:AllfunView"
+                              Icon="Allfun.png" />
+    <lazyView:LazyContentPage Title="通知"
+                              x:TypeArguments="loading:LoadingContentView,pages:NotificationsView"
+                              Icon="Notification.png" />
+    <lazyView:LazyContentPage Title="我的"
+                              x:TypeArguments="loading:LoadingContentView,pages:ProfileView"
+                              Icon="User.png" />
+</TabbedPage>

@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       x:Class="Wesley.Client.Pages.Reporting.CustomerVisitRankPage"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:CustomerVisitRankPageViewModel">
+    <ContentPage.Resources>
+        
+        
+    </ContentPage.Resources>
+    <AbsoluteLayout>
+        <StackLayout HorizontalOptions="FillAndExpand"
+                     Spacing="0"
+                     AbsoluteLayout.LayoutBounds="0,0,1,1"
+                     AbsoluteLayout.LayoutFlags="All">
+            <!--统计图-->
+            <custom:ChartBar BindingContext="{Binding}" />
+            <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                         Command="{Binding RefreshCommand}"
+                         RefreshColor="{StaticResource PrimaryDarkColor}">
+                <ScrollView>
+                    <!--<CollectionView ItemsSource="{Binding RankSeries,Mode=TwoWay}" SelectionMode="None">
+                        <CollectionView.Header>
+                            <custom:HeaderView ControlTemplate="{StaticResource CustomerVisitRank_Template}" />
+                        </CollectionView.Header>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                              
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <custom:NullView />
+                        </CollectionView.EmptyView>
+                    </CollectionView>-->
+                    <StackLayout Spacing="0">
+                        <custom:HeaderView ControlTemplate="{StaticResource CustomerVisitRank_Template}" />
+                        <StackLayout BindableLayout.ItemsSource="{Binding RankSeries,Mode=TwoWay}"
+                                     Spacing="0">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Style="{StaticResource GGrid}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="40" />
+                                            <RowDefinition Height=".7" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <!--客户名称-->
+                                        <Label Grid.Row="0"
+                                               Grid.Column="0"
+                                               Text="{Binding BusinessUserName}"
+                                               FontSize="{StaticResource FT14}"
+                                               HorizontalOptions="FillAndExpand"
+                                               TextColor="{StaticResource PrimaryTextColor}"
+                                               VerticalOptions="CenterAndExpand"
+                                               Margin="{StaticResource ML10}"></Label>
+                                        <!--次数-->
+                                        <Label Grid.Row="0"
+                                               Grid.Column="1"
+                                               Text="{Binding VisitedCount}"
+                                               HorizontalOptions="End"
+                                               FontSize="{StaticResource FT14}"
+                                               TextColor="{StaticResource PrimaryTextColor}"
+                                               VerticalOptions="CenterAndExpand"
+                                               Margin="{StaticResource MR10}" />
+                                        <!--客户数-->
+                                        <Label Grid.Row="0"
+                                               Grid.Column="2"
+                                               Text="{Binding CustomerCount}"
+                                               HorizontalOptions="End"
+                                               FontSize="{StaticResource FT14}"
+                                               TextColor="{StaticResource PrimaryTextColor}"
+                                               VerticalOptions="CenterAndExpand"
+                                               Margin="{StaticResource MR10}" />
+                                        <BoxView Grid.Row="1"
+                                                 Grid.ColumnSpan="3"
+                                                 Style="{StaticResource SeparatorGrid}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                            <BindableLayout.EmptyView>
+                                <custom:NullView />
+                            </BindableLayout.EmptyView>
+                        </StackLayout>
+                    </StackLayout>
+                </ScrollView>
+            </RefreshView>
+        </StackLayout>
+        <!--footer-->
+        <Grid HeightRequest="{StaticResource RH45}"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Grid.ColumnSpan="3"
+                     Style="{StaticResource SeparatorGrid}" />
+            <Label Grid.Row="1"
+                   Grid.Column="0"
+                   Text="合计"
+                   HorizontalOptions="FillAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="10,5,0,5" />
+            <Label Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding SubTotal}"
+                   HorizontalOptions="EndAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5" />
+            <Label Grid.Row="1"
+                   Grid.Column="2"
+                   Text="{Binding Total}"
+                   HorizontalOptions="EndAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5,5,10,5" />
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

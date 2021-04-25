@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+                    mc:Ignorable="d"
+                    x:Class="Wesley.Client.Styles.Fonts">
+
+    <ResourceDictionary Source="Colors.xaml" />
+
+    <!--TODO: Move fonts into shared project-->
+    <x:String x:Key="FontAwesomeSearch">&#xf002;</x:String>
+    <x:String x:Key="FontAwesomeHome">&#xf015;</x:String>
+    <x:String x:Key="FontAwesomeCog">&#xf013;</x:String>
+    <x:String x:Key="FontAwesomeComment">&#xf27a;</x:String>
+    <x:String x:Key="FontAwesomeChevronLeft">&#xf053;</x:String>
+    <x:String x:Key="FontAwesomePhone">&#xf095;</x:String>
+    <x:String x:Key="FontAwesomeVideo">&#xf03d;</x:String>
+    <x:String x:Key="FontAwesomePaperClip">&#xf0c6;</x:String>
+    <x:String x:Key="FontAwesomePaperPlane">&#xf1d8;</x:String>
+    <x:String x:Key="FontAwesomeTimes">&#xf00d;</x:String>
+    <x:String x:Key="FontAwesomeReply">&#xf3e5;</x:String>
+    <x:String x:Key="FontAwesomeCircle">&#xf111;</x:String>
+    <x:String x:Key="FontAwesomeEllipsis">&#xf142;</x:String>
+    <x:String x:Key="FontAwesomeFilter">&#xf0b0;</x:String>
+    <x:String x:Key="FontAwesomeSave">&#xf0c7;</x:String>
+    <x:String x:Key="FontAwesomeRefresh">&#xf021;</x:String>
+    <x:String x:Key="FontAwesomeDown">&#xf107;</x:String>
+    <x:String x:Key="FontAwesomeRight">&#xf105;</x:String>
+    <x:String x:Key="FontAwesomeMap">&#xf041;</x:String>
+
+    <!--字体 Font Awesome-->
+    <OnPlatform x:Key="FontAwesome"
+                x:TypeArguments="x:String"
+                Android="FAS"
+                iOS="FAS" />
+    <OnPlatform x:Key="FontAwesomeBrandsRegular"
+                x:TypeArguments="x:String"
+                Android="FAR"
+                iOS="FAR" />
+    <Style x:Key="FontAwesomeLabel"
+           TargetType="{x:Type Label}">
+        <Setter Property="FontFamily"
+                Value="FAS" />
+        <Setter Property="TextColor"
+                Value="{StaticResource AccentColor}" />
+    </Style>
+    <Style x:Key="FontAwesomeBrandLabel"
+           TargetType="{x:Type Label}">
+        <Setter Property="FontFamily"
+                Value="FAB" />
+    </Style>
+
+    <!--细体-->
+
+    <Style x:Key="P-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="17" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+    <Style x:Key="H1-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="25" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+    <Style x:Key="H2-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="17" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+    <Style x:Key="H3-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="15" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+    <Style x:Key="H4-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="14" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+    <Style x:Key="H5-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="12" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+    <Style x:Key="H6-Regular"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="10" />
+        <Setter Property="FontFamily"
+                Value="FAR" />
+    </Style>
+
+    <!--#endregion-->
+
+    <!--加粗体-->
+
+    <Style x:Key="H1-Semibold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="25" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+
+    </Style>
+    <Style x:Key="H2-Semibold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="17" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+
+    </Style>
+    <Style x:Key="H3-Semibold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="15" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+
+    </Style>
+    <Style x:Key="H4-Semibold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="14" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+
+    </Style>
+    <Style x:Key="H5-Semibold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="12" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+
+    </Style>
+    <Style x:Key="H6-Semibold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="10" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+
+    </Style>
+    <!--#endregion-->
+
+    <!--粗体-->
+
+    <Style x:Key="H1-Bold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="25" />
+
+    </Style>
+    <Style x:Key="H2-Bold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="17" />
+
+    </Style>
+    <Style x:Key="H3-Bold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="15" />
+    </Style>
+    <Style x:Key="H4-Bold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="14" />
+
+    </Style>
+    <Style x:Key="H5-Bold"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="12" />
+
+    </Style>
+    <Style x:Key="H6-Bold"
+           TargetType="Label">
+        <Setter Property="FontFamily"
+                Value="FAR" />
+        <Setter Property="FontSize"
+                Value="10" />
+
+    </Style>
+    <!--#endregion-->
+
+</ResourceDictionary>

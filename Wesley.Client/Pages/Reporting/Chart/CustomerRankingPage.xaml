@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Reporting.CustomerRankingPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:CustomerRankingPageViewModel">
+    <ContentPage.Resources>
+        
+        
+    </ContentPage.Resources>
+    <AbsoluteLayout>
+        <StackLayout HorizontalOptions="FillAndExpand"
+                     Spacing="0"
+                     AbsoluteLayout.LayoutBounds="0,0,1,1"
+                     AbsoluteLayout.LayoutFlags="All" Padding="0,0,0,45">
+            <!--统计图-->
+            <custom:ChartBar BindingContext="{Binding}" />
+            <custom:HeaderView ControlTemplate="{StaticResource CustomerRanking_Template}" />
+            <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                         Command="{Binding RefreshCommand}"
+                         RefreshColor="{StaticResource PrimaryDarkColor}">
+                <ScrollView>
+                    <StackLayout BindableLayout.ItemsSource="{Binding RankSeries,Mode=TwoWay}"
+                                 Spacing="0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Style="{StaticResource GGrid}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="40" />
+                                        <RowDefinition Height="40" />
+                                        <RowDefinition Height=".7" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <!--客户名称-->
+                                    <Label Grid.Row="0"
+                                           Grid.Column="0"
+                                           Grid.RowSpan="2"
+                                           Text="{Binding TerminalName}"
+                                           FontFamily="QSB"
+                                           FontSize="{StaticResource FT14}"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="FillAndExpand"
+                                           TextColor="{StaticResource PrimaryTextColor}"
+                                           VerticalOptions="CenterAndExpand"
+                                           Margin="{StaticResource ML10}"></Label>
+                                    <!--拜访数-->
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Text="{Binding VisitSum}"
+                                           FontFamily="QSB"
+                                           HorizontalOptions="End"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource PrimaryTextColor}"
+                                           VerticalOptions="End"
+                                           Margin="{StaticResource MR10}" />
+                                    <!--净额-->
+                                    <Label Grid.Row="0"
+                                           Grid.Column="2"
+                                           Text="{Binding NetAmount,StringFormat='{0:F2}'}"
+                                           HorizontalOptions="End"
+                                           FontFamily="QSB"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource PrimaryTextColor}"
+                                           VerticalOptions="End"
+                                           Margin="{StaticResource MR10}" />
+                                    <!--额度-->
+                                    <Label Grid.Row="1"
+                                           Grid.Column="1"
+                                           Text="{Binding SaleAmount,StringFormat='销：{0:F2}'}"
+                                           HorizontalOptions="End"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Start"
+                                           Margin="{StaticResource MR10}" />
+                                    <Label Grid.Row="1"
+                                           Grid.Column="2"
+                                           Text="{Binding SaleReturnAmount,StringFormat='退：{0:F2}'}"
+                                           HorizontalOptions="End"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Start"
+                                           Margin="{StaticResource MR10}" />
+                                    <BoxView HeightRequest=".7"
+                                             Grid.Row="2"
+                                             Grid.ColumnSpan="3"
+                                             BackgroundColor="{StaticResource SpliterLineColor}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                        <BindableLayout.EmptyView>
+                            <custom:NullView />
+                        </BindableLayout.EmptyView>
+                    </StackLayout>
+                </ScrollView>
+            </RefreshView>
+        </StackLayout>
+        <!--footer-->
+        <Grid HeightRequest="{StaticResource RH45}"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Grid.ColumnSpan="3"
+                     Style="{StaticResource SeparatorGrid}" />
+            <Label Grid.Row="1"
+                   Grid.ColumnSpan="3"
+                   Text="合计（业务员全部）"
+                   HorizontalOptions="FillAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="10,5,0,5" />
+            <Label Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding SubTotal,StringFormat='{0:F2}'}"
+                   HorizontalOptions="EndAndExpand"
+                   FontFamily="QSB"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5" />
+            <Label Grid.Row="1"
+                   Grid.Column="2"
+                   Text="{Binding Total,StringFormat='{0:F2}'}"
+                   HorizontalOptions="EndAndExpand"
+                   FontFamily="QSB"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5,5,10,5" />
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.AddCostContractProductPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AddCostContractProductPageViewModel">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="TableToolButtonStyle"
+                   TargetType="Button">
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="FontSize"
+                        Value="12" />
+                <Setter Property="BackgroundColor"
+                        Value="#ffffff" />
+                <Setter Property="BorderColor"
+                        Value="{StaticResource DividerColor}" />
+                <Setter Property="BorderRadius"
+                        Value="50" />
+                <Setter Property="CornerRadius"
+                        Value="50" />
+                <Setter Property="BorderWidth"
+                        Value="0.7" />
+                <Setter Property="HeightRequest"
+                        Value="25" />
+                <Setter Property="WidthRequest"
+                        Value="50" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="HorizontalOptions"
+                        Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <AbsoluteLayout>
+        <StackLayout  VerticalOptions="Start"
+                      Spacing="0"
+                      Margin="0"
+                      AbsoluteLayout.LayoutBounds="0,0,1,1"
+                      AbsoluteLayout.LayoutFlags="All">
+            <StackLayout Orientation="Vertical"
+                         Spacing="0">
+                <StackLayout Orientation="Horizontal"
+                             VerticalOptions="Start"
+                             Padding="{StaticResource PLR10}"
+                             Spacing="0"
+                             HeightRequest="{StaticResource RH45}"
+                             BackgroundColor="#eeeeee">
+                    <Label Text="{Binding Product.ProductName}"
+                           HorizontalOptions="StartAndExpand"
+                           VerticalOptions="Center"></Label>
+                </StackLayout>
+                <Grid Style="{StaticResource GGrid}"
+                      Padding="{StaticResource PLR10}"
+                      VerticalOptions="Start"
+                      HorizontalOptions="FillAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".7" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height=".7" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!--//////////大单位价格///////////-->
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="0"
+                                 Spacing="0"
+                                 Orientation="Horizontal"
+                                 HorizontalOptions="FillAndExpand">
+                        <Label HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="5,0,5,0"
+                               Text="大单位数量:"
+                               FontSize="{StaticResource FT14}" />
+                        <custom:CustomEntry Placeholder="输入数量..."
+                                            Keyboard="Numeric"
+                                            Text="{Binding Product.BigPriceUnit.Quantity,Converter={StaticResource NullableIntConverter},Mode=TwoWay}"
+                                            HorizontalOptions="FillAndExpand"
+                                            VerticalOptions="CenterAndExpand"
+                                            Style="{StaticResource FormEntry}" />
+                    </StackLayout>
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="1"
+                                 Padding="0,0,10,0"
+                                 Spacing="0"
+                                 Orientation="Horizontal">
+                        <Label Text="{Binding Product.BigPriceUnit.UnitName}"
+                               HorizontalOptions="Start"
+                               FontSize="{StaticResource FT14}"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0" />
+                        <Label HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="5,0,5,0"
+                               Text="备注:"
+                               FontSize="{StaticResource FT14}" />
+                        <custom:CustomEntry Placeholder="在这里备注..."
+                                            Text="{Binding Product.BigPriceUnit.Remark,Mode=TwoWay}"
+                                            HorizontalOptions="FillAndExpand"
+                                            VerticalOptions="CenterAndExpand"
+                                            Style="{StaticResource FormEntry}" />
+                    </StackLayout>
+                    <BoxView  Grid.Row="1"
+                              VerticalOptions="Start"
+                              Grid.ColumnSpan="2"
+                              Style="{StaticResource SeparatorGrid}"
+                              Margin="0" />
+                    <!--//////////小单位价格///////////-->
+                    <StackLayout Grid.Row="2"
+                                 Grid.Column="0"
+                                 Spacing="0"
+                                 Orientation="Horizontal"
+                                 HorizontalOptions="FillAndExpand">
+                        <Label HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="5,0,5,0"
+                               Text="小单位数量:"
+                               FontSize="{StaticResource FT14}" />
+                        <custom:CustomEntry Placeholder="输入数量..."
+                                            Keyboard="Numeric"
+                                            Text="{Binding Product.SmallPriceUnit.Quantity,Converter={StaticResource NullableIntConverter},Mode=TwoWay}"
+                                            HorizontalOptions="FillAndExpand"
+                                            VerticalOptions="CenterAndExpand"
+                                            Style="{StaticResource FormEntry}" />
+                    </StackLayout>
+                    <StackLayout Grid.Row="2"
+                                 Grid.Column="1"
+                                 Padding="0,0,10,0"
+                                 Spacing="0"
+                                 Orientation="Horizontal">
+                        <Label Text="{Binding Product.SmallPriceUnit.UnitName}"
+                               HorizontalOptions="Start"
+                               FontSize="{StaticResource FT14}"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0" />
+                        <Label HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="5,0,5,0"
+                               Text="备注:"
+                               FontSize="{StaticResource FT14}" />
+                        <custom:CustomEntry Placeholder="在这里备注"
+                                            Text="{Binding Product.SmallPriceUnit.Remark,Mode=TwoWay}"
+                                            HorizontalOptions="FillAndExpand"
+                                            VerticalOptions="CenterAndExpand"
+                                            Style="{StaticResource FormEntry}" />
+                    </StackLayout>
+                    <BoxView   Grid.Row="3"
+                               VerticalOptions="Start"
+                               Grid.ColumnSpan="2"
+                               Style="{StaticResource SeparatorGrid}"
+                               Margin="0" />
+                    <StackLayout Grid.Row="4"
+                                 Grid.Column="0"
+                                 Spacing="0"
+                                 Grid.ColumnSpan="2"
+                                 Orientation="Horizontal"
+                                 HorizontalOptions="FillAndExpand">
+                        <Label Text="单位换算："
+                               Margin="5,0,5,0"
+                               HorizontalOptions="Start"
+                               FontSize="{StaticResource FT14}"
+                               VerticalOptions="Center"></Label>
+                        <Label  Text="{Binding Product.UnitConversion}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"
+                                FontSize="{StaticResource FT14}"></Label>
+                    </StackLayout>
+                </Grid>
+                <BoxView VerticalOptions="Start"
+                         Style="{StaticResource SeparatorGrid}"
+                         Margin="0" />
+            </StackLayout>
+        </StackLayout>
+        <!--footer-->
+        <Grid Margin="0"
+              HeightRequest="45"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="45" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Style="{StaticResource SeparatorGrid}"
+                     Margin="0" /> 
+            <Button Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="5"
+                    Text="确定"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    Command="{Binding Path=SaveCommand}"
+                    CommandParameter="{Binding .}"></Button>
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

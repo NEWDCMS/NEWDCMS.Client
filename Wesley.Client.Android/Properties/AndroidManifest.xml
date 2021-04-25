@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:versionCode="1" android:versionName="1.0.0.0" package="com.dcms.clientv3" android:installLocation="auto">
+	<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="29" />
+	<!-- 用于开启相机 -->
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.FLASHLIGHT" />
+	<!-- 用于安装更新包 -->
+	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+	<!-- 权限用于访问GPS定位 -->
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位 -->
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<!-- 获取运营商信息，用于支持提供运营商信息相关的接口 -->
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位 -->
+	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+	<!-- 用于读取手机当前的状态 -->
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<!-- 访问网络，网络定位需要上网 -->
+	<uses-permission android:name="android.permission.INTERNET" />
+	<!-- SD卡读取权限，用户写入离线定位数据 -->
+	<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+	<uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
+	<!-- 允许使用PowerManager的 WakeLocks保持进程在休眠时从屏幕消失 -->
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<!-- 这个权限用于进行网络定位 -->
+	<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.GET_TASKS" />
+	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
+	<!-- 清理缓存 -->
+	<uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
+	<uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
+	<uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
+	<!-- 存储 -->
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
+	<!-- 写入扩展存储，向扩展卡写入数据，用于写入离线定位数据 -->
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+	<uses-permission android:name="android.permission.LOCATION_HARDWARE" />
+	<uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+	<uses-permission android:name="android.permission.READ_LOGS" />
+	<!-- 开机自启动服务，启动广播 -->
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<!-- 开启蓝牙权限 -->
+	<uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+	<uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.BIND_JOB_SERVICE" />
+	<!-- 前台服务 -->
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+	<uses-permission android:name="android.permission.BATTERY_STATS" />
+	<uses-permission android:name="android.permission.BIND_MIDI_DEVICE_SERVICE" />
+	<uses-permission android:name="android.permission.READ_CALENDAR" />
+	<!--白名单-->
+	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" android:maxSdkVersion="29" />
+	<!--application android:persistent="true"-->
+	<application android:icon="@mipmap/ic_launcher" android:persistent="true" android:label="经销商管家" android:requestLegacyExternalStorage="true" android:networkSecurityConfig="@xml/network_security_config" android:hardwareAccelerated="true" android:extractNativeLibs="true">
+		<meta-data android:name="com.baidu.lbsapi.API_KEY" android:value="x6F8UwkTFkuyXGo0AOT7QzHZUlfXjsh3" />
+		<service android:name="com.baidu.location.f" android:enabled="true" android:process=":remote" android:foregroundServiceType="location" />
+		<!--FileProvider-->
+		<provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true">
+			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+		</provider>
+		<!--workmanager-->
+		<provider android:name="androidx.work.impl.WorkManagerInitializer" android:authorities="${applicationId}.workmanager-init" android:enabled="true" android:directBootAware="false" android:exported="false" android:multiprocess="true" />
+	</application>
+</manifest>

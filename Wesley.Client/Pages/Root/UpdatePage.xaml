@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.UpdatePage"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:UpdatePageViewModel">
+    <RelativeLayout>
+        <Grid Padding="10"
+              Style="{StaticResource GGrid}"
+              VerticalOptions="Start"
+              x:Name="oneThird"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="45" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Grid.Row="0"
+                   Text="当前版本"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="Center"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource H4-Regular}" />
+            <Label Grid.Column="1"
+                   Grid.Row="0"
+                   Text="{Binding CurrentVersion,StringFormat='V{0}'}"
+                   TextColor="{StaticResource DividerColor}"
+                   VerticalOptions="Center"
+                   HorizontalOptions="End"
+                   Style="{StaticResource H4-Regular}" />
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     Grid.ColumnSpan="2"
+                     Grid.Column="0"
+                     Grid.Row="1" />
+            <Label Grid.Column="0"
+                   Grid.Row="2"
+                   Text="最新版本"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="Center"
+                   HorizontalOptions="StartAndExpand"
+                   Style="{StaticResource H4-Regular}" />
+            <Label Grid.Column="1"
+                   Grid.Row="2"
+                   Text="{Binding LatestVersion,StringFormat='V{0}'}"
+                   TextColor="{StaticResource DividerColor}"
+                   VerticalOptions="Center"
+                   HorizontalOptions="End"
+                   Style="{StaticResource H4-Regular}" />
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     Grid.Row="3" />
+            <ScrollView Grid.ColumnSpan="2"
+                        Grid.Column="0"
+                        Grid.Row="4">
+                <custom:HtmlLabel Margin="0,10"
+                                  Text="{Binding Path=CurrentUpdateInfo.UpgradeDescription}"
+                                  FontSize="{StaticResource FT14}"
+                                  TextColor="{StaticResource DividerColor}"
+                                  HorizontalOptions="FillAndExpand"
+                                  LineHeight="1.5"></custom:HtmlLabel>
+            </ScrollView>
+        </Grid>
+        <StackLayout VerticalOptions="End"
+                     BackgroundColor="White"
+                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1}"
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.90}"
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.1}">
+            <!-- Bottom Content -->
+            <Button Margin="10"
+                    CornerRadius="100"
+                    HeightRequest="45"
+                    TextColor="White"
+                    BackgroundColor="#53a245"
+                    Text="{Binding DownloadInfoText,StringFormat='download {0}'}"
+                    FontFamily="FAS"
+                    Command="{Binding Path=BindingContext.UpdateCommand,Source={x:Reference CurrentContentView}}" />
+        </StackLayout>
+    </RelativeLayout>
+</pages:BaseContentPage>

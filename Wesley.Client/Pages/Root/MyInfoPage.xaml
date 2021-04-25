@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:zxing="clr-namespace:ZXing.Net.Mobile.Forms;assembly=ZXing.Net.Mobile.Forms"
+                       xmlns:zxingcommon="clr-namespace:ZXing.Common;assembly=zxing"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.MyInfoPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:MyInfoPageViewModel">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical">
+            <!--头像-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="50">
+                <Label Text="头像"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16"
+                       Margin="{StaticResource ML10}" />
+                <StackLayout VerticalOptions="CenterAndExpand"
+                             HorizontalOptions="EndAndExpand"
+                             Padding="0,0,10,0"
+                             Orientation="Horizontal">
+                    <ffimageloading:CachedImage HorizontalOptions="Center"
+                                                VerticalOptions="Center"
+                                                LoadingPlaceholder="profile_placeholder.png"
+                                                ErrorPlaceholder="profile_placeholder.png"
+                                                DownsampleToViewSize="true"
+                                                Aspect="AspectFill"
+                                                HeightRequest="30"
+                                                WidthRequest="30"
+                                                Source="{Binding UserFace,Mode=OneWay}">
+                        <ffimageloading:CachedImage.Transformations>
+                            <fftransformations:CircleTransformation BorderSize="4"
+                                                                    BorderHexColor="#ffffff" />
+                        </ffimageloading:CachedImage.Transformations>
+                        <ffimageloading:CachedImage.GestureRecognizers>
+                            <TapGestureRecognizer
+                                    Command="{Binding Path=BindingContext.UpdateFaceCommand,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="UpdateFace" />
+                        </ffimageloading:CachedImage.GestureRecognizers>
+                    </ffimageloading:CachedImage>
+                </StackLayout>
+            </StackLayout>
+            <ContentView BackgroundColor="#eeeeee"
+                         HeightRequest="10" />
+            <!--公司名称-->
+            <Grid Style="{StaticResource GGrid}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <zxing:ZXingBarcodeImageView BarcodeFormat="CODE_93"
+                                             BarcodeValue="{Binding UserProfile.DealerNumber}"
+                                             HeightRequest="20"
+                                             Margin="0,0,0,0"
+                                             Grid.Row="0"
+                                             Grid.Column="0">
+                    <zxing:ZXingBarcodeImageView.BarcodeOptions>
+                        <zxingcommon:EncodingOptions Height="20"
+                                                     PureBarcode="True"
+                                                     GS1Format="True" />
+                    </zxing:ZXingBarcodeImageView.BarcodeOptions>
+                </zxing:ZXingBarcodeImageView>
+                <Label  Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="{StaticResource MR10}"
+                        Text="{Binding UserProfile.StoreName}"
+                        TextColor="{StaticResource DividerColor}"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="End"
+                        Style="{StaticResource H4-Regular}" />
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="1"
+                         Grid.ColumnSpan="2" />
+                <!--姓名-->
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       Text="姓名"
+                       Margin="{StaticResource ML10}"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16" />
+                <Label  Grid.Row="2"
+                        Grid.Column="1"
+                        Text="{Binding UserProfile.UserRealName}"
+                        Margin="{StaticResource MR10}"
+                        TextColor="{StaticResource DividerColor}"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="End"
+                        Style="{StaticResource H4-Regular}" />
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="3"
+                         Grid.ColumnSpan="2" />
+                <!--邮箱-->
+                <Label  Grid.Row="4"
+                        Grid.Column="0"
+                        Text="邮箱"
+                        Margin="{StaticResource ML10}"
+                        TextColor="{StaticResource PrimaryTextColor}"
+                        VerticalOptions="CenterAndExpand"
+                        
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        HorizontalOptions="StartAndExpand" />
+                <Label  Grid.Row="4"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding UserProfile.Email}"
+                        LineBreakMode="NoWrap"
+                        Margin="{StaticResource MR10}"
+                        TextColor="{StaticResource DividerColor}"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="End" />
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="5"
+                         Grid.ColumnSpan="2" />
+                <!--手机号-->
+                <Label  Grid.Row="6"
+                        Grid.Column="0"
+                        Text="手机号"
+                        Margin="{StaticResource ML10}"
+                        TextColor="{StaticResource PrimaryTextColor}"
+                        VerticalOptions="CenterAndExpand"
+                        
+                        FontAttributes="Bold"
+                        FontSize="16" />
+                <Label  Grid.Row="6"
+                        Grid.Column="1"
+                        Margin="{StaticResource MR10}"
+                        Text="{Binding UserProfile.MobileNumber}"
+                        TextColor="{StaticResource DividerColor}"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="End"
+                        Style="{StaticResource H4-Regular}" />
+            </Grid>
+            <ContentView BackgroundColor="#eeeeee"
+                         HeightRequest="10" />
+            <!--区域-->
+            <Grid Style="{StaticResource GGrid}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height=".7" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="{StaticResource ML10}"
+                       Text="经销商编码"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16" />
+                <Label Grid.Row="0"
+                       Grid.Column="1"
+                       Text="{Binding UserProfile.DealerNumber,StringFormat='NO.{0}'}"
+                       Margin="{StaticResource MR10}"
+                       TextColor="{StaticResource DividerColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="End"
+                       Style="{StaticResource H4-Regular}" />
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="1"
+                         Grid.ColumnSpan="2" />
+                <!--营销中心/编码-->
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       Text="营销中心/编码"
+                       Margin="{StaticResource ML10}"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16" />
+                <StackLayout Grid.Row="2"
+                             Grid.Column="1"
+                             Orientation="Horizontal">
+                    <Label  Text="{Binding UserProfile.MarketingCenter}"
+                            Margin="{StaticResource MR10}"
+                            TextColor="{StaticResource DividerColor}"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="EndAndExpand"
+                            Style="{StaticResource H4-Regular}" />
+                    <Label Text="{Binding UserProfile.MarketingCenterCode}"
+                           LineBreakMode="NoWrap"
+                           Margin="{StaticResource MR10}"
+                           TextColor="{StaticResource DividerColor}"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           Style="{StaticResource H4-Regular}" />
+                </StackLayout>
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="3"
+                         Grid.ColumnSpan="2" />
+                <!--大区/编码-->
+                <Label Grid.Row="4"
+                       Grid.Column="0"
+                       Text="大区/编码"
+                       Margin="{StaticResource ML10}"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16" />
+                <StackLayout Grid.Row="4"
+                             Grid.Column="1"
+                             Orientation="Horizontal">
+                    <Label Text="{Binding UserProfile.SalesArea}"
+                           LineBreakMode="NoWrap"
+                           Margin="{StaticResource MR10}"
+                           TextColor="{StaticResource DividerColor}"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="EndAndExpand"
+                           Style="{StaticResource H4-Regular}" />
+                    <Label Margin="{StaticResource MR10}"
+                           Text="{Binding UserProfile.SalesAreaCode}"
+                           TextColor="{StaticResource DividerColor}"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           Style="{StaticResource H4-Regular}" />
+                </StackLayout>
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="5"
+                         Grid.ColumnSpan="2" />
+                <!--业务部/编码-->
+                <Label Grid.Row="6"
+                       Grid.Column="0"
+                       Text="业务部/编码"
+                       Margin="{StaticResource ML10}"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16" />
+                <StackLayout Grid.Row="6"
+                             Grid.Column="1"
+                             Orientation="Horizontal">
+                    <Label  Margin="{StaticResource MR10}"
+                            Text="{Binding UserProfile.BusinessDepartment}"
+                            TextColor="{StaticResource DividerColor}"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="EndAndExpand"
+                            Style="{StaticResource H4-Regular}" />
+                    <Label  Margin="{StaticResource MR10}"
+                            TextColor="{StaticResource DividerColor}"
+                            Text="{Binding UserProfile.BusinessDepartmentCode}"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="End"
+                            Style="{StaticResource H4-Regular}" />
+                </StackLayout>
+                <BoxView Style="{StaticResource SeparatorGrid}"
+                         Grid.Row="7"
+                         Grid.ColumnSpan="2" />
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</pages:BaseContentPage>

@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:xe="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.AboutPage"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AboutPageViewModel"
+                       Title="{Binding Title}">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical"
+                     Spacing="0">
+            <StackLayout Orientation="Vertical"
+                         Padding="0,20,0,0">
+                <ffimageloading:CachedImage HorizontalOptions="Center"
+                                            VerticalOptions="Center"
+                                            LoadingPlaceholder="profile_placeholder.png"
+                                            ErrorPlaceholder="profile_placeholder.png"
+                                            DownsampleToViewSize="true"
+                                            Aspect="AspectFill"
+                                            HeightRequest="60"
+                                            WidthRequest="60"
+                                            Source="logo3.png">
+                    <ffimageloading:CachedImage.Transformations>
+                        <fftransformations:CircleTransformation BorderSize="4"
+                                                                BorderHexColor="#ffffff" />
+                    </ffimageloading:CachedImage.Transformations>
+                </ffimageloading:CachedImage>
+                <Label Text="{Binding CurrentVersion,StringFormat='当前版本：V{0}'}"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       HorizontalOptions="CenterAndExpand"
+                       Margin="0,20,0,20"
+                       Style="{StaticResource H4-Regular}" />
+            </StackLayout>
+            <ContentView BackgroundColor="#eeeeee"
+                         HeightRequest="10" />
+            <Grid xe:TouchEffect.Color="LightGray"
+                  xe:Commands.Tap="{Binding BindingContext.InvokeCommand, Source={x:Reference CurrentContentView}}"
+                  xe:Commands.TapParameter="UpdatePage"
+                  Style="{StaticResource GGrid}"
+                  Padding="0"
+                  RowSpacing="0"
+                  Margin="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="{Binding LatestVersion,StringFormat='最新版本 V{0}'}"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource H4-Regular}"
+                       Margin="{StaticResource ML10}" />
+                <Label Grid.Column="1"
+                       Text="{StaticResource FontAwesomeRight}"
+                       FontFamily="FAS"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="20"
+                       Margin="{StaticResource MR10}" />
+            </Grid>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     VerticalOptions="Start"
+                     Margin="0" />
+            <Grid xe:TouchEffect.Color="LightGray"
+                  xe:Commands.Tap="{Binding BindingContext.InvokeCommand, Source={x:Reference CurrentContentView}}"
+                  xe:Commands.TapParameter="AgreementPage">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="服务协议"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource H4-Regular}"
+                       Margin="{StaticResource ML10}" />
+                <Label Grid.Column="1"
+                       Text="{StaticResource FontAwesomeRight}"
+                       FontFamily="FAS"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="20"
+                       Margin="{StaticResource MR10}" />
+            </Grid>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     VerticalOptions="Start" />
+            <Grid xe:TouchEffect.Color="LightGray"
+                  xe:Commands.Tap="{Binding BindingContext.InvokeCommand, Source={x:Reference CurrentContentView}}"
+                  xe:Commands.TapParameter="CopyrightPage">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="版权信息"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource H4-Regular}"
+                       Margin="{StaticResource ML10}" />
+                <Label Grid.Column="1"
+                       Text="{StaticResource FontAwesomeRight}"
+                       FontFamily="FAS"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="20"
+                       Margin="{StaticResource MR10}" />
+            </Grid>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     VerticalOptions="Start" />
+            <Grid xe:TouchEffect.Color="LightGray"
+                  xe:Commands.Tap="{Binding BindingContext.InvokeCommand, Source={x:Reference CurrentContentView}}"
+                  xe:Commands.TapParameter="ClearCache">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="清理缓存"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource H4-Regular}"
+                       Margin="{StaticResource ML10}" />
+                <Label Grid.Column="1"
+                       Text="{StaticResource FontAwesomeRight}"
+                       FontFamily="FAS"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="20"
+                       Margin="{StaticResource MR10}" />
+            </Grid>
+            <ContentView BackgroundColor="#eeeeee"
+                         HeightRequest="10" />
+            <Grid xe:TouchEffect.Color="LightGray"
+                  xe:Commands.Tap="{Binding BindingContext.InvokeCommand, Source={x:Reference CurrentContentView}}"
+                  xe:Commands.TapParameter="FeedbackPage">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="问题反馈"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource H4-Regular}"
+                       Margin="{StaticResource ML10}" />
+                <Label Grid.Column="1"
+                       Text="{StaticResource FontAwesomeRight}"
+                       FontFamily="FAS"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="20"
+                       Margin="{StaticResource MR10}" />
+            </Grid>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     VerticalOptions="Start" />
+            <Grid xe:TouchEffect.Color="LightGray"
+                  xe:Commands.Tap="{Binding BindingContext.InvokeCommand, Source={x:Reference CurrentContentView}}"
+                  xe:Commands.TapParameter="QAHelper">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="帮助"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource H4-Regular}"
+                       Margin="{StaticResource ML10}" />
+                <Label Grid.Column="1"
+                       Text="{StaticResource FontAwesomeRight}"
+                       FontFamily="FAS"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="20"
+                       Margin="{StaticResource MR10}" />
+            </Grid>
+            <BoxView Style="{StaticResource SeparatorGrid}"
+                     VerticalOptions="Start" />
+        </StackLayout>
+    </ContentPage.Content>
+</pages:BaseContentPage>

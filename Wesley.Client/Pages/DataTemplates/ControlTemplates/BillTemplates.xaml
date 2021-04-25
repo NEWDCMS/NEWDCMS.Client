@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://xamarin.com/schemas/2014/forms/design" mc:Ignorable="d"
+        x:Class="Wesley.Client.Pages.DataTemplates.BillTemplates">
+    <!--调拨单-->
+    <ControlTemplate x:Key="AllocationBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" LineBreakMode="TailTruncation" FontSize="{StaticResource FT14}"
+                    HorizontalOptions="Start" VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate> 
+    <!--回库调拨单-->
+    <ControlTemplate x:Key="BackStockBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" LineBreakMode="TailTruncation" FontSize="{StaticResource FT14}"
+                    HorizontalOptions="Start" VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate>
+    <!--费用合同-->
+    <ControlTemplate x:Key="CostContractBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="单位" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate>
+    <!--费用支出-->
+    <ControlTemplate x:Key="CostExpenditureBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="费用类型" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="金额" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate>
+    <!--采购单-->
+    <ControlTemplate x:Key="PurchaseOrderBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#dddddd" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate> 
+    <!--退货单-->
+    <ControlTemplate x:Key="ReturnBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate> 
+    <!--退货订单-->
+    <ControlTemplate x:Key="ReturnOrderBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate> 
+    <!--销售单-->
+    <ControlTemplate x:Key="SaleBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" HorizontalOptions="FillAndExpand" BackgroundColor="#eeeeee"
+                Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate> 
+    <!--销售订单-->
+    <ControlTemplate x:Key="SaleOrderBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" HorizontalOptions="FillAndExpand" BackgroundColor="#eeeeee"
+                Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" FontSize="{StaticResource FT14}" HorizontalOptions="FillAndExpand"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate>
+    <!--换货单-->
+    <ControlTemplate x:Key="ExchangeBillPage_Template">
+        <Grid Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              BackgroundColor="#eeeeee"
+              Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Text="商品名称"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="FillAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1"
+                   Text="当前单价"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="End"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2"
+                   Text="换货数量"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="End"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3"
+                   Text="小计"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="End"
+                   VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate>
+    <!--装车调拨-->
+    <ControlTemplate x:Key="TrackAllocationBillPage_Template">
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
+                BackgroundColor="#eeeeee" Padding="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="商品名称" LineBreakMode="TailTruncation" FontSize="{StaticResource FT14}"
+                    HorizontalOptions="Start" VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1" Text="单价" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2" Text="数量" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="3" Text="小计" FontSize="{StaticResource FT14}" HorizontalOptions="End"
+                    VerticalOptions="CenterAndExpand"></Label>
+        </Grid>
+    </ControlTemplate>
+</ResourceDictionary>

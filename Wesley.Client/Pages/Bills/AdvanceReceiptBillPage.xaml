@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:converters="clr-namespace:Wesley.Client.Converters;assembly=Wesley.Client"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Bills.AdvanceReceiptBillPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AdvanceReceiptBillPageViewModel">
+    <ContentPage.Resources>
+        <converters:StringArrayConverter x:Key="stringArrayConverter" />
+       
+    </ContentPage.Resources>
+    <RelativeLayout>
+        <Grid Style="{StaticResource GGrid}"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!--0-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Spacing="0"
+                         Grid.Row="0"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="2">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="{StaticResource ML10}"
+                       Text="{Binding Bill.BillNumber,Mode=OneWay}"
+                       FontSize="{StaticResource FT14}" />
+            </StackLayout>
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="0"
+                         Grid.Column="1">
+                <Label HorizontalOptions="EndAndExpand"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="{StaticResource MR10}"
+                       Text="{Binding Bill.CreatedOnUtc,Converter={StaticResource DateTimeToStringConverter},ConverterParameter='yyyy-MM-dd',Mode=OneWay}"
+                       FontSize="{StaticResource FT14}" />
+            </StackLayout>
+            <!--1-->
+            <BoxView Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--2-->
+            <StackLayout Orientation="Horizontal"
+                         Margin="{StaticResource PLR10}"
+                         Grid.Row="2"
+                         Grid.ColumnSpan="2">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Text="客户:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry x:Name="SelectCustom"
+                                    HorizontalOptions="FillAndExpand"
+                                    Placeholder="请选择客户..."
+                                    Text="{Binding Bill.TerminalName,Mode=TwoWay}"
+                                    Margin="{StaticResource ML8}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.CustomSelected,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="0" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource SearchArrow}"
+                       IsEnabled="{Binding EnableOperation}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.CustomSelected}"></TapGestureRecognizer>
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <!--3-->
+            <BoxView Grid.Row="3"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--4-->
+            <StackLayout Orientation="Horizontal"
+                         Margin="{StaticResource PLR10}"
+                         Grid.Row="4"
+                         Grid.ColumnSpan="2">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Text="预收款:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry Placeholder="请选收款账户..."
+                                    Text="{Binding Bill.AccountingOptionName,Mode=TwoWay}"
+                                    Margin="{StaticResource ML8}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    ShowVirtualKeyboardOnFocus="False"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.AccountingSelected,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="0" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource DownArrow}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.AccountingSelected}"></TapGestureRecognizer>
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <BoxView Grid.Row="5"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--6-->
+            <StackLayout Orientation="Horizontal"
+                         Margin="{StaticResource PLR10}"
+                         Grid.Row="6"
+                         Grid.Column="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Text="预收金额:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry Placeholder="请输入预收金额..."
+                                    Text="{Binding Bill.AdvanceAmount,Mode=TwoWay}"
+                                    Margin="{StaticResource ML8}"
+                                    Keyboard="Numeric"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="TextChanged"
+                                                  Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="{Binding PaymentMethods.AdvanceAmount}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+            </StackLayout>
+            <!--7-->
+            <BoxView Grid.Row="7"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--8-->
+            <StackLayout Orientation="Horizontal"
+                         Margin="{StaticResource PLR10}"
+                         Grid.Row="8"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="2">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Text="备注:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry x:Name="MarkEntry"
+                                    Margin="{StaticResource ML8}"
+                                    Placeholder="在这里填写备注..."
+                                    Text="{Binding Bill.Remark,Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}" />
+            </StackLayout>
+            <!--9-->
+            <BoxView Grid.Row="9"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+        <!--红冲/审核水印-->
+        <Image Source="have_black.png"
+               IsVisible="{Binding Bill.AuditedStatus}"
+               WidthRequest="100"
+               Scale="2"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}"></Image>
+        <!--footer-->
+        <Grid HeightRequest="90"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              BackgroundColor="White"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,Property=Height,Factor=1,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,Property=Width, Factor=1,Constant=0}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackLayout Grid.Row="0"
+                         Grid.ColumnSpan="3"
+                         HeightRequest="{StaticResource RH45}"
+                         Orientation="Horizontal"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="CenterAndExpand"
+                         BackgroundColor="#eeeeee"
+                         Spacing="0">
+                <custom:HtmlLabel Text="{Binding Bill.SumAmount,StringFormat='合计: {0:F2}',Mode=OneWay}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="{StaticResource ML105}" />
+                <custom:HtmlLabel Text="{Binding Bill.PreferentialAmount,StringFormat='惠: {0:F2}',Mode=OneWay}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="{StaticResource MR5}" />
+                <custom:HtmlLabel Text="{Binding Bill.OweCash,StringFormat='欠: {0:F2}',Mode=OneWay}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="{StaticResource MR5}" />
+            </StackLayout>
+            <StackLayout Grid.Row="1"
+                         Grid.Column="0"
+                         Orientation="Vertical"
+                         HorizontalOptions="Start"
+                         Spacing="0">
+                <!--支付方式-->
+                <custom:HtmlLabel Text="{Binding Bill.Accountings,Mode=OneWay,Converter={StaticResource stringArrayConverter},
+                        ConverterParameter=''}"
+                                  FontSize="{StaticResource FT14}"
+                                  Margin="{StaticResource ML105}"
+                                  VerticalOptions="CenterAndExpand" />
+            </StackLayout>
+            <StackLayout Grid.Row="1"
+                         Grid.Column="1"
+                         HorizontalOptions="Center"
+                         Padding="0"
+                         Spacing="0">
+                <Button x:Name="AddProductBtn"
+                        Text="支付"
+                        FontSize="{StaticResource FT14}"
+                        WidthRequest="60"
+                        Style="{StaticResource FooterButtonStyle}"
+                        Command="{Binding Path=MorePaymentCommand}"
+                        IsEnabled="{Binding EnableOperation}"
+                        VerticalOptions="Center" />
+            </StackLayout>
+        </Grid>
+    </RelativeLayout>
+</pages:BaseContentPage>

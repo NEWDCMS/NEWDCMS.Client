@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.ScanLoginPage"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:ScanLoginPageViewModel">
+    <RelativeLayout>
+        <Grid Padding="10"
+              Style="{StaticResource GGrid}"
+              VerticalOptions="Start"
+              x:Name="oneThird"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   Grid.Row="0"
+                   Text="&#xf109;"
+                   FontFamily="FAS"
+                   FontSize="100"
+                   TextColor="{StaticResource DividerColor}"
+                   HorizontalOptions="Center"
+                   Style="{StaticResource H4-Regular}" />
+            <Label Grid.Column="0"
+                   Grid.Row="1"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   HorizontalOptions="Center"
+                   Style="{StaticResource H4-Regular}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Wesley账号 [" />
+                        <Span Text="{Binding AccountName}" />
+                        <Span Text="]在其它设备登录" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label Grid.Column="0"
+                   Grid.Row="2"
+                   Text="请确认是本人操作，并确保二维码来源安全"
+                   TextColor="{StaticResource DividerColor}"
+                   HorizontalOptions="Center"
+                   Style="{StaticResource H4-Regular}" />
+
+        </Grid>
+        <StackLayout VerticalOptions="End"
+                     BackgroundColor="White"
+                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1}"
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.85}"
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.1}">
+            <!-- Bottom Content -->
+            <Button Margin="20"
+                    CornerRadius="100"
+                    HeightRequest="45"
+                    TextColor="White"
+                    BackgroundColor="#53a245"
+                    Text="确认登录"
+                    FontFamily="FAS"
+                    Command="{Binding LoginCommand}" />
+        </StackLayout>
+    </RelativeLayout>
+</pages:BaseContentPage>
