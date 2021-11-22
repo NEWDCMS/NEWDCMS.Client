@@ -1,13 +1,13 @@
 ﻿using Android.Widget;
-using Wesley.Effects.Droid;
-using Wesley.Effects;
+using DCMS.Client.Droid.Effects;
+using DCMS.Client.Effects;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 
 [assembly: ExportEffect(typeof(AndroidListViewStyleEffect), nameof(ListViewStyleEffect))]
 
-namespace Wesley.Effects.Droid
+namespace DCMS.Client.Droid.Effects
 {
     [Preserve]
     public class AndroidListViewStyleEffect : PlatformEffect

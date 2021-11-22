@@ -14,7 +14,10 @@ namespace Wesley.Client.CustomViews
         {
             InitVisibility();
         }
-
+        /// <summary>
+        /// 1表示在倒数第二的位置添加
+        /// </summary>
+        public int OrderIndex { get; set; }
         public bool IsVisible
         {
             get { return (bool)GetValue(IsVisibleProperty); }
@@ -39,7 +42,23 @@ namespace Wesley.Client.CustomViews
 
                 if ((bool)newvalue && !items.Contains(item))
                 {
-                    Device.BeginInvokeOnMainThread(() => { items.Add(item); });
+                    if (item.OrderIndex == -1)
+                    {
+                        Device.BeginInvokeOnMainThread(() => { items.Insert(0, item); });
+                    }
+                    else if (item.OrderIndex == 1)
+                    {
+                        int insertIndex = 0;
+                        if (items.Count > 0)
+                        {
+                            insertIndex = items.Count - 1;
+                        }
+                        Device.BeginInvokeOnMainThread(() => { items.Insert(insertIndex, item); });
+                    }
+                    else
+                    {
+                        Device.BeginInvokeOnMainThread(() => { items.Add(item); });
+                    }
                 }
                 else if (!(bool)newvalue && items.Contains(item))
                 {

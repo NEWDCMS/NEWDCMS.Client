@@ -5,6 +5,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+
 
 namespace Wesley.Client.ViewModels
 {
@@ -31,7 +33,8 @@ namespace Wesley.Client.ViewModels
             ITerminalService terminalService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-              IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "商品档案";
 
@@ -52,7 +55,7 @@ namespace Wesley.Client.ViewModels
                 .Subscribe(s =>
                 {
                     ((ICommand)SerchCommand)?.Execute(s);
-                }).DisposeWith(DestroyWith);
+                }).DisposeWith(DeactivateWith);
 
             this.SerchCommand = ReactiveCommand.Create<string>(e =>
             {
@@ -63,17 +66,18 @@ namespace Wesley.Client.ViewModels
                 }
                 ((ICommand)Load)?.Execute(null);
             });
-
             this.Load = ProductSeriesLoader.Load(async () =>
             {
                 //重载时排它
                 ItemTreshold = 1;
 
-                var results = await Sync.Run(() =>
+                var items = await GetProductsPage(0, PageSize);
+
+                //清除列表
+                ProductSeries?.Clear();
+
+                if (items != null && items.Any())
                 {
-                    var items = GetProductsPage(0, PageSize).Result;
-                    //清除列表
-                    ProductSeries.Clear();
                     foreach (var item in items)
                     {
                         if (ProductSeries.Count(s => s.ProductId == item.ProductId) == 0)
@@ -81,14 +85,13 @@ namespace Wesley.Client.ViewModels
                             ProductSeries.Add(item);
                         }
                     }
-                    return items;
-                }, (ex) => { Crashes.TrackError(ex); });
+                }
 
-                this.ProductSeries = results;
+                if (ProductSeries.Count > 0)
+                    this.ProductSeries = new System.Collections.ObjectModel.ObservableCollection<ProductModel>(ProductSeries);
 
-                return results;
+                return ProductSeries;
             });
-
             //以增量方式加载数据
             this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
             {
@@ -99,20 +102,23 @@ namespace Wesley.Client.ViewModels
                     {
                         var items = await GetProductsPage(pageIdex, PageSize);
                         var previousLastItem = ProductSeries.Last();
-                        foreach (var item in items)
+
+                        if (items != null)
                         {
-                            if (ProductSeries.Count(s => s.ProductId == item.ProductId) == 0)
+                            foreach (var item in items)
                             {
-                                ProductSeries.Add(item);
+                                if (ProductSeries.Count(s => s.ProductId == item.ProductId) == 0)
+                                {
+                                    ProductSeries.Add(item);
+                                }
+                            }
+
+                            if (items.Count() == 0 || items.Count() == ProductSeries.Count)
+                            {
+                                ItemTreshold = -1;
+                                //return this.ProductSeries;
                             }
                         }
-
-                        if (items.Count() == 0 || items.Count() == ProductSeries.Count)
-                        {
-                            ItemTreshold = -1;
-                            //return this.ProductSeries;
-                        }
-
                     }
                     catch (Exception ex)
                     {
@@ -131,7 +137,7 @@ namespace Wesley.Client.ViewModels
              {
                  await this.NavigateAsync("AddProductArchivePage", ("Product", item));
                  Selecter = null;
-             });
+             }).DisposeWith(DeactivateWith);
 
             this.AddCommand = ReactiveCommand.Create<object>(async e => await this.NavigateAsync("AddProductArchivePage"));
 
@@ -146,7 +152,14 @@ namespace Wesley.Client.ViewModels
             });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
+
+            this.Load.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SerchCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.AddCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CatagorySelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+
         }
 
         /// 分页获取商品
@@ -167,7 +180,7 @@ namespace Wesley.Client.ViewModels
                 pageNumber,
                 pageSize,
                 false,
-                this.ForceRefresh, calToken: cts.Token);
+                this.ForceRefresh, new System.Threading.CancellationToken());
 
             if (result != null && result.Data != null)
             {

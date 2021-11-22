@@ -1,5 +1,6 @@
 using Wesley.Client.Models;
 using Wesley.Client.Models.Finances;
+using Wesley.Client.Models.Products;
 using Wesley.Client.Models.Purchases;
 using Wesley.Client.Models.Sales;
 using Wesley.Client.Models.WareHouses;
@@ -7,6 +8,7 @@ using Newtonsoft.Json;
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 using System;
+using System.Collections.Generic;
 
 namespace Wesley.Client
 {
@@ -14,6 +16,7 @@ namespace Wesley.Client
     {
         private static ISettings AppSettings => CrossSettings.Current;
 
+       
         /// <summary>
         /// Token
         /// </summary>
@@ -22,6 +25,13 @@ namespace Wesley.Client
             get => AppSettings.GetValueOrDefault(nameof(AccessToken), string.Empty);
             set => AppSettings.AddOrUpdateValue(nameof(AccessToken), value);
         }
+
+        public static bool IsAuthenticated
+        {
+            get => AppSettings.GetValueOrDefault(nameof(IsAuthenticated), false);
+            set => AppSettings.AddOrUpdateValue(nameof(IsAuthenticated), value);
+        }
+
         public static DateTime LastUpdatedRefreshTokenTime
         {
             get => AppSettings.GetValueOrDefault(nameof(LastUpdatedRefreshTokenTime), DateTime.MinValue);
@@ -185,12 +195,6 @@ namespace Wesley.Client
             set => AppSettings.AddOrUpdateValue(nameof(LastSigninCoustmerName), value);
         }
 
-        public static string SelectedDeviceName
-        {
-            get => AppSettings.GetValueOrDefault(nameof(SelectedDeviceName), string.Empty);
-            set => AppSettings.AddOrUpdateValue(nameof(SelectedDeviceName), value);
-        }
-
         public static string ReportsDatas
         {
             get => AppSettings.GetValueOrDefault(nameof(ReportsDatas), string.Empty);
@@ -258,7 +262,11 @@ namespace Wesley.Client
             get => AppSettings.GetValueOrDefault(nameof(EnableBluetooth), false);
             set => AppSettings.AddOrUpdateValue(nameof(EnableBluetooth), value);
         }
-
+        public static int PrintStyleSelected
+        {
+            get => AppSettings.GetValueOrDefault(nameof(PrintStyleSelected), 58);
+            set => AppSettings.AddOrUpdateValue(nameof(PrintStyleSelected), value);
+        }
 
         #region 单据共享存储
 
@@ -656,11 +664,11 @@ namespace Wesley.Client
                     if (!string.IsNullOrEmpty(Settings.SaleBills))
                         return JsonConvert.DeserializeObject<SaleBillModel>(Settings.SaleBills);
                     else
-                        return null;
+                        return new SaleBillModel();
                 }
                 catch (Exception)
                 {
-                    return null;
+                    return new SaleBillModel();
                 }
             }
             set
@@ -707,7 +715,6 @@ namespace Wesley.Client
         }
 
 
-
         private static string Abnormals
         {
             get => AppSettings.GetValueOrDefault(nameof(Abnormals), string.Empty);
@@ -743,7 +750,44 @@ namespace Wesley.Client
             }
         }
 
+        /// <summary>
+        /// 商品收藏
+        /// </summary>
+        private static string Favorites
+        {
+            get => AppSettings.GetValueOrDefault(nameof(Favorites), string.Empty);
+            set => AppSettings.AddOrUpdateValue(nameof(Favorites), value);
+        }
+        public static List<ProductModel> FavoriteProducts
+        {
+            get
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(Settings.Favorites))
+                        return JsonConvert.DeserializeObject<List<ProductModel>>(Settings.Favorites);
+                    else
+                        return new List<ProductModel>();
+                }
+                catch (Exception)
+                {
+                    return new List<ProductModel>();
+                }
+            }
+            set
+            {
+                try
+                {
+                    var favorites = JsonConvert.SerializeObject(value);
+                    Settings.Favorites = favorites;
+                }
+                catch (Exception)
+                {
+                    Settings.Favorites = "";
+                }
+            }
+        }
+
         #endregion
     }
-
 }

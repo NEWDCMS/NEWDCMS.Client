@@ -1,6 +1,9 @@
 ﻿using Wesley.Client.ViewModels;
 using Microsoft.AppCenter.Crashes;
 using System;
+using Xamarin.Forms;
+
+
 namespace Wesley.Client.Pages
 {
 
@@ -11,6 +14,7 @@ namespace Wesley.Client.Pages
             try
             {
                 InitializeComponent();
+                NavigationPage.SetHasNavigationBar(this, true);
             }
             catch (Exception ex)
             {

@@ -9,7 +9,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/finances/receiptcashbill", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IReceiptCashApi
     {
 
@@ -22,7 +22,7 @@ namespace Wesley.Client.Services
         [Post("/createorupdate/{storeId}/{userId}/{billId}")]
         Task<APIResult<CashReceiptUpdateModel>> CreateOrUpdateAsync(CashReceiptUpdateModel data, int storeId, int userId, int billId = 0, CancellationToken calToken = default);
 
-        [Get("/GetOwecashBills/{storeId}/{userId}")]
+        [Get("/getowecashbills/{storeId}/{userId}")]
         Task<APIResult<IList<BillSummaryModel>>> GetOwecashBillsAsync(int storeId, int userId, int? terminalId, int? billTypeId, string billNumber = "", string remark = "", DateTime? startTime = null, DateTime? endTime = null, int pageIndex = 0, int pageSize = 20, CancellationToken calToken = default);
 
         [Get("/getbills/{storeId}/{customerId}/{payeer}")]
@@ -32,6 +32,6 @@ namespace Wesley.Client.Services
         Task<APIResult<CashReceiptBillModel>> GetBillAsync(int storeId, int userId, int billId, CancellationToken calToken = default);
 
         [Get("/reverse/{storeId}/{userId}/{billId}")]
-        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId = 0, CancellationToken calToken = default);
+        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId = 0, string remark = "", CancellationToken calToken = default);
     }
 }

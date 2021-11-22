@@ -13,7 +13,10 @@
     <AbsoluteLayout>
         <Grid Style="{StaticResource GGrid}"
               AbsoluteLayout.LayoutBounds="0,0,1,1"
-              AbsoluteLayout.LayoutFlags="All">
+              AbsoluteLayout.LayoutFlags="All"
+              Margin="0,0,0,50"
+              RadioButtonGroup.GroupName="PrintStyleSelected"
+              RadioButtonGroup.SelectedValue="{Binding PrintStyleSelected}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="45" />
                 <RowDefinition Height=".7" />
@@ -37,7 +40,6 @@
                    TextColor="{StaticResource PrimaryTextColor}"
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="Start"
-                   Style="{StaticResource H4-Regular}"
                    Margin="10,0,0,0" />
             <Switch Grid.Column="1"
                     Grid.Row="0"
@@ -57,7 +59,7 @@
                     TextColor="{StaticResource PrimaryTextColor}"
                     VerticalOptions="CenterAndExpand"
                     HorizontalOptions="Start"
-                    Style="{StaticResource H4-Regular}"
+                    
                     Margin="10,0,0,0" />
             <Switch Grid.Column="1"
                     Grid.Row="2"
@@ -77,14 +79,14 @@
                     TextColor="{StaticResource PrimaryTextColor}"
                     VerticalOptions="CenterAndExpand"
                     HorizontalOptions="Start"
-                    Style="{StaticResource H4-Regular}"
+                    
                     Margin="10,0,0,0" />
             <RadioButton IsChecked="False"
                          Grid.Row="4"
                          Grid.Column="1"
                          Margin="10,5,10,5"
                          HorizontalOptions="End"
-                         GroupName="Selected"
+                         Value="58"
                          VerticalOptions="CenterAndExpand" />
             <BoxView Grid.Row="5"
                      Grid.ColumnSpan="2"
@@ -96,14 +98,14 @@
                     TextColor="{StaticResource PrimaryTextColor}"
                     VerticalOptions="CenterAndExpand"
                     HorizontalOptions="Start"
-                    Style="{StaticResource H4-Regular}"
+                    
                     Margin="10,0,0,0" />
             <RadioButton IsChecked="False"
                          Grid.Row="6"
                          Grid.Column="1"
                          Margin="10,5,10,5"
                          HorizontalOptions="End"
-                         GroupName="Selected"
+                         Value="76"
                          VerticalOptions="CenterAndExpand" />
             <BoxView Grid.Row="7"
                      Grid.ColumnSpan="2"
@@ -115,16 +117,15 @@
                     TextColor="{StaticResource PrimaryTextColor}"
                     VerticalOptions="CenterAndExpand"
                     HorizontalOptions="Start"
-                    Style="{StaticResource H4-Regular}"
+                    
                     Margin="10,0,0,0" />
-            <RadioButton IsChecked="True"
+            <RadioButton IsChecked="False"
                          Grid.Row="8"
                          Grid.Column="1"
                          Margin="10,5,10,5"
                          HorizontalOptions="End"
-                         GroupName="Selected"
+                         Value="80"
                          VerticalOptions="CenterAndExpand" />
-            
             <Label Grid.Row="9"
                    Grid.ColumnSpan="2"
                    Padding="10,10,10,10"
@@ -134,40 +135,61 @@
                    TextColor="{StaticResource PrimaryTextColor}"
                    BackgroundColor="#eeeeee"
                    VerticalOptions="CenterAndExpand" />
+
             <CollectionView ItemsSource="{Binding Drives,Mode=TwoWay}"
                             x:Name="Drives"
-                            SelectionMode="Single"
-                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
-                            Grid.Row="10"
-                            Grid.ColumnSpan="2"
-                            HeightRequest="{Binding DrivesHeight}">
+                            SelectionMode="None"
+                                HeightRequest="{Binding DrivesHeight}"
+                                Grid.Row="10"
+                                Grid.ColumnSpan="2" VerticalScrollBarVisibility="Always">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Style="{StaticResource GGrid}"
                               VerticalOptions="CenterAndExpand"
                               HorizontalOptions="FillAndExpand">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="50" />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80" />
                             </Grid.ColumnDefinitions>
                             <Label Grid.Row="0"
                                    Grid.Column="0"
                                    Text="{Binding Name}"
-                                   HorizontalOptions="FillAndExpand"
                                    FontSize="{StaticResource FT14}"
-                                   VerticalOptions="CenterAndExpand"
-                                   Margin="10,5,0,5"></Label>
-                            <RadioButton IsChecked="{Binding Selected,Mode=TwoWay}"
-                                         Grid.Row="0"
-                                         Grid.Column="1"
-                                         Margin="10,5,10,5"
-                                         HorizontalOptions="End"
-                                         GroupName="Selected"
-                                         VerticalOptions="CenterAndExpand" />
+                                   Margin="10,5,0,5" />
+                            <Button Grid.Row="0"
+                                   Grid.Column="1"
+                                   HorizontalOptions="End"
+                                    Padding="0"
+                                    CornerRadius="50"
+                                   FontSize="{StaticResource FT14}"
+                                        Margin="0,5,15,5"
+                                        Command="{Binding Path=BindingContext.AdaptationCmd,Source={x:Reference CurrentContentView}}" 
+                                        CommandParameter="{Binding .}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button"
+                                                     Binding="{Binding Status}"
+                                                     Value="True">
+                                            <Setter Property="Text"
+                                                    Value="取消"></Setter>
+                                            <Setter Property="TextColor"
+                                                    Value="White" />
+                                            <Setter Property="BackgroundColor"
+                                                    Value="#3B5998" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Button"
+                                                     Binding="{Binding Status}"
+                                                     Value="False">
+                                            <Setter Property="Text"
+                                                    Value="适配" />
+                                            <Setter Property="TextColor"
+                                                    Value="#333" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
                             <BoxView Grid.Row="1"
                                      Grid.ColumnSpan="2"
                                      Style="{StaticResource SeparatorGrid}" />
@@ -176,7 +198,7 @@
                 </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>
                     <StackLayout VerticalOptions="Center">
-                        <Label Text="print"
+                            <Label Text="&#xf05a;"
                                FontFamily="FAS"
                                FontAttributes="None"
                                FontSize="28"
@@ -187,7 +209,7 @@
                                 <TapGestureRecognizer Command="{Binding Path=ScanCommand}" />
                             </Label.GestureRecognizers>-->
                         </Label>
-                        <Label Text="无可用设备"
+                        <Label Text="抱歉，无可用设备！"
                                FontSize="{StaticResource FT14}"
                                Margin="10"
                                HorizontalOptions="Center"
@@ -195,6 +217,7 @@
                     </StackLayout>
                 </CollectionView.EmptyView>
             </CollectionView>
+      
         </Grid>
         <!--footer-->
         <Grid HeightRequest="50"
@@ -210,11 +233,12 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button CornerRadius="50"
+            <Button CornerRadius="0"
                     BackgroundColor="{StaticResource PrimaryDarkColor}"
-                    Margin="5"
-                    Text="打印"
-                    FontSize="{StaticResource FT14}"
+                    Margin="0"
+                    FontFamily="FAS"
+                    Text="&#xf02f; 打印"
+                    FontSize="14"
                     Grid.Row="0"
                     Grid.Column="0"
                     Command="{Binding PrintCommand}"

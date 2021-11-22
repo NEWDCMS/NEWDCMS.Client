@@ -1,20 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-                       xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.Common.PaymentMethodPage"
                        x:Name="CurrentContentView"
                        Title="{Binding Title}"
-                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:PaymentMethodPageViewModel">
     <AbsoluteLayout>
         <StackLayout VerticalOptions="Start"
-                     Margin="10,0,10,0"
+                     Padding="0,0,0,0"
                      Spacing="0"
                      AbsoluteLayout.LayoutBounds="0,0,1,1"
                      AbsoluteLayout.LayoutFlags="All">
@@ -22,7 +21,7 @@
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
                          Spacing="0"
-                         Margin="0">
+                         Margin="10,0,10,0">
                 <Label VerticalOptions="CenterAndExpand"
                        HorizontalOptions="Start"
                        Text="合计："
@@ -30,17 +29,29 @@
                 <Label VerticalOptions="CenterAndExpand"
                        HorizontalOptions="Start"
                        Text="{Binding PaymentMethods.SubAmount,Converter={StaticResource NullableDecimalConverter},Mode=OneWay,StringFormat='{0:F2}'}"
-                       FontSize="{StaticResource FT14}" />
+                       FontSize="20" />
                 <Label IsVisible="{Binding ShowTBalance}"
                        VerticalOptions="CenterAndExpand"
-                       HorizontalOptions="EndAndExpand"
-                       Text="{Binding TBalance.AdvanceAmountBalance,Converter={StaticResource NullableDecimalConverter},Mode=OneWay,StringFormat='预收款余额：{0:F2}'}"
-                       FontSize="{StaticResource FT14}" />
+                       HorizontalOptions="EndAndExpand">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="预收款余额："></Span>
+                            <Span Text="{Binding TBalance.AdvanceAmountBalance,Converter={StaticResource NullableDecimalConverter},Mode=OneWay,StringFormat='{0:F2}'}"
+                                  FontSize="20" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
                 <Label IsVisible="{Binding ShowMBalance}"
                        VerticalOptions="CenterAndExpand"
-                       HorizontalOptions="EndAndExpand"
-                       Text="{Binding MBalance.AdvanceAmountBalance,Converter={StaticResource NullableDecimalConverter},Mode=OneWay,StringFormat='预付款余额：{0:F2}'}"
-                       FontSize="{StaticResource FT14}" />
+                       HorizontalOptions="EndAndExpand">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="预付款余额："></Span>
+                            <Span Text="{Binding MBalance.AdvanceAmountBalance,Converter={StaticResource NullableDecimalConverter},Mode=OneWay,StringFormat='{0:F2}'}"
+                                  FontSize="20" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
             </StackLayout>
             <!--1-->
             <BoxView Style="{StaticResource SeparatorGrid}"
@@ -49,7 +60,7 @@
             <StackLayout Spacing="0"
                          Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
-                         Margin="0"
+                         Margin="10,0,10,0"
                          Padding="0"
                          IsVisible="{Binding PaymentMethods.PreferentialAmountShowFiled}">
                 <Label VerticalOptions="CenterAndExpand"
@@ -64,7 +75,8 @@
                                     HorizontalOptions="FillAndExpand"
                     HorizontalTextAlignment="End"
                     XAlign="End"
-                                    Placeholder="请输入金额...">
+                                    Placeholder="请输入金额..."
+                                    FontSize="20">
                     <custom:CustomEntry.Behaviors>
                         <b:EventToCommandBehavior EventName="TextChanged"
                                                   Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
@@ -78,7 +90,7 @@
             <StackLayout Spacing="0"
                          Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
-                         Margin="0"
+                         Margin="10,0,10,0"
                          IsVisible="{Binding PaymentMethods.PreferentialAmountShowFiled}">
                 <Label VerticalOptions="CenterAndExpand"
                        HorizontalOptions="Start"
@@ -90,12 +102,10 @@
                                     VerticalOptions="CenterAndExpand"
                                     Style="{StaticResource DefaultEntry}"
                                     XAlign="End"
-                                    Placeholder="请输入金额...">
-                    <!--<custom:CustomEntry.Behaviors>
-                        <b:EventToCommandBehavior EventName="TextChanged"
-                                                  Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
-                                                  CommandParameter="{Binding PaymentMethods.CurrentCollectionAmount}" />
-                    </custom:CustomEntry.Behaviors>-->
+                                    IsReadOnly="True"
+                                    Placeholder="请输入金额..."
+                                    FontSize="20">
+
                 </custom:CustomEntry>
             </StackLayout>
             
@@ -104,7 +114,7 @@
                      IsVisible="{Binding PaymentMethods.PreferentialAmountShowFiled}" />
             <!--(默认收款账户/选择动态方式)-->
             <CollectionView ItemsSource="{Binding PaymentMethods.Selectes,Mode=TwoWay}"
-                            Margin="0,0,0,0"
+                            Margin="10,0,10,0"
                             HeightRequest="{Binding CustomColViewHeight}"
                             ItemSizingStrategy="MeasureAllItems"
                             VerticalOptions="CenterAndExpand"
@@ -114,8 +124,7 @@
                         <StackLayout Spacing="0">
                             <StackLayout Orientation="Horizontal"
                                          Spacing="0"
-                                         HeightRequest="45"
-                                         Margin="0">
+                                         HeightRequest="45">
                                 <Label VerticalOptions="CenterAndExpand"
                                        HorizontalOptions="Start"
                                        Text="{Binding Name,StringFormat='{0}：'}"
@@ -126,7 +135,8 @@
                                                     VerticalOptions="CenterAndExpand"
                                                     Style="{StaticResource DefaultEntry}"
                                                     XAlign="End"
-                                                    Placeholder="请输入金额...">
+                                                    Placeholder="请输入金额..."
+                                                    FontSize="20">
                                     <custom:CustomEntry.Behaviors>
                                         <b:EventToCommandBehavior EventName="TextChanged"
                                                                   Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
@@ -147,7 +157,7 @@
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
                          Spacing="0"
-                         Margin="0"
+                         Margin="10,0,10,0"
                          IsVisible="{Binding PaymentMethods.OweCashShowFiled}">
                 <Label VerticalOptions="CenterAndExpand"
                        HorizontalOptions="StartAndExpand"
@@ -156,7 +166,8 @@
                 <Label HorizontalOptions="End"
                        Text="{Binding PaymentMethods.OweCash,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}',Mode=OneWay}"
                        VerticalOptions="CenterAndExpand"
-                       Style="{StaticResource DefaultEntry}" />
+                       Style="{StaticResource DefaultEntry}"
+                       FontSize="20" />
             </StackLayout>
             <!--5-->
             <BoxView Style="{StaticResource SeparatorGrid}"

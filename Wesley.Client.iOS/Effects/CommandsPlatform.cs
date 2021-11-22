@@ -4,14 +4,14 @@ using System.Windows.Input;
 using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
-using Wesley.Effects;
-using Wesley.Effects.iOS;
-using Wesley.Effects.iOS.GestureCollectors;
-using Wesley.Effects.iOS.GestureRecognizers;
+using Wesley.Client.Effects;
+using Wesley.Client.Effects.iOS;
+using Wesley.Client.Effects.iOS.GestureCollectors;
+using Wesley.Client.Effects.iOS.GestureRecognizers;
 
 [assembly: ExportEffect(typeof(CommandsPlatform), nameof(Commands))]
 
-namespace Wesley.Effects.iOS {
+namespace Wesley.Client.Effects.iOS {
     public class CommandsPlatform : PlatformEffect {
         public UIView View => Control ?? Container;
 

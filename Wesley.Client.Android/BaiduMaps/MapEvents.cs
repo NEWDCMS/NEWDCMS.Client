@@ -10,12 +10,12 @@ namespace Wesley.Client.Droid
 {
     public partial class MapRenderer
     {
-        void OnMapClick(object sender, BaiduMap.MapClickEventArgs e)
+        private void OnMapClick(object sender, BaiduMap.MapClickEventArgs e)
         {
             Map.SendBlankClicked(e.P0.ToUnity());
         }
 
-        void OnMapPoiClick(object sender, BaiduMap.MapPoiClickEventArgs e)
+        private void OnMapPoiClick(object sender, BaiduMap.MapPoiClickEventArgs e)
         {
             Map.SendPoiClicked(new Poi
             {
@@ -24,12 +24,12 @@ namespace Wesley.Client.Droid
             });
         }
 
-        void OnMapDoubleClick(object sender, BaiduMap.MapDoubleClickEventArgs e)
+        private void OnMapDoubleClick(object sender, BaiduMap.MapDoubleClickEventArgs e)
         {
             Map.SendDoubleClicked(e.P0.ToUnity());
         }
 
-        void OnMapLongClick(object sender, BaiduMap.MapLongClickEventArgs e)
+        private void OnMapLongClick(object sender, BaiduMap.MapLongClickEventArgs e)
         {
             Map.SendLongClicked(e.P0.ToUnity());
         }
@@ -40,7 +40,7 @@ namespace Wesley.Client.Droid
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void OnMarkerClick(object sender, BaiduMap.MarkerClickEventArgs e)
+        private void OnMarkerClick(object sender, BaiduMap.MarkerClickEventArgs e)
         {
             try
             {
@@ -52,13 +52,17 @@ namespace Wesley.Client.Droid
                         var color = pin?.Terminal?.RankColor ?? "#4a89dc";
 
                         //cardView
-                        var cardView = new CardView(Context);
-                        cardView.Radius = 15;
+                        var cardView = new CardView(Context)
+                        {
+                            Radius = 15
+                        };
                         cardView.SetCardBackgroundColor(Color.FromHex(color).ToAndroid());
 
                         //布局
-                        var layout = new LinearLayout(Context);
-                        layout.Orientation = Orientation.Vertical;
+                        var layout = new LinearLayout(Context)
+                        {
+                            Orientation = Orientation.Vertical
+                        };
                         layout.SetPadding(10, 10, 10, 10);
 
                         //Title
@@ -69,8 +73,10 @@ namespace Wesley.Client.Droid
                         tview.Text = e.P0.Title;
 
                         //Button
-                        var param = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
-                        param.Height = 45;
+                        var param = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent)
+                        {
+                            Height = 45
+                        };
                         var button = new Android.Widget.Button(Context);
                         button.Text = "去拜访";
                         button.TextSize = 10;
@@ -93,24 +99,24 @@ namespace Wesley.Client.Droid
                     }
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }
 
-        void OnMarkerDragStart(object sender, BaiduMap.MarkerDragStartEventArgs e)
+        private void OnMarkerDragStart(object sender, BaiduMap.MarkerDragStartEventArgs e)
         {
             try
             {
                 NativeMap.Map.HideInfoWindow();
                 Map.Pins.Find(e.P0)?.SendDrag(AnnotationDragState.Starting);
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }
 
-        void OnMarkerDrag(object sender, BaiduMap.MarkerDragEventArgs e)
+        private void OnMarkerDrag(object sender, BaiduMap.MarkerDragEventArgs e)
         {
             try
             {
@@ -121,12 +127,12 @@ namespace Wesley.Client.Droid
                     pin.SendDrag(AnnotationDragState.Dragging);
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }
 
-        void OnMarkerDragEnd(object sender, BaiduMap.MarkerDragEndEventArgs e)
+        private void OnMarkerDragEnd(object sender, BaiduMap.MarkerDragEndEventArgs e)
         {
             try
             {
@@ -137,20 +143,21 @@ namespace Wesley.Client.Droid
                     pin.SendDrag(AnnotationDragState.Ending);
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }
 
-        void MapStatusChangeFinish(object sender, BaiduMap.MapStatusChangeFinishEventArgs e)
+        private void MapStatusChangeFinish(object sender, BaiduMap.MapStatusChangeFinishEventArgs e)
         {
             try
             {
-                Map.SetValueSilent(Map.CenterProperty, e.P0.Target.ToUnity());
+                var coor = e.P0.Target.ToUnity();
+                Map.SetValueSilent(Map.CenterProperty, coor);
                 Map.SetValueSilent(Map.ZoomLevelProperty, e.P0.Zoom);
-                Map.SendStatusChanged();
+                Map.SendStatusChanged(coor.Latitude, coor.Longitude);
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }
@@ -164,7 +171,7 @@ namespace Wesley.Client.Droid
                 Map.SendLoaded();
                 ///ZoomToSpan();
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }

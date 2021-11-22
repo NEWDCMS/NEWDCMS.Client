@@ -8,7 +8,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
+using System.Reactive.Disposables;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -35,28 +35,35 @@ namespace Wesley.Client.ViewModels
             IReturnReservationBillService returnReservationBillService,
             IReturnBillService returnBillService,
             ISaleReservationBillService saleReservationBillService,
-            ISaleBillService saleBillService) : base(navigationService, globalService, allocationService, advanceReceiptService, receiptCashService, costContractService, costExpenditureService, inventoryService, purchaseBillService, returnReservationBillService, returnBillService, saleReservationBillService, saleBillService, dialogService)
+            ISaleBillService saleBillService
+            ) : base(navigationService, globalService, allocationService, advanceReceiptService, receiptCashService, costContractService, costExpenditureService, inventoryService, purchaseBillService, returnReservationBillService, returnBillService, saleReservationBillService, saleBillService, dialogService)
         {
             Title = "销售订单";
 
             this.BillType = BillTypeEnum.SaleReservationBill;
 
+
             //加载数据
-            this.Load = BillsLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
                 //重载时排它
                 ItemTreshold = 1;
+                PageCounter = 0;
+
                 try
                 {
                     int? terminalId = Filter.TerminalId;
                     int? businessUserId = Filter.BusinessUserId;
                     DateTime? startTime = Filter.StartTime;
                     DateTime? endTime = Filter.EndTime;
-
+                    string billNumber = Filter.SerchKey;
                     int? makeuserId = Settings.UserId;
+
+                    if (businessUserId.HasValue && businessUserId > 0)
+                        makeuserId = 0;
+
                     string terminalName = "";
                     int? deliveryUserId = 0;
-                    string billNumber = "";
                     int? wareHouseId = 0;
                     string remark = "";
                     int? districtId = 0;
@@ -70,31 +77,26 @@ namespace Wesley.Client.ViewModels
                     //清除列表
                     Bills?.Clear();
 
-                    var items = await _saleReservationBillService.GetSaleReservationBillsAsync(makeuserId, terminalId, terminalName, businessUserId, deliveryUserId, billNumber, wareHouseId, remark, districtId, startTime, endTime, auditedStatus, sortByAuditedTime, showReverse, showReturn, alreadyChange, 0, PageSize, this.ForceRefresh, calToken: cts.Token);
+                    var items = await _saleReservationBillService.GetSaleReservationBillsAsync(makeuserId, terminalId, terminalName, businessUserId, deliveryUserId, billNumber, wareHouseId, remark, districtId, startTime, endTime, auditedStatus, sortByAuditedTime, showReverse, showReturn, alreadyChange, 0, PageSize, this.ForceRefresh, new System.Threading.CancellationToken());
 
-                    foreach (var item in items)
+                    if (items != null)
                     {
-                        if (Bills.Count(s => s.Id == item.Id) == 0)
+                        foreach (var item in items)
                         {
-                            Bills.Add(item);
+                            if (Bills.Count(s => s.Id == item.Id) == 0)
+                            {
+                                Bills.Add(item);
+                            }
                         }
-                    }
 
-                    foreach (var s in Bills)
-                    {
-                        s.IsLast = !(Bills.LastOrDefault()?.BillNumber == s.BillNumber);
-                    }
+                        foreach (var s in Bills)
+                        {
+                            s.IsLast = !(Bills.LastOrDefault()?.BillNumber == s.BillNumber);
+                        }
 
-                    if (Bills.Count > 0)
-                        this.Bills = new ObservableRangeCollection<SaleReservationBillModel>(Bills);
-
-                    if (ReferencePage == "NewOrderPage")
-                    {
-                        Title = $"历史销售订单({Bills.Count})";
-                    }
-                    else
-                    {
-                        Title = $"销售订单({Bills.Count})";
+                        if (Bills.Count > 0)
+                            this.Bills = new ObservableRangeCollection<SaleReservationBillModel>(Bills);
+                        UpdateTitle();
                     }
 
                 }
@@ -103,8 +105,8 @@ namespace Wesley.Client.ViewModels
                     Crashes.TrackError(ex);
                 }
 
-                return Bills;
             });
+
             //以增量方式加载数据
             this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
             {
@@ -123,11 +125,11 @@ namespace Wesley.Client.ViewModels
                             int? businessUserId = Filter.BusinessUserId;
                             DateTime? startTime = Filter.StartTime;
                             DateTime? endTime = Filter.EndTime;
+                            string billNumber = Filter.SerchKey;
 
                             int? makeuserId = Settings.UserId;
                             string terminalName = "";
                             int? deliveryUserId = 0;
-                            string billNumber = "";
                             int? wareHouseId = 0;
                             string remark = "";
                             int? districtId = 0;
@@ -138,33 +140,33 @@ namespace Wesley.Client.ViewModels
                             bool? showReturn = null;
                             bool? alreadyChange = null;
 
-                            //清除列表
-                            Bills.Clear();
+                            var items = await _saleReservationBillService.GetSaleReservationBillsAsync(makeuserId, terminalId, terminalName, businessUserId, deliveryUserId, billNumber, wareHouseId, remark, districtId, startTime, endTime, auditedStatus, sortByAuditedTime, showReverse, showReturn, alreadyChange, pageIdex, PageSize, this.ForceRefresh, new System.Threading.CancellationToken());
 
-                            var items = await _saleReservationBillService.GetSaleReservationBillsAsync(makeuserId, terminalId, terminalName, businessUserId, deliveryUserId, billNumber, wareHouseId, remark, districtId, startTime, endTime, auditedStatus, sortByAuditedTime, showReverse, showReturn, alreadyChange, pageIdex, PageSize, this.ForceRefresh, calToken: cts.Token);
-
-                            foreach (var item in items)
+                            if (items != null)
                             {
-                                if (Bills.Count(s => s.Id == item.Id) == 0)
+                                foreach (var item in items)
                                 {
-                                    Bills.Add(item);
+                                    if (Bills.Count(s => s.Id == item.Id) == 0)
+                                    {
+                                        Bills.Add(item);
+                                    }
                                 }
-                            }
 
-                            if (items.Count() == 0 || items.Count() == Bills.Count)
-                            {
-                                ItemTreshold = -1;
-                            }
+                                if (items.Count() == 0)
+                                {
+                                    ItemTreshold = -1;
+                                }
 
-                            foreach (var s in Bills)
-                            {
-                                s.IsLast = !(Bills.LastOrDefault()?.BillNumber == s.BillNumber);
+                                foreach (var s in Bills)
+                                {
+                                    s.IsLast = !(Bills.LastOrDefault()?.BillNumber == s.BillNumber);
+                                }
+                                UpdateTitle();
                             }
                         }
                         catch (Exception ex)
                         {
                             Crashes.TrackError(ex);
-                            ItemTreshold = -1;
                         }
                     }
                 }
@@ -179,13 +181,12 @@ namespace Wesley.Client.ViewModels
                if (x != null)
                    await NavigateAsync(nameof(SaleOrderBillPage), ("Bill", x));
                this.Selecter = null;
-           });
+           }).DisposeWith(DeactivateWith);
 
-            //菜单选择
-            string key = string.Format("Wesley.CLIENT.PAGES.ORDER.{0}_SELECTEDTAB_{1}", this.PageViewName, 0);
+            //菜单选择 
             this.SubscribeMenus((x) =>
             {
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
+
                 //获取当前UTC时间
                 DateTime dtime = DateTime.Now;
                 switch (x)
@@ -225,13 +226,23 @@ namespace Wesley.Client.ViewModels
                         break;
                 }
 
-            }, string.Format(Constants.MENU_KEY, key));
+            }, string.Format(Constants.MENU_KEY, 0));
 
-
-            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
+        }
+
+        private void UpdateTitle()
+        {
+            if (ReferencePage == "NewOrderPage")
+            {
+                Title = $"历史销售订单({Bills?.Count ?? 0})";
+            }
+            else
+            {
+                Title = $"销售订单({Bills?.Count ?? 0})";
+            }
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
@@ -300,6 +311,11 @@ namespace Wesley.Client.ViewModels
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            ThrottleLoad(() =>
+            {
+                ((ICommand)Load)?.Execute(null);
+            }, (Bills?.Count == 0), false);
         }
     }
 }

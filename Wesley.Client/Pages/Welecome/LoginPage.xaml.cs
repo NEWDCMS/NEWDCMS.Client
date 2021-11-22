@@ -3,10 +3,8 @@ using Microsoft.AppCenter.Crashes;
 using System;
 using Xamarin.Forms;
 
-
 namespace Wesley.Client.Pages
 {
-
     public partial class LoginPage : BaseContentPage<LoginPageViewModel>
     {
         public LoginPage()

@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:local="clr-namespace:Wesley.Client"
+                       xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:Selectors="clr-namespace:Wesley.Client.Selector;assembly=Wesley.Client"
@@ -8,7 +10,7 @@
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Name="CurrentContentView"
-                       x:Class="Wesley.Client.Pages.Archive.ReconciliationORreceivablesPage"
+                       x:Class="Wesley.Client.Pages.Reporting.ReconciliationORreceivablesPage"
                        Title="{Binding Title}"
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:ReconciliationORreceivablesPageViewModel">
@@ -25,7 +27,7 @@
                         <RowDefinition Height=".7" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="50" />
@@ -33,8 +35,7 @@
                     <!--Row 0-->
                     <Label Grid.Row="0"
                            Grid.Column="0"
-                           Text="{Binding BillTypeName}"
-                           FontSize="{StaticResource FT14}" />
+                           Text="{Binding BillTypeName}"/>
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            FontSize="{StaticResource FT14}"
@@ -96,7 +97,7 @@
                         <RowDefinition Height=".7" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="50" />
@@ -104,7 +105,6 @@
                     <!--Row 0-->
                     <Label Grid.Row="0"
                            Grid.Column="0"
-                           FontSize="{StaticResource FT14}"
                            Text="{Binding BillTypeName}" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
@@ -160,7 +160,7 @@
                         <RowDefinition Height=".7" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="50" />
@@ -168,7 +168,6 @@
                     <!--Row 0-->
                     <Label Grid.Row="0"
                            Grid.Column="0"
-                           FontSize="{StaticResource FT14}"
                            Text="{Binding BillTypeName}" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
@@ -218,7 +217,7 @@
                         <RowDefinition Height=".7" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="50" />
@@ -226,7 +225,6 @@
                     <!--Row 0-->
                     <Label Grid.Row="0"
                            Grid.Column="0"
-                           FontSize="{StaticResource FT14}"
                            Text="{Binding BillTypeName}" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
@@ -275,7 +273,7 @@
                         <RowDefinition Height="35" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="50" />
@@ -283,7 +281,6 @@
                     <!--Row 0-->
                     <Label Grid.Row="0"
                            Grid.Column="0"
-                           FontSize="{StaticResource FT14}"
                            Text="{Binding BillTypeName}" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
@@ -333,17 +330,17 @@
                                                   CostExpenditureBillTemplate="{StaticResource CostExpenditureBillDataTemplate}" />
         </ResourceDictionary>
     </ContentPage.Resources>
-    <AbsoluteLayout>
-        <ScrollView  AbsoluteLayout.LayoutBounds="0,0,1,1"
-                     AbsoluteLayout.LayoutFlags="All">
+    <Grid ColumnDefinitions="*" RowDefinitions="*,45">
+        <ScrollView  Grid.Row="0"
+                     Grid.Column="0">
             <StackLayout VerticalOptions="Start"
-                         Padding="0,0,0,45"
+                         Padding="0,0,0,50"
                          Spacing="0">
                 <Grid Style="{StaticResource GGrid}"
                       HorizontalOptions="FillAndExpand"
                       VerticalOptions="Start">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="50" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -356,8 +353,7 @@
                         <Label HorizontalOptions="Start"
                                VerticalOptions="CenterAndExpand"
                                Margin="{StaticResource ML10}"
-                               Text="员工:"
-                               FontSize="{StaticResource FT14}" />
+                               Text="员工:" />
                         <custom:CustomEntry x:Name="DeliverEntry"
                                             Placeholder="请选择..."
                                             Text="{Binding Filter.BusinessUserName,Mode=TwoWay}"
@@ -365,6 +361,7 @@
                                             HorizontalOptions="FillAndExpand"
                                             VerticalOptions="CenterAndExpand"
                                             ShowVirtualKeyboardOnFocus="False"
+                                            FontSize="16"
                                             Style="{StaticResource DefaultEntry}">
                             <custom:CustomEntry.Behaviors>
                                 <b:EventToCommandBehavior EventName="Focused"
@@ -377,7 +374,8 @@
                            Style="{StaticResource DownArrow}"
                            Margin="{StaticResource MR10}">
                         <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Path=DeliverSelected}"></TapGestureRecognizer>
+                            <TapGestureRecognizer Command="{Binding Path=DeliverSelected}"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                 </Grid>
@@ -400,10 +398,9 @@
                     <Label Grid.Row="0"
                            Grid.Column="0"
                            Grid.ColumnSpan="2"
-                           Margin="{StaticResource ML10}"
+                           Margin="15,0,0,0"
                            Text="收款来源"
-                           
-                           FontSize="{StaticResource FT14}"
+                           FontAttributes="Bold"
                            HorizontalOptions="Start"
                            VerticalOptions="Center" />
                 </Grid>
@@ -419,9 +416,7 @@
                         <StackLayout>
                             <Label Text="稍等，数据加载中...."
                                    FontSize="{StaticResource FT14}"
-                                   Margin="10"
-                                   VerticalOptions="CenterAndExpand"
-                                   HorizontalOptions="CenterAndExpand" />
+                                   Margin="10" />
                         </StackLayout>
                     </CollectionView.EmptyView>
                 </CollectionView>
@@ -443,10 +438,9 @@
                     <Label Grid.Row="0"
                            Grid.Column="0"
                            Grid.ColumnSpan="2"
-                           Margin="{StaticResource ML10}"
+                           Margin="15,0,0,0"
                            Text="收款方式"
-                           
-                           FontSize="{StaticResource FT14}"
+                           FontAttributes="Bold"
                            HorizontalOptions="Start"
                            VerticalOptions="Center" />
                 </Grid>
@@ -481,15 +475,13 @@
                                        Margin="10,0,0,0"
                                        TextColor="{StaticResource SecondaryTextColor}"
                                        HorizontalOptions="StartAndExpand"
-                                       VerticalOptions="Center"
-                                       FontSize="{StaticResource FT14}" />
+                                       VerticalOptions="Center" />
                                 <Label Grid.Row="0"
                                        Grid.Column="1"
                                        Text="{Binding CollectionAmount,StringFormat='{0:F2}'}"
                                        TextColor="{StaticResource PrimaryDarkColor}"
                                        HorizontalOptions="End"
-                                       VerticalOptions="Center"
-                                       FontSize="{StaticResource FT14}" />
+                                       VerticalOptions="Center" />
                                 <BoxView Grid.Row="1"
                                          Grid.Column="0"
                                          Grid.ColumnSpan="3"
@@ -516,41 +508,33 @@
                     <Label Grid.Row="0"
                            Grid.Column="0"
                            Grid.ColumnSpan="2"
-                           Margin="{StaticResource ML10}"
+                           Margin="15,0,0,0"
                            Text="商品汇总"
-                           
-                           FontSize="{StaticResource FT14}"
+                           FontAttributes="Bold"
                            HorizontalOptions="Start"
                            VerticalOptions="Center" />
                 </Grid>
                 <Grid Style="{StaticResource GGrid}"
-                      Margin="{StaticResource PLR10}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height=".7" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height=".7" />
-                        <RowDefinition Height="40" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="50" />
-                    </Grid.ColumnDefinitions>
+                      Padding="{StaticResource PLR10}"
+                      xe:TouchEffect.Color="LightGray"
+                      xe:EffectCommands.Tap="{Binding BindingContext.ViewProducts, Source={x:Reference CurrentContentView}}"
+                      xe:EffectCommands.TapParameter="SaleProducts"
+                      RowDefinitions="40,.7"
+                      ColumnDefinitions="*,*,50">
                     <Label Grid.Row="0"
                            Grid.Column="0"
                            Text="销售商品"
                            TextColor="{StaticResource SecondaryTextColor}"
                            HorizontalOptions="StartAndExpand"
-                           VerticalOptions="Center"
-                           FontSize="{StaticResource FT14}" />
+                           VerticalOptions="Center">
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            Text="{Binding SaleProductCount,StringFormat='{0} 种'}"
                            TextColor="{StaticResource PrimaryDarkColor}"
                            HorizontalOptions="End"
-                           VerticalOptions="Center"
-                           FontSize="{StaticResource FT14}" />
+                           VerticalOptions="Center">
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="2"
                            Text="{StaticResource FontAwesomeRight}"
@@ -558,11 +542,46 @@
                            VerticalOptions="CenterAndExpand"
                            HorizontalOptions="End"
                            TextColor="{StaticResource PrimaryDarkColor}"
-                           FontSize="{StaticResource FT14}"
+                           Margin="{StaticResource MR10}">
+                    </Label>
+                    <BoxView Grid.Row="1"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             VerticalOptions="Start"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+                <Grid Style="{StaticResource GGrid}"
+                      Padding="{StaticResource PLR10}"
+                      xe:TouchEffect.Color="LightGray"
+                      xe:EffectCommands.Tap="{Binding BindingContext.ViewProducts, Source={x:Reference CurrentContentView}}"
+                      xe:EffectCommands.TapParameter="GiftProducts"
+                      RowDefinitions="40,.7"
+                      ColumnDefinitions="*,*,50">
+
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Text="赠送商品"
+                           TextColor="{StaticResource SecondaryTextColor}"
+                           HorizontalOptions="StartAndExpand"
+                           VerticalOptions="Center" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Text="{Binding GiftProductCount,StringFormat='{0} 种'}"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center" />
+                    <Label Grid.Row="0"
+                           Grid.Column="2"
+                           Text="{StaticResource FontAwesomeRight}"
+                           FontFamily="FAS"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="End"
+                           TextColor="{StaticResource PrimaryDarkColor}"
                            Margin="{StaticResource MR10}">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ViewProducts}"
-                                                  CommandParameter="SaleProducts"></TapGestureRecognizer>
+                                                  CommandParameter="GiftProducts"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                     <BoxView Grid.Row="1"
@@ -570,77 +589,58 @@
                              Grid.ColumnSpan="3"
                              VerticalOptions="Start"
                              Style="{StaticResource SeparatorGrid}" />
-                    <Label Grid.Row="2"
-                           Grid.Column="0"
-                           Text="赠送商品"
-                           TextColor="{StaticResource SecondaryTextColor}"
-                           HorizontalOptions="StartAndExpand"
-                           VerticalOptions="Center"
-                           FontSize="{StaticResource FT14}" />
-                    <Label Grid.Row="2"
-                           Grid.Column="1"
-                           Text="{Binding GiftProductCount,StringFormat='{0} 种'}"
-                           TextColor="{StaticResource PrimaryDarkColor}"
-                           HorizontalOptions="End"
-                           VerticalOptions="Center"
-                           FontSize="{StaticResource FT14}" />
-                    <Label Grid.Row="2"
-                           Grid.Column="2"
-                           Text="{StaticResource FontAwesomeRight}"
-                           FontFamily="FAS"
-                           VerticalOptions="CenterAndExpand"
-                           HorizontalOptions="End"
-                           TextColor="{StaticResource PrimaryDarkColor}"
-                           FontSize="{StaticResource FT14}"
-                           Margin="{StaticResource MR10}">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ViewProducts}"
-                                                  CommandParameter="GiftProducts"></TapGestureRecognizer>
-                        </Label.GestureRecognizers>
-                    </Label>
-                    <BoxView Grid.Row="3"
-                             Grid.Column="0"
-                             Grid.ColumnSpan="3"
-                             VerticalOptions="Start"
-                             Style="{StaticResource SeparatorGrid}" />
-                    <Label Grid.Row="4"
+
+                </Grid>
+                <Grid Style="{StaticResource GGrid}"
+                      Padding="{StaticResource PLR10}"
+                      xe:TouchEffect.Color="LightGray"
+                      xe:EffectCommands.Tap="{Binding BindingContext.ViewProducts, Source={x:Reference CurrentContentView}}"
+                      xe:EffectCommands.TapParameter="ReturnProducts"
+                      RowDefinitions="40,.7"
+                      ColumnDefinitions="*,*,50">
+                    <Label Grid.Row="0"
                            Grid.Column="0"
                            Text="退货商品"
                            TextColor="{StaticResource SecondaryTextColor}"
                            HorizontalOptions="StartAndExpand"
-                           VerticalOptions="Center"
-                           FontSize="{StaticResource FT14}" />
-                    <Label Grid.Row="4"
+                           VerticalOptions="Center" />
+                    <Label Grid.Row="0"
                            Grid.Column="1"
                            Text="{Binding ReturnProductCount,StringFormat='{0} 种'}"
                            TextColor="{StaticResource PrimaryDarkColor}"
                            HorizontalOptions="End"
-                           VerticalOptions="Center"
-                           FontSize="{StaticResource FT14}" />
-                    <Label Grid.Row="4"
+                           VerticalOptions="Center" />
+                    <Label Grid.Row="0"
                            Grid.Column="2"
                            Text="{StaticResource FontAwesomeRight}"
                            FontFamily="FAS"
                            VerticalOptions="CenterAndExpand"
                            HorizontalOptions="End"
                            TextColor="{StaticResource PrimaryDarkColor}"
-                           FontSize="{StaticResource FT14}"
                            Margin="{StaticResource MR10}">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ViewProducts}"
-                                                  CommandParameter="ReturnProducts"></TapGestureRecognizer>
+                                                  CommandParameter="ReturnProducts"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                 </Grid>
             </StackLayout>
         </ScrollView>
+        <StackLayout Grid.Row="0"
+                     Grid.Column="0"
+                     IsVisible="{Binding IsBusy}">
+            <ActivityIndicator IsRunning="True"
+                               HorizontalOptions="Center"
+                               VerticalOptions="CenterAndExpand" />
+        </StackLayout>
         <!--footer-->
-        <Grid HeightRequest="{StaticResource RH45}"
+        <Grid Grid.Row="1"
+              Grid.Column="0"
+              HeightRequest="{StaticResource RH45}"
               Style="{StaticResource GGrid}"
               HorizontalOptions="FillAndExpand"
               VerticalOptions="End"
-              AbsoluteLayout.LayoutBounds="0,1,1,1"
-              AbsoluteLayout.LayoutFlags="All"
               BackgroundColor="White">
             <Grid.RowDefinitions>
                 <RowDefinition Height=".7" />
@@ -655,20 +655,30 @@
                      Style="{StaticResource SeparatorGrid}" />
             <Label Grid.Row="1"
                    Grid.Column="0"
-                   Text="{Binding TotalCount,StringFormat='总计：{0}'}"
                    HorizontalOptions="Start"
-                   FontSize="{StaticResource FT14}"
                    TextColor="{StaticResource PrimaryTextColor}"
                    VerticalOptions="CenterAndExpand"
-                   Margin="10,5,0,5" />
+                   Margin="10,5,0,5">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span  Text="总计：" />
+                        <Span   Text="{Binding TotalCount}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
             <Label Grid.Row="1"
                    Grid.Column="1"
-                   Text="{Binding TotalAmount,StringFormat='待交金额：{0:F2}'}"
                    HorizontalOptions="End"
-                   FontSize="{StaticResource FT14}"
                    TextColor="{StaticResource PrimaryTextColor}"
                    VerticalOptions="CenterAndExpand"
-                   Margin="0,5,10,5" />
+                   Margin="0,5,10,5">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span  Text="待交金额：" />
+                        <Span   Text="{Binding TotalAmount,StringFormat='{0:F2}'}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
         </Grid>
-    </AbsoluteLayout>
+    </Grid>
 </pages:BaseContentPage>

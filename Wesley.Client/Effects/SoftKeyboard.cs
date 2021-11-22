@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading;
-using Xamarin.Forms.Internals;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public class SoftKeyboard
     {

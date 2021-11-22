@@ -4,7 +4,7 @@ using Android.Graphics;
 using AndroidX.Annotations;
 using System;
 
-namespace Wesley.Client.Droid.Utils
+namespace DCMS.Client.Droid.Utils
 {
     public class NotificationUtils : ContextWrapper
     {

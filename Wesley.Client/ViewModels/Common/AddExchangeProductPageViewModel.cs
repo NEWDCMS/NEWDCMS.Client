@@ -1,12 +1,13 @@
-﻿using Wesley.Client.CustomViews;
-using Wesley.Client.Enums;
+﻿using Wesley.Client.Enums;
 using Wesley.Client.Models;
 using Wesley.Client.Models.Products;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +16,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
+
 namespace Wesley.Client.ViewModels
 {
     public class AddExchangeProductPageViewModel : ViewModelBase
@@ -87,7 +89,7 @@ namespace Wesley.Client.ViewModels
                        //大单位
                        ProductSeries.ToList().ForEach(p =>
                       {
-                          vaildBigPrice = (p.BigPriceUnit.Quantity > 0 && (p.BigPriceUnit.Price == null || p.BigPriceUnit.Price < 0));
+                          vaildBigPrice = p.BigPriceUnit.Quantity > 0 && (p.BigPriceUnit?.Price == null || p.BigPriceUnit?.Price < 0);
                           if (vaildBigPrice)
                               return;
                       });
@@ -102,7 +104,7 @@ namespace Wesley.Client.ViewModels
                        //小单位
                        ProductSeries.ToList().ForEach(p =>
                       {
-                          vaildSmallPrice = (p.SmallPriceUnit.Quantity > 0 && (p.SmallPriceUnit.Price == null || p.SmallPriceUnit.Price < 0));
+                          vaildSmallPrice = p.SmallPriceUnit.Quantity > 0 && (p.SmallPriceUnit?.Price == null || p.SmallPriceUnit?.Price < 0);
                           if (vaildSmallPrice)
                               return;
                       });
@@ -284,22 +286,22 @@ namespace Wesley.Client.ViewModels
                         if (ReferencePage.Equals("PurchaseOrderBillPage"))
                         {
                             //大单位价格
-                            product.BigPriceUnit.Amount = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price ?? 0;
+                            product.BigPriceUnit.Amount = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price;
 
 
                             if ((product.BigQuantity ?? 0) == 0) product.BigQuantity = 1;
                             var price = (product.BigQuantity ?? 0) != 0 ? (product.BigPriceUnit.Price / product.BigQuantity) : 0;
-                            var amount = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price ?? 0;
+                            var amount = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price;
 
                             //小单位价格
-                            product.SmallPriceUnit.Price = price != 0 ? price : 0; ;
+                            product.SmallPriceUnit.Price = price != 0 ? price ?? 0 : 0;
                             product.SmallPriceUnit.Amount = amount != 0 ? amount : 0;
 
                         }
                         else
                         {
-                            var ba = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price ?? 0;
-                            var sa = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price ?? 0;
+                            var ba = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price;
+                            var sa = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price;
 
                             //大单位价格
                             product.BigPriceUnit.Amount = ba != 0 ? ba : 0;
@@ -320,7 +322,148 @@ namespace Wesley.Client.ViewModels
             {
                 var product = ProductSeries.Where(p => p.Id == porductId).Select(p => p).FirstOrDefault();
 
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择价格", "", (() =>
+                #region
+                //var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择价格", "", (() =>
+                //{
+                //    var popDatas = new List<PopData>();
+                //    if (product != null)
+                //    {
+                //        var tierprices = product.ProductTierPrices;
+                //        if (tierprices != null)
+                //        {
+                //            #region
+
+                //            //默认条件
+                //            int pId = 0;
+                //            int pTId = 0;
+                //            var pArry = Settings.DefaultPricePlan.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(p => int.Parse(p)).ToList();
+                //            if (pArry.Count > 0)
+                //            {
+                //                pId = pArry[0];
+                //                pTId = pArry[1];
+                //            }
+
+                //            switch (pTId)
+                //            {
+                //                case (int)PriceType.ProductCost:
+                //                    {
+                //                        var price = tierprices.FirstOrDefault(s => s.PriceTypeId == 0);
+                //                        popDatas.Add(new PopData()
+                //                        {
+                //                            Id = (int)PriceType.ProductCost,
+                //                            Column = "进价",
+                //                            Column1 = price?.BigUnitPrice.ToString(),
+                //                            Column1Enable = true,
+                //                            Data = price?.BigUnitPrice ?? 0
+                //                        });
+                //                    }
+                //                    break;
+                //                case (int)PriceType.CostPrice:
+                //                    {
+                //                        //成本价
+                //                        var price = tierprices.FirstOrDefault(s => s.PriceTypeId == 5);
+                //                        popDatas.Add(new PopData()
+                //                        {
+                //                            Id = (int)PriceType.CostPrice,
+                //                            Column = "成本价",
+                //                            Column1 = price?.BigUnitPrice.ToString(),
+                //                            Column1Enable = true,
+                //                            Data = price?.BigUnitPrice ?? 0
+                //                        });
+                //                    }
+                //                    break;
+                //                case (int)PriceType.WholesalePrice:
+                //                    {
+                //                        //批发价格
+                //                        var price = tierprices.FirstOrDefault(s => s.PriceTypeId == 1);
+                //                        popDatas.Add(new PopData()
+                //                        {
+                //                            Id = (int)PriceType.WholesalePrice,
+                //                            Column = "批发价格",
+                //                            Column1 = price?.BigUnitPrice.ToString(),
+                //                            Column1Enable = true,
+                //                            Data = price?.BigUnitPrice ?? 0
+                //                        });
+                //                    }
+                //                    break;
+                //                case (int)PriceType.RetailPrice:
+                //                    {
+                //                        //零售价格
+                //                        var price = tierprices.FirstOrDefault(s => s.PriceTypeId == 2);
+                //                        popDatas.Add(new PopData()
+                //                        {
+                //                            Id = (int)PriceType.RetailPrice,
+                //                            Column = "零售价格",
+                //                            Column1 = price?.BigUnitPrice.ToString(),
+                //                            Column1Enable = true,
+                //                            Data = price?.BigUnitPrice ?? 0
+                //                        });
+                //                    }
+                //                    break;
+                //                case (int)PriceType.LowestPrice:
+                //                    {
+                //                        //最低售价
+                //                        var price = tierprices.FirstOrDefault(s => s.PriceTypeId == 3);
+                //                        popDatas.Add(new PopData()
+                //                        {
+                //                            Id = (int)PriceType.LowestPrice,
+                //                            Column = "最低售价",
+                //                            Column1 = price?.BigUnitPrice.ToString(),
+                //                            Column1Enable = true,
+                //                            Data = price?.BigUnitPrice ?? 0
+                //                        });
+                //                    }
+                //                    break;
+                //                case (int)PriceType.CustomPlan:
+                //                    {
+                //                        //方案价格
+                //                        int i = 0;
+                //                        foreach (var price in tierprices.Where(s => new int[] { (int)PriceType.CustomPlan }.Contains(s.PriceTypeId)).ToList())
+                //                        {
+                //                            popDatas.Add(new PopData()
+                //                            {
+                //                                Id = (int)PriceType.CustomPlan + i,
+                //                                Column = price?.PriceTypeName,
+                //                                Column1 = price?.BigUnitPrice.ToString(),
+                //                                Column1Enable = true,
+                //                                Data = price?.BigUnitPrice ?? 0
+                //                            });
+                //                            i++;
+                //                        }
+                //                    }
+                //                    break;
+                //                case (int)PriceType.LastedPrice:
+                //                    {
+                //                        //上次价格
+                //                        var price = product.ProductTierPrices.Where(s => s.PriceTypeId == (int)PriceType.LastedPrice).FirstOrDefault();
+                //                        if (price != null)
+                //                        {
+                //                            popDatas.Add(new PopData()
+                //                            {
+                //                                Id = (int)PriceType.CustomPlan,
+                //                                Column = "上次价格",
+                //                                Column1 = price?.BigUnitPrice.ToString(),
+                //                                Column1Enable = true,
+                //                                Data = price?.BigUnitPrice ?? 0
+                //                            });
+                //                        }
+                //                    }
+                //                    break;
+                //            }
+
+                //            #endregion
+                //        }
+                //    }
+                //    return Task.FromResult(popDatas);
+                //}));
+                //if (result != null)
+                //{
+                //    product.BigPriceUnit.Price = (decimal)(result?.Data ?? 0);
+                //    product.BigPriceUnit.Amount = (decimal)(result?.Data ?? 0) * product?.BigPriceUnit?.Quantity ?? 0;
+                //}
+                #endregion
+
+                var _dialogView = new PopRadioButtonPage("选择价格", "", () =>
                 {
                     var popDatas = new List<PopData>();
                     if (product != null)
@@ -452,13 +595,16 @@ namespace Wesley.Client.ViewModels
                         }
                     }
                     return Task.FromResult(popDatas);
-                }));
-
-                if (result != null)
+                });
+                _dialogView.Completed += (sender, result) =>
                 {
-                    product.BigPriceUnit.Price = (decimal)(result?.Data ?? 0);
-                    product.BigPriceUnit.Amount = (decimal)(result?.Data ?? 0) * product?.BigPriceUnit?.Quantity ?? 0;
-                }
+                    if (result != null)
+                    {
+                        product.BigPriceUnit.Price = (decimal)(result?.Data ?? 0);
+                        product.BigPriceUnit.Amount = (decimal)(result?.Data ?? 0) * product?.BigPriceUnit?.Quantity ?? 0;
+                    }
+                };
+                await PopupNavigation.Instance.PushAsync(_dialogView);
 
             }
             catch (Exception ex)
@@ -471,8 +617,7 @@ namespace Wesley.Client.ViewModels
             try
             {
                 var product = ProductSeries.Where(p => p.Id == porductId).Select(p => p).FirstOrDefault();
-
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择价格", "", (() =>
+                var _dialogView = new PopRadioButtonPage("选择价格", "", () =>
                 {
                     var popDatas = new List<PopData>();
                     if (product != null)
@@ -604,13 +749,22 @@ namespace Wesley.Client.ViewModels
                         }
                     }
                     return Task.FromResult(popDatas);
-                }));
-
-                if (result != null)
+                });
+                _dialogView.Completed += (sender, result) =>
                 {
-                    product.SmallPriceUnit.Price = (decimal)(result?.Data ?? 0);
-                    product.SmallPriceUnit.Amount = (decimal)(result?.Data ?? 0) * product?.SmallPriceUnit?.Quantity ?? 0;
-                }
+                    try { 
+                    if (result != null)
+                    {
+                        product.SmallPriceUnit.Price = (decimal)(result?.Data ?? 0);
+                        product.SmallPriceUnit.Amount = (decimal)(result?.Data ?? 0) * product?.SmallPriceUnit?.Quantity ?? 0;
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {

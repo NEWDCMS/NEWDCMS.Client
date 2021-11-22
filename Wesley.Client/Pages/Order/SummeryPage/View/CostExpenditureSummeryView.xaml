@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             
+             x:Class="Wesley.Client.Pages.Order.CostExpenditureSummeryView"
+             x:Name="Current_CostExpenditureSummeryView">
+    <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="{StaticResource PrimaryDarkColor}">
+
+         
+                <CollectionView ItemsSource="{Binding Bills}"
+                                x:Name="orders"
+                                ItemSizingStrategy="MeasureAllItems"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                                RemainingItemsThreshold="{Binding ItemTreshold}"
+                                SelectionMode="Single"
+                                VerticalScrollBarVisibility="Always">
+                    <CollectionView.Header>
+                        <custom:HeaderView ControlTemplate="{StaticResource CostExpenditureSummeryView_Template}" />
+                    </CollectionView.Header>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <!-- 单号-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding BillNumber,StringFormat='单号：{0}'}"
+                                       LineBreakMode="TailTruncation"
+                                       FontSize="{StaticResource FT14}"
+                                       HorizontalOptions="Start"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="{StaticResource ML10}" />
+                                <BoxView Grid.Row="0"
+                                         Grid.Column="1"
+                                         Margin="{StaticResource MR10}"
+                                         CornerRadius="50"
+                                         HeightRequest="25"
+                                         HorizontalOptions="End"
+                                         Opacity=".7"
+                                         VerticalOptions="Center"
+                                         WidthRequest="50"
+                                         Color="{StaticResource PrimaryColor}">
+                                    <BoxView.Triggers>
+                                        <DataTrigger Binding="{Binding ReversedStatus}"
+                                                     TargetType="BoxView"
+                                                     Value="true">
+                                            <Setter Property="Color"
+                                                    Value="Red" />
+                                        </DataTrigger>
+                                    </BoxView.Triggers>
+                                </BoxView>
+                                <!--状态-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Margin="0,0,17,0"
+                                       Text="未审核"
+                                       TextColor="White"
+                                       FontSize="{StaticResource FT12}"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="CenterAndExpand">
+                                    <Label.Triggers>
+                                        <DataTrigger Binding="{Binding AuditedStatus}"
+                                                     TargetType="Label"
+                                                     Value="true">
+                                            <Setter Property="Text"
+                                                    Value="已审核" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding AuditedStatus}"
+                                                     TargetType="Label"
+                                                     Value="false">
+                                            <Setter Property="Text"
+                                                    Value="未审核" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ReversedStatus}"
+                                                     TargetType="Label"
+                                                     Value="true">
+                                            <Setter Property="TextColor"
+                                                    Value="White" />
+                                            <Setter Property="Text"
+                                                    Value="已红冲" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <!--客户-->
+                                <Label Grid.Row="1"
+                                       Grid.Column="0"
+                                       LineBreakMode="TailTruncation"
+                                       Text="{Binding CustomerName}"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       Margin="{StaticResource ML10}"
+                                       VerticalOptions="CenterAndExpand" />
+                                <!--金额-->
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Text="{Binding SumAmount,StringFormat='￥{0:F2}'}"
+                                       TextColor="{StaticResource PrimaryColor}"
+                                       HorizontalOptions="End"
+                                       FontAttributes="Bold"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="{StaticResource MR10}" />
+                                <!--业务员-->
+                                <Label Grid.Row="2"
+                                       Grid.Column="0"
+                                       Text="{Binding  EmployeeName,StringFormat='业务员：{0}'}"
+                                       TextColor="{StaticResource SecondaryTextColor}"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Start"
+                                       Margin="{StaticResource ML10}" />
+                                <!--开单时间-->
+                                <Label Grid.Row="2"
+                                       Grid.Column="1"
+                                       TextColor="{StaticResource SecondaryTextColor}"
+                                       Text="{Binding CreatedOnUtc}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Start"
+                                       Margin="{StaticResource MR10}" />
+                                <custom:DashedBar Grid.Row="3"
+                                                  Grid.Column="0"
+                                                  Grid.ColumnSpan="2"
+                                                  IsVisible="{Binding IsLast}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <custom:NullView />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+        
+
+    </RefreshView>
+</ContentView>

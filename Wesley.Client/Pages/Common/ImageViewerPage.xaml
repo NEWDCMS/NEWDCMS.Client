@@ -2,9 +2,36 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             xmlns:cards="clr-namespace:PanCardView;assembly=PanCardView"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              prism:ViewModelLocator.AutowireViewModel="True"
-             x:Class="Wesley.Client.Pages.Common.ImageViewerPage"
-             BackgroundColor="Black">
+             x:Class="Wesley.Client.Pages.Common.ImageViewerPage" 
+             Title="照片预览" BackgroundColor="Black">
+    <AbsoluteLayout>
 
+        <cards:CarouselView AbsoluteLayout.LayoutBounds="0,0,1,1"
+                            AbsoluteLayout.LayoutFlags="All"
+                            ItemsSource="{Binding ImagesUrls}"
+                            IsAutoInteractionRunning="False"
+                            IsAutoNavigatingAnimationEnabled="False"
+                            SlideShowDuration="3000">
+            <cards:CarouselView.ItemTemplate>
+                <DataTemplate>
+                    <ContentView>
+                        <ffimageloading:CachedImage  WidthRequest="480"
+                                                     HeightRequest="480"
+                                                     VerticalOptions="Center"
+                                                     HorizontalOptions="Center"
+                                                     DownsampleToViewSize="true"
+                                                     CacheType="Disk"
+                                                     RetryCount="0"
+                                                     RetryDelay="250"
+                                                     BitmapOptimizations="False"
+                                                     Source="{Binding .}"
+                                                     Margin="{StaticResource MR5}" />
+                    </ContentView>
+                </DataTemplate>
+            </cards:CarouselView.ItemTemplate>
+        </cards:CarouselView>
+    </AbsoluteLayout>
 </ContentPage>

@@ -12,7 +12,7 @@ namespace Wesley.Client.Services
     {
         private readonly MakeRequest _makeRequest;
 
-        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/dcms/warehouse/allocationbill";
+        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/Wesley/warehouse/allocationbill";
 
         public AllocationService(MakeRequest makeRequest)
         {
@@ -46,7 +46,7 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<IAllocationApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetAllocationsAsync", storeId,
+                var results = await _makeRequest.Start(api.GetAllocationsAsync(storeId,
                     makeuserId,
                     businessUserId,
                     shipmentWareHouseId,
@@ -59,23 +59,8 @@ namespace Wesley.Client.Services
                     showReverse,
                     sortByAuditedTime,
                     pagenumber,
-                    pageSize);
-
-                var results = await _makeRequest.StartUseCache(api.GetAllocationsAsync(storeId,
-                    makeuserId,
-                    businessUserId,
-                    shipmentWareHouseId,
-                    incomeWareHouseId,
-                    billNumber,
-                    remark,
-                    auditedStatus,
-                    startTime,
-                    endTime,
-                    showReverse,
-                    sortByAuditedTime,
-                    pagenumber,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize,
+                    calToken), calToken);
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();

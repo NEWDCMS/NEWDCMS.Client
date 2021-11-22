@@ -2,34 +2,24 @@
 using Microsoft.AppCenter.Crashes;
 using System;
 using System.Linq;
-using Xamarin.Forms;
 namespace Wesley.Client.Pages.Market
 {
 
     public partial class CustomerArchivesPage : BaseContentPage<CustomerArchivesPageViewModel>
     {
-        protected override void OnAppearing()
+        public CustomerArchivesPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
+                InitializeComponent();
+                ToolbarItems?.Clear();
+                foreach (var toolBarItem in this.GetToolBarItems4<CustomerArchivesPageViewModel>(ViewModel).ToList())
                 {
-                    try
-                    {
-                        InitializeComponent();
-                        ToolbarItems.Clear();
-                        foreach (var toolBarItem in this.GetToolBarItems4<CustomerArchivesPageViewModel>(ViewModel).ToList())
-                        {
-                            ToolbarItems.Add(toolBarItem);
-                        }
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                    ToolbarItems.Add(toolBarItem);
+                }
             }
-
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
+
     }
 }

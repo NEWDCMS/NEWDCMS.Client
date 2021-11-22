@@ -5,7 +5,7 @@
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          mc:Ignorable="d"
                          xmlns:pancakeView="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
-                         xmlns:xe="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                         xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
                          x:Class="Wesley.Client.Pages.CustomControls.MessageBubble"
                          x:Name="bubble_fdasdl"
                          Style="{StaticResource LightShadowPancakeViewStyle}"
@@ -23,9 +23,9 @@
               BindingContext="{Binding ReplyTo}"
               VerticalOptions="Start"
               Margin="5"
-              xe:Commands.Tap="{Binding ReplyTappedCommand, Source={x:Reference bubble_fdasdl}}"
+              xe:EffectCommands.Tap="{Binding ReplyTappedCommand, Source={x:Reference bubble_fdasdl}}"
               xe:TouchEffect.Color="LightGray"
-              xe:Commands.TapParameter="{Binding}">
+              xe:EffectCommands.TapParameter="{Binding}">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

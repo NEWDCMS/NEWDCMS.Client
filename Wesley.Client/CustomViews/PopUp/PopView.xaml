@@ -2,7 +2,7 @@
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
         xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
         xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
-        x:Class="Wesley.Client.CustomViews.Views.PopView">
+        x:Class="Wesley.Client.CustomViews.PopView">
     <StackLayout Margin="20" HorizontalOptions="Center" VerticalOptions="Center" BackgroundColor="Transparent"
             Spacing="0">
         <yummy:PancakeView CornerRadius="10" BackgroundColor="White">

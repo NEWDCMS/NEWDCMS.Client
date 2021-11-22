@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UIKit;
-using Wesley.Effects.iOS.GestureRecognizers;
+using Wesley.Client.Effects.iOS.GestureRecognizers;
 
-namespace Wesley.Effects.iOS.GestureCollectors {
+namespace Wesley.Client.Effects.iOS.GestureCollectors {
     internal static class TouchGestureCollector {
         static Dictionary<UIView, GestureActionsContainer> Collection { get; } =
             new Dictionary<UIView, GestureActionsContainer>();

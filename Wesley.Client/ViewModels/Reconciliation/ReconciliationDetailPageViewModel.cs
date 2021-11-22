@@ -5,6 +5,7 @@ using Wesley.Client.Services.Sales;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive.Disposables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,13 +13,20 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 
+
 namespace Wesley.Client.ViewModels
 {
     public class ReconciliationDetailPageViewModel : ViewModelBaseCutom
     {
         private readonly IFinanceReceiveAccountService _financeReceiveAccountService;
+        [Reactive] public IList<FinanceReceiveAccountBillModel> TempBills { get; set; } = new ObservableCollection<FinanceReceiveAccountBillModel>();
         [Reactive] public IList<FinanceReceiveAccountBillModel> Bills { get; set; } = new ObservableCollection<FinanceReceiveAccountBillModel>();
         [Reactive] public FinanceReceiveAccountBillModel Selecter { get; set; }
+
+        [Reactive] public bool SelectedAll { get; set; }
+        [Reactive] public decimal SumCount { get; set; }
+        [Reactive] public string ConfirmText { get; set; }
+
 
         public ReconciliationDetailPageViewModel(INavigationService navigationService,
              IProductService productService,
@@ -27,8 +35,6 @@ namespace Wesley.Client.ViewModels
              IWareHousesService wareHousesService,
              IAccountingService accountingService,
              IFinanceReceiveAccountService financeReceiveAccountService,
-
-
              IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "单据信息";
@@ -62,13 +68,38 @@ namespace Wesley.Client.ViewModels
                         break;
                 }
                 Selecter = null;
+            }).DisposeWith(DeactivateWith);
+
+            //选择业务员
+            this.WhenAnyValue(x => x.Filter.BusinessUserId)
+             .Skip(1)
+             .Where(x => x > 0)
+             .Subscribe(x =>
+            {
+                var fillter = this.TempBills.Where(s => s.UserId == x).ToList();
+                this.Bills = new ObservableCollection<FinanceReceiveAccountBillModel>(fillter);
             });
+
+            //全选
+            this.WhenAnyValue(x => x.SelectedAll)
+                .Subscribe(x =>
+                {
+                    foreach (var b in this.Bills)
+                    {
+                        b.Selected = x;
+                    }
+                    CalcSum();
+                    var count = this.Bills.Where(s => s.Selected).Count();
+                    this.ConfirmText = $"确认上交({count})";
+
+                });
 
             //打印单据
             this.PrintCommand = ReactiveCommand.Create(() =>
             {
                 Alert("请选择单据！");
             });
+
 
             //上交对账单
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async (e) =>
@@ -95,10 +126,45 @@ namespace Wesley.Client.ViewModels
                 });
 
             });
-
-            this.ExceptionsSubscribe();
         }
 
+        public void CheckChanged()
+        {
+            CalcSum();
+            var count = this.Bills.Where(s => s.Selected).Count();
+            this.ConfirmText = $"确认上交({count})";
+        }
+
+
+        public void CalcSum()
+        {
+            var bills = this.Bills.Where(s => s.Selected).ToList();
+            decimal subCount = 0;
+            foreach (var b in bills)
+            {
+                switch (b.BillType)
+                {
+                    case (int)BillTypeEnum.SaleBill:
+                        subCount += b.SaleAmountSum;
+                        break;
+                    case (int)BillTypeEnum.ReturnBill:
+                        subCount += b.ReturnAmountSum;
+                        break;
+                    case (int)BillTypeEnum.CashReceiptBill:
+                        subCount += b.ReceiptCashOweCashAmountSum;
+                        break;
+                    case (int)BillTypeEnum.AdvanceReceiptBill:
+                        subCount += b.AdvanceReceiptSum;
+                        break;
+                    case (int)BillTypeEnum.CostExpenditureBill:
+                        subCount += b.CostExpenditureSum;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            this.SumCount = subCount;
+        }
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -126,6 +192,7 @@ namespace Wesley.Client.ViewModels
                 if (bills != null)
                 {
                     this.Bills = bills;
+                    this.TempBills = bills;
                 }
             }
         }

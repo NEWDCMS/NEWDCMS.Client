@@ -140,8 +140,7 @@
                             <MultiTrigger.Setters>
                                 <Setter Property="Content">
                                     <Setter.Value>
-                                        <Label TextColor="{StaticResource SecondaryTextColor}"
-                                               FontFamily="BSR">
+                                        <Label TextColor="{StaticResource SecondaryTextColor}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" 
                                                              Binding="{Binding Peer.IsOnline}"
@@ -186,8 +185,7 @@
                     
                     <Label Text="{Binding LastMessage.Content}"
                            TextColor="{StaticResource SecondaryTextColor}"
-                           LineBreakMode="TailTruncation"
-                           FontFamily="BSR"/>
+                           LineBreakMode="TailTruncation" />
                     
                 </ContentView>
             </StackLayout>
@@ -198,7 +196,6 @@
                    VerticalOptions="Center"
                    FontSize="Caption"
                    TextColor="{StaticResource SecondaryTextColor}"
-                   FontFamily="BSR"
                    HorizontalOptions="Center"
                    Margin="10">
                 <Label.Triggers>

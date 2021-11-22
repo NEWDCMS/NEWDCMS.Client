@@ -1,4 +1,4 @@
-﻿namespace Wesley.Easycharts.Forms
+﻿namespace DCMS.Easycharts.Forms
 {
     using SkiaSharp;
     using SkiaSharp.Views.Forms;

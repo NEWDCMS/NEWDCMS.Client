@@ -3,7 +3,6 @@ using Microsoft.AppCenter.Crashes;
 using System;
 namespace Wesley.Client.Pages
 {
-
     public partial class SystemSettingPage : BaseContentPage<SystemSettingPageViewModel>
     {
         public SystemSettingPage() : base()

@@ -1,4 +1,5 @@
 ﻿using Acr.UserDialogs;
+using Akavache;
 using Akavache.Sqlite3;
 using Android;
 using Android.Annotation;
@@ -9,53 +10,41 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using AndroidX.Core.Content;
-using Com.Baidu.Location;
-using Com.Baidu.Mapapi.Map;
-using Com.Baidu.Mapapi.Utils;
-using Wesley.Client.BaiduMaps;
 using Wesley.Client.Droid.AutoUpdater;
 using Wesley.Client.Droid.Utils;
-using Wesley.Client.Models.Census;
 using Wesley.Client.Pages;
 using FFImageLoading;
 using FFImageLoading.Forms.Platform;
 using ImageCircle.Forms.Plugin.Droid;
-using Microsoft.AppCenter.Crashes;
 using Rg.Plugins.Popup;
-using Shiny;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Xamarin.Forms;
+using Android.Media;
+using System.Reactive.Disposables;
+using Wesley.Client.BaiduMaps;
+using System.Threading.Tasks;
 using Platform = Xamarin.Essentials.Platform;
 using ZXingPlatform = global::ZXing.Net.Mobile.Forms.Android;
-using Android.Locations;
-
+using AndroidX.Annotations;
+using Wesley.Client.Services;
 
 namespace Wesley.Client.Droid
 {
     [Activity(Label = "@string/ApplicationName",
-        Icon = "@mipmap/ic_launcher",
+        Icon = "@mipmap/app",
         Theme = "@style/MainTheme",
-         MainLauncher = true,
-        //LaunchMode = LaunchMode.SingleTop,
+        LaunchMode = LaunchMode.SingleTask,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class MainActivity : BaseActivity
     {
         protected Context mContext;
         public static MainActivity Instance { set; get; }
-        private bool isBacking = false;
         private PowerManager.WakeLock _wakeLock;
 
-        /*
-        PARTIAL_WAKE_LOCK:保持CPU 运转，屏幕和键盘灯有可能是关闭的。
-        SCREEN_DIM_WAKE_LOCK：保持CPU 运转，允许保持屏幕显示但有可能是灰的，允许关闭键盘灯
-        SCREEN_BRIGHT_WAKE_LOCK：保持CPU 运转，允许保持屏幕高亮显示，允许关闭键盘灯
-        FULL_WAKE_LOCK：保持CPU 运转，保持屏幕高亮显示，键盘灯也保持亮度
-        ACQUIRE_CAUSES_WAKEUP：强制使屏幕亮起，这种锁主要针对一些必须通知用户的操作.
-        ON_AFTER_RELEASE：当锁被释放时，保持屏幕亮起一段时间**
-        */
 
         #region override
 
@@ -64,41 +53,60 @@ namespace Wesley.Client.Droid
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
-            //base.Window.RequestFeature(WindowFeatures.NoTitle);
-            //重置主题:(注意 RequestFeature 一定先于OnCreate执行)
             base.Window.RequestFeature(WindowFeatures.ActionBar);
             base.OnCreate(bundle);
-
-            //添加Activity
-            ActivityCollector.AddActivity(this);
 
             mContext = this;
             Instance = this;
 
-            #region 拷贝数据架构到本地存储
+            try
+            {
+                var width = Resources.DisplayMetrics.WidthPixels;
+                var height = Resources.DisplayMetrics.HeightPixels;
+                var density = Resources.DisplayMetrics.Density; //屏幕密度
+                App.ScreenWidth = width / density; //屏幕宽度
+                App.ScreenHeight = height / density; //屏幕高度
+            }
+            catch (System.Exception) { }
 
-            //try
-            //{
-            //    DbContext.LocalFilePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-            //    var fileName = System.IO.Path.Combine(DbContext.LocalFilePath, DbContext.DB_NAME);
-            //    if (!File.Exists(fileName))
-            //    {
-            //        using (var source = Assets.Open(DbContext.DB_NAME))
-            //        using (var dest = OpenFileOutput(DbContext.DB_NAME, FileCreationMode.Append))
-            //        {
-            //            source.CopyTo(dest);
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Crashes.TrackError(ex);
-            //}
+            //返回此活动是否为任务的根
+            if (!IsTaskRoot)
+            {
+                Finish();
+                return;
+            }
 
-            #endregion
+            PowerManager pm = (PowerManager)GetSystemService(Context.PowerService);
+            isPause = pm.IsScreenOn;
+            if (handler == null)
+                handler = new Handler();
 
-            //获取电源锁
-            AcquireWakeLock();
+
+            //注册广播,屏幕点亮状态监听，用于单独控制音乐播放
+            if (screenStateReceiver == null)
+            {
+                screenStateReceiver = new ScreenStateReceiver();
+                var intentFilter = new IntentFilter();
+                intentFilter.AddAction("_ACTION_SCREEN_OFF"); //熄屏
+                intentFilter.AddAction("_ACTION_SCREEN_ON");//点亮
+                intentFilter.AddAction("_ACTION_BACKGROUND");//后台
+                intentFilter.AddAction("_ACTION_FOREGROUND");//前台
+                RegisterReceiver(screenStateReceiver, intentFilter);
+            }
+
+
+            Window.AddFlags(WindowManagerFlags.KeepScreenOn);
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
+            {
+                Window.ClearFlags(WindowManagerFlags.TranslucentStatus);
+                Window.AddFlags(WindowManagerFlags.TranslucentNavigation);
+                TranslucentStatubar.Immersive(Window);
+                Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
+                Window.ClearFlags(WindowManagerFlags.Fullscreen);
+            }
+
+            //在andrioid m之后，必须在运行时请求权限
+            GetPersimmions();
 
             //图片裁切
             BitImageEditor.Droid.Platform.Init(this, bundle);
@@ -131,14 +139,11 @@ namespace Wesley.Client.Droid
                 VerbosePerformanceLogging = false,
                 VerboseMemoryCacheLogging = false,
                 VerboseLoadingCancelledLogging = false,
-                //Logger = new CustomLogger(),
             };
             ImageService.Instance.Initialize(config);
 
             #endregion 
 
-
-            Platform.Init(this, bundle);
             Forms.Init(this, bundle);
 
             //初始 对话框组件
@@ -147,49 +152,93 @@ namespace Wesley.Client.Droid
             //初始 ZXing
             ZXingPlatform.Platform.Init();
 
-            //注册Effects
-            Effects.Droid.Effects.Init(this);
+            LoadApplication(new App(new AndroidInitializer()));
 
-            this.LoadApplication(new App(new AndroidInitializer()));
-
-            //this.LoadApplication(new App());
-  
-            this.ShinyOnCreate();
-
-            //在andrioid m之后，必须在运行时请求权限
-            GetPersimmions();
         }
 
+
+        /// <summary>
+        /// 获取电源锁
+        /// </summary>
+        private void AcquireWakeLock()
+        {
+            if (null == _wakeLock)
+            {
+                PowerManager pm = (PowerManager)GetSystemService(Context.PowerService);
+                _wakeLock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.OnAfterRelease, "MyWakelockTag");
+                if (_wakeLock != null)
+                {
+
+                    this.SendBroadcast(new Intent("_ACTION_SCREEN_ON"));
+                    _wakeLock.Acquire();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 释放电源锁
+        /// </summary>
+        private void ReleaseWakeLock()
+        {
+            if (null != _wakeLock || _wakeLock.IsHeld)
+            {
+                this.SendBroadcast(new Intent("_ACTION_SCREEN_OFF"));
+                _wakeLock.Release();
+                _wakeLock = null;
+            }
+        }
+
+
+        /// <summary>
+        /// 当屏幕获取焦点时
+        /// </summary>
+        /// <param name="hasFocus"></param>
         public override void OnWindowFocusChanged(bool hasFocus)
         {
             base.OnWindowFocusChanged(hasFocus);
-            //Activity加载完毕（完成渲染）清空背景图片
-            base.Window.SetBackgroundDrawable(null);
-
             if (hasFocus)
             {
-                //状态栏
-                base.Window.AddFlags(WindowManagerFlags.Fullscreen);
-                base.Window.AddFlags(WindowManagerFlags.KeepScreenOn);
-                base.Window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
-                //if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
-                //{
-                //    base.Window.DecorView.SetFitsSystemWindows(true);
-                //    base.Window.SetStatusBarColor(Android.Graphics.Color.Transparent);
-                //}
-                //移除Activity
-                //ActivityCollector.Finish("SplashActivity");
+                TranslucentStatubar.Immersive(Window);
             }
+        }
+
+        /// <summary>
+        /// 在应用程序恢复后被发送到后台时调用
+        /// </summary>
+        protected override void OnResume()
+        {
+            try
+            {
+                base.OnResume();
+                //获取电源锁
+                AcquireWakeLock();
+                TranslucentStatubar.Immersive(Window);
+
+            }
+            catch (System.NullReferenceException)
+            {
+            }
+            catch (System.Exception) { }
         }
 
         protected override void OnStart()
         {
             base.OnStart();
-            if (CheckSelfPermission(Manifest.Permission.AccessCoarseLocation) != (int)Permission.Granted)
+            this.Set();
+            this.TryRun();
+
+            //播放无声音乐
+            if (mediaPlayer == null)
             {
-                RequestPermissions(new string[] { Manifest.Permission.AccessCoarseLocation, Manifest.Permission.AccessFineLocation }, 1);
+                mediaPlayer = MediaPlayer.Create(this, Resource.Raw.cactus);
+                if (mediaPlayer != null)
+                {
+                    mediaPlayer.SetVolume(0f, 0f);
+                    mediaPlayer.SetOnCompletionListener(new OnCompletionListener());
+                    mediaPlayer.SetOnErrorListener(new OnErrorListener());
+                    Play();
+                }
             }
-            InitGPS();
         }
 
         protected override void OnStop()
@@ -197,168 +246,156 @@ namespace Wesley.Client.Droid
             base.OnStop();
         }
 
-        protected override void OnDestroy()
+        protected override void OnPause()
         {
-            base.OnDestroy();
-
-            //移除Activity
-            ActivityCollector.RemoveActivity(this);
+            base.OnPause();
             //释放电源锁
             ReleaseWakeLock();
         }
 
-        /// <summary>
-        /// 软导航后退
-        /// </summary>
-        public override void OnBackPressed()
+        protected override void OnDestroy()
         {
-            var actionPage = App.Current.MainPage;
-            if (!Wesley.BitImageEditor.ImageEditor.IsOpened)
-                Wesley.BitImageEditor.Droid.Platform.OnBackPressed();
+            try
+            {
+                this.disposer?.Dispose();
+                this.disposer = null;
 
-            if (actionPage?.Navigation != null && actionPage?.Navigation?.NavigationStack?.Count != 0)
-            {
-                actionPage = actionPage.Navigation.NavigationStack.Last();
-                if (null != actionPage && actionPage is MainLayoutPage)
-                {
-                    if (isBacking)
-                    {
-                        Finish();
-                    }
-                    else
-                    {
-                        isBacking = true;
-                        ToastUtils.ShowSingleToast("再按一次退出");
-                    }
-                }
-                else if (actionPage is LoginPage)
-                {
-                    MoveTaskToBack(true);
-                }
-                else
-                {
-                    Popup.SendBackPressed(base.OnBackPressed);
-                }
+                //卸载广播
+                UnregisterReceiver(screenStateReceiver);
+
+                //BlobCache.Shutdown()方法对 Akavache 缓存的完整性至关重要。
+                //当您的应用程序关闭时，您必须调用它。而且，一定要等待结果：
+                //不这样做可能意味着排队的项目不会刷新到缓存中。
+                BlobCache.Shutdown().Wait();
             }
-            else
+            catch (System.Exception) { }
+            finally
             {
-                Popup.SendBackPressed(base.OnBackPressed);
+                base.OnDestroy();
             }
         }
 
-        DateTime? lastBackKeyDownTime;//记录上次按下Back的时间
+
+
+
+        private DateTime? lastBackKeyDownTime;
         public override bool OnKeyDown([GeneratedEnum] Keycode keyCode, KeyEvent e)
         {
             if (keyCode == Keycode.Back && e.Action == KeyEventActions.Down)
             {
-                if (!lastBackKeyDownTime.HasValue || DateTime.Now - lastBackKeyDownTime.Value > new TimeSpan(0, 0, 2))
+                //这里解决Popup 弹出后，点击回退健时不能释放Popup问题
+                Device.BeginInvokeOnMainThread(async () =>
+                {
+                    if (PopupNavigation.Instance.PopupStack.Count > 0)
+                        await PopupNavigation.Instance.PopAllAsync();
+                });
+
+                if (!lastBackKeyDownTime.HasValue || (DateTime.Now - lastBackKeyDownTime.Value) > new TimeSpan(0, 0, 2))
                 {
                     var actionPage = App.Current.MainPage;
                     if (actionPage?.Navigation != null && actionPage?.Navigation?.NavigationStack?.Count != 0)
                     {
                         actionPage = actionPage.Navigation.NavigationStack.Last();
-                        if (null != actionPage && actionPage is MainLayoutPage)
+                        if (null != actionPage)
                         {
-                            ToastUtils.ShowSingleToast("再按一次退出程序");
-                            lastBackKeyDownTime = DateTime.Now;
-                            return true;
-                        }
-                        else if (actionPage is LoginPage)
-                        {
-                            MoveTaskToBack(true);
-                        }
-                        else
-                        {
-                            if (actionPage != null)
+                            if (actionPage is MainLayoutPage)
+                            {
+                                ToastUtils.ShowSingleToast("再按一次退出程序");
+
+                                lastBackKeyDownTime = DateTime.Now;
+                                return true;
+                            }
+                            else if (actionPage is LoginPage)
+                            {
+                                MoveTaskToBack(true);
+                                return false;
+                            }
+                            else
                             {
                                 Device.BeginInvokeOnMainThread(async () =>
                                 {
-                                    Popup.SendBackPressed(base.OnBackPressed);
-                                    await actionPage?.Navigation.PopAsync();
+                                    await actionPage?.Navigation.PopAsync(true);
                                 });
                             }
-                            return false;
                         }
-                    }
-                    else
-                    {
-                        ToastUtils.ShowSingleToast("再按一次退出程序");
-                        lastBackKeyDownTime = DateTime.Now;
                     }
                 }
                 else
                 {
-                    Intent intent = new Intent();
-                    intent.SetClass(this, typeof(SplashActivity));
-                    StartActivity(intent);
+                    //移除Activity
+                    AppManager.Instance().ExitApp();
                 }
-
                 return true;
             }
-
             return base.OnKeyDown(keyCode, e);
         }
 
-        protected override void OnResume()
-        {
-            base.OnResume();
-        }
-
+        /// <summary>
+        /// 内存紧张时释放内存
+        /// </summary>
         public override void OnTrimMemory(TrimMemory level)
         {
-            FFImageLoading.ImageService.Instance.InvalidateMemoryCache();
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-            base.OnTrimMemory(level);
-        }
 
-        public override void OnLowMemory()
-        {
-            FFImageLoading.ImageService.Instance.InvalidateMemoryCache();
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-            base.OnLowMemory();
-        }
+            //RunningModerate = 5, 系统已经进入了低内存的状态，你的进程正在运行但是不会被杀死。
 
-        protected override void OnNewIntent(Intent intent)
-        {
-            base.OnNewIntent(intent);
-            this.ShinyOnNewIntent(intent);
-        }
+            //RunningLow = 10,
 
-        private static readonly int REQUEST_CODE_GPS = 1;
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent intent)
-        {
-            base.OnActivityResult(requestCode, resultCode, intent);
-            Wesley.BitImageEditor.Droid.Platform.OnActivityResult(requestCode, resultCode, intent);
-        }
+            //RunningCritical = 15,虽然你的进程不会被杀死，但是系统已经开始准备杀死其他的后台进程了，这时候你应该释放无用资源以防止性能下降。下一个阶段就是调用"onLowMemory()"来报告开始杀死后台进程了，特别是状况已经开始影响到用户。
 
-        private void InitGPS()
-        {
-            LocationManager locationManager = (LocationManager)GetSystemService(Context.LocationService);
-            //判断GPS是否开启，没有开启，则开启
-            if (!locationManager.IsProviderEnabled(LocationManager.GpsProvider))
+            //TRIM_MEMORY_RUNNING_LOW：虽然你的进程不会被杀死，但是系统已经开始准备杀死其他的后台进程了，你应该释放不必要的资源来提供系统性能，否则会影响用户体验
+
+
+            //UiHidden = 20,当前进程的界面已经不可见，这时是释放UI相关的资源的好时机。
+
+            //Background = 40,当前进程在LRU列表的头部，虽然你的进程不会被高优杀死，但是系统已经开始准备杀死LRU列表中的其他进程了，
+            //因此你应该尽量的释放能够快速回复的资源，以保证当用户返回你的app时可以快速恢复
+
+            //Moderate = 60, 当前进程在LRU列表的中部，如果系统进一步需要内存，你的进程可能会被杀死。
+
+            //Complete = 80 当前进程在LRU列表的尾部，如果没有足够的内存，它将很快被杀死。这时候你应该释放任何不影响app运行的资源。
+
+            try
             {
-                OpenGPSDialog();
+                ImageService.Instance.InvalidateMemoryCache();
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+                base.OnTrimMemory(level);
+            }
+            catch (Java.Util.Concurrent.TimeoutException ex)
+            {
+
             }
         }
 
-        private void OpenGPSDialog()
+        /// <summary>
+        /// 低内存时强制回收
+        /// </summary>
+        public override void OnLowMemory()
         {
-            AlertDialog.Builder b = new AlertDialog.Builder(this);
-            b.SetTitle("请打开GPS连接")
-                .SetIcon(Resource.Drawable.water_drop)
-                .SetMessage("为了提高定位的准确度，更好的为您服务，请打开GPS")
-                .SetPositiveButton("设置", (s, e) =>
-                {
-                    //跳转到手机打开GPS页面
-                    Intent intent = new Intent(Android.Provider.Settings.ActionLocationSourceSettings);
-                    //设置完成后返回原来的界面
-                    StartActivityForResult(intent, REQUEST_CODE_GPS);
+            try
+            {
+                ImageService.Instance.InvalidateMemoryCache();
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+                base.OnLowMemory();
+            }
+            catch (Java.Util.Concurrent.TimeoutException ex)
+            {
 
-                }).SetNeutralButton("取消", (s, e) =>
-                { 
-                });
-            b.Create();
-            b.Show();
+            }
+        }
+
+        /// <summary>
+        /// 获取intent传递值
+        /// </summary>
+        /// <param name="intent"></param>
+        protected override void OnNewIntent(Intent intent)
+        {
+            base.OnNewIntent(intent);
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent intent)
+        {
+            base.OnActivityResult(requestCode, resultCode, intent);
+            BitImageEditor.Droid.Platform.OnActivityResult(requestCode, resultCode, intent);
         }
 
         /// <summary>
@@ -369,152 +406,226 @@ namespace Wesley.Client.Droid
         /// <param name="grantResults"></param>
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
-            //Essentials
-            Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            //Shiny
-            this.ShinyOnRequestPermissionsResult(requestCode, permissions, grantResults);
             //Base
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            //Essentials
+            Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        private void AcquireWakeLock()
-        {
-            if (null == _wakeLock)
-            {
-                PowerManager pm = (PowerManager)GetSystemService(Context.PowerService);
-                _wakeLock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.OnAfterRelease, "MyWakelockTag");
-                if (_wakeLock != null)
-                {
-                    _wakeLock.Acquire();
-                }
-            }
-        }
-
-        private void ReleaseWakeLock()
-        {
-            if (null != _wakeLock || _wakeLock.IsHeld)
-            {
-                _wakeLock.Release();
-                _wakeLock = null;
-            }
-        }
 
         #endregion
-
 
         /// <summary>
         /// 请求权限
         /// </summary>
-        [TargetApi(Value = 23)]
+        [RequiresApi(Value = 24)]
         private void GetPersimmions()
         {
-            //var currentActivity = MainActivity.Instance;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
+            //ACCESS_FINE_LOCATION
+            var permissions = new List<string>()
             {
-                List<string> permissions = new List<string>();
-                /***
-                 * 定位权限为必须权限，用户如果禁止，则每次进入都会申请
-                 */
-                // 定位精确位置
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessFineLocation) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.AccessFineLocation);
-                }
+               Manifest.Permission.Camera,
+               Manifest.Permission.RecordAudio,
+               Manifest.Permission.AccessFineLocation,
+               Manifest.Permission.WriteExternalStorage,
+               Manifest.Permission.AccessFineLocation,
+               Manifest.Permission.AccessBackgroundLocation,
+               Manifest.Permission.ForegroundService,
+               Manifest.Permission.AccessNetworkState,
+               Manifest.Permission.Internet,
+               Manifest.Permission.AccessCoarseLocation,
+               Manifest.Permission.AccessNetworkState,
+               Manifest.Permission.ReadExternalStorage,
+               Manifest.Permission.WriteSettings,
+               Manifest.Permission.AccessWifiState,
+               Manifest.Permission.WriteExternalStorage
+            };
 
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessBackgroundLocation) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.AccessBackgroundLocation);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.ForegroundService) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.ForegroundService);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessNetworkState) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.AccessNetworkState);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.Internet) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.Internet);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessCoarseLocation) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.AccessCoarseLocation);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessNetworkState) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.AccessNetworkState);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.ReadExternalStorage) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.ReadExternalStorage);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.WriteSettings) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.WriteSettings);
-                }
-
-                if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessWifiState) != Permission.Granted)
-                {
-                    permissions.Add(Manifest.Permission.AccessWifiState);
-                }
-
-                //读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
-                // 读写权限
-                if (AddPermission(permissions, Manifest.Permission.WriteExternalStorage))
-                {
-                    //permissionInfo += "Manifest.permission.WRITE_EXTERNAL_STORAGE Deny \n";
-                }
-
-                if (permissions.Count > 0)
-                {
-                    //private final int SDK_PERMISSION_REQUEST = 127;
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
+            {
+                if (permissions.FirstOrDefault(x => ContextCompat.CheckSelfPermission(this, x) != Permission.Granted) != null)
                     RequestPermissions(permissions.ToArray(), 127);
+            }
+        }
+
+
+        public static TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(30);
+        CompositeDisposable? disposer;
+        void Set()
+        {
+            this.disposer ??= new CompositeDisposable();
+            this.disposer.Add
+            (
+                Observable
+                    .Interval(Interval)
+                    .Subscribe(_ => this.TryRun())
+            );
+        }
+
+        static bool running = false;
+        void TryRun()
+        {
+            try
+            {
+                if (running)
+                    return;
+
+                var loc = App.Resolve<IBaiduLocationService>();
+                if (loc != null)
+                {
+                    if (!loc.IsStarted())
+                    {
+                        System.Diagnostics.Debug.Print("启动IBaiduLocationService....");
+
+                        loc?.Start();
+                        running = false;
+                    }
+                    else
+                    {
+                        running = true;
+                    }
                 }
             }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.Message);
+            }
+        }
 
+
+
+        #region KeeepLive
+
+        private ScreenStateReceiver screenStateReceiver;
+
+        //控制暂停
+        private static bool isPause = true;
+        private static MediaPlayer mediaPlayer;
+        private static Handler handler;
+
+        /// <summary>
+        /// 屏幕息屏亮屏与前后台切换广播
+        /// </summary>
+        protected class ScreenStateReceiver : BroadcastReceiver
+        {
+            public override void OnReceive(Context? context, Intent intent)
+            {
+                if (intent.Action.Equals("_ACTION_SCREEN_OFF"))
+                {
+                    // 熄屏
+                    //播放
+                    Play();
+                }
+                else if (intent.Action.Equals("_ACTION_SCREEN_ON"))
+                {
+                    //亮屏
+                    //暂停
+                    Pause();
+
+                }
+                else if (intent.Action.Equals("_ACTION_BACKGROUND"))
+                {
+                    //后台
+                    //播放
+                    Play();
+                    //后台回调
+                    OnBackground(true);
+                }
+                else if (intent.Action.Equals("_ACTION_FOREGROUND"))
+                {
+                    //前台
+                    //暂停
+                    Pause();
+                    //前台回调
+                    OnBackground(false);
+                }
+            }
+        }
+
+
+        public class OnCompletionListener : Java.Lang.Object, MediaPlayer.IOnCompletionListener
+        {
+            public void OnCompletion(MediaPlayer mediaPlayer)
+            {
+                if (!isPause)
+                {
+                    Play();
+
+                    //ROGUE
+                    //if (KeepLive.runMode == KeepLive.RunMode.ROGUE)
+                    //{
+                    //    Play();
+                    //}
+                    //else
+                    //{
+                    //    if (handler != null)
+                    //    {
+                    //        handler.PostDelayed(() =>
+                    //        {
+                    //            new Thread(() =>
+                    //            {
+                    //                Play();
+
+                    //            }).Start();
+
+                    //        }, 5000);
+                    //    }
+                    //}
+                }
+            }
+        }
+
+        public class OnErrorListener : Java.Lang.Object, MediaPlayer.IOnErrorListener
+        {
+            public bool OnError(MediaPlayer mp, [GeneratedEnum] MediaError what, int extra)
+            {
+                return false;
+            }
         }
 
         /// <summary>
-        /// 添加权限
+        /// 播放
         /// </summary>
-        /// <param name="permissionsList"></param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        [TargetApi(Value = 23)]
-        private bool AddPermission(List<string> permissionsList, string permission)
+        private static void Play()
         {
-            // 如果应用没有获得对应权限,则添加到列表中,准备批量申请
-            if (ContextCompat.CheckSelfPermission(Android.App.Application.Context, Manifest.Permission.AccessCoarseLocation) != Permission.Granted)
+            if (mediaPlayer != null && !mediaPlayer.IsPlaying)
             {
-                if (ShouldShowRequestPermissionRationale(permission))
-                {
-                    return true;
-                }
-                else
-                {
-                    permissionsList.Add(permission);
-                    return false;
-                }
-            }
-            else
-            {
-                return true;
+                mediaPlayer.Start();
             }
         }
 
+        /// <summary>
+        /// 暂停
+        /// </summary>
+        private static void Pause()
+        {
+            if (mediaPlayer != null && mediaPlayer.IsPlaying)
+            {
+                mediaPlayer.Pause();
+            }
+        }
+
+        /// <summary>
+        /// 是否是在后台
+        /// </summary>
+        public static void OnBackground(bool background)
+        {
+            if (MainApplication.BACKGROUND_CALLBACKS.Any())
+            {
+                foreach (var it in MainApplication.BACKGROUND_CALLBACKS)
+                {
+                    it.onBackground(background);
+                }
+            }
+        }
+
+        #endregion
     }
 
 
+
     /// <summary>
-    /// Ensure the Akavache.Sqlite3 dll will not be removed by Xamarin build tools
+    /// 确保Akavache.Sqlite3 dll不会被Xamarin构建工具删除
     /// </summary>
     public static class LinkerPreserve
     {
@@ -522,337 +633,7 @@ namespace Wesley.Client.Droid
         {
             _ = typeof(SQLitePersistentBlobCache).FullName;
             _ = typeof(SQLiteEncryptedBlobCache).FullName;
-        }
-    }
 
-    public class BaiduLocationServiceImpl : IBaiduLocationService
-    {
-        private static LocationClient client = null;
-        private static LocationClientOption mOption;
-        private static MyLocationListener myLocationListener;
-        //private readonly Context _context;
-        private bool IsDisposed = false;
-
-        //private Notification mNotification;
-        private readonly MapView _mapView;
-        private readonly object objLock = new Object();
-
-        public BaiduLocationServiceImpl(MapView mapView, Context context)
-        {
-            _mapView = mapView;
-            //_context = context;
-
-            // 注册定位监听
-            myLocationListener = new MyLocationListener((lct) =>
-            {
-                if (_mapView != null && lct != null)
-                {
-                    //初始化坐标转换工具类，指定源坐标类型和坐标数据
-                    CoordinateConverter converter = new CoordinateConverter()
-                            .From(CoordinateConverter.CoordType.Gps)
-                            .Coord(new Com.Baidu.Mapapi.Model.LatLng(lct.Latitude, lct.Longitude));
-                    //desLatLng 转换后的坐标
-                    var lcts = converter.Convert();
-                    GlobalSettings.UpdatePoi(lct.Latitude, lct.Longitude);
-
-                    //此处设置开发者获取到的方向信息，顺时针0 - 360
-                    var locData = new MyLocationData.Builder()
-                        .Accuracy(lct.Radius)
-                        .Direction(lct.Direction).Latitude(lcts.Latitude)
-                        .Longitude(lcts.Longitude)
-                        .Build();
-
-                    try
-                    {
-                        if (_mapView != null && _mapView.Map != null)
-                            _mapView.Map.SetMyLocationData(locData);
-                    }
-                    catch (System.ObjectDisposedException )
-                    { 
-                    
-                    }
-                }
-            });
-
-            client = new LocationClient(context)
-            {
-                // 设置定位参数
-                LocOption = GetDefaultLocationClientOption()
-            };
-        }
-
-        public LocationClientOption GetDefaultLocationClientOption()
-        {
-            if (mOption == null)
-            {
-                mOption = new LocationClientOption();
-                //高精度
-                mOption.SetLocationMode(LocationClientOption.LocationMode.HightAccuracy);
-                //附近地址
-                mOption.SetIsNeedAddress(true);
-                // 可选，默认0，即仅定位一次，设置发起连续定位请求的间隔需要大于等于1000ms才是有效的
-                mOption.ScanSpan = 3000;
-                // 可选，默认gcj02，设置返回的定位结果坐标系，如果配合百度地图使用，建议设置为bd09ll;
-                mOption.CoorType = "bd09ll";
-                // 可选，默认false，设置是否开启Gps定位
-                mOption.OpenGps = true;
-                // 可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop
-                mOption.SetIgnoreKillProcess(true);
-                // 可选，默认false，设置是否需要位置语义化结果，可以在BDLocation
-                mOption.SetIsNeedLocationDescribe(true);
-                // 可选，默认false，设置是否需要POI结果，可以在BDLocation
-                mOption.SetIsNeedLocationPoiList(true);
-            }
-            return mOption;
-        }
-
-        public void Converter(Map map,double lat,double lng)
-        {
-            //初始化坐标转换工具类，指定源坐标类型和坐标数据
-            CoordinateConverter converter = new CoordinateConverter()
-                    .From(CoordinateConverter.CoordType.Gps)
-                    .Coord(new Com.Baidu.Mapapi.Model.LatLng(lat, lng));
-
-            //desLatLng 转换后的坐标
-            var lct = converter.Convert();
-
-            if (map != null)
-                map.Center = new Coordinate(lct.Latitude, lct.Longitude);
-
-          
-            //当前位置
-            if (!IsDisposed)
-            {
-                // 此处设置开发者获取到的方向信息，顺时针0-360
-                var locData = new MyLocationData.Builder().Latitude(lct.Latitude)
-                    .Longitude(lct.Longitude)
-                    .Build();
-
-                try
-                {
-                    if (_mapView != null && _mapView.Map != null)
-                        _mapView.Map.SetMyLocationData(locData);
-                }
-                catch (System.ObjectDisposedException)
-                {
-
-                }
-            }
-
-            GlobalSettings.UpdatePoi(lct.Latitude, lct.Longitude);
-        }
-
-        public void Converter(double lat, double lng)
-        {
-            //初始化坐标转换工具类，指定源坐标类型和坐标数据
-            CoordinateConverter converter = new CoordinateConverter()
-                    .From(CoordinateConverter.CoordType.Gps)
-                    .Coord(new Com.Baidu.Mapapi.Model.LatLng(lat, lng));
-            //desLatLng 转换后的坐标
-            var lct = converter.Convert();
-            GlobalSettings.UpdatePoi(lct.Latitude, lct.Longitude);
-        }
-
-
-        public void Start()
-        {
-            lock (objLock)
-            {
-                IsDisposed = false;
-
-                if (client != null && !client.IsStarted)
-                {
-                    RegisterListener(myLocationListener);
-                    //启用前台服务
-                    //ForegroundNotification(_context);
-                    //开始服务
-                    client.Start();
-                }
-            }
-        }
-
-        public void Stop()
-        {
-            lock (objLock)
-            {
-                if (client != null && client.IsStarted)
-                {
-                    //关闭前台定位，同时移除通知栏
-                    client?.DisableLocInForeground(true);
-                    client.Stop();
-                }
-            }
-        }
-
-        public void OnDestroy()
-        {
-            try
-            {
-                lock (objLock)
-                {
-                    IsDisposed = true;
-
-                    if (client != null)
-                    {
-                        //停止Baidu定位服务
-                        if (client.IsStarted)
-                            client?.Stop();
-
-                        //关闭前台定位服务
-                        client?.DisableLocInForeground(true);
-
-                        //取消之前注册的 BDAbstractLocationListener 定位监听函数
-                        UnregisterListener(myLocationListener);
-                    }
-                }
-            }
-            catch (Java.Lang.Exception ex)
-            {
-                Crashes.TrackError(ex);
-            }
-        }
-
-        public bool RegisterListener(BDAbstractLocationListener listener)
-        {
-            bool isSuccess = false;
-            if (listener != null)
-            {
-                client.RegisterLocationListener(listener);
-                isSuccess = true;
-            }
-            return isSuccess;
-        }
-
-        public void UnregisterListener(BDAbstractLocationListener listener)
-        {
-            if (listener != null)
-            {
-                client.UnRegisterLocationListener(listener);
-            }
-        }
-
-        ///// <summary>
-        ///// android8.0 初始化前台服务
-        ///// </summary>
-        //private void ForegroundNotification(Context context)
-        //{
-        //    try
-        //    {
-        //        if (context == null)
-        //            return;
-
-        //        if (mNotification == null)
-        //        {
-        //            //设置后台定位
-        //            //android8.0及以上使用NotificationUtils
-        //            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-        //            {
-        //                var notificationUtils = new NotificationUtils(context);
-        //                var builder = notificationUtils.GetAndroidChannelNotification("Wesley", "正在后台定位");
-        //                mNotification = builder.Build();
-        //            }
-        //            else
-        //            {
-        //                //获取一个Notification构造器
-        //                Notification.Builder builder = new Notification.Builder(context, NotificationUtils.ANDROID_CHANNEL_ID);
-        //                Intent nfIntent = new Intent(context, typeof(MainActivity));
-
-        //                var currenttimemillis = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
-
-        //                builder.SetContentIntent(PendingIntent.GetActivity(context, 0, nfIntent, 0))
-        //                    .SetContentTitle("Wesley定位服务")
-        //                    .SetSmallIcon(Android.Resource.Mipmap.SymDefAppIcon)
-        //                    .SetContentText("正在后台定位")
-        //                    .SetWhen(currenttimemillis);
-
-        //                //获取构建好的Notification
-        //                mNotification = builder.Build();
-        //            }
-
-        //            // 将定位SDK的SERVICE设置成为前台服务, 提高定位进程存活率
-        //            client?.EnableLocInForeground(1001, mNotification);
-        //        }
-        //    }
-        //    catch (Java.Lang.Exception ex)
-        //    {
-        //        Crashes.TrackError(ex);
-        //    }
-        //}
-
-    }
-
-    /// <summary>
-    /// 侦听器
-    /// </summary>
-    public class MyLocationListener : BDAbstractLocationListener
-    {
-        readonly Action<BDLocation> _update;
-
-        public MyLocationListener(Action<BDLocation> update)
-        {
-            _update = update;
-        }
-
-        public override void OnReceiveLocation(BDLocation lct)
-        {
-            if (lct == null)
-                return;
-
-            try
-            {
-                _update?.Invoke(lct);
-
-                var asyncTasker = new AsyncTasker(async () =>
-                {
-                    try
-                    {
-                        if (lct != null)
-                        {
-                            var msg = $"OnReceiveLocation:{lct.Latitude} Latitude:{lct.Longitude} Address:{lct.Country}{lct.Province}{lct.City}{lct.Address?.Street}";
-                            Android.Util.Log.Info("获取位置：", msg);
-
-                            //GlobalSettings.UpdatePoi(lct.Latitude, lct.Longitude);
-
-                            var _conn = App.Resolve<LocalDatabase>();
-                            var tracking = new TrackingModel()
-                            {
-                                StoreId = Settings.StoreId,
-                                BusinessUserId = Settings.UserId,
-                                BusinessUserName = Settings.UserRealName,
-                                Latitude = lct.Latitude,
-                                Longitude = lct.Longitude,
-                                CreateDateTime = DateTime.Now,
-                                Province = lct.Province,
-                                County = lct.Country,
-                                City = lct.City,
-                                Address = $"{lct.Country}{lct.Province}{lct.City}{lct.Address?.Street}"
-                            };
-
-                            //存储本地  
-                            if (!string.IsNullOrWhiteSpace(tracking.Address))
-                            {
-                                var lg = await _conn.LocationSyncEvents.CountAsync();
-                                if (lg > 50)
-                                {
-                                    await _conn.RemoveTopLocation();
-                                }
-                                await _conn.InsertAsync(tracking);
-                            }
-                        }
-                    }
-                    catch (Java.Lang.Exception ex)
-                    {
-                        Crashes.TrackError(ex);
-                    }
-                });
-                asyncTasker.Execute();
-
-            }
-            catch (Java.Lang.Exception ex)
-            {
-                Android.Util.Log.Error("上报", ex.Message);
-                Crashes.TrackError(ex);
-            }
         }
     }
 
@@ -871,50 +652,15 @@ namespace Wesley.Client.Droid
         {
             this.Action = action;
         }
+
         protected override Java.Lang.Void RunInBackground(params Java.Lang.Void[] @params)
         {
             if (this.Action == null)
                 return null;
+
             this.Action();
+
             return null;
-        }
-    }
-
-    public class ActivityCollector
-    {
-        private static readonly Dictionary<string, Activity> Activities = new Dictionary<string, Activity>();
-        public static void AddActivity(Activity activity)
-        {
-            var name = activity.GetType().Name;
-            if (Activities.Where(s => s.Key == name).Count() == 0)
-                Activities.Add(name, activity);
-        }
-        public static void RemoveActivity(Activity activity)
-        {
-            if (Activities.Any())
-                Activities.Remove(activity.GetType().Name);
-        }
-
-        public static void FinishAll()
-        {
-            foreach (var activity in Activities)
-            {
-                if (!activity.Value.IsFinishing)
-                {
-                    activity.Value.Finish();
-                }
-            }
-            Activities.Clear();
-        }
-
-        public static void Finish(string key)
-        {
-            var ac = Activities.Where(s => s.Key == key).FirstOrDefault();
-            if (ac.Value != null)
-            {
-                ac.Value.Finish();
-                Activities.Remove(ac.Key);
-            }
         }
     }
 }

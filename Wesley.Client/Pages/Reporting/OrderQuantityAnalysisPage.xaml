@@ -35,7 +35,6 @@
             <yummy:PancakeView IsClippedToBounds="true"
                                CornerRadius="10"
                                BackgroundColor="#eeeeee"
-                             
                                HorizontalOptions="FillAndExpand"
                                Margin="5">
                 <StackLayout Padding="5">
@@ -167,7 +166,7 @@
                        HorizontalOptions="EndAndExpand"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.Today.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.Today.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="3"
@@ -194,7 +193,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.Yesterday.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.Yesterday.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="5"
@@ -221,7 +220,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.BeforeYesterday.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.BeforeYesterday.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="7"
@@ -248,7 +247,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.LastWeek.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.LastWeek.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="9"
@@ -275,7 +274,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.ThisWeek.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.ThisWeek.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="11"
@@ -302,7 +301,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.LastMonth.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.LastMonth.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="13"
@@ -329,7 +328,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.ThisMonth.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.ThisMonth.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <BoxView Grid.Row="15"
                          Grid.Column="0"
@@ -355,7 +354,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.ThisYear.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.ThisYear.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <!--TR-->
                 <BoxView Grid.Row="17"
@@ -382,7 +381,7 @@
                        HorizontalOptions="End"
                        VerticalOptions="Center"
                        Style="{StaticResource GridCellStyle}"
-                       Text="{Binding ChartData.ThisYear.NetAmount,Converter={StaticResource NullableDecimalConverter},ConverterParameter='0.00',StringFormat='{0:F2}'}"
+                       Text="{Binding ChartData.ThisYear.NetAmount,Converter={StaticResource NullableDecimalConverter},StringFormat='{0:F2}'}"
                        Margin="{StaticResource MR10}" />
                 <BoxView Grid.Row="19"
                          Grid.Column="0"

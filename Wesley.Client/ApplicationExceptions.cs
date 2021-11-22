@@ -1,8 +1,4 @@
 ﻿using System;
-using ReactiveUI;
-using Shiny;
-using Wesley.Client.Services;
-
 namespace Wesley.Client
 {
     public static class ApplicationExceptions
@@ -17,22 +13,12 @@ namespace Wesley.Client
             };
         }
     }
-    public class ServerException : Exception{}
-    public class NetworkException : Exception{}
 
-    /// <summary>
-    /// 全局异常处理
-    /// </summary>
-    public class GlobalExceptionHandler : IObserver<Exception>, IShinyStartupTask
+    public class ServerException : Exception
     {
-        readonly IDialogService _dialogs;
-        public GlobalExceptionHandler(IDialogService dialogs) => this._dialogs = dialogs;
-        public void Start() => RxApp.DefaultExceptionHandler = this;
-        public void OnCompleted() { }
-        public void OnError(Exception error) { }
-        public void OnNext(Exception value)
-        {
-            this._dialogs.ShortAlert(value.ToString());
-        }
+    }
+
+    public class NetworkException : Exception
+    {
     }
 }

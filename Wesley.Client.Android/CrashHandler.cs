@@ -51,7 +51,7 @@ namespace DCMS.Client.Droid
         /// 初始化
         /// </summary>
         /// <param name="context"></param>
-        public void Init()
+        public void Init(Context context)
         {
             //mContext = context;
             //获取系统默认的UncaughtException处理器

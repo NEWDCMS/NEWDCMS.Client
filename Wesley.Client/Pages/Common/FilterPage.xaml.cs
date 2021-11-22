@@ -1,29 +1,19 @@
 ﻿using Wesley.Client.ViewModels;
 using Microsoft.AppCenter.Crashes;
 using System;
-using Xamarin.Forms;
 namespace Wesley.Client.Pages.Common
 {
 
     public partial class FilterPage : BaseContentPage<FilterPageViewModel>
     {
-        protected override void OnAppearing()
+        public FilterPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                InitializeComponent();
             }
-        }
+            catch (Exception ex) { Crashes.TrackError(ex); }
 
+        }
     }
 }

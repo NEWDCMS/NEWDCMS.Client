@@ -1,21 +1,18 @@
-﻿using Android.Runtime;
-using Android.Views;
-using Android.Views.InputMethods;
+﻿using Android.Views.InputMethods;
 using Android.Widget;
-using Wesley.Effects;
-using Wesley.Effects.Droid;
+using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
 using Google.Android.Material.TextField;
 using System;
 using System.Linq;
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 using Context = Android.Content.Context;
 using View = Android.Views.View;
 
 
 [assembly: ExportEffect(typeof(KeyboardEnableAndroidEffect), nameof(KeyboardEnableEffect))]
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
     public class KeyboardEnableAndroidEffect : PlatformEffect
     {
@@ -24,12 +21,14 @@ namespace Wesley.Effects.Droid
             try
             {
                 EditText editText;
+
                 # region Material Design
                 if (Control is TextInputLayout inputLayout)
                 {
                     editText = inputLayout.EditText;
                 }
                 #endregion
+
                 else if (Control is EditText text)
                 {
                     editText = text;
@@ -84,7 +83,7 @@ namespace Wesley.Effects.Droid
                     return;
                 }
 
-                var visibilityEffect = Element.Effects.OfType<Wesley.Effects.KeyboardEnableEffect>().FirstOrDefault();
+                var visibilityEffect = Element.Effects.OfType<Wesley.Client.Effects.KeyboardEnableEffect>().FirstOrDefault();
 
                 if (visibilityEffect != null)
                 {
@@ -94,7 +93,8 @@ namespace Wesley.Effects.Droid
                 editText.ShowSoftInputOnFocus = KeyboardEffect.GetEnableKeyboard(Element);
                 editText.FocusChange -= HideMethod;
 
-                var imm = (InputMethodManager)Effects.Activity?.GetSystemService(Context.InputMethodService);
+                var currentActivity = MainActivity.Instance;
+                var imm = (InputMethodManager)currentActivity.GetSystemService(Context.InputMethodService);
                 imm?.ShowSoftInput(Control, ShowFlags.Implicit);
                 var requestFocus = KeyboardEffect.GetRequestFocus(Element);
                 if (requestFocus)
@@ -112,8 +112,9 @@ namespace Wesley.Effects.Droid
         {
             try
             {
+                var currentActivity = MainActivity.Instance;
                 //hide keyboard for current focused control.
-                var imm = (InputMethodManager)Effects.Activity?.GetSystemService(Context.InputMethodService);
+                var imm = (InputMethodManager)currentActivity.GetSystemService(Context.InputMethodService);
                 imm?.HideSoftInputFromWindow(Control.WindowToken, HideSoftInputFlags.None);
                 SoftKeyboard.Current.InvokeVisibilityChanged(!e.HasFocus);
             }

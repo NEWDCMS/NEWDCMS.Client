@@ -20,7 +20,6 @@ namespace Wesley.Client.Models.Finances
         public string AuditedUserName { get; set; }
         public decimal? DiscountAmount { get; set; }
         public decimal? AmountOwedAfterReceipt { get; set; }
-        public int? PrintNum { get; set; }
         public int CollectionAccount { get; set; }
         public decimal? CollectionAmount { get; set; }
 
@@ -141,6 +140,7 @@ namespace Wesley.Client.Models.Finances
     /// </summary>
     public class PaymentReceiptUpdateModel
     {
+        public string BillNumber { get; set; }
         public int Draweer { get; set; }
         public int ManufacturerId { get; set; }
         public decimal? DiscountAmount { get; set; }

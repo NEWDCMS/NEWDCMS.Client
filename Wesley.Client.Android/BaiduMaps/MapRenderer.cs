@@ -1,22 +1,23 @@
 ﻿using Android.Content;
 using Com.Baidu.Mapapi.Map;
+using Com.Baidu.Mapapi.Model;
 using Wesley.Client.BaiduMaps;
 using Wesley.Client.Droid;
+using System;
 using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using AG = Android.Graphics;
-using Com.Baidu.Mapapi.Model;
-
 
 [assembly: ExportRenderer(typeof(Map), typeof(MapRenderer))]
 namespace Wesley.Client.Droid
 {
-    //OnMarkerClickListener, OnPolylineClickListener
     public partial class MapRenderer : ViewRenderer<Map, MapView>, BaiduMap.IOnMapLoadedCallback
     {
         protected MapView NativeMap => Control;
         protected Map Map => Element;
+        private bool _isDisposed;
+
 
         /// <summary>
         /// 标注
@@ -46,42 +47,49 @@ namespace Wesley.Client.Droid
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            try
             {
-                if (null != Element)
+                if (_isDisposed)
+                {
+                    return;
+                }
+
+                _isDisposed = true;
+
+                if (disposing && Element != null)
                 {
                     //清除所有标注
                     if (Map.Pins.Count > 0)
                         Map.Pins.Clear();
 
-                    ((BaiduLocationServiceImpl)Map?.LocationService).OnDestroy();
+                    //((BaiduLocationServiceImpl)Map?.LocationService).OnDestroy();
+
+                    pinImpl.Unregister(Map);
+                    polylineImpl.Unregister(Map);
+                    polygonImpl.Unregister(Map);
+                    circleImpl.Unregister(Map);
+
+                    //清除所有图层
+                    NativeMap?.Map?.Clear();
+
+                    //卸载事件
+                    NativeMap.Map.MapClick -= OnMapClick;
+                    NativeMap.Map.MapPoiClick -= OnMapPoiClick;
+                    NativeMap.Map.MapDoubleClick -= OnMapDoubleClick;
+                    NativeMap.Map.MapLongClick -= OnMapLongClick;
+                    NativeMap.Map.MarkerClick -= OnMarkerClick;
+                    NativeMap.Map.MarkerDragStart -= OnMarkerDragStart;
+                    NativeMap.Map.MarkerDrag -= OnMarkerDrag;
+                    NativeMap.Map.MarkerDragEnd -= OnMarkerDragEnd;
+                    NativeMap.Map.MapStatusChangeFinish -= MapStatusChangeFinish;
+                    NativeMap.Map.SetOnMapLoadedCallback(null);
+                    NativeMap.OnDestroy();
                 }
-
-                pinImpl.Unregister(Map);
-                polylineImpl.Unregister(Map);
-                polygonImpl.Unregister(Map);
-                circleImpl.Unregister(Map);
-
-                //清除所有图层
-                NativeMap.Map.Clear();
-
-                //卸载事件
-                NativeMap.Map.MapClick -= OnMapClick;
-                NativeMap.Map.MapPoiClick -= OnMapPoiClick;
-                NativeMap.Map.MapDoubleClick -= OnMapDoubleClick;
-                NativeMap.Map.MapLongClick -= OnMapLongClick;
-                NativeMap.Map.MarkerClick -= OnMarkerClick;
-                NativeMap.Map.MarkerDragStart -= OnMarkerDragStart;
-                NativeMap.Map.MarkerDrag -= OnMarkerDrag;
-                NativeMap.Map.MarkerDragEnd -= OnMarkerDragEnd;
-                NativeMap.Map.MapStatusChangeFinish -= MapStatusChangeFinish;
-                NativeMap.Map.SetOnMapLoadedCallback(null);
-                //NativeMap.SetMapCustomStyleEnable(false);
-                NativeMap.OnDestroy();
             }
+            catch (Exception)
+            {
 
-            //MapView.setMapCustomEnable(false);
-
+            }
             base.Dispose(disposing);
         }
 
@@ -101,7 +109,7 @@ namespace Wesley.Client.Droid
                 if (oldMap.Pins.Count > 0)
                     oldMap.Pins.Clear();
 
-                ((BaiduLocationServiceImpl)oldMap?.LocationService).OnDestroy();
+                //((BaiduLocationServiceImpl)oldMap?.LocationService).OnDestroy();
 
                 MapView oldMapView = Control;
 
@@ -128,7 +136,7 @@ namespace Wesley.Client.Droid
                     SetNativeControl(new MapView(Context));
                 }
 
-                Map.LocationService = new BaiduLocationServiceImpl(NativeMap, Context);
+                //Map.LocationService = new BaiduLocationServiceImpl(NativeMap, Context);
 
                 NativeMap.Map.MyLocationEnabled = true;
                 NativeMap.Map.MapClick += OnMapClick;
@@ -257,7 +265,7 @@ namespace Wesley.Client.Droid
 
             if (Map.CenterProperty.PropertyName == e.PropertyName)
             {
-               // System.Diagnostics.Debug.WriteLine("Center = " + Map.Center);
+                // System.Diagnostics.Debug.WriteLine("Center = " + Map.Center);
                 UpdateCenter();
                 return;
             }
@@ -384,9 +392,11 @@ namespace Wesley.Client.Droid
         private void UpdateCenter()
         {
             if (NativeMap.Map != null)
-                NativeMap.Map.AnimateMapStatus(
-                MapStatusUpdateFactory.NewLatLng(Map.Center.ToNative())
-            );
+            {
+                var locData = new MyLocationData.Builder().Latitude(Map.Center.Latitude).Longitude(Map.Center.Longitude).Build();
+                NativeMap.Map.AnimateMapStatus(MapStatusUpdateFactory.NewLatLng(Map.Center.ToNative()));
+                NativeMap.Map.SetMyLocationData(locData);
+            }
         }
 
         private void UpdateShowScaleBar()
@@ -483,7 +493,7 @@ namespace Wesley.Client.Droid
             {
                 LatLngBounds.Builder builder = new LatLngBounds.Builder();
                 foreach (var item in mOverlayList)
-                { 
+                {
                     // polyline 中的点可能太多，只按marker 缩放
                     var overlay = (Marker)item?.NativeObject;
                     if (overlay != null)

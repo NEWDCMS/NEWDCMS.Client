@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:local="clr-namespace:Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:prism="http://prismlibrary.com"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.ProfilePage"
+                       x:TypeArguments="vms:ProfilePageViewModel"
+                       BackgroundColor="#f1f1f1">
+
+    <ScrollView VerticalOptions="FillAndExpand"
+                HorizontalOptions="FillAndExpand">
+        <Grid VerticalOptions="FillAndExpand">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="475" />
+            </Grid.RowDefinitions>
+            <ffimageloading:CachedImage Grid.Row="0"
+                                        LoadingPlaceholder="CacheBG.jpg"
+                                        ErrorPlaceholder="CacheBG.jpg"
+                                        DownsampleToViewSize="true"
+                                        CacheType="Disk"
+                                        Aspect="AspectFill"
+                                        HeightRequest="250"
+                                        VerticalOptions="StartAndExpand"
+                                        Source="{Binding UserFace}">
+                <ffimageloading:CachedImage.CacheKeyFactory>
+                    <local:CustomCacheKeyFactory />
+                </ffimageloading:CachedImage.CacheKeyFactory>
+            </ffimageloading:CachedImage>
+            <ImageButton Source="PhotoIcon.png"
+                         WidthRequest="50"
+                         HeightRequest="50"
+                         Margin="0,0,0,50"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         Opacity=".7"
+                         BackgroundColor="Transparent"
+                         Command="{Binding UpdateFaceCommand}"
+                         CommandParameter="UpdateFace" />
+            <Frame Grid.Row="1"
+                   HasShadow="False"
+                   CornerRadius="5"
+                   Margin="15,-50,15,0"
+                   Padding="18"
+                   HeightRequest="160"
+                   VerticalOptions="StartAndExpand">
+                <Grid HorizontalOptions="FillAndExpand"
+                      VerticalOptions="FillAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackLayout Orientation="Vertical"
+                                 Spacing="6"
+                                 HorizontalOptions="CenterAndExpand">
+                        <Label Text="{Binding ProfileName, Mode=OneWay}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="Black"
+                               HorizontalOptions="CenterAndExpand" />
+                        <Label Text="{Binding StoreName}"
+                               FontSize="12"
+                               TextColor="#2C3E50"
+                               HorizontalOptions="CenterAndExpand" />
+                        <StackLayout Orientation="Horizontal"
+                                     Spacing="10"
+                                     HorizontalOptions="CenterAndExpand">
+                            <Label FontFamily="FAS"
+                                   Text="&#xf095;"
+                                   FontSize="12"
+                                   Rotation="90"
+                                   VerticalOptions="Center" />
+                            <Label Text="{Binding UserMobile}"
+                                   TextColor="{StaticResource PrimaryDarkColor}"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center" />
+                        </StackLayout>
+                    </StackLayout>
+                    <Grid Grid.Row="1"
+                          HorizontalOptions="FillAndExpand"
+                          VerticalOptions="CenterAndExpand">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Orientation="Vertical"
+                                     Spacing="10"
+                                     HorizontalOptions="CenterAndExpand">
+                            <!--<Image Source="PhotoIcon.png"
+                                   WidthRequest="45"
+                                   HeightRequest="45"
+                                   HorizontalOptions="Center" />-->
+                            <Label Text="{Binding Analysis.TodayAddTerminalQuantity, Mode=OneWay}"
+                                   HorizontalTextAlignment="Start"
+                                   FontAttributes="Bold"
+                                   TextColor="#3B5998"
+                                   FontSize="Large" />
+                            <Label Text="新增客户"
+                                   TextColor="{StaticResource PrimaryDarkColor}"
+                                   FontSize="12"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1"
+                                     Orientation="Vertical"
+                                     Spacing="10"
+                                     HorizontalOptions="CenterAndExpand">
+                            <!--<Image Source="Picnic.png"
+                                   WidthRequest="45"
+                                   HeightRequest="45"
+                                   HorizontalOptions="Center" />-->
+                            <Label Text="{Binding Analysis.TodayVisitQuantity, Mode=OneWay}"
+                                   HorizontalTextAlignment="Start"
+                                   FontAttributes="Bold"
+                                   TextColor="#3B5998"
+                                   FontSize="Large" />
+                            <Label Text="拜访客户"
+                                   TextColor="{StaticResource PrimaryDarkColor}"
+                                   FontSize="12"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="2"
+                                     Orientation="Vertical"
+                                     Spacing="10"
+                                     HorizontalOptions="CenterAndExpand">
+                            <!--<Image Source="Binoculars.png"
+                                   WidthRequest="45"
+                                   HeightRequest="45"
+                                   HorizontalOptions="Center" />-->
+                            <Label Text="{Binding Analysis.TodaySaleAmount,StringFormat='{0:F2}'}"
+                                   HorizontalTextAlignment="Start"
+                                   FontAttributes="Bold"
+                                   TextColor="#3B5998"
+                                   FontSize="Large" />
+                            <Label Text="销售净额"
+                                   TextColor="{StaticResource PrimaryDarkColor}"
+                                   FontSize="12"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+                    </Grid>
+                </Grid>
+            </Frame>
+            <Frame Grid.Row="2"
+                   HasShadow="False"
+                   CornerRadius="5"
+                   Margin="15"
+                   HeightRequest="445.6"
+                   Padding="0,0,0,0">
+                <CollectionView ItemsSource="{Binding Menus}"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                SelectionMode="Single"
+                                IsGrouped="False"
+                                HorizontalOptions="FillAndExpand"
+                                VerticalOptions="Start"
+                                HeightRequest="445.6"
+                                Margin="0">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="55" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding Icon,Converter={StaticResource IconConverter}}"
+                                       FontFamily="FAS"
+                                       VerticalOptions="Center"
+                                       TextColor="{StaticResource PrimaryDarkColor}"
+                                       FontSize="20"
+                                       Margin="16,0,16,0" />
+                                <Label Grid.Column="1"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Name}" />
+                                            <Span Text=" " />
+                                            <Span Text="{Binding Describe}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Grid.Column="2"
+                                       FontFamily="FAS"
+                                       Style="{StaticResource IconLabelStyle}"
+                                       FontSize="14"
+                                       Text="&#xf054;" />
+                                <BoxView Grid.Row="1"
+                                         Grid.Column="1"
+                                         Grid.ColumnSpan="2"
+                                         IsVisible="{Binding ShowSeparator}"
+                                         Style="{StaticResource SeparatorGrid}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Frame>
+        </Grid>
+    </ScrollView>
+
+</pages:BaseContentPage>

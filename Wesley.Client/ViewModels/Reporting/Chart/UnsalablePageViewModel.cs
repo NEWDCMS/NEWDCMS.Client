@@ -1,10 +1,11 @@
-﻿using Wesley.Client.Models.Report;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Report;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
     public class UnsalablePageViewModel : ViewModelBaseChart<UnSaleRanking>
@@ -24,18 +27,17 @@ namespace Wesley.Client.ViewModels
         public UnsalablePageViewModel(INavigationService navigationService,
             IProductService productService,
             IReportingService reportingService,
-              IDialogService dialogService) : base(navigationService,
+              IDialogService dialogService
+            ) : base(navigationService,
                 productService,
                 reportingService,
-
-
                 dialogService)
         {
             Title = "库存滞销排行榜";
 
             this.PageType = Enums.ChartPageEnum.Unsalable_Template;
 
-            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DestroyWith);
+            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DeactivateWith);
             this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
                 try
@@ -48,101 +50,25 @@ namespace Wesley.Client.ViewModels
                     DateTime? endTime = Filter.EndTime;
 
                     //初始化 
-                    var result = await _reportingService.GetUnSaleRankingAsync(businessUserId, brandId, categoryId, startTime, endTime, this.ForceRefresh, calToken: cts.Token);
+                    var result = await _reportingService.GetUnSaleRankingAsync(businessUserId, brandId, categoryId, startTime, endTime, this.ForceRefresh, new System.Threading.CancellationToken());
                     if (result != null)
                     {
                         Refresh(result.ToList());
                     }
-#if DEBUG
-                    //模拟
-                    var random = new Random();
-                    var series = new List<UnSaleRanking>();
 
-                    series.Add(new UnSaleRanking
-                    {
-                        ProductId = random.Next(10, 1000),
-                        ProductName = "王老吉" + random.Next(1, 10),
-                        TotalSumSaleAmount = random.Next(0, 100),
-                        TotalSumSaleQuantity = random.Next(10, 100),
-                        TotalSumReturnAmount = random.Next(20, 100),
-                        TotalSumReturnQuantity = random.Next(0, 100),
-                        TotalSumNetAmount = random.Next(0, 1000),
-                        TotalSumNetQuantity = random.Next(0, 1000)
-                    });
-                    series.Add(new UnSaleRanking
-                    {
-                        ProductId = random.Next(10, 1000),
-                        ProductName = "王老吉" + random.Next(1, 10),
-                        TotalSumSaleAmount = random.Next(0, 100),
-                        TotalSumSaleQuantity = random.Next(10, 100),
-                        TotalSumReturnAmount = random.Next(20, 100),
-                        TotalSumReturnQuantity = random.Next(0, 100),
-                        TotalSumNetAmount = random.Next(0, 1000),
-                        TotalSumNetQuantity = random.Next(0, 1000)
-                    });
-                    series.Add(new UnSaleRanking
-                    {
-                        ProductId = random.Next(10, 1000),
-                        ProductName = "王老吉" + random.Next(1, 10),
-                        TotalSumSaleAmount = random.Next(0, 100),
-                        TotalSumSaleQuantity = random.Next(10, 100),
-                        TotalSumReturnAmount = random.Next(20, 100),
-                        TotalSumReturnQuantity = random.Next(0, 100),
-                        TotalSumNetAmount = random.Next(0, 1000),
-                        TotalSumNetQuantity = random.Next(0, 1000)
-                    });
-                    series.Add(new UnSaleRanking
-                    {
-                        ProductId = random.Next(10, 1000),
-                        ProductName = "王老吉" + random.Next(1, 10),
-                        TotalSumSaleAmount = random.Next(0, 100),
-                        TotalSumSaleQuantity = random.Next(10, 100),
-                        TotalSumReturnAmount = random.Next(20, 100),
-                        TotalSumReturnQuantity = random.Next(0, 100),
-                        TotalSumNetAmount = random.Next(0, 1000),
-                        TotalSumNetQuantity = random.Next(0, 1000)
-                    });
-                    series.Add(new UnSaleRanking
-                    {
-                        ProductId = random.Next(10, 1000),
-                        ProductName = "王老吉" + random.Next(1, 10),
-                        TotalSumSaleAmount = random.Next(0, 100),
-                        TotalSumSaleQuantity = random.Next(10, 100),
-                        TotalSumReturnAmount = random.Next(20, 100),
-                        TotalSumReturnQuantity = random.Next(0, 100),
-                        TotalSumNetAmount = random.Next(0, 1000),
-                        TotalSumNetQuantity = random.Next(0, 1000)
-                    });
-
-                    Refresh(series);
-#endif
                 }
                 catch (Exception ex)
                 {
                     Crashes.TrackError(ex);
                 }
-                finally
-                {
-
-                }
             }));
 
-            //菜单选择
-            this.SetMenus((x) =>
-            {
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
-            }, 8, 10);
+            //绑定页面菜单
+            BindFilterDateMenus(true);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
-
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
-        }
-
-
 
         public void Refresh(List<UnSaleRanking> series)
         {
@@ -150,25 +76,33 @@ namespace Wesley.Client.ViewModels
             TotalSumReturnAmount = series.Select(s => s.TotalSumReturnAmount).Sum();
             TotalSumNetAmount = series.Select(s => s.TotalSumNetAmount).Sum();
 
-            var entries = new List<ChartEntry>();
-            int i = 0;
-            foreach (var t in RankSeries.Take(10))
+
+            var ranks = series.ToList();
+            if (ranks.Count > 10)
             {
-                entries.Add(new ChartEntry((float)(t?.TotalSumNetQuantity ?? 0))
-                {
-                    Label = t.ProductName,
-                    ValueLabel = (t?.TotalSumNetQuantity ?? 0).ToString(),
-                    Color = ChartDataProvider.Colors[i]
-                });
-                i++;
+                ranks = ranks.Take(10).ToList();
             }
-            ChartData = ChartDataProvider.CreateLineChart(entries);
+
+            var data = new ChartViewConfig()
+            {
+                BackgroundColor = Color.White,
+                ChartConfig = new ChartConfig
+                {
+                    type = Wesley.ChartJS.ChartTypes.Line,
+                    data = ChartDataProvider.GetUnsalable(ranks),
+                }
+            };
+            ChartConfig = data;
         }
+
 
 
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            _popupMenu?.Show(8, 10, 13, 14);
+
             ((ICommand)Load)?.Execute(null);
         }
     }

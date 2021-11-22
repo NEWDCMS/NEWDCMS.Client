@@ -8,7 +8,11 @@ namespace Wesley.Client.Pages
     {
         public MyInfoPage()
         {
-            try { InitializeComponent(); } catch (Exception ex) { Crashes.TrackError(ex); }
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public static class ListViewEffect
     {
@@ -40,10 +40,7 @@ namespace Wesley.Effects
 
     public class ListViewStyleEffect : RoutingEffect
     {
-        public static readonly string Name = $"Silly.{nameof(ListViewStyleEffect)}";
-
-        public ListViewStyleEffect()
-            : base(Name)
+        public ListViewStyleEffect() : base($"Wesley.Client.{nameof(ListViewStyleEffect)}")
         {
         }
     }

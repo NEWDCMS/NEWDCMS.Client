@@ -1,17 +1,13 @@
 ﻿using Android.Content;
-using Android.Content.Res;
-using Android.Graphics;
-using Android.Graphics.Drawables;
-using Android.Graphics.Drawables.Shapes;
 using Android.Widget;
+using Wesley.Client.CustomViews;
+using Wesley.Client.Droid.Renderers;
 using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using AView = Android.Views.View;
 using AViewGroup = Android.Views.ViewGroup;
-using Wesley.Client.CustomViews;
-using Wesley.Client.Droid.Renderers;
 
 [assembly: ExportRenderer(handler: typeof(CrossSearchBar), target: typeof(PlatformSearchBarRenderer))]
 namespace Wesley.Client.Droid.Renderers

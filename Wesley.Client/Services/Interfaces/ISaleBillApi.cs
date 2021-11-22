@@ -9,12 +9,12 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/sales/salebill", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface ISaleBillApi
     {
 
         [Get("/auditing/{storeId}/{userId}/{billId}")]
-        Task<APIResult<bool>> AuditingAsync(int storeId, int userId, int billId = 0, CancellationToken calToken = default);
+        Task<APIResult<ResultData>> AuditingAsync(int storeId, int userId, int billId = 0, CancellationToken calToken = default);
 
         [Post("/createorupdate/{storeId}/{userId}/{billId}")]
         Task<APIResult<SaleBillUpdateModel>> CreateOrUpdateAsync(SaleBillUpdateModel data, int storeId, int userId, int billId = 0, CancellationToken calToken = default);
@@ -101,6 +101,6 @@ namespace Wesley.Client.Services
 
 
         [Get("/reverse/{storeId}/{userId}/{billId}")]
-        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId = 0, CancellationToken calToken = default);
+        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId = 0, string remark = "", CancellationToken calToken = default);
     }
 }

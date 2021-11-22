@@ -3,146 +3,450 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:tintedImages="clr-namespace:Wesley.Client.Plugin;assembly=Wesley.Client"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
-                       xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Name="CurrentContentView"
                        x:Class="Wesley.Client.Pages.SystemSettingPage"
                        x:TypeArguments="vms:SystemSettingPageViewModel"
                        Title="{Binding Title}"
-                       BackgroundColor="White">
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <Style x:Key="ShadowButtonStyle"
-                   TargetType="Button">
-                <Setter Property="TextColor"
-                        Value="White" />
-                <Setter Property="FontSize"
-                        Value="12" />
-                <Setter Property="BackgroundColor"
-                        Value="{StaticResource PrimaryDarkColor}" />
-                <Setter Property="BorderColor"
-                        Value="{StaticResource DividerColor}" />
-                <Setter Property="BorderRadius"
-                        Value="20" />
-                <Setter Property="CornerRadius"
-                        Value="20" />
-                <Setter Property="BorderWidth"
-                        Value="0.2" />
-                <Setter Property="HeightRequest"
-                        Value="25" />
-                <Setter Property="Padding"
-                        Value="0" />
-                <Setter Property="HorizontalOptions"
-                        Value="Center" />
-            </Style>
-        </ResourceDictionary>
-    </ContentPage.Resources>
+                       BackgroundColor="#eee">
     <ContentPage.Content>
         <ScrollView>
-            <StackLayout>
-                <Grid RowDefinitions="50,30,*,30,*,30,*"
-                      ColumnDefinitions="*,*"
-                      Padding="0"
-                      Margin="0">
-                    <Label Grid.Row="0"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="2"
-                           Text="bell 为了系统稳定运行，建议你进行下列设置"
-                           FontFamily="FAS"
-                           FontSize="14"
-                           TextColor="{StaticResource PrimaryDarkColor}"
-                           BackgroundColor="#eeeeee"
-                           Padding="10" />
-                    <Label Grid.Row="1"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="2"
-                           Text="exclamation-triangle 请勿开启省电模式"
-                           FontFamily="FAS"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           Padding="10,0,0,0" />
-                    <Label Grid.Row="2"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="2"
-                           TextColor="{StaticResource DividerColor}"
-                           FontSize="14"
-                           Text="如果开启了省电模式，可能会导致位置定位异常，记录不准确，轨迹漂移问题，建议在适用中关闭省电模式。"
-                           Padding="10,0,10,0" />
-                    <Label Grid.Row="3"
-                           Grid.Column="0"
-                           Text="battery-three-quarters 电池优化白名单"
-                           FontFamily="FAS"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           Padding="10,0,0,0" />
-                    <Button Grid.Row="3"
-                            Grid.Column="1"
-                            HeightRequest="30"
-                            HorizontalOptions="EndAndExpand"
-                            VerticalOptions="CenterAndExpand"
-                            Text="cog 设置"
-                            FontFamily="FAS"
-                            android:Button.UseDefaultShadow="True"
-                            Style="{StaticResource ShadowButtonStyle}"
-                            Margin="0,0,10,0"
-                            Command="{Binding BatteryOptimizationCommand}" />
-                    <Label Grid.Row="4"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="2"
-                           Padding="10,0,10,10"
-                           TextColor="{StaticResource DividerColor}"
-                           FontSize="14"
-                           Text="系统为了省电，在你开启APP后长时间不使用的情况下，默认30秒无操作，进程可能会被误杀，请你把Wesley添加到电源管理白名单中。" />
-                    <Label Grid.Row="5"
-                           Grid.Column="0"
-                           Text="users 后台权限设置"
-                           FontFamily="FAS"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           Padding="10,0,0,0" />
-                    <Button Grid.Row="5"
-                            Grid.Column="1"
-                            HeightRequest="30"
-                            HorizontalOptions="EndAndExpand"
-                            VerticalOptions="CenterAndExpand"
-                            Margin="0,0,10,0"
-                            Text="cog 设置"
-                            FontFamily="FAS"
-                            android:Button.UseDefaultShadow="True"
-                            Style="{StaticResource ShadowButtonStyle}"
-                            Command="{Binding BackgroundOperationCommand}" />
-                    <Label Grid.Row="6"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="2"
-                           Padding="10,0,10,10"
-                           TextColor="{StaticResource DividerColor}"
-                           FontSize="14"
-                           Text="如果没有开启后台服务运行权限，可能会造成记录异常，距离不准确，拍照，蓝牙使用被杀导致闪退，建议你为Wesley开启后台运行权限。" />
-                </Grid>
-                <Label 
-                       Text="link 参考示例："
-                       FontFamily="FAS"
-                       FontSize="16"
+            <!--开单默认仓库设置-->
+            <StackLayout Padding="15"
+                         Spacing="0">
+
+                <Label Text="数据同步"
+                       FontSize="Small"
                        FontAttributes="Bold"
-                       Padding="10,0,0,0" />
-                <Grid RowDefinitions="380"
-                      ColumnDefinitions="*,*" Margin="10">
-                    <Frame Grid.Row="0"
-                           Grid.Column="0"
-                           CornerRadius="10"
-                           Padding="0">
-                        <Image Source="permission.jpg"
-                               Aspect="AspectFill" />
-                    </Frame>
-                    <Frame Grid.Row="0"
-                           Grid.Column="1"
-                           CornerRadius="10"
-                           Padding="0">
-                        <Image Source="systemmanag.jpg"
-                               Aspect="AspectFill" />
-                    </Frame>
-                </Grid>
+                       Margin="0,0,0,10" />
+                <Frame CornerRadius="5"
+                       HasShadow="False"
+                       Padding="0">
+                    <Grid RowDefinitions="50,.7,50,.7"
+                          ColumnDefinitions="*,100"
+                          RowSpacing="0"
+                          ColumnSpacing="0"
+                          BackgroundColor="White">
+
+                        <!--商品档案-->
+                        <Label Grid.Row="0"
+                               Grid.Column="0"
+                               HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="20,0,0,0"
+                               Text="商品档案"
+                               FontSize="Small"
+                               WidthRequest="80" />
+                        <Switch Grid.Row="0"
+                                Grid.Column="1"
+                                IsToggled="{Binding IsAutoAsyncProducts,Mode=TwoWay}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End"
+                                Margin="{StaticResource MR10}"
+                                OnColor="#53a245"
+                                ThumbColor="#53a245" />
+                        <StackLayout Grid.Row="1"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Padding="0"
+                                     Spacing="0">
+                            <BoxView Style="{StaticResource SeparatorGrid}" />
+                        </StackLayout>
+
+                        <!--终端档案-->
+                        <Label Grid.Row="2"
+                               Grid.Column="0"
+                               HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="20,0,0,0"
+                               Text="终端档案"
+                               FontSize="Small"
+                               WidthRequest="80" />
+                        <Switch Grid.Row="2"
+                                Grid.Column="1"
+                                IsToggled="{Binding IsAutoAsyncTerminals,Mode=TwoWay}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End"
+                                Margin="{StaticResource MR10}"
+                                OnColor="#53a245"
+                                ThumbColor="#53a245" />
+                        <StackLayout Grid.Row="3"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Padding="0"
+                                     Spacing="0">
+                            <BoxView Style="{StaticResource SeparatorGrid}" />
+                        </StackLayout>
+                    </Grid>
+                </Frame>
+                
+                <Label Text="开单默认仓库设置"
+                       FontSize="Small"
+                       FontAttributes="Bold"
+                       Margin="0,10,0,10" />
+                <Frame CornerRadius="5"
+                       HasShadow="False"
+                       Padding="0">
+                    <Grid RowDefinitions="50,.7,50,.7,50,.7,50,.7,50"
+                          ColumnDefinitions="*,50"
+                          RowSpacing="0"
+                          ColumnSpacing="0"
+                          BackgroundColor="White">
+
+                        <!--销售单-->
+                        <StackLayout Grid.Row="0"
+                                     Grid.Column="0"
+                                     xe:TouchEffect.Color="LightGray"
+                                     xe:EffectCommands.Tap="{Binding StockSelected}"
+                                     xe:EffectCommands.TapParameter="12"
+                                     Orientation="Horizontal"
+                                     HeightRequest="{StaticResource RH45}"
+                                     Spacing="0"
+                                     Padding="0">
+                            <Label HorizontalOptions="Start"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="20,0,0,0"
+                                   Text="销售单"
+                                   FontSize="Small"
+                                   WidthRequest="80" />
+                            <custom:CustomEntry   WidthRequest="50" Placeholder="请选择默认仓库..."
+                                                Text="{Binding SaleBill.WareHouseName}"
+                                                Margin="{StaticResource ML8}"
+                                                HorizontalOptions="FillAndExpand"
+                                                ShowVirtualKeyboardOnFocus="False"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}">
+                            </custom:CustomEntry>
+                            <tintedImages:TintedImage Aspect="AspectFit"
+                                                      HeightRequest="22"
+                                                      TintColor="#53a245"
+                                                      Source="ic_chevron_down"
+                                                      WidthRequest="22"
+                                                      Margin="{StaticResource MR10}" />
+                        </StackLayout>
+                        <Button Grid.Row="0"
+                                Grid.Column="1"
+                                FontFamily="FAS"
+                                Text="&#xf064;"
+                                BackgroundColor="White"
+                                TextColor="#53a245"
+                                Command="{Binding NavigateCommand}"
+                                CommandParameter="SaleBillPage" />
+                        <StackLayout Grid.Row="1"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Padding="0"
+                                     Spacing="0">
+                            <BoxView Style="{StaticResource SeparatorGrid}" />
+                        </StackLayout>
+
+                        <!--销售订单-->
+                        <StackLayout Grid.Row="2"
+                                     Grid.Column="0"
+                                     xe:TouchEffect.Color="LightGray"
+                                     xe:EffectCommands.Tap="{Binding StockSelected}"
+                                     xe:EffectCommands.TapParameter="11"
+                                     Orientation="Horizontal"
+                                     HeightRequest="{StaticResource RH45}"
+                                     Spacing="0"
+                                     Padding="0">
+                            <Label HorizontalOptions="Start"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="20,0,0,0"
+                                   Text="销售订单"
+                                   FontSize="Small"
+                                   WidthRequest="80" />
+                            <custom:CustomEntry   WidthRequest="50" Placeholder="请选择默认仓库..."
+                                                Text="{Binding SaleReservationBill.WareHouseName}"
+                                                Margin="{StaticResource ML8}"
+                                                HorizontalOptions="FillAndExpand"
+                                                ShowVirtualKeyboardOnFocus="False"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}">
+                            </custom:CustomEntry>
+                            <tintedImages:TintedImage Aspect="AspectFit"
+                                                      HeightRequest="22"
+                                                      TintColor="#53a245"
+                                                      Source="ic_chevron_down"
+                                                      WidthRequest="22"
+                                                      Margin="{StaticResource MR10}" />
+                        </StackLayout>
+                        <Button Grid.Row="2"
+                                Grid.Column="1"
+                                FontFamily="FAS"
+                                Text="&#xf064;"
+                                BackgroundColor="White"
+                                TextColor="#53a245"
+                                Command="{Binding NavigateCommand}"
+                                CommandParameter="SaleOrderBillPage" />
+                        <StackLayout Grid.Row="3"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Padding="0"
+                                     Spacing="0">
+                            <BoxView Style="{StaticResource SeparatorGrid}" />
+                        </StackLayout>
+
+                        <!--退货单-->
+                        <StackLayout Grid.Row="4"
+                                     Grid.Column="0"
+                                     xe:TouchEffect.Color="LightGray"
+                                     xe:EffectCommands.Tap="{Binding StockSelected}"
+                                     xe:EffectCommands.TapParameter="14"
+                                     Orientation="Horizontal"
+                                     HeightRequest="{StaticResource RH45}"
+                                     Spacing="0">
+                            <Label HorizontalOptions="Start"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="20,0,0,0"
+                                   Text="退货单"
+                                   FontSize="Small"
+                                   WidthRequest="80" />
+                            <custom:CustomEntry   WidthRequest="50" Placeholder="请选择默认仓库..."
+                                                Text="{Binding ReturnBill.WareHouseName}"
+                                                Margin="{StaticResource ML8}"
+                                                HorizontalOptions="FillAndExpand"
+                                                ShowVirtualKeyboardOnFocus="False"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}">
+                            </custom:CustomEntry>
+                            <tintedImages:TintedImage Aspect="AspectFit"
+                                                      HeightRequest="22"
+                                                      TintColor="#53a245"
+                                                      Source="ic_chevron_down"
+                                                      WidthRequest="22"
+                                                      Margin="{StaticResource MR10}" />
+                        </StackLayout>
+                        <Button Grid.Row="4"
+                                Grid.Column="1"
+                                FontFamily="FAS"
+                                Text="&#xf064;"
+                                BackgroundColor="White"
+                                TextColor="#53a245"
+                                Command="{Binding NavigateCommand}"
+                                CommandParameter="ReturnBillPage" />
+                        <StackLayout Grid.Row="5"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Padding="0"
+                                     Spacing="0">
+                            <BoxView Style="{StaticResource SeparatorGrid}" />
+                        </StackLayout>
+
+                        <!--退货订单-->
+                        <StackLayout Grid.Row="6"
+                                     Grid.Column="0"
+                                     xe:TouchEffect.Color="LightGray"
+                                     xe:EffectCommands.Tap="{Binding StockSelected}"
+                                     xe:EffectCommands.TapParameter="13"
+                                     Orientation="Horizontal"
+                                     HeightRequest="{StaticResource RH45}"
+                                     Spacing="0">
+                            <Label HorizontalOptions="Start"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="20,0,0,0"
+                                   Text="退货订单"
+                                   FontSize="Small"
+                                   WidthRequest="80" />
+                            <custom:CustomEntry   WidthRequest="50" Placeholder="请选择默认仓库..."
+                                                Text="{Binding ReturnReservationBill.WareHouseName}"
+                                                Margin="{StaticResource ML8}"
+                                                HorizontalOptions="FillAndExpand"
+                                                ShowVirtualKeyboardOnFocus="False"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}">
+                            </custom:CustomEntry>
+                            <tintedImages:TintedImage Aspect="AspectFit"
+                                                      HeightRequest="22"
+                                                      TintColor="#53a245"
+                                                      Source="ic_chevron_down"
+                                                      WidthRequest="22"
+                                                      Margin="{StaticResource MR10}" />
+                        </StackLayout>
+                        <Button Grid.Row="6"
+                                Grid.Column="1"
+                                FontFamily="FAS"
+                                Text="&#xf064;"
+                                BackgroundColor="White"
+                                TextColor="#53a245"
+                                Command="{Binding NavigateCommand}"
+                                CommandParameter="ReturnOrderBillPage" />
+                        <StackLayout Grid.Row="7"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Padding="0"
+                                     Spacing="0">
+                            <BoxView Style="{StaticResource SeparatorGrid}" />
+                        </StackLayout>
+
+                        <!--换货单-->
+                        <StackLayout Grid.Row="8"
+                                     Grid.Column="0"
+                                     xe:TouchEffect.Color="LightGray"
+                                     xe:EffectCommands.Tap="{Binding StockSelected}"
+                                     xe:EffectCommands.TapParameter="10"
+                                     Orientation="Horizontal"
+                                     HeightRequest="{StaticResource RH45}" Spacing="0">
+                            <Label HorizontalOptions="Start"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="20,0,0,0"
+                                   Text="换货单"
+                                   FontSize="Small"
+                                   WidthRequest="80" />
+                            <custom:CustomEntry   WidthRequest="50" Placeholder="请选择默认仓库..."
+                                                Text="{Binding ExchangeBill.WareHouseName}"
+                                                Margin="{StaticResource ML8}"
+                                                HorizontalOptions="FillAndExpand"
+                                                ShowVirtualKeyboardOnFocus="False"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}">
+                            </custom:CustomEntry>
+                            <tintedImages:TintedImage Aspect="AspectFit"
+                                                      HeightRequest="22"
+                                                      TintColor="#53a245"
+                                                      Source="ic_chevron_down"
+                                                      WidthRequest="22"
+                                                      Margin="{StaticResource MR10}" />
+                        </StackLayout>
+                        <Button Grid.Row="8"
+                                Grid.Column="1"
+                                FontFamily="FAS"
+                                Text="&#xf064;"
+                                BackgroundColor="White"
+                                TextColor="#53a245"
+                                Command="{Binding NavigateCommand}"
+                                CommandParameter="ExchangeBillPage" />
+
+                    </Grid>
+                </Frame>
+
+                <Label Text="单据打印设置(实验性)"
+                       FontSize="Small"
+                       FontAttributes="Bold"
+                       Margin="0,10,0,10" />
+                <Frame CornerRadius="5"
+                       HasShadow="False"
+                       Padding="0"
+                       Margin="0,0,0,20">
+                    <Grid RowDefinitions="50"
+                          ColumnDefinitions="*,100"
+                          RowSpacing="0"
+                          ColumnSpacing="0"
+                          BackgroundColor="White">
+                        <Label Grid.Column="0"
+                               Grid.Row="0"
+                               Margin="20,0,0,0"
+                               Text="是否开启按需自定义打印数"
+                               FontSize="Small" />
+                        <Switch Grid.Column="1"
+                                Grid.Row="0"
+                                x:Name="EnableCustomPrintNum"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End"
+                                Margin="{StaticResource MR10}"
+                                OnColor="#53a245"
+                                ThumbColor="#53a245" />
+                    </Grid>
+                </Frame>
+
+                <Frame CornerRadius="5"
+                       HasShadow="False"
+                       Padding="0">
+
+                    <!--PrintModules-->
+                    <CollectionView ItemsSource="{Binding PrintModules}"
+                                    SelectionMode="None"
+                                    IsGrouped="False"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="Start"
+                                    Margin="0"
+                                    HeightRequest="608.4">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+
+                                <Grid RowDefinitions="50,.7"
+                                      ColumnDefinitions="*,50"
+                                      RowSpacing="0"
+                                      ColumnSpacing="0"
+                                      BackgroundColor="White">
+                                    <StackLayout Grid.Row="0"
+                                                 Grid.Column="0"
+                                                 Orientation="Horizontal"
+                                                 HeightRequest="{StaticResource RH45}"
+                                                 Spacing="0"
+                                                 Padding="0">
+                                        <Label HorizontalOptions="Start"
+                                               VerticalOptions="CenterAndExpand"
+                                               Margin="20,0,0,0"
+                                               Text="{Binding BillTypeName}"
+                                               FontSize="Small"
+                                               WidthRequest="80" />
+                                        <custom:CustomEntry WidthRequest="50"
+                                                            Placeholder="打印次数..."
+                                                            Text="{Binding PrintNum}"
+                                                            Margin="{StaticResource ML8}"
+                                                            HorizontalOptions="StartAndExpand"
+                                                            ShowVirtualKeyboardOnFocus="False"
+                                                            VerticalOptions="CenterAndExpand"
+                                                            Style="{StaticResource DefaultEntry}">
+                                        </custom:CustomEntry>
+                                        <Button Text="&#xf067;"
+                                                BackgroundColor="Transparent"
+                                                TextColor="#3B5998"
+                                                FontFamily="FAS"
+                                            
+                                                Padding="0"
+                                                Margin="0,10,0,10"
+                                                WidthRequest="50"
+                                                HeightRequest="50"
+                                                CornerRadius="0"
+                                                Command="{Binding BindingContext.Add, Source={x:Reference CurrentContentView}}"
+                                                CommandParameter="{Binding BillTypeId}" />
+                                        <Button Text="&#xf068;"
+                                                BackgroundColor="Transparent"
+                                                TextColor="#53a245"
+                                                FontFamily="FAS"
+                                 
+                                                Padding="0"
+                                                Margin="0,10,0,10"
+                                                WidthRequest="50"
+                                                HeightRequest="50"
+                                                CornerRadius="0"
+                                                Command="{Binding BindingContext.Remove, Source={x:Reference CurrentContentView}}"
+                                                CommandParameter="{Binding BillTypeId}" />
+                                    </StackLayout>
+                                    <Button Grid.Row="0"
+                                            Grid.Column="1"
+                                            FontFamily="FAS"
+                                            Text="&#xf064;"
+                                            BackgroundColor="White"
+                                            TextColor="#53a245"
+                                            Command="{Binding BindingContext.NavigateCommand, Source={x:Reference CurrentContentView}}"
+                                            CommandParameter="{Binding Navigation}" />
+                                    <StackLayout Grid.Row="1"
+                                                 Grid.Column="0"
+                                                 Grid.ColumnSpan="2"
+                                                 Padding="0"
+                                                 Spacing="0">
+                                        <BoxView Style="{StaticResource SeparatorGrid}" />
+                                    </StackLayout>
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <StackLayout>
+                                <ActivityIndicator IsRunning="True"
+                                                   HorizontalOptions="Center"
+                                                   VerticalOptions="CenterAndExpand" />
+                            </StackLayout>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+                </Frame>
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>

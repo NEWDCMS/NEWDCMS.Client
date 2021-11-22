@@ -27,7 +27,6 @@ namespace Wesley.Client.Models.Finances
         [Reactive] public string AuditedUserName { get; set; }
         [Reactive] public string AuditedStatusName { get; set; }
 
-        public int? PrintNum { get; set; }
         public bool? HandInStatus { get; set; }
         public DateTime? HandInDate { get; set; }
 
@@ -65,6 +64,8 @@ namespace Wesley.Client.Models.Finances
     /// </summary>
     public class CostExpenditureUpdateModel : Base
     {
+        public int CustomerId { get; set; }
+        public string BillNumber { get; set; }
         [Reactive] public int EmployeeId { get; set; }
         [Reactive] public decimal OweCash { get; set; }
         [Reactive] public string Remark { get; set; }

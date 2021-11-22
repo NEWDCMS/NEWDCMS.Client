@@ -43,7 +43,8 @@
                 <Label Style="{StaticResource SearchArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding Path=SerchCommand}"
-                                              CommandParameter="{Binding Text,Source={x:Reference SearchBar}}" />
+                                              CommandParameter="{Binding Text,Source={x:Reference SearchBar}}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -51,10 +52,10 @@
                        VerticalOptions="Start"
                        Style="{StaticResource SeparatorGrid}" />
         </Grid>
-        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+        <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                      Command="{Binding RefreshCommand}"
                      RefreshColor="{StaticResource PrimaryDarkColor}">
-            <ScrollView>
+
                 <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
                                        ViewModelLoader="{Binding BusinessVisitLoader}">
                     <CollectionView ItemsSource="{Binding BusinessUsers}"
@@ -64,7 +65,8 @@
                                     SelectedItem="{Binding Selecter, Mode=TwoWay}"
                                     SelectionChangedCommand="{Binding ItemSelectedCommand, Mode=TwoWay}"
                                     SelectionChangedCommandParameter="{x:Reference businessusers}"
-                                    SelectionMode="Single">
+                                    SelectionMode="Single" 
+                                    VerticalScrollBarVisibility="Always">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Style="{StaticResource GGrid}"
@@ -137,7 +139,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </custom:TaskLoaderView>
-            </ScrollView>
+
         </RefreshView>
     </StackLayout>
 </pages:BaseContentPage>

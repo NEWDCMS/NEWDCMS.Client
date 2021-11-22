@@ -3,31 +3,41 @@ using Wesley.Client.BaiduMaps;
 using Wesley.Client.ViewModels;
 using Microsoft.AppCenter.Crashes;
 using System;
-using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using Xamarin.Essentials;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using Xamarin.Forms;
+using System.Threading.Tasks;
 
 namespace Wesley.Client.Pages.Market
 {
-
     public partial class VisitStorePage : BaseContentPage<VisitStorePageViewModel>
     {
         private CancellationTokenSource cts => new CancellationTokenSource();
-        private IDisposable _locationDisposable;
+        private readonly IBaiduLocationService _locationService;
+
         public VisitStorePage()
         {
-            InitializeComponent();
-            ToolbarItems.Clear();
-            var bar = PageExtensions.BulidButton("\uf017", () =>
-             {
-                 if (ViewModel != null)
+            try
+            {
+                InitializeComponent();
+                _locationService = App.Resolve<IBaiduLocationService>();
+               
+                ToolbarItems?.Clear();
+                var bar = PageExtensions.BulidButton("\uf017", () =>
                  {
-                     ((ICommand)ViewModel.HistoryCommand)?.Execute(null);
-                 }
-             });
-            ToolbarItems.Add(bar);
+                     if (ViewModel != null)
+                     {
+                         ((ICommand)ViewModel.HistoryCommand)?.Execute(null);
+                     }
+                 });
+                ToolbarItems.Add(bar);
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
+            }
         }
 
         protected override void OnAppearing()
@@ -35,25 +45,9 @@ namespace Wesley.Client.Pages.Market
             try
             {
                 base.OnAppearing();
-                if (map != null)
-                {
-                    map.Loaded += MapLoaded;
-                }
-
-                _locationDisposable = Observable
-                   .Interval(TimeSpan.FromSeconds(3))
-                   .SubOnMainThread(async _ =>
-                   {
-                       try
-                       {
-                           await UpdateCenter();
-                       }
-                       catch (Exception ex)
-                       {
-                           Crashes.TrackError(ex);
-                       }
-                   });
-
+                map.Loaded += MapLoaded;
+                map.StatusChanged += Map_StatusChanged;
+                Set();
             }
             catch (Exception ex)
             {
@@ -66,89 +60,29 @@ namespace Wesley.Client.Pages.Market
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="x"></param>
-        public async void MapLoaded(object sender, EventArgs x)
+        public  void MapLoaded(object sender, EventArgs x)
         {
             if (map != null)
             {
                 map.ShowCompass = false;
                 map.ShowScaleBar = false;
-
                 map.ZoomLevel = 19;
-                //状态更新时
-                map.StatusChanged += (_, e) =>
-                {
-                    //map.Center = new Coordinate(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
-                    //当前标注
-                    //AddOverlay(map.Center, "water_drop.png");
-                };
-                ////开始
-                map.LocationService?.Start();
-
-                //
-                await UpdateCenter();
             }
         }
 
-        private async Task UpdateCenter()
+        private void Map_StatusChanged(object sender, StatusChangedEventArgs e)
         {
             try
             {
-                var request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
-                var location = await Geolocation.GetLocationAsync(request, cts.Token);
-                if (location != null)
-                {
-                    map?.LocationService.Converter(map, location.Latitude, location.Longitude);
-                }
-            }
-
-            catch (FeatureNotEnabledException fneEx)
-            {
-                cts.Cancel();
-                Crashes.TrackError(fneEx);
-            }
-            catch (FeatureNotSupportedException fnsEx)
-            {
-                cts.Cancel();
-                Crashes.TrackError(fnsEx);
-            }
-            catch (PermissionException pEx)
-            {
-                cts.Cancel();
-                Crashes.TrackError(pEx);
+                System.Diagnostics.Debug.Print($"Latitude:{e.Latitude}  Longitude:{e.Longitude}");
+                //Task.Run(async () =>
+                //{
+                //    await _locationService?.UpdateCenter(map);
+                //});
             }
             catch (Exception ex)
             {
-                cts.Cancel();
                 Crashes.TrackError(ex);
-            }
-            finally
-            {
-                map.Center = new Coordinate(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
-            }
-        }
-
-        /// <summary>
-        /// 添加覆盖物
-        /// </summary>
-        /// <param name="coord">坐标</param>
-        /// <param name="image">图像</param>
-        private void AddOverlay(Coordinate coord, string image)
-        {
-            if (map != null)
-            {
-                if (map.Pins?.Count > 0)
-                    map.Pins.Clear();
-
-                var annotation = new Pin
-                {
-                    Coordinate = coord,
-                    Animate = true,
-                    Draggable = true,
-                    Enabled3D = true,
-                    Image = XImage.FromResource(image)
-                };
-
-                map.Pins.Add(annotation);
             }
         }
 
@@ -156,18 +90,10 @@ namespace Wesley.Client.Pages.Market
         {
             try
             {
-                if (_locationDisposable != null)
-                {
-                    _locationDisposable?.Dispose();
-                    cts.Cancel();
-                }
-
                 if (map != null)
                 {
-                    //停止服务
                     map.Loaded -= MapLoaded;
-                    //停止
-                    map.LocationService?.Stop();
+                    map.StatusChanged -= Map_StatusChanged;
                 }
 
                 base.OnDisappearing();
@@ -185,10 +111,41 @@ namespace Wesley.Client.Pages.Market
         /// <param name="e"></param>
         private async void OrientationCmd_Clicked(object sender, EventArgs e)
         {
-            using (UserDialogs.Instance.Loading("定位中...", () => { cts.Cancel(); }, cancelText: "取消"))
+            using (UserDialogs.Instance.Loading("定位中...", cancelText: "取消"))
             {
                 map.ZoomLevel = 19;
-                await UpdateCenter();
+                await _locationService?.UpdateCenter(map);
+            }
+        }
+
+
+        public static TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(2);
+        void Set()
+        {
+            this.disposer ??= new CompositeDisposable();
+            this.disposer.Add
+            (
+                Observable
+                    .Interval(Interval)
+                    .Subscribe(_ => this.TryRun())
+            );
+        }
+        void TryRun()
+        {
+            try
+            {
+                Task.Run(async () =>
+                {
+                    if (_locationService != null)
+                    {
+                        if (map != null)
+                            await _locationService.UpdateCenter(map);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.Message);
             }
         }
     }

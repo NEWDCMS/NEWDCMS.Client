@@ -1,4 +1,5 @@
 ﻿using Acr.UserDialogs;
+using Wesley.ChartJS.Models;
 using Wesley.Client.Abstractions;
 using Wesley.Client.CustomViews;
 using Wesley.Client.Enums;
@@ -15,11 +16,12 @@ using Wesley.Client.Models.Terminals;
 using Wesley.Client.Models.Users;
 using Wesley.Client.Models.Visit;
 using Wesley.Client.Models.WareHouses;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
@@ -31,7 +33,11 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
-
+using Rg.Plugins.Popup.Services;
+using System.Diagnostics;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -39,9 +45,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,13 +52,11 @@ using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using PLU = Plugin.Media.Abstractions;
-using Shiny.Notifications;
-
 
 namespace Wesley.Client.ViewModels
 {
     /// <summary>
-    /// VM 标准基类
+    /// VM 标准基类  
     /// </summary>
     [ExcludeFromCodeCoverage]
     public abstract class ViewModelBase : ReactiveObject,
@@ -68,8 +69,11 @@ namespace Wesley.Client.ViewModels
         IDestructible,
         IConfirmNavigationAsync,
         IActiveAware,
+        IActivatableViewModel,
         IValidatableViewModel
     {
+
+        protected ILogger<ViewModelBase> _logger;
         protected INavigationService _navigationService;
         protected IDialogService _dialogService;
         protected CancellationTokenSource cts;
@@ -77,6 +81,7 @@ namespace Wesley.Client.ViewModels
         protected bool isInCall = false;
         protected object syncLock = new object();
         protected bool loaded = false;
+        protected bool IsView = false;
         protected DateTime _lastExecution = DateTime.MinValue;
         public event EventHandler IsActiveChanged;
 
@@ -90,6 +95,20 @@ namespace Wesley.Client.ViewModels
         protected readonly Func<int, bool> _isZero = value => value > 0;
         protected readonly Func<bool, bool> _isBool = value => !value;
         protected readonly Func<decimal?, bool> _isDZero = value => value > 0;
+
+        /// <summary>
+        /// 判断网络状态
+        /// </summary>
+        /// <returns></returns>
+        public static bool InternetConnectivity()
+        {
+            var connectivity = Connectivity.NetworkAccess;
+            if (connectivity == NetworkAccess.Internet)
+                return true;
+
+            return false;
+        }
+
 
         #region Prevents
 
@@ -188,40 +207,33 @@ namespace Wesley.Client.ViewModels
 
         #region Field
 
+
         /// <summary>
         /// 防止内存泄漏，在某些情况下没有及时取消订阅导致内存泄漏。CompositeDisposable可以将Disposable统一管理
         /// CompositeDisposable 是一个一次性的东西，如果调用了dispose 方法，
         /// 那么之后加进来的 disposable 会自动dispose，所以不要试图在dispose 之后希望它还能重用
         /// </summary>
         private CompositeDisposable deactivateWith;
-        protected IDisposable subMenuBus;
+        protected CompositeDisposable DeactivateWith => this.deactivateWith ??= new CompositeDisposable();
+
         protected IDisposable subProductCatagoryBus;
         protected IDisposable subGPSBus;
         protected IDisposable subMessage;
         protected IDisposable subUpdateUI;
 
-        protected CompositeDisposable DeactivateWith => this.deactivateWith ??= new CompositeDisposable();
-        protected CompositeDisposable DestroyWith { get; } = new CompositeDisposable();
-        protected virtual void Deactivate()
-        {
-            this.deactivateWith?.Dispose();
-            this.deactivateWith = null;
-        }
+        public ViewModelActivator Activator { get; }
 
-        protected readonly ViewModelActivator viewModelActivator = new ViewModelActivator();
-        public ViewModelActivator Activator
-        {
-            get { return viewModelActivator; }
-        }
-
-
+        [Reactive] public bool IsTouched { get; set; }
         private bool _isActive;
-        public bool IsActive { get { return _isActive; } set { _isActive = value; OnActiveTabChangedAsync(); } }
-
-
+        public bool IsActive
+        {
+            get { return _isActive; }
+            set { _isActive = value; OnActiveTabChangedAsync(); }
+        }
         public string MenuBusKey { get; set; }
 
-        public int PageSize { get; } = 20;
+        public int PageSize { get; set; } = 20;
+        public int TotalPageSize { get; set; } = 0;
         public int PageCounter { get; set; } = 0;
 
         [Reactive] public string CurrentAppVersion { get; set; }
@@ -234,12 +246,21 @@ namespace Wesley.Client.ViewModels
         [Reactive] public bool IsRefreshing { get; set; }
         [Reactive] public bool IsNull { get; set; }
         [Reactive] public DateTime LastUpdateTime { get; set; } = Settings.LastUpdateTime;
+
         [Reactive] public bool IsBusy { get; set; } = false;
+        [Reactive] public bool Is1Busy { get; set; } = false;
+        [Reactive] public bool Is2Busy { get; set; } = false;
+        [Reactive] public bool Is3Busy { get; set; } = false;
+        [Reactive] public bool Is4Busy { get; set; } = false;
+        [Reactive] public bool Is5Busy { get; set; } = false;
+        [Reactive] public bool Is6Busy { get; set; } = false;
+
         [Reactive] public bool ForceRefresh { get; set; } = false;
         [Reactive] public bool ShowSubmitBtn { get; set; } = true;
+        [Reactive] public bool ShowPrintBtn { get; set; } = true;
         [Reactive] public bool EnabledSubmitBtn { get; set; } = true;
-        [Reactive] public string SubmitText { get; set; } = "\uf0c7";
-        [Reactive] public int ItemTreshold { get; set; } = 0;
+        [Reactive] public string SubmitText { get; set; } = "保存";
+        [Reactive] public int ItemTreshold { get; set; }
         [Reactive] public string ReferencePage { get; set; }
         [Reactive] public MessageInfo SelecterMessage { get; set; }
         [Reactive] public int BillId { get; set; }
@@ -260,6 +281,8 @@ namespace Wesley.Client.ViewModels
         [Reactive] public bool ShowAddProduct { get; set; } = true;
         [Reactive] public bool EnableOperation { get; set; } = true;
         [Reactive] public bool EnableRefused { get; set; } = false;
+        [Reactive] public bool IsChatNull { get; set; }
+        [Reactive] public bool IsChat2Null { get; set; }
 
         #endregion
 
@@ -293,49 +316,39 @@ namespace Wesley.Client.ViewModels
 
         #region ObservableCollection
 
-        [Reactive] public ObservableCollection<TrackingModel> GpsEvents { get; set; } = new ObservableRangeCollection<TrackingModel>();
+        [Reactive] public ObservableCollection<TrackingModel> GpsEvents { get; set; } = new ObservableCollection<TrackingModel>();
         [Reactive] public ObservableCollection<WareHouseModel> WareHouses { get; set; } = new ObservableCollection<WareHouseModel>();
-        [Reactive] public ObservableCollection<BusinessVisitList> BusinessUsers { get; set; } = new ObservableRangeCollection<BusinessVisitList>();
+        [Reactive] public ObservableCollection<BusinessVisitList> BusinessUsers { get; set; } = new ObservableCollection<BusinessVisitList>();
         [Reactive] public ObservableCollection<ManufacturerModel> Manufacturers { get; set; } = new ObservableCollection<ManufacturerModel>();
-        [Reactive] public ObservableCollection<TerminalModel> Terminals { get; set; } = new ObservableRangeCollection<TerminalModel>();
+        [Reactive] public AsyncObservableCollection<TerminalModel> Terminals { get; set; } = new AsyncObservableCollection<TerminalModel>();
         [Reactive] public ObservableCollection<ProductModel> TempProductSeries { get; set; } = new ObservableCollection<ProductModel>();
         [Reactive] public ObservableCollection<ProductModel> ProductSeries { get; set; } = new ObservableCollection<ProductModel>();
         [Reactive] public ObservableCollection<SubMenu> BindMenus { get; set; } = new ObservableCollection<SubMenu>();
         [Reactive] public ObservableCollection<CategoryModel> BindCategories { get; set; } = new ObservableCollection<CategoryModel>();
         [Reactive] public ObservableCollection<DistrictModel> Districts { get; set; } = new ObservableCollection<DistrictModel>();
 
-        /// <summary>
-        /// 初始菜单
-        /// </summary>
-        /// <param name="action">选择菜单后执行的方式</param>
-        /// <param name="menus">要绑定的菜单项</param>
+
         public void SetMenus(Action<MenuEnum> action = null, params int[] menus)
         {
-            BindMenus = new ObservableCollection<SubMenu>(GlobalSettings.ToolBarMenus.Where(s => menus.Contains(s.Id)));
-            subMenuBus = MessageBus.Current.Listen<MenuEnum>(MenuBusKey.ToUpper()).Subscribe(x => { action?.Invoke(x); });
-        }
-        public void SetMenus(params int[] menus)
-        {
-            BindMenus = new ObservableCollection<SubMenu>(GlobalSettings.ToolBarMenus.Where(s => menus.Contains(s.Id)));
-        }
-        public void SubscribeMenus(Action<MenuEnum> action = null, string key = "")
-        {
-            //"MESSAGINGCENTER.SELECTMENUITEM.CONTRACT.Wesley.CLIENT.PAGES.ORDER.SaleOrderSummeryView_SELECTEDTAB_0"
-            subMenuBus = MessageBus.Current.Listen<MenuEnum>(key.ToUpper()).Subscribe(x => { action?.Invoke(x); });
+            BindMenus = new ObservableCollection<SubMenu>(GlobalSettings.ToolBarMenus?.Where(s => menus?.Contains(s.Id) ?? false));
+            var key = MenuBusKey.ToUpper();
+            MessageBus.Current
+                          .Listen<MenuEnum>(key)
+                          .Subscribe(x =>
+                          {
+                              action?.Invoke(x);
+                          });
         }
 
-        /// <summary>
-        /// 追加菜单
-        /// </summary>
-        /// <param name="menus"></param>
-        /// <param name="action"></param>
-        public void AppendMenus(Action<MenuEnum> action = null, params int[] menus)
+        public void SubscribeMenus(Action<MenuEnum> action = null, string key = "")
         {
-            var curMenus = BindMenus.ToList();
-            var appends = GlobalSettings.ToolBarMenus.Where(s => menus.Contains(s.Id));
-            curMenus.AddRange(appends);
-            BindMenus = new ObservableCollection<SubMenu>(curMenus);
-            subMenuBus = MessageBus.Current.Listen<MenuEnum>(MenuBusKey.ToUpper()).Subscribe(x => { action?.Invoke(x); });
+            MessageBus
+                .Current
+                .Listen<MenuEnum>(key.ToUpper())
+                .Subscribe(x =>
+                {
+                    action?.Invoke(x);
+                });
         }
 
         /// <summary>
@@ -343,42 +356,43 @@ namespace Wesley.Client.ViewModels
         /// </summary>
         /// <param name="menu"></param>
         /// <param name="call"></param>
-        public void HitFilterDate(Enums.MenuEnum menu, Action call)
+        public void BindFilterDateMenus(bool reLoad = false)
         {
-            switch (menu)
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
             {
-                case MenuEnum.TODAY://今日
-                    {
-                        Filter.StartTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd 00:00:00"));
+                //TODAY
+                { MenuEnum.TODAY, (m,vm) => {
+                    Filter.StartTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd 00:00:00"));
                         Filter.EndTime = DateTime.Now;
-                    }
-                    break;
-                case MenuEnum.YESTDAY://昨日
-                    {
-                        Filter.StartTime = DateTime.Now.AddDays(-1);
+                    if(reLoad)
+                         ((ICommand)Load)?.Execute(null);
+                } },
+                //YESTDAY
+                { MenuEnum.YESTDAY, (m,vm) => {
+                     Filter.StartTime = DateTime.Now.AddDays(-1);
                         Filter.EndTime = DateTime.Now;
-                    }
-                    break;
-                case MenuEnum.MONTH:
-                    {
-                        Filter.StartTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-01 00:00:00"));
+                     if(reLoad)
+                         ((ICommand)Load)?.Execute(null);
+                } },
+                //MONTH
+                { MenuEnum.MONTH, (m,vm) => {
+                      Filter.StartTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-01 00:00:00"));
                         Filter.EndTime = DateTime.Now;
-                    }
-                    break;
-                case MenuEnum.THISWEEBK:
-                    {
-                        Filter.StartTime = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek);
+                     if(reLoad)
+                         ((ICommand)Load)?.Execute(null);
+                } },
+                //THISWEEBK
+                { MenuEnum.THISWEEBK, (m,vm) => {
+                      Filter.StartTime = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek);
                         Filter.EndTime = DateTime.Now;
-                    }
-                    break;
-                case MenuEnum.OTHER://其它
-                    {
-                        SelectDateRang();
-                    }
-                    break;
-            }
-
-            call?.Invoke();
+                     if(reLoad)
+                         ((ICommand)Load)?.Execute(null);
+                } },
+                //OTHER
+                { MenuEnum.OTHER, (m,vm) => {
+                     SelectDateRang(reLoad);
+                } }
+            });
         }
 
         [Reactive] public IList<AccountingModel> Accounts { get; set; } = new ObservableCollection<AccountingModel>();
@@ -387,12 +401,8 @@ namespace Wesley.Client.ViewModels
 
         #region virtual
 
-        public virtual void OnNavigatedFrom(INavigationParameters parameters)
-        {
-            loaded = false;
-            deactivateWith?.Dispose();
-            deactivateWith = null;
-        }
+        public PopupMenu _popupMenu { get; set; }
+        public virtual void OnNavigatedFrom(INavigationParameters parameters) { } //=> this.Deactivate();
         public virtual void Initialize(INavigationParameters parameters) { }
         public virtual Task InitializeAsync(INavigationParameters parameters) => Task.CompletedTask;
         public virtual void OnNavigatedTo(INavigationParameters parameters)
@@ -423,14 +433,16 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("Title"))
                 {
                     parameters.TryGetValue("Title", out string title);
-                    this.Title = title;
+                    if (!string.IsNullOrEmpty(title))
+                        this.Title = title;
                 }
 
                 //Message
                 if (parameters.ContainsKey("Message"))
                 {
                     parameters.TryGetValue("Message", out MessageInfo message);
-                    this.SelecterMessage = message;
+                    if (message != null)
+                        this.SelecterMessage = message;
                 }
 
                 //过滤器
@@ -505,10 +517,13 @@ namespace Wesley.Client.ViewModels
                     if (products != null && products.Count() > 0)
                     {
                         var product = products.FirstOrDefault();
-                        this.Product = product;
-                        this.Filter.ProductName = product != null ? product.Name : "";
-                        this.Filter.ProductId = product != null ? product.Id : 0;
-                        this.ProductSeries = new ObservableCollection<ProductModel>(products);
+                        if (product != null)
+                        {
+                            this.Product = product;
+                            this.Filter.ProductName = product != null ? product.Name : "";
+                            this.Filter.ProductId = product != null ? product.Id : 0;
+                            this.ProductSeries = new ObservableCollection<ProductModel>(products);
+                        }
                     }
                 }
 
@@ -530,7 +545,8 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("Accounting"))
                 {
                     parameters.TryGetValue("Accounting", out AccountingModel accounting);
-                    this.Accounting = accounting;
+                    if (accounting != null)
+                        this.Accounting = accounting;
                 }
 
 
@@ -538,71 +554,99 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("SerchKey"))
                 {
                     parameters.TryGetValue("SerchKey", out string serchKey);
-                    this.Filter.SerchKey = serchKey;
+                    if (!string.IsNullOrEmpty(serchKey))
+                        this.Filter.SerchKey = serchKey;
                 }
 
                 //引用页
                 if (parameters.ContainsKey("Reference"))
                 {
                     parameters.TryGetValue("Reference", out string reference);
-                    this.ReferencePage = reference;
+                    if (!string.IsNullOrEmpty(reference))
+                        this.ReferencePage = reference;
                 }
-
             }
             catch (Exception ex)
             {
                 Alert($"获取参数错误:{ex.Message} {ex.StackTrace}");
             }
+           
         }
         public virtual void OnAppearing()
         {
-            cts = new CancellationTokenSource();
+            try
+            {
+                cts = new CancellationTokenSource();
+                once = false;
+                CheckAccessExpired();
+            }
+            catch (Exception) { }
         }
         public virtual void OnDisappearing()
         {
-            _timer?.Dispose();
+            try
+            {
+                _timer?.Dispose();
+                subProductCatagoryBus?.Dispose();
+                subGPSBus?.Dispose();
+                subMessage?.Dispose();
+                subUpdateUI?.Dispose();
+                loaded = false;
 
-            if (!cts?.IsCancellationRequested ?? true)
-                cts?.Cancel();
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            }
+            catch (Exception) { }
+            finally
+            {
+                if (cts != null)
+                    cts.Cancel();
+            }
         }
-
-
         public virtual void Destroy()
         {
-            if (!DestroyWith?.IsDisposed ?? true)
-                DestroyWith?.Dispose();
-
-            subMenuBus?.Dispose();
-
-            subProductCatagoryBus?.Dispose();
-
-            subGPSBus?.Dispose();
-
-            subMessage?.Dispose();
-
-            subUpdateUI?.Dispose();
+            try
+            {
+                if (!deactivateWith?.IsDisposed ?? true)
+                {
+                    this.deactivateWith?.Dispose();
+                    this.deactivateWith = null;
+                    System.Diagnostics.Debug.Print($"{this.PageName}-------------------------------> dw is disposed");
+                }
+            }
+            catch (Exception) { }
+            finally
+            {
+                if (cts != null)
+                    cts.Dispose();
+            }
         }
-
         public virtual Task<bool> CanNavigateAsync(INavigationParameters parameters) => Task.FromResult(true);
         public virtual void OnActiveTabChangedAsync() { IsActiveChanged?.Invoke(this, EventArgs.Empty); }
         public virtual void OnResume() { }
         public virtual void OnSleep() { }
-        //public virtual bool OnBackButtonPressed()
-        //{
-        //    return false;
-        //}
+        public virtual void OnArchiveing(bool showTips = false, Action call = null) { }
 
         /// <summary>
         /// 返回回退软操作时，执行SaveCommand 保存命令
         /// </summary>
-        public virtual void OnSoftBackButtonPressed()
+        public async virtual void OnSoftBackButtonPressed(bool noSave = false)
         {
-            ((ICommand)SaveCommand)?.Execute(null);
+            if (!noSave)
+            {
+                var cmd = (ICommand)SaveCommand;
+                if (cmd != null)
+                    ((ICommand)SaveCommand)?.Execute(null);
+                else
+                    await _navigationService.GoBackAsync();
+            }
+            else
+                await _navigationService.GoBackAsync();
         }
 
         #endregion
 
         #region Command
+        public ReactiveCommand<string, Unit> NavigateCommand => ReactiveCommand.CreateFromTask<string>(async (r) => await this.NavigateAsync(r));
         public IReactiveCommand ItemTresholdReachedCommand { get; set; }
         public IReactiveCommand OpenMapNavigation { get; set; }
         public IReactiveCommand CallPhone { get; set; }
@@ -611,7 +655,6 @@ namespace Wesley.Client.ViewModels
         public IReactiveCommand SubmitDataCommand { get; set; }
         public IReactiveCommand SaveCommand { get; set; }
         public IReactiveCommand AddCommand { get; set; }
-
         public IReactiveCommand ItemSelectedCommand { get; set; }
         public IReactiveCommand SwichCommand { get; set; }
         public ReactiveCommand<string, Unit> SerchCommand { get; set; }
@@ -630,9 +673,23 @@ namespace Wesley.Client.ViewModels
         public ReactiveCommand<object, Unit> RemarkSelected { get; set; }
 
 
-        protected void BindBusyCommand(IReactiveCommand command) => command.IsExecuting
-            .Subscribe(x => IsBusy = x, _ => IsBusy = false, () => IsBusy = false)
-            .DisposeWith(DestroyWith);
+
+        protected void BindBusyCommand(ICommand command) => this.BindBusyCommand((IReactiveCommand)command);
+        protected void BindBusy1Command(ICommand command) => this.BindBusy1Command((IReactiveCommand)command);
+        protected void BindBusy2Command(ICommand command) => this.BindBusy2Command((IReactiveCommand)command);
+        protected void BindBusy3Command(ICommand command) => this.BindBusy3Command((IReactiveCommand)command);
+        protected void BindBusy4Command(ICommand command) => this.BindBusy4Command((IReactiveCommand)command);
+        protected void BindBusy5Command(ICommand command) => this.BindBusy5Command((IReactiveCommand)command);
+        protected void BindBusy6Command(ICommand command) => this.BindBusy6Command((ReactiveCommand<object, Unit>)command);
+
+
+        protected void BindBusyCommand(IReactiveCommand command) => command.IsExecuting.Subscribe(x => IsBusy = x, _ => IsBusy = false, () => IsBusy = false).DisposeWith(DeactivateWith);
+        protected void BindBusy1Command(IReactiveCommand command) => command.IsExecuting.Subscribe(x => Is1Busy = x, _ => Is1Busy = false, () => Is1Busy = false).DisposeWith(DeactivateWith);
+        protected void BindBusy2Command(IReactiveCommand command) => command.IsExecuting.Subscribe(x => Is2Busy = x, _ => Is2Busy = false, () => Is2Busy = false).DisposeWith(DeactivateWith);
+        protected void BindBusy3Command(IReactiveCommand command) => command.IsExecuting.Subscribe(x => Is3Busy = x, _ => Is3Busy = false, () => Is3Busy = false).DisposeWith(DeactivateWith);
+        protected void BindBusy4Command(IReactiveCommand command) => command.IsExecuting.Subscribe(x => Is4Busy = x, _ => Is4Busy = false, () => Is4Busy = false).DisposeWith(DeactivateWith);
+        protected void BindBusy5Command(IReactiveCommand command) => command.IsExecuting.Subscribe(x => Is5Busy = x, _ => Is5Busy = false, () => Is5Busy = false).DisposeWith(DeactivateWith);
+        protected void BindBusy6Command(ReactiveCommand<object, Unit> command) => command.IsExecuting.Subscribe(x => Is6Busy = x, _ => Is6Busy = false, () => Is6Busy = false).DisposeWith(DeactivateWith);
 
         private DelegateCommand<string> _scanBarcodeCommand;
         public DelegateCommand<string> ScanBarcodeCommand
@@ -643,7 +700,6 @@ namespace Wesley.Client.ViewModels
                 {
                     _scanBarcodeCommand = new DelegateCommand<string>(async (r) =>
                     {
-                        //await _navigationService.NavigateAsync("ScanLoginPage", ("ScanData", null));
                         await this.NavigateAsync("ScanBarcodePage", ("action", "add"));
                     });
                 }
@@ -655,8 +711,28 @@ namespace Wesley.Client.ViewModels
 
         #region Action
 
-        private static readonly int MIN_CLICK_DELAY_TIME = 1000;
-        private static long lastClickTime;
+        //private static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private bool once = false;
+        private async void CheckAccessExpired()
+        {
+            if (!once)
+            {
+                if (this.PageName != "LoginPage" && this.PageName != "SecurityPage")
+                {
+                    if (!Settings.IsAuthenticated)
+                    {
+                        var ok = await UserDialogs.Instance.ConfirmAsync("账户会话已经过期？", "", "重新登录", "");
+                        if (ok)
+                        {
+                            once = true;
+                            await _navigationService.NavigateAsync("LoginPage");
+                        }
+                    }
+                }
+            }
+        }
+
+
         /// <summary>
         /// 两次点击按钮之间的点击间隔不能少于1000毫秒
         /// </summary>
@@ -665,21 +741,43 @@ namespace Wesley.Client.ViewModels
         {
             bool flag = false;
             long curClickTime = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
-            if ((curClickTime - lastClickTime) >= MIN_CLICK_DELAY_TIME)
+            if ((curClickTime - App.LastClickTime) >= App.MIN_CLICK_DELAY_TIME)
             {
                 flag = true;
             }
-            lastClickTime = curClickTime;
+            App.LastClickTime = curClickTime;
             return flag;
         }
 
-        public async void SelectDateRang()
+        public static void ThrottleLoad(Action action, bool condition = false, bool enable = true)
+        {
+            if (condition)
+            {
+                action?.Invoke();
+            }
+            else
+            {
+                long curLoadTime = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                if ((curLoadTime - App.LastLoadTime) >= App.MIN_LOAD_DELAY_TIME)
+                {
+                    if (enable)
+                    {
+                        action?.Invoke();
+                    }
+                }
+                App.LastLoadTime = curLoadTime;
+            }
+        }
+
+
+        public async void SelectDateRang(bool load = false)
         {
             var result = await CrossDiaglogKit.Current.GetDateTimePickerRankAsync("选择日期");
             if (result != null)
             {
                 Filter.StartTime = UtcHelper.ConvertDateTimeInt(result.Item1.ToUniversalTime());
                 Filter.EndTime = UtcHelper.ConvertDateTimeInt(result.Item2.ToUniversalTime());
+                ((ICommand)Load)?.Execute(null);
             }
         }
 
@@ -692,26 +790,6 @@ namespace Wesley.Client.ViewModels
             }
         }
 
-        public void ExceptionsSubscribe()
-        {
-            this.Load?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SubmitDataCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ItemSelectedCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SwichCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SerchCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.RefreshCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ShowWaitCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SpeechCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.GoBackAsync?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.HistoryCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.PrintCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.DistrictSelected?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.BrandSelected?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.CustomSelected?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ManufacturerSelected?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SaveCommand?.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-        }
 
         /// <summary>
         /// 异步转向导航
@@ -721,11 +799,12 @@ namespace Wesley.Client.ViewModels
         /// <returns></returns>
         public async Task NavigateAsync(string page, params (string, object)[] parameters)
         {
-            if (GlobalSettings.IsNotConnected)
+            if (!InternetConnectivity())
             {
-                _dialogService.ShortAlert("网络已经断开 :(");
+                _dialogService.LongAlert("网络已经断开 :(");
                 return;
             }
+
             var now = DateTime.Now;
             try
             {
@@ -733,6 +812,7 @@ namespace Wesley.Client.ViewModels
                 {
                     return;
                 }
+
                 await _navigationService.TryNavigateAsync(page, parameters.ToNavParams());
             }
             finally
@@ -755,7 +835,7 @@ namespace Wesley.Client.ViewModels
                 }
             });
         }
-        public async Task<Unit> ShowConfirm(Action call, bool success, string message = null)
+        public async Task<Unit> ShowConfirm(Action call, bool success, string message = null, string reffPage = "")
         {
             if (message == null)
             {
@@ -768,7 +848,7 @@ namespace Wesley.Client.ViewModels
             }
             return Unit.Default;
         }
-        public async Task<Unit> ShowConfirm(bool success, string message = null, bool goBack = true)
+        public async Task<Unit> ShowConfirm(bool success, string message = null, bool goBack = true, bool goReceipt = true, string reffPage = "")
         {
             if (message == null)
             {
@@ -777,8 +857,16 @@ namespace Wesley.Client.ViewModels
             var ok = await CrossDiaglogKit.Current.ShowSuccessAsync(message, success, true);
             if (ok)
             {
+                //提示是否去签收
+                if (goReceipt)
+                {
+                    await PopupNavigation.Instance.PushAsync(new GoReceiptPage());
+                    return Unit.Default;
+                }
+
                 if (goBack)
-                    await _navigationService.GoBackAsync();
+                    await _navigationService.GoBackAsync(("reffPage", reffPage));
+
             }
             return Unit.Default;
         }
@@ -791,25 +879,28 @@ namespace Wesley.Client.ViewModels
             await CrossDiaglogKit.Current.ShowSuccessAsync(message, success, true);
             return Unit.Default;
         }
-        private bool Authorization(AccessGranularityEnum access)
+        private bool Authorization(params AccessGranularityEnum[] access)
         {
             try
             {
-                if (access == 0)
+                if (access==null||access.Length<=0)
+                {
                     return true;
+                }
 
-                var authorizeCodes = JsonConvert.DeserializeObject<List<PermissionRecordQuery>>(Settings.AvailablePermissionRecords);
-                if (authorizeCodes != null && authorizeCodes.Count > 0)
+                foreach (var item in access)
                 {
-                    return authorizeCodes.Where(a => a.Code == (int)access).ToList().Count > 0;
+                    var authorizeCodes = JsonConvert.DeserializeObject<List<PermissionRecordQuery>>(Settings.AvailablePermissionRecords);
+                    if (authorizeCodes != null && authorizeCodes.Count > 0 && authorizeCodes.Where(a => a.Code == (int)item).ToList().Count > 0)
+                    {
+                        return true;
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
-            catch
+            catch (Exception ex)
             {
+                Crashes.TrackError(ex);
                 return false;
             }
         }
@@ -825,7 +916,8 @@ namespace Wesley.Client.ViewModels
         }
         public async Task<bool> Access(Module m, AccessStateEnum ase)
         {
-            var accessState = Authorization(m.PermissionCodes.Where(s => s.ToString().EndsWith(ase.ToString())).FirstOrDefault());
+            if (m == null) return false;
+            var accessState = Authorization(m.PermissionCodes?.ToArray());
             if (!accessState)
             {
                 await ShowAlert(false, "对不起，你无权访问");
@@ -835,7 +927,8 @@ namespace Wesley.Client.ViewModels
         }
         public async Task<bool> Access(Module m, AccessStateEnum ase, Action call)
         {
-            var accessState = Authorization(m.PermissionCodes.Where(s => s.ToString().EndsWith(ase.ToString())).FirstOrDefault());
+            if (m == null) return false;
+            var accessState = Authorization(m.PermissionCodes?.ToArray());
             if (!accessState)
             {
                 await ShowAlert(false, "对不起，你无权访问");
@@ -845,6 +938,31 @@ namespace Wesley.Client.ViewModels
             {
                 call?.Invoke();
                 return true;
+            }
+        }
+        public async Task<Unit> Access(AccessGranularityEnum ase, Action call)
+        {
+            var accessState = Authorization(ase);
+            if (!accessState)
+            {
+                await ShowAlert(false, "对不起，你无权访问");
+            }
+            else
+            {
+                call?.Invoke();
+            }
+            return Unit.Default;
+        }
+        public async Task<Unit> Access(AccessGranularityEnum ase, Func<Task<Unit>> call)
+        {
+            var accessState = Authorization(ase);
+            if (!accessState)
+            {
+                return await ShowAlert(false, "对不起，你无权访问");
+            }
+            else
+            {
+                return await call.Invoke();
             }
         }
 
@@ -872,11 +990,11 @@ namespace Wesley.Client.ViewModels
         /// <param name="func"></param>
         /// <param name="clear"></param>
         /// <returns></returns>
-        public async Task<Unit> SubmitAsync<T>(T postData, int billId, Func<T, int, CancellationToken, Task<APIResult<T>>> func, Action<APIResult<T>> clear, bool goBack = true, CancellationToken token = default) where T : Base
+        public async Task<Unit> SubmitAsync<T>(T postData, int billId, Func<T, int, CancellationToken, Task<APIResult<T>>> func, Action<APIResult<T>> clear, bool goBack = true, bool goReceipt = false, CancellationToken token = default) where T : Base
         {
-            if (GlobalSettings.IsNotConnected)
+            if (!InternetConnectivity())
             {
-                _dialogService.ShortAlert("网络已经断开 :(");
+                _dialogService.LongAlert("网络已经断开 :(");
                 return Unit.Default;
             }
 
@@ -894,7 +1012,7 @@ namespace Wesley.Client.ViewModels
                         if (result.Success)
                         {
                             clear?.Invoke(result);
-                            return await ShowConfirm(result.Success, "提交成功！", goBack);
+                            return await ShowConfirm(result.Success, "提交成功！", goBack, goReceipt);
                         }
                         else
                         {
@@ -923,11 +1041,11 @@ namespace Wesley.Client.ViewModels
         /// <param name="func"></param>
         /// <param name="clear"></param>
         /// <returns></returns>
-        public async Task<Unit> SubmitAsync<T>(T postData, Func<T, CancellationToken, Task<APIResult<T>>> func, Action<APIResult<T>> clear, bool goBack = true, CancellationToken token = default) where T : Base
+        public async Task<Unit> SubmitAsync<T>(T postData, Func<T, CancellationToken, Task<APIResult<T>>> func, Action<APIResult<T>> clear, bool goBack = true, bool goReceipt = false, CancellationToken token = default, string reffPage = "") where T : Base
         {
-            if (GlobalSettings.IsNotConnected)
+            if (!InternetConnectivity())
             {
-                _dialogService.ShortAlert("网络已经断开 :(");
+                _dialogService.LongAlert("网络已经断开 :(");
                 return Unit.Default;
             }
 
@@ -936,20 +1054,42 @@ namespace Wesley.Client.ViewModels
                 try
                 {
                     APIResult<T> result = null;
-                    using (Acr.UserDialogs.UserDialogs.Instance.Loading("提交中..."))
+                    using (UserDialogs.Instance.Loading("提交中..."))
                     {
-                        result = await func?.Invoke(postData, token);
+                        try
+                        {
+                            result = await func?.Invoke(postData, token);
+                        }
+                        catch (Exception)
+                        { 
+                        
+                        }
                     }
+
                     if (result != null)
                     {
                         if (result.Success)
                         {
-                            clear?.Invoke(result);
-                            return await ShowConfirm(result.Success, "提交成功！", goBack);
+                            try
+                            {
+                                clear?.Invoke(result);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+                            return await ShowConfirm(result.Success, "提交成功！", goBack, goReceipt, reffPage);
                         }
                         else
                         {
-                            clear?.Invoke(result);
+                            try
+                            {
+                                clear?.Invoke(result);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
                             await ShowAlert(false, result.Message);
                         }
                     }
@@ -975,9 +1115,9 @@ namespace Wesley.Client.ViewModels
         /// <returns></returns>
         public async Task<Unit> SubmitAsync(int billId, Func<int, CancellationToken, Task<bool>> func, Action<bool> call, CancellationToken token = default)
         {
-            if (GlobalSettings.IsNotConnected)
+            if (!InternetConnectivity())
             {
-                _dialogService.ShortAlert("网络已经断开 :(");
+                _dialogService.LongAlert("网络已经断开 :(");
                 return Unit.Default;
             }
 
@@ -1001,6 +1141,54 @@ namespace Wesley.Client.ViewModels
                         else
                         {
                             await ShowAlert(false, "审核失败！");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ShowAlert(false, ex.Message);
+                }
+                return Unit.Default;
+            });
+        }
+
+        /// <summary>
+        /// 用于单据审核/回冲 ResultData
+        /// </summary>
+        /// <param name="billId"></param>
+        /// <param name="func"></param>
+        /// <param name="clear"></param>
+        /// <returns></returns>
+        public async Task<Unit> SubmitAsync(int billId, Func<int, CancellationToken, Task<ResultData>> func, Action<bool> call, CancellationToken token = default)
+        {
+            if (!InternetConnectivity())
+            {
+                _dialogService.LongAlert("网络已经断开 :(");
+                return Unit.Default;
+            }
+
+            return await RapidTapPreventorAsync(async () =>
+            {
+                try
+                {
+                    var ok = await _dialogService.ShowConfirmAsync("确认审批吗？", okText: "确定", cancelText: "取消");
+                    if (ok)
+                    {
+                        ResultData result = null;
+
+                        using (UserDialogs.Instance.Loading("提交中..."))
+                        {
+                            result = await func?.Invoke(billId, token);
+                        }
+
+                        if (result != null)
+                        {
+                            call?.Invoke(result.Success);
+                            return await ShowConfirm(true, "审核成功");
+                        }
+                        else
+                        {
+                            await ShowAlert(false, result.Message);
                         }
                     }
                 }
@@ -1049,9 +1237,9 @@ namespace Wesley.Client.ViewModels
         /// </summary>
         public async void RecognitionSpeech(Action<string> action)
         {
-            if (GlobalSettings.IsNotConnected)
+            if (!InternetConnectivity())
             {
-                _dialogService.ShortAlert("网络已经断开 :(");
+                _dialogService.LongAlert("网络已经断开 :(");
                 return;
             }
 
@@ -1145,9 +1333,9 @@ namespace Wesley.Client.ViewModels
         /// <param name="mqObj"></param>
         public async Task RedirectAsync(MessageInfo item, params (string, object)[] parameters)
         {
-            if (GlobalSettings.IsNotConnected)
+            if (!InternetConnectivity())
             {
-                _dialogService.ShortAlert("网络已经断开 :(");
+                _dialogService.LongAlert("网络已经断开 :(");
                 return;
             }
 
@@ -1434,17 +1622,14 @@ namespace Wesley.Client.ViewModels
         public ViewModelLoader<IReadOnlyCollection<NewsInfoModel>> NewsInfosLoader { get; set; } = new ViewModelLoader<IReadOnlyCollection<NewsInfoModel>>(ApplicationExceptions.ToString, Resources.TextResources.EmptyText);
         #endregion
 
-        public ViewModelBase(INavigationService navigationService, 
-            IDialogService dialogService)
+        public ViewModelBase(INavigationService navigationService, IDialogService dialogService)
         {
             _navigationService = navigationService;
             _dialogService = dialogService;
 
-            //注册网络状态
-            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+            Activator = new ViewModelActivator();
 
-            this.MenuBusKey = string.Format(Constants.MENU_KEY, this.GetType().FullName);
-
+            this.MenuBusKey = string.Format(Constants.MENU_KEY, this.GetType().FullName.ToUpper());
             this.ReferencePage = "";
 
             this.GoBackAsync = ReactiveCommand.CreateFromTask<object>(async e =>
@@ -1456,11 +1641,13 @@ namespace Wesley.Client.ViewModels
             this.RefreshCommand = ReactiveCommand.Create<object>(e =>
             {
                 Settings.LastUpdateTime = DateTime.Now;
-                this.ItemTreshold = 0;
+                this.ItemTreshold = -1;
                 //强制刷新
                 this.ForceRefresh = true;
                 ((ICommand)Load)?.Execute(null);
+                this.ForceRefresh = false;
             });
+
 
             //拨打电话
             this.CallPhone = ReactiveCommand.Create<string>(number =>
@@ -1483,51 +1670,11 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
-            //messageBus
-            //   .Listener<SyncItem>()
-            //   .SubOnMainThread(x => this.Remove(x.Id))
-            //   .DisposeWith(this.DestroyWith);
-        }
+            this.NavigateCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.GoBackAsync.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.RefreshCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CallPhone.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
 
-        /// <summary>
-        /// 卸载 ConnectivityChanged
-        /// </summary>
-        ~ViewModelBase()
-        {
-            Connectivity.ConnectivityChanged -= Connectivity_ConnectivityChanged;
-        }
-
-        public ObservableList<CommandItem> SyncEvents { get; } = new ObservableList<CommandItem>();
-
-        /// <summary>
-        ///// 移除
-        ///// </summary>
-        ///// <param name="syncId"></param>
-        ///// <returns></returns>
-        //private void Remove(Guid syncId)
-        //{
-        //    var e = this.SyncEvents.FirstOrDefault(y => ((SyncItem)y.Data).Id == syncId);
-        //    if (e != null)
-        //        this.SyncEvents.Remove(e);
-        //}
-
-        /// <summary>
-        /// 网络状态更改时
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Connectivity_ConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
-        {
-            if (e.NetworkAccess != NetworkAccess.Internet && !GlobalSettings.IsNotConnected)
-            {
-                _dialogService.ShortAlert("网络已经断开 :(");
-                GlobalSettings.IsNotConnected = true;
-            }
-            else if (e.NetworkAccess == NetworkAccess.Internet && GlobalSettings.IsNotConnected)
-            {
-                _dialogService.ShortAlert("网络已经连接 :)");
-                GlobalSettings.IsNotConnected = false;
-            }
         }
     }
 
@@ -1563,9 +1710,10 @@ namespace Wesley.Client.ViewModels
                 {
                     Filter.BusinessUserId = data.Id;
                     Filter.BusinessUserName = data.Column;
-                }, Enums.UserRoleType.Delivers);
-            });
+                    this.OnArchiveing();
 
+                }, Enums.UserRoleType.Delivers, true);
+            });
             //片区选择
             this.DistrictSelected = ReactiveCommand.Create<object>(async e =>
             {
@@ -1573,9 +1721,9 @@ namespace Wesley.Client.ViewModels
                 {
                     Filter.DistrictId = data.Id;
                     Filter.DistrictName = data.Name;
+                    this.OnArchiveing();
                 });
             });
-
             //品牌选择
             this.BrandSelected = ReactiveCommand.Create<object>(async e =>
             {
@@ -1583,9 +1731,9 @@ namespace Wesley.Client.ViewModels
                 {
                     Filter.BrandId = data.Id;
                     Filter.BrandName = data.Name;
+                    this.OnArchiveing();
                 });
             });
-
             //备注选择
             this.RemarkSelected = ReactiveCommand.Create<object>(async e =>
             {
@@ -1593,13 +1741,20 @@ namespace Wesley.Client.ViewModels
                 {
                     RemarkConfig.Id = data.Id;
                     RemarkConfig.Name = data.Name;
+                    this.OnArchiveing();
                 });
             });
-
             //客户选择
-            this.CustomSelected = ReactiveCommand.Create<object>(async e => await this.NavigateAsync("SelectCustomerPage"));
+            this.CustomSelected = ReactiveCommand.CreateFromTask<object>(async e => await this.NavigateAsync("SelectCustomerPage"));
             //供应商选择
-            this.ManufacturerSelected = ReactiveCommand.Create<object>(async e => await this.NavigateAsync("SelectManufacturerPage"));
+            this.ManufacturerSelected = ReactiveCommand.CreateFromTask<object>(async e => await this.NavigateAsync("SelectManufacturerPage"));
+
+            this.DeliverSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.DistrictSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CustomSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.RemarkSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.BrandSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.ManufacturerSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
         }
 
 
@@ -1639,17 +1794,46 @@ namespace Wesley.Client.ViewModels
 
         public async Task SelectUser(Action<PopData> call, UserRoleType userRoleType, bool include = false)
         {
-            var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择员工", "", async () =>
+            //var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择员工", "", async () =>
+            //{
+            //    var users = await GetUser(userRoleType, include);
+            //    var popDatas = new List<PopData>();
+            //    if (users != null && users.Any())
+            //    {
+            //        popDatas = users?.Where(s => s != null)
+            //        .Select(s => { return new PopData { Id = s.Id, Column = s.UserRealName }; })?.ToList();
+            //    }
+            //    return popDatas;
+            //});
+            //call?.Invoke(result);
+
+            var _dialogView = new PopRadioButtonPage("选择员工", "", async () =>
             {
                 var users = await GetUser(userRoleType, include);
                 var popDatas = new List<PopData>();
                 if (users != null && users.Any())
                 {
-                    popDatas = users.Select(s => { return new PopData { Id = s.Id, Column = s.UserRealName }; })?.ToList();
+                    popDatas = users?.Where(s => s != null)
+                    .Select(s => { return new PopData { Id = s.Id, Column = s.UserRealName }; })?.ToList();
                 }
                 return popDatas;
             });
-            call?.Invoke(result);
+
+            _dialogView.Completed += (sender, result) =>
+            {
+                try { 
+                if (result != null)
+                {
+                    call?.Invoke(result);
+                }
+                }
+                catch (Exception ex)
+                {
+                    Crashes.TrackError(ex);
+                }
+            };
+
+            await PopupNavigation.Instance.PushAsync(_dialogView);
         }
 
         /// <summary>
@@ -1668,7 +1852,7 @@ namespace Wesley.Client.ViewModels
         /// <param name="amount"></param>
         public async void SetOweCash(Action<string> callback, decimal amount = 0)
         {
-            var result = await CrossDiaglogKit.Current.GetInputTextAsync("输入欠款", "", defaultValue: string.Format("{0:F2}", amount));
+            var result = await CrossDiaglogKit.Current.GetInputTextAsync("输入欠款", "", keyboard: Keyboard.Numeric, defaultValue: string.Format("{0:F2}", amount));
             if (!string.IsNullOrEmpty(result))
             {
                 callback(result);
@@ -1683,7 +1867,7 @@ namespace Wesley.Client.ViewModels
         /// <param name="amount"></param>
         public async void SetDiscount(Action<string> callback, decimal amount = 0)
         {
-            var result = await CrossDiaglogKit.Current.GetInputTextAsync("输入优惠", "", defaultValue: string.Format("{0:F2}", amount));
+            var result = await CrossDiaglogKit.Current.GetInputTextAsync("输入优惠", "", keyboard: Keyboard.Numeric, defaultValue: string.Format("{0:F2}", amount));
             if (!string.IsNullOrEmpty(result))
             {
                 callback(result);
@@ -1697,7 +1881,7 @@ namespace Wesley.Client.ViewModels
         /// <param name="remark"></param>
         public async void AllRemak(Action<string> callback, string remark = "")
         {
-            var result = await CrossDiaglogKit.Current.GetInputTextAsync("整单备注", "", defaultValue: remark);
+            var result = await CrossDiaglogKit.Current.GetInputTextAsync("整单备注", "", keyboard: Keyboard.Text, defaultValue: remark);
             if (!string.IsNullOrEmpty(result))
             {
                 callback(result);
@@ -1748,7 +1932,63 @@ namespace Wesley.Client.ViewModels
         /// </summary>
         public async Task SelectPrint(AbstractBill bill)
         {
-            await NavigateAsync("PrintSettingPage", ("Bill", bill));
+            //var num = await CrossDiaglogKit.Current.GetInputTextAsync("重复打印数", "", keyboard: Keyboard.Numeric, defaultValue: string.Format("{0}", 2),placeHolder: "自定义打印单页次数");
+            //if (!string.IsNullOrEmpty(num))
+            //{
+            //    await NavigateAsync("PrintSettingPage", ("Bill", bill), ("PrintNum", num));
+            //}
+
+            int printNum = 1;
+            switch (bill.BillType)
+            {
+                case BillTypeEnum.SaleBill:
+                    printNum = Settings.SaleBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.SaleReservationBill:
+                    printNum = Settings.SaleReservationBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.ReturnBill:
+                    printNum = Settings.ReturnBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.ReturnReservationBill:
+                    printNum = Settings.ReturnReservationBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.ExchangeBill:
+                    printNum = Settings.ExchangeBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.AllocationBill:
+                    printNum = Settings.AllocationBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.CashReceiptBill:
+                    printNum = Settings.CashReceiptBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.PurchaseBill:
+                    printNum = Settings.PurchaseBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.InventoryPartTaskBill:
+                    printNum = Settings.InventoryPartTaskBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.CostExpenditureBill:
+                    printNum = Settings.CostExpenditureBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.CostContractBill:
+                    printNum = Settings.CostContractBill?.PrintNum ?? 0;
+                    break;
+                case BillTypeEnum.AdvanceReceiptBill:
+                    printNum = Settings.AdvanceReceiptBill?.PrintNum ?? 0;
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(App.BtAddress))
+            {
+                var _blueToothService = DependencyService.Get<IBlueToothService>();
+                _blueToothService?.Print(bill, Settings.PrintStyleSelected, printNum);
+            }
+            else
+            {
+                this.loaded = false;
+                await NavigateAsync("PrintSettingPage", ("Bill", bill), ("PrintNum", printNum));
+            }
         }
 
         /// <summary>
@@ -1766,6 +2006,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("结算方式", "", () =>
                 {
                     var popDatas = new List<PopData>()
@@ -1781,6 +2022,34 @@ namespace Wesley.Client.ViewModels
                     this.PayTypeId = result.Id;
                     this.PayTypeName = result.Column;
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("结算方式", "", () =>
+               {
+                   var popDatas = new List<PopData>()
+                   {
+                        new PopData { Id = (int)PaymentMethodType.XianJie, Column = "现结" },
+                        new PopData { Id = (int)PaymentMethodType.GuaZhang, Column = "挂账" }
+                   };
+                   return Task.FromResult(popDatas);
+               });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try {
+                    if (result != null)
+                    {
+                        this.PayTypeId = result.Id;
+                        this.PayTypeName = result.Column;
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -1849,22 +2118,58 @@ namespace Wesley.Client.ViewModels
                     ],
                  */
 
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("默认售价", "", (() =>
                 {
                     var popDatas = new List<PopData>();
                     int index = 0;
-                    options.ForEach(o =>
+                    if (options != null && options.Any())
                     {
-                        popDatas.Add(new PopData { Id = index, Column = o.Text, Column1 = o.Value });
-                        index++;
-                    });
+                        options.ForEach(o =>
+                        {
+                            popDatas.Add(new PopData { Id = index, Column = o.Text, Column1 = o.Value });
+                            index++;
+                        });
+                    }
                     return Task.FromResult(popDatas);
                 }));
 
                 if (result != null)
                 {
                     Settings.DefaultPricePlan = result.Column1;
-                }
+                }*/
+
+                var _dialogView = new PopRadioButtonPage("选择员工", "", () =>
+               {
+                   var popDatas = new List<PopData>();
+                   int index = 0;
+                   if (options != null && options.Any())
+                   {
+                       options.ForEach(o =>
+                       {
+                           popDatas.Add(new PopData { Id = index, Column = o.Text, Column1 = o.Value });
+                           index++;
+                       });
+                   }
+                   return Task.FromResult(popDatas);
+               });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try {
+                    if (result != null)
+                    {
+                        Settings.DefaultPricePlan = result.Column1;
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
+
             }
             catch (Exception ex)
             {
@@ -1880,19 +2185,27 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择科目", "", async () =>
                 {
                     var results = await _accountingService.GetDefaultAccountingAsync((int)type, this.ForceRefresh);
                     var popDatas = results?.Item2?.Select(s =>
                     {
-                        return new PopData
+                        if (s != null)
                         {
-                            Id = s.Id,
-                            Column = s.Name,
-                            Column1 = (s.AccountCodeTypeId).ToString(),
-                            Column1Enable = false
-                        };
-                    }).ToList();
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Column1 = (s?.AccountCodeTypeId ?? 0).ToString(),
+                                Column1Enable = false
+                            };
+                        }
+                        else
+                        {
+                            return new PopData();
+                        }
+                    })?.ToList();
                     return popDatas;
                 });
 
@@ -1904,6 +2217,50 @@ namespace Wesley.Client.ViewModels
                     Accounting.AccountCodeTypeId = int.Parse(result.Column1);
                     call?.Invoke(this.Accounting);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择员工", "", async () =>
+                {
+                    var results = await _accountingService.GetDefaultAccountingAsync((int)type, this.ForceRefresh);
+                    var popDatas = results?.Item2?.Select(s =>
+                    {
+                        if (s != null)
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Column1 = (s?.AccountCodeTypeId ?? 0).ToString(),
+                                Column1Enable = false
+                            };
+                        }
+                        else
+                        {
+                            return new PopData();
+                        }
+                    })?.ToList();
+                    return popDatas;
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try {
+                    if (result != null)
+                    {
+                        Accounting.AccountingOptionId = result.Id;
+                        Accounting.Name = result.Column;
+                        Accounting.AccountingOptionName = result.Column;
+                        Accounting.AccountCodeTypeId = int.Parse(result.Column1);
+                        call?.Invoke(this.Accounting);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -1919,6 +2276,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择科目", "", async () =>
                 {
                     var options = new List<AccountingModel>();
@@ -2150,13 +2508,20 @@ namespace Wesley.Client.ViewModels
                         Accounts = new ObservableCollection<AccountingModel>(options);
                         popDatas = options.Select(s =>
                         {
-                            return new PopData
+                            if (s != null)
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Column1 = (s.AccountCodeTypeId).ToString(),
-                                Column1Enable = false
-                            };
+                                return new PopData
+                                {
+                                    Id = s?.Id ?? 0,
+                                    Column = s?.Name,
+                                    Column1 = (s?.AccountCodeTypeId ?? 0).ToString(),
+                                    Column1Enable = false
+                                };
+                            }
+                            else
+                            {
+                                return new PopData();
+                            }
                         }).ToList();
                     }
                     return popDatas;
@@ -2170,6 +2535,277 @@ namespace Wesley.Client.ViewModels
                     Accounting.AccountCodeTypeId = int.Parse(result.Column1);
                     call?.Invoke(Accounting);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择科目", "", async () =>
+                {
+                    var options = new List<AccountingModel>();
+                    IList<AccountingOptionModel> result = null;
+
+                    if (loadTuple)
+                    {
+                        var defaults = await _accountingService.GetDefaultAccountingAsync(billTypeId, this.ForceRefresh);
+                        result = defaults?.Item2?.Select(a =>
+                        {
+                            return new AccountingOptionModel()
+                            {
+                                Id = a.Id,
+                                AccountCodeTypeId = a.AccountCodeTypeId ?? 0,
+                                Selected = false,
+                                Name = a.Name,
+                                Number = a.Number
+                            };
+                        }).ToList();
+                    }
+                    else
+                    {
+                        result = await _accountingService.GetPaymentMethodsAsync(billTypeId, this.ForceRefresh);
+                    }
+
+                    if (result != null)
+                    {
+                        switch (BillType)
+                        {
+                            case BillTypeEnum.SaleBill://销售单(收款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+
+                                }
+                                break;
+                            case BillTypeEnum.SaleReservationBill://销售订单(收款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.ReturnBill://退货单(收款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.ReturnReservationBill://退货订单(收款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.CashReceiptBill://收款单(收款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.PaymentReceiptBill://付款单(付款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.AdvanceReceiptBill://预收款单(收款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Id = a.Id,
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.AdvancePaymentBill://预付款单(付款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.PurchaseBill://采购单(付款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.PurchaseReturnBill://采购退货单(付款账户) 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.CostExpenditureBill://费用支出（支出账户） 配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                            case BillTypeEnum.FinancialIncomeBill://财务收入（收款账户）  配置
+                                {
+                                    options = result.Select(a =>
+                                    {
+                                        return new AccountingModel()
+                                        {
+                                            Default = a.IsDefault,
+                                            AccountingOptionId = a.Id,
+                                            AccountCodeTypeId = a.AccountCodeTypeId,
+                                            Selected = false,
+                                            AccountingOptionName = a.Name,
+                                            Name = a.Name
+                                        };
+                                    }).ToList();
+                                }
+                                break;
+                        }
+                    }
+
+                    var popDatas = new List<PopData>();
+                    if (options != null)
+                    {
+                        Accounts = new ObservableCollection<AccountingModel>(options);
+                        popDatas = options.Select(s =>
+                        {
+                            if (s != null)
+                            {
+                                return new PopData
+                                {
+                                    Id = s?.Id ?? 0,
+                                    Column = s?.Name,
+                                    Column1 = (s?.AccountCodeTypeId ?? 0).ToString(),
+                                    Column1Enable = false
+                                };
+                            }
+                            else
+                            {
+                                return new PopData();
+                            }
+                        }).ToList();
+                    }
+                    return popDatas;
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try {
+                    if (result != null)
+                    {
+                        Accounting.AccountingOptionId = result.Id;
+                        Accounting.Name = result.Column;
+                        Accounting.AccountingOptionName = result.Column;
+                        Accounting.AccountCodeTypeId = int.Parse(result.Column1);
+                        call?.Invoke(Accounting);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2181,16 +2817,24 @@ namespace Wesley.Client.ViewModels
         /// 仓库选择
         /// </summary>
         /// <param name="call"></param>
-        public async Task SelectStock(Action<WareHouseModel> call, WareHouseType type)
+        public async Task SelectStock(Action<WareHouseModel> call, BillTypeEnum type)
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择库存", "", async () =>
                 {
-                    var result = await _wareHousesService.GetWareHousesAsync((int)type, force: this.ForceRefresh);
+                    var result = await _wareHousesService.GetWareHousesAsync(type, force: this.ForceRefresh);
                     if (result != null && result.Any())
                     {
-                        var popDatas = result?.Select(s => { return new PopData { Id = s.Id, Column = s.Name }; })?.ToList();
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name
+                            };
+                        })?.ToList();
                         return popDatas;
                     }
                     else
@@ -2204,6 +2848,47 @@ namespace Wesley.Client.ViewModels
                     WareHouse.Name = result?.Column;
                     call?.Invoke(WareHouse);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择库存", "", async () =>
+                {
+                    var result = await _wareHousesService.GetWareHousesAsync(type, force: this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    { 
+                    if (result != null)
+                    {
+                        WareHouse.Id = result?.Id ?? 0;
+                        WareHouse.Name = result?.Column;
+                        call?.Invoke(WareHouse);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2216,16 +2901,24 @@ namespace Wesley.Client.ViewModels
         /// </summary>
         /// <param name="call"></param>
         /// <param name="type"></param>
-        public async Task DefaultSelectStock(Action<WareHouseModel> call, WareHouseType type)
+        public async Task DefaultSelectStock(Action<WareHouseModel> call, BillTypeEnum type)
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择库存", "", async () =>
                 {
-                    var results = await _wareHousesService.GetWareHousesAsync((int)type, force: this.ForceRefresh);
+                    var results = await _wareHousesService.GetWareHousesAsync(type, force: this.ForceRefresh);
                     if (results != null && results.Any())
                     {
-                        var popDatas = results?.Select(s => { return new PopData { Id = s.Id, Column = s.Name }; })?.ToList();
+                        var popDatas = results?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name
+                            };
+                        })?.ToList();
                         return popDatas;
                     }
                     else
@@ -2240,6 +2933,47 @@ namespace Wesley.Client.ViewModels
                     WareHouse.Name = result.Column;
                     call?.Invoke(WareHouse);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择库存", "", async () =>
+                {
+                    var results = await _wareHousesService.GetWareHousesAsync(type, force: this.ForceRefresh);
+                    if (results != null && results.Any())
+                    {
+                        var popDatas = results?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    {
+                    if (result != null)
+                    {
+                        WareHouse.Id = result.Id;
+                        WareHouse.Name = result.Column;
+                        call?.Invoke(WareHouse);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2254,6 +2988,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择片区", "", async () =>
                 {
                     var result = await _terminalService.GetDistrictsAsync(this.ForceRefresh);
@@ -2263,9 +2998,9 @@ namespace Wesley.Client.ViewModels
                         {
                             return new PopData
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Selected = s.Id == defaultValue
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
                             };
                         })?.ToList();
                         return popDatas;
@@ -2281,6 +3016,47 @@ namespace Wesley.Client.ViewModels
                     District.Name = result.Column;
                     call?.Invoke(District);
                 }
+                */
+                var _dialogView = new PopRadioButtonPage("选择片区", "", async () =>
+                {
+                    var result = await _terminalService.GetDistrictsAsync(true);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    { 
+                    if (result != null)
+                    {
+                        District.Id = result.Id;
+                        District.Name = result.Column;
+                        call?.Invoke(District);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2296,6 +3072,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择渠道", "", async () =>
                 {
                     var result = await _terminalService.GetChannelsAsync(this.ForceRefresh);
@@ -2303,12 +3080,19 @@ namespace Wesley.Client.ViewModels
                     {
                         var popDatas = result?.Select(s =>
                         {
-                            return new PopData
+                            if (s != null)
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Selected = s.Id == defaultValue
-                            };
+                                return new PopData
+                                {
+                                    Id = s?.Id ?? 0,
+                                    Column = s?.Name,
+                                    Selected = (s?.Id ?? 0) == defaultValue
+                                };
+                            }
+                            else
+                            {
+                                return new PopData();
+                            }
                         })?.ToList();
                         return popDatas;
                     }
@@ -2323,6 +3107,54 @@ namespace Wesley.Client.ViewModels
                     Channel.Name = result.Column;
                     call?.Invoke(Channel);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择渠道", "", async () =>
+                {
+                    var result = await _terminalService.GetChannelsAsync(this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            if (s != null)
+                            {
+                                return new PopData
+                                {
+                                    Id = s?.Id ?? 0,
+                                    Column = s?.Name,
+                                    Selected = (s?.Id ?? 0) == defaultValue
+                                };
+                            }
+                            else
+                            {
+                                return new PopData();
+                            }
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try {
+                    if (result != null)
+                    {
+                        Channel.Id = result.Id;
+                        Channel.Name = result.Column;
+                        call?.Invoke(Channel);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2338,20 +3170,21 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择线路", "", async () =>
                 {
                     var result = await _terminalService.GetLineTiersAsync(this.ForceRefresh);
                     if (result != null && result.Any())
                     {
-                        var popDatas = result?.Select(s =>
-                        {
-                            return new PopData
+                        var popDatas = result?.Where(s => s != null).Select(s =>
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Selected = s.Id == defaultValue
-                            };
-                        })?.ToList();
+                                return new PopData
+                                {
+                                    Id = s?.Id ?? 0,
+                                    Column = s?.Name,
+                                    Selected = (s?.Id ?? 0) == defaultValue
+                                };
+                            })?.ToList();
                         return popDatas;
                     }
                     else
@@ -2365,6 +3198,48 @@ namespace Wesley.Client.ViewModels
                     LineTier.Name = result.Column;
                     call?.Invoke(LineTier);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择线路", "", async () =>
+                {
+                    var result = await _terminalService.GetLineTiersAsync(this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Where(s => s != null).Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    {
+                    if (result != null)
+                    {
+                        LineTier.Id = result.Id;
+                        LineTier.Name = result.Column;
+                        call?.Invoke(LineTier);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2380,6 +3255,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择线路", "", async () =>
                 {
                     var result = await _terminalService.GetLineTiersByUserAsync(this.ForceRefresh);
@@ -2389,10 +3265,10 @@ namespace Wesley.Client.ViewModels
                         {
                             return new PopData
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Data = s.Terminals,
-                                Selected = s.Id == defaultValue
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Data = s?.Terminals,
+                                Selected = (s?.Id ?? 0) == defaultValue
                             };
                         }).ToList();
                         return popDatas;
@@ -2416,6 +3292,56 @@ namespace Wesley.Client.ViewModels
 
                     call?.Invoke(LineTier);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择线路", "", async () =>
+                {
+                    var result = await _terminalService.GetLineTiersByUserAsync(this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Data = s?.Terminals,
+                                Selected = (s?.Id ?? 0) == defaultValue
+                            };
+                        }).ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    {
+                    if (result != null)
+                    {
+                        LineTier.Id = result.Id;
+                        LineTier.Name = result.Column;
+
+                        if (result.Data is List<TerminalModel> lines)
+                        {
+                            LineTier.Terminals = lines;
+                        }
+
+                        call?.Invoke(LineTier);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2431,6 +3357,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("等级选择", "", async () =>
                 {
                     var result = await _terminalService.GetRanksAsync(this.ForceRefresh);
@@ -2440,9 +3367,9 @@ namespace Wesley.Client.ViewModels
                         {
                             return new PopData
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Selected = s.Id == defaultValue
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
                             };
                         })?.ToList();
                         return popDatas;
@@ -2459,6 +3386,47 @@ namespace Wesley.Client.ViewModels
                     Rank.Name = result.Column;
                     call?.Invoke(Rank);
                 }
+                */
+                var _dialogView = new PopRadioButtonPage("等级选择", "", async () =>
+                {
+                    var result = await _terminalService.GetRanksAsync(this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    {
+                    if (result != null)
+                    {
+                        Rank.Id = result.Id;
+                        Rank.Name = result.Column;
+                        call?.Invoke(Rank);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2473,6 +3441,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择商品类别", "", async () =>
                 {
                     var result = await _productService.GetAllCategoriesAsync(this.ForceRefresh);
@@ -2482,9 +3451,9 @@ namespace Wesley.Client.ViewModels
                         {
                             return new PopData
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Selected = s.Id == defaultValue
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
                             };
                         })?.ToList();
                         return popDatas;
@@ -2500,6 +3469,47 @@ namespace Wesley.Client.ViewModels
                     Category.Name = result.Column;
                     call?.Invoke(Category);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择商品类别", "", async () =>
+                {
+                    var result = await _productService.GetAllCategoriesAsync(this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try { 
+                    if (result != null)
+                    {
+                        Category.Id = result.Id;
+                        Category.Name = result.Column;
+                        call?.Invoke(Category);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2514,6 +3524,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
+                /*
                 var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择品牌", "", async () =>
                 {
                     var result = await _productService.GetBrandsAsync("", 0, 50, this.ForceRefresh);
@@ -2523,9 +3534,9 @@ namespace Wesley.Client.ViewModels
                         {
                             return new PopData
                             {
-                                Id = s.Id,
-                                Column = s.Name,
-                                Selected = s.Id == defaultValue
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
                             };
                         })?.ToList();
                         return popDatas;
@@ -2541,6 +3552,47 @@ namespace Wesley.Client.ViewModels
                     Brand.Name = result.Column;
                     call?.Invoke(Brand);
                 }
+                */
+
+                var _dialogView = new PopRadioButtonPage("选择品牌", "", async () =>
+                {
+                    var result = await _productService.GetBrandsAsync("", 0, 50, this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name,
+                                Selected = (s?.Id ?? 0) == defaultValue
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try {
+                    if (result != null)
+                    {
+                        Brand.Id = result.Id;
+                        Brand.Name = result.Column;
+                        call?.Invoke(Brand);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2558,7 +3610,7 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择单位", "", async () =>
+                var _dialogView = new PopRadioButtonPage("选择单位", "", async () =>
                 {
                     var result = await _productService.GetSpecificationAttributeOptionsAsync(this.ForceRefresh);
                     if (result != null)
@@ -2579,7 +3631,14 @@ namespace Wesley.Client.ViewModels
                                     break;
                             }
                         }
-                        var popDatas = options?.Select(s => { return new PopData { Id = s.Id, Column = s.Name }; }).ToList();
+                        var popDatas = options?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s?.Id ?? 0,
+                                Column = s?.Name
+                            };
+                        }).ToList();
                         return popDatas;
                     }
                     else
@@ -2587,12 +3646,25 @@ namespace Wesley.Client.ViewModels
                         return null;
                     }
                 });
-                if (result != null)
+
+                _dialogView.Completed += (sender, result) =>
                 {
-                    Specification.Id = result.Id;
-                    Specification.Name = result.Column;
-                    call?.Invoke(Specification);
-                }
+                    try
+                    { 
+                    if (result != null)
+                    {
+                        Specification.Id = result.Id;
+                        Specification.Name = result.Column;
+                        call?.Invoke(Specification);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2600,15 +3672,15 @@ namespace Wesley.Client.ViewModels
             }
         }
 
-
+        private readonly static object _ulock = new object();
         /// <summary>
-        /// 检查签到
+        /// 检查签到,是否有，没签退客户
         /// </summary>
         /// <param name="terminalId"></param>
         /// <param name="businessUserId"></param>
-        /// <returns>是否有，没签退客户</returns>
         public async Task<bool> CheckSignIn()
         {
+
             //获取最后一次签到未签退记录
             var result = await _terminalService.GetOutVisitStoreAsync(Settings.UserId);
             if (result != null && (result?.Id ?? 0) > 0)
@@ -2643,28 +3715,41 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择备注", "", async () =>
-                {
-                    var _settingService = App.Resolve<ISettingService>();
-                    var result = await _settingService.GetRemarkConfigListSetting();
-                    var popDatas = result?.Select(s =>
-                    {
-                        return new PopData
-                        {
-                            Id = s.Key,
-                            Column = s.Value,
-                            Selected = s.Key == defaultValue
-                        };
-                    })?.ToList();
-                    return popDatas;
-                });
 
-                if (result != null)
+                var _dialogView = new PopRadioButtonPage("选择备注", "", async () =>
+                    {
+                        var _settingService = App.Resolve<ISettingService>();
+                        var result = await _settingService.GetRemarkConfigListSetting();
+                        var popDatas = result?.Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s.Key,
+                                Column = s.Value,
+                                Selected = s.Key == defaultValue
+                            };
+                        })?.ToList();
+                        return popDatas;
+                    });
+
+                _dialogView.Completed += (sender, result) =>
                 {
-                    RemarkConfig.Id = result.Id;
-                    RemarkConfig.Name = result.Column;
-                    call?.Invoke(RemarkConfig);
-                }
+                    try
+                    {
+                    if (result != null)
+                    {
+                        RemarkConfig.Id = result.Id;
+                        RemarkConfig.Name = result.Column;
+                        call?.Invoke(RemarkConfig);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -2682,10 +3767,232 @@ namespace Wesley.Client.ViewModels
     public abstract class ViewModelBaseCutom<TData> : ViewModelBaseCutom where TData : AbstractBill
     {
         [Reactive] public TData Bill { get; set; }
-
+        [Reactive] public bool StockSelectedChange { get; set; }
         public ReactiveCommand<object, Unit> StockSelected { get; set; }
         public ReactiveCommand<object, Unit> AddProductCommand { get; set; }
+        public bool CheckBill()
+        {
+            if (this.Bill.ReversedStatus)
+            {
+                _dialogService.ShortAlert("已红冲单据不能操作");
+                return false;
+            }
 
+            if (this.Bill.AuditedStatus)
+            {
+                _dialogService.ShortAlert("已审核单据不能操作");
+                return false;
+            }
+
+            return true;
+        }
+
+        /*
+        public async void ClearCacheDataByType(BillTypeEnum typeId)
+        {
+            try
+            {
+                var db = App.Resolve<ILiteDbService<CacheBillData>>();
+                var result = await db.Table.FindAsync(c => c.TypeId == (int)typeId);
+                if (result != null && result.Any())
+                {
+                    foreach (var item in result)
+                    {
+                        await db.Table.DeleteAsync(item.Id);
+                    }
+                }
+
+                var db2 = App.Resolve<ILiteDbService<CachePaymentMethod>>();
+                var paymentOldCache = await db2.Table.FindAsync(c => c.BillTypeId == (int)typeId);
+
+                if (paymentOldCache != null && paymentOldCache.Any())
+                {
+                    foreach (var item in paymentOldCache)
+                    {
+                        await db2.Table.DeleteAsync(item.Id);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+        public async void SetCacheDataInfo(BillTypeEnum typeId, AbstractBill bill, PaymentMethodBaseModel payment)
+        {
+            try
+            {
+                var db = App.Resolve<ILiteDbService<CacheBillData>>();
+                var data = await db.Table.FindAsync(c => c.TypeId == (int)typeId);
+                var result = data.OrderByDescending(c => c.Id).FirstOrDefault();
+                if (result != null)
+                    await db.Table.DeleteAsync(result.Id);
+
+                var cacheData = new CacheBillData
+                {
+                    TypeId = (int)typeId,
+                    DataValue = JsonConvert.SerializeObject(bill)
+                };
+                await db.InsertAsync(cacheData);
+
+
+                var db2 = App.Resolve<ILiteDbService<CachePaymentMethod>>();
+                var data2 = await db2.Table.FindAsync(c => c.BillTypeId == (int)typeId);
+                var paymentOldCache = data2.ToList();
+                if (paymentOldCache != null && paymentOldCache.Any())
+                {
+                    foreach (var item in paymentOldCache)
+                    {
+                        await db2.Table.DeleteAsync(item.Id);
+                    }
+                }
+                if (payment != null)
+                {
+                    var cachePaymentData = new CachePaymentMethod
+                    {
+                        BillTypeId = (int)typeId,
+                        BillGuid = bill.GUID,
+                        DataValue = JsonConvert.SerializeObject(payment)
+                    };
+                    await db2.InsertAsync(cachePaymentData);
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+        public async Task<Tuple<AbstractBill, PaymentMethodBaseModel>> GetAbstractBillByType(BillTypeEnum typeId)
+        {
+            try
+            {
+                var db = App.Resolve<ILiteDbService<CacheBillData>>();
+
+                var data = await db.Table.FindAsync(c => c.TypeId == (int)typeId);
+                if (null == data)
+                {
+                    return null;
+                }
+
+                var result = data.OrderByDescending(c => c.Id).FirstOrDefault();
+
+                AbstractBill cacheData = null;
+                switch (typeId)
+                {
+                    case BillTypeEnum.None:
+                        break;
+                    case BillTypeEnum.ExchangeBill:
+                        break;
+                    case BillTypeEnum.SaleReservationBill:
+                        cacheData = JsonConvert.DeserializeObject<SaleReservationBillModel>(result?.DataValue);
+                        break;
+                    case BillTypeEnum.SaleBill:
+                        cacheData = JsonConvert.DeserializeObject<SaleBillModel>(result?.DataValue);
+                        break;
+                    case BillTypeEnum.ReturnReservationBill:
+                        cacheData = JsonConvert.DeserializeObject<ReturnReservationBillModel>(result?.DataValue);
+                        break;
+                    case BillTypeEnum.ReturnBill:
+                        cacheData = JsonConvert.DeserializeObject<ReturnBillModel>(result?.DataValue);
+                        break;
+                    case BillTypeEnum.CarGoodBill:
+                        break;
+                    case BillTypeEnum.FinanceReceiveAccount:
+                        break;
+                    case BillTypeEnum.PickingBill:
+                        break;
+                    case BillTypeEnum.DispatchBill:
+                        break;
+                    case BillTypeEnum.ChangeReservation:
+                        break;
+                    case BillTypeEnum.PurchaseReservationBill:
+                        break;
+                    case BillTypeEnum.PurchaseBill:
+                        break;
+                    case BillTypeEnum.PurchaseReturnReservationBill:
+                        break;
+                    case BillTypeEnum.PurchaseReturnBill:
+                        break;
+                    case BillTypeEnum.BackStockBill:
+                        break;
+                    case BillTypeEnum.AllocationBill:
+                        break;
+                    case BillTypeEnum.InventoryProfitLossBill:
+                        break;
+                    case BillTypeEnum.CostAdjustmentBill:
+                        break;
+                    case BillTypeEnum.ScrapProductBill:
+                        break;
+                    case BillTypeEnum.InventoryAllTaskBill:
+                        break;
+                    case BillTypeEnum.InventoryPartTaskBill:
+                        break;
+                    case BillTypeEnum.CombinationProductBill:
+                        break;
+                    case BillTypeEnum.SplitProductBill:
+                        break;
+                    case BillTypeEnum.InventoryReportBill:
+                        break;
+                    case BillTypeEnum.CashReceiptBill:
+                        break;
+                    case BillTypeEnum.PaymentReceiptBill:
+                        break;
+                    case BillTypeEnum.AdvanceReceiptBill:
+                        break;
+                    case BillTypeEnum.AdvancePaymentBill:
+                        break;
+                    case BillTypeEnum.CostExpenditureBill:
+                        break;
+                    case BillTypeEnum.CostContractBill:
+                        break;
+                    case BillTypeEnum.FinancialIncomeBill:
+                        break;
+                    case BillTypeEnum.AllLoadBill:
+                        break;
+                    case BillTypeEnum.ZeroLoadBill:
+                        break;
+                    case BillTypeEnum.AllZeroMergerBill:
+                        break;
+                    case BillTypeEnum.AccountingVoucher:
+                        break;
+                    case BillTypeEnum.StockReport:
+                        break;
+                    case BillTypeEnum.SaleSummeryReport:
+                        break;
+                    case BillTypeEnum.TransferSummaryReport:
+                        break;
+                    case BillTypeEnum.SaleSummeryProductReport:
+                        break;
+                    case BillTypeEnum.RecordingVoucher:
+                        break;
+                    case BillTypeEnum.LoanGoodsBill:
+                        break;
+                    case BillTypeEnum.ReturnGoodsBill:
+                        break;
+                    case BillTypeEnum.Other:
+                        break;
+                    default:
+                        break;
+                }
+                PaymentMethodBaseModel payment = null;
+                if (cacheData != null)
+                {
+                    var billGuid = cacheData?.GUID;
+                    var db2 = App.Resolve<ILiteDbService<CachePaymentMethod>>();
+                    var data2 = await db2.Table.FindAsync(c => c.BillTypeId == (int)typeId && billGuid == c.BillGuid);
+                    var paymentCache = data2.FirstOrDefault();
+                    if (null != paymentCache && !string.IsNullOrEmpty(paymentCache?.DataValue))
+                    {
+                        payment = JsonConvert.DeserializeObject<PaymentMethodBaseModel>(paymentCache?.DataValue);
+                    }
+                }
+
+                return Tuple.Create(cacheData, payment);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        */
         public ViewModelBaseCutom(INavigationService navigationService,
             IProductService productService,
             ITerminalService terminalService,
@@ -2700,47 +4007,82 @@ namespace Wesley.Client.ViewModels
                 accountingService,
                 dialogService)
         {
-            //员工选择
-            this.DeliverSelected = ReactiveCommand.Create<object>(async e =>
-           {
-               await SelectUser(Bill, UserRoleType.Delivers);
-           });
-
-            //选择仓库
-            this.StockSelected = ReactiveCommand.Create<object>(async e =>
+            //客户选择
+            this.CustomSelected = ReactiveCommand.CreateFromTask<object>(async e =>
             {
-                await SelectStock((result) =>
-                {
-                    if (result != null)
-                    {
-                        WareHouse.Id = result.Id;
-                        WareHouse.Name = result.Column;
-
-                        Bill.WareHouseId = result.Id;
-                        Bill.WareHouseName = result.Column;
-
-                        if (e.ToString() == "0")
-                        {
-                            Bill.ShipmentWareHouseId = result.Id;
-                            Bill.ShipmentWareHouseName = result.Column;
-                        }
-                        else if (e.ToString() == "1")
-                        {
-                            Bill.IncomeWareHouseId = result.Id;
-                            Bill.IncomeWareHouseName = result.Column;
-                        }
-                    }
-
-                }, WareHouseType.All);
+                if (CheckBill())
+                    await this.NavigateAsync("SelectCustomerPage");
             });
+            //供应商选择
+            this.ManufacturerSelected = ReactiveCommand.CreateFromTask<object>(async e =>
+            {
+                if (CheckBill())
+                    await this.NavigateAsync("SelectManufacturerPage");
+            });
+            //员工选择
+            this.DeliverSelected = ReactiveCommand.CreateFromTask<object>(async e =>
+           {
+               if (CheckBill())
+                   await SelectUser(Bill, UserRoleType.Delivers, true);
+           });
+            //选择仓库
+            this.StockSelected = ReactiveCommand.CreateFromTask<object>(async e =>
+            {
+                if (e == null) return;
+                if (CheckBill())
+                {
+                    await SelectStock((result) =>
+                    {
+                        if (result != null && WareHouse != null && Bill != null)
+                        {
+                            WareHouse.Id = result.Id;
+                            WareHouse.Name = result.Column;
 
+                            Bill.WareHouseId = result.Id;
+                            Bill.WareHouseName = result.Column;
+
+                            if (e.ToString() == "0")
+                            {
+                                Bill.ShipmentWareHouseId = result.Id;
+                                Bill.ShipmentWareHouseName = result.Column;
+                            }
+                            else if (e.ToString() == "1")
+                            {
+                                Bill.IncomeWareHouseId = result.Id;
+                                Bill.IncomeWareHouseName = result.Column;
+                            }
+
+                            this.OnArchiveing();
+                            this.StockSelectedChange = true;
+                        }
+
+                    }, BillType);
+                }
+            });
 
             //审核禁用
             this.WhenAnyValue(x => x.Bill.AuditedStatus).Where(x => x == true)
-                .Subscribe(x => { this.EnableOperation = false; this.ShowAddProduct = true; })
+                .Subscribe(x =>
+                {
+                    this.EnableOperation = false;
+                    this.ShowAddProduct = true;
+                    this.EnabledSubmitBtn = true;
+                })
                 .DisposeWith(this.DeactivateWith);
-        }
 
+            //红冲禁用
+            this.WhenAnyValue(x => x.Bill.ReversedStatus).Where(x => x == true)
+               .Subscribe(x =>
+               {
+                   this.EnabledSubmitBtn = true;
+               })
+               .DisposeWith(this.DeactivateWith);
+
+            this.DeliverSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CustomSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.StockSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.ManufacturerSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+        }
 
         /// <summary>
         /// 留存拍照
@@ -2775,21 +4117,27 @@ namespace Wesley.Client.ViewModels
                 {
                     try
                     {
-                        var content = new MultipartFormDataContent
-                        {{ new StreamContent(convertStream),"\"file\"", $"\"{mediaFile?.Path}\"" }};
+                        var scb = new StreamContent(convertStream);
+                        var content = new MultipartFormDataContent { { scb, "\"file\"", $"\"{mediaFile?.Path}\"" } };
 
                         var url = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
                         var result = await httpClientHelper.PostAsync(url, content);
-                        //await Task.Delay(1000);
                         var uploadResult = new UploadResult();
                         if (!string.IsNullOrEmpty(result))
                         {
                             uploadResult = JsonConvert.DeserializeObject<UploadResult>(result);
                         }
+
                         if (uploadResult != null)
                         {
                             action.Invoke(uploadResult, mediaFile);
                         }
+
+                        if (scb != null)
+                            scb.Dispose();
+
+                        if (content != null)
+                            content.Dispose();
                     }
                     catch (Exception ex)
                     {
@@ -2810,53 +4158,25 @@ namespace Wesley.Client.ViewModels
                 _dialogService.LongAlert(ex.Message);
             }
         }
-        public async Task SelectStock(TData bill, WareHouseType type)
-        {
-            try
-            {
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择库存", "", async () =>
-               {
-                   var result = await _wareHousesService.GetWareHousesAsync((int)type);
-                   if (result != null && result.Any())
-                   {
-                       var popDatas = result?.Where(s => s != null).Select(s => { return new PopData { Id = s.Id, Column = s.Name }; })?.ToList();
-                       return popDatas;
-                   }
-                   else
-                   {
-                       return null;
-                   }
-               });
 
-                if (result != null)
-                {
-                    WareHouse.Id = result.Id;
-                    WareHouse.Name = result.Column;
-                    bill.WareHouseId = result.Id;
-                    bill.WareHouseName = result.Column;
-                    bill.WareHouseId = result.Id;
-                    bill.WareHouseName = result.Column;
-                    bill.WareHouseId = result.Id;
-                    bill.WareHouseName = result.Column;
-                }
-            }
-            catch (Exception ex)
-            {
-                Crashes.TrackError(ex, new Dictionary<string, string> { { "Line:", "2766" } });
-            }
-        }
-        public async Task SelectStock(Action<PopData> action, WareHouseType type)
+        public async Task SelectStock(TData bill, BillTypeEnum type)
         {
             try
             {
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择库存", "", async () =>
+                var _dialogView = new PopRadioButtonPage("选择库存", "", async () =>
                 {
-                    var result = await _wareHousesService.GetWareHousesAsync((int)type, force: this.ForceRefresh);
+                    var result = await _wareHousesService.GetWareHousesAsync(type);
                     if (result != null && result.Any())
                     {
                         var popDatas = result?.Where(s => s != null)
-                        .Select(s => { return new PopData { Id = s.Id, Column = s.Name }; })?.ToList();
-
+                        .Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s.Id,
+                                Column = s.Name
+                            };
+                        })?.ToList();
                         return popDatas;
                     }
                     else
@@ -2865,126 +4185,151 @@ namespace Wesley.Client.ViewModels
                     }
                 });
 
-                if (result != null)
+                _dialogView.Completed += (sender, result) =>
                 {
-                    action?.Invoke(result);
-                }
+                    try { 
+                    if (result != null)
+                    {
+                        WareHouse.Id = result.Id;
+                        WareHouse.Name = result.Column;
+                        bill.WareHouseId = result.Id;
+                        bill.WareHouseName = result.Column;
+                        bill.WareHouseId = result.Id;
+                        bill.WareHouseName = result.Column;
+                        bill.WareHouseId = result.Id;
+                        bill.WareHouseName = result.Column;
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
+
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex, new Dictionary<string, string> { { "Line:", "2766" } });
+            }
+        }
+        public async Task SelectStock(Action<PopData> action, BillTypeEnum type)
+        {
+            try
+            {
+                var _dialogView = new PopRadioButtonPage("选择库存", "", async () =>
+                {
+                    var result = await _wareHousesService.GetWareHousesAsync(type, force: this.ForceRefresh);
+                    if (result != null && result.Any())
+                    {
+                        var popDatas = result?.Where(s => s != null).Select(s =>
+                        {
+                            return new PopData
+                            {
+                                Id = s.Id,
+                                Column = s.Name
+                            };
+                        })?.ToList();
+
+                        return popDatas ?? new List<PopData>();
+                    }
+                    else
+                    {
+                        return new List<PopData>();
+                    }
+                });
+
+                _dialogView.Completed += (sender, result) =>
+                {
+                    try
+                    {
+                    if (result != null)
+                    {
+                        action?.Invoke(result);
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
                 Crashes.TrackError(ex, new Dictionary<string, string> { { "Line:", "2801" } });
             }
         }
+
         public async Task SelectUser(TData bill, UserRoleType userRoleType, bool include = false)
         {
-            var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择员工", "", async () =>
+
+            var _dialogView = new PopRadioButtonPage("选择员工", "", async () =>
             {
                 var users = await GetUser(userRoleType, include);
-                var popDatas = users?.Where(s => s != null)
-                .Select(s => { return new PopData { Id = s.Id, Column = s.UserRealName }; })?.ToList();
+                var popDatas = new List<PopData>();
+                if (users != null && users.Any())
+                {
+                    popDatas = users?.Where(s => s != null)
+                    .Select(s => { return new PopData { Id = s.Id, Column = s.UserRealName }; })?.ToList();
+                }
                 return popDatas;
             });
 
-            if (result != null)
-            {
-                switch (userRoleType)
-                {
-                    case UserRoleType.Delivers:
-                        bill.DeliveryUserId = result?.Id ?? 0;
-                        bill.DeliveryUserName = result?.Column;
-                        break;
-                    case UserRoleType.Employees:
-                        bill.BusinessUserId = result?.Id ?? 0;
-                        bill.BusinessUserName = result?.Column;
-                        break;
-                }
-            }
+            _dialogView.Completed += (sender, result) =>
+           {
+               try
+               {
+                   if (result != null)
+                   {
+                       switch (userRoleType)
+                       {
+                           case UserRoleType.Delivers:
+                               bill.DeliveryUserId = result?.Id ?? 0;
+                               bill.DeliveryUserName = result?.Column;
+                               break;
+                           case UserRoleType.Employees:
+                               bill.BusinessUserId = result?.Id ?? 0;
+                               bill.BusinessUserName = result?.Column;
+                               break;
+                       }
+
+                       this.OnArchiveing();
+                   }
+               }
+               catch (Exception ex)
+               {
+                   Crashes.TrackError(ex);
+               }
+           };
+            await PopupNavigation.Instance.PushAsync(_dialogView);
         }
-        public void ViewBill(AbstractBill bill, Func<int, CancellationToken, Task<bool>> reverse, Func<int, CancellationToken, Task<bool>> auditing, CancellationToken token = default)
+
+        public void AppendMenus(AbstractBill bill)
         {
             //已审核未红冲
             if (bill.AuditedStatus && !bill.ReversedStatus)
             {
-                this.SetMenus(async (x) =>
-                {
-                    switch (x)
-                    {
-                        //打印
-                        case MenuEnum.PRINT:
-                            await SelectPrint(this.Bill);
-                            break;
-                        //红冲
-                        case Enums.MenuEnum.HONGCHOU:
-                            {
-                                bool result = false;
-                                using (Acr.UserDialogs.UserDialogs.Instance.Loading("红冲中..."))
-                                {
-                                    result = await reverse?.Invoke(bill.Id, token);
-                                }
-
-                                if (result)
-                                {
-                                    await ShowConfirm(true, "红冲成功", true);
-                                }
-                                else
-                                {
-                                    await ShowConfirm(false, "红冲失败！", false);
-                                }
-                            }
-                            break;
-                        //冲改
-                        case Enums.MenuEnum.CHOUGAI:
-                            await reverse?.Invoke(bill.Id, token);
-                            break;
-                    }
-                }, 5, 35, 36);
+                //隐藏保存按钮
+                ShowSubmitBtn = false;
+                //控制显示菜单
+                _popupMenu?.Show(5, 35, 36);
             }
             //未审核时
             else if (!bill.AuditedStatus && !bill.ReversedStatus)
             {
-                this.AppendMenus(async (x) =>
-                {
-                    switch (x)
-                    {
-                        //审核
-                        case MenuEnum.SHENGHE:
-                            {
-                                bool result = false;
-                                using (Acr.UserDialogs.UserDialogs.Instance.Loading("审核中..."))
-                                {
-                                    result = await auditing?.Invoke(bill.Id, token);
-                                }
-
-                                if (result)
-                                {
-                                    await ShowConfirm(true, "审核成功", true);
-                                }
-                                else
-                                {
-                                    await ShowConfirm(false, "审核失败！", false);
-                                }
-                            }
-                            break;
-                    }
-                }, 34);
+                _popupMenu?.Show(0, 2, 3, 4, 5, 6, 7, 34);
             }
             //已经红冲时
-            else if (bill.AuditedStatus && bill.ReversedStatus)
-            {
-                this.SetMenus(async (x) =>
-                {
-                    switch (x)
-                    {
-                        //打印
-                        case MenuEnum.PRINT:
-                            await SelectPrint(this.Bill);
-                            break;
-                    }
-                }, 5);
+            else if (bill.ReversedStatus)
+            {    //隐藏保存按钮
+                ShowSubmitBtn = false;
+                //控制显示菜单
+                _popupMenu?.Show(5);
             }
         }
-
-
     }
 
     /// <summary>
@@ -3009,7 +4354,7 @@ namespace Wesley.Client.ViewModels
         [Reactive] public ObservableCollection<TData> Bills { get; set; }
         public ReactiveCommand<TData, Unit> SelectedCommand { get; set; }
         [Reactive] public TData Selecter { get; set; }
-        public new ViewModelLoader<IReadOnlyCollection<TData>> BillsLoader { get; }
+
 
         public ViewModelBaseOrder(INavigationService navigationService,
             IGlobalService globalService,
@@ -3024,7 +4369,8 @@ namespace Wesley.Client.ViewModels
             IReturnBillService returnBillService,
             ISaleReservationBillService saleReservationBillService,
             ISaleBillService saleBillService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _globalService = globalService;
 
@@ -3040,9 +4386,7 @@ namespace Wesley.Client.ViewModels
             _saleReservationBillService = saleReservationBillService;
             _saleBillService = saleBillService;
 
-
             Bills = new ObservableCollection<TData>();
-            BillsLoader = new ViewModelLoader<IReadOnlyCollection<TData>>(ApplicationExceptions.ToString, Resources.TextResources.EmptyText);
 
         }
     }
@@ -3057,14 +4401,15 @@ namespace Wesley.Client.ViewModels
         public readonly IReportingService _reportingService;
 
         [Reactive] public ObservableCollection<TData> RankSeries { get; set; }
-        [Reactive] public Chart ChartData { get; set; }
+        [Reactive] public ChartViewConfig ChartConfig { get; set; }
+
         public ChartPageEnum PageType { get; set; }
 
         public ViewModelBaseChart(INavigationService navigationService,
             IProductService productService,
             IReportingService reportingService,
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _productService = productService;
             _reportingService = reportingService;
@@ -3073,3 +4418,8 @@ namespace Wesley.Client.ViewModels
         }
     }
 }
+
+//msbuild Wesley.Client.Android.csproj -p:LinkerDumpDependencies = true
+//msbuild Wesley.Client.Android.csproj -p:Configuration = Release
+
+//    msbuild  -p:Configuration = Release;

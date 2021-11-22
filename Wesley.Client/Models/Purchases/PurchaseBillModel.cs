@@ -25,7 +25,6 @@ namespace Wesley.Client.Models.Purchases
         public int CollectionAccount { get; set; }
         [Reactive] public decimal CollectionAmount { get; set; }
         public string AuditedUserName { get; set; }
-        public int PrintNum { get; set; }
         public bool Paymented { get; set; }
         [Reactive] public ObservableCollection<PurchaseItemModel> Items { get; set; } = new ObservableCollection<PurchaseItemModel>();
         [Reactive] public IList<AccountMaping> PurchaseBillAccountings { get; set; } = new ObservableCollection<AccountMaping>();
@@ -72,6 +71,7 @@ namespace Wesley.Client.Models.Purchases
     /// </summary>
     public class PurchaseItemUpdateModel : Base
     {
+        public string BillNumber { get; set; }
         public int ManufacturerId { get; set; }
         [Reactive] public int BusinessUserId { get; set; }
         [Reactive] public int WareHouseId { get; set; }

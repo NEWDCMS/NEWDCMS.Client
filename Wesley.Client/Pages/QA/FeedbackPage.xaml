@@ -12,11 +12,12 @@
                        x:Name="CurrentContentView"
                        x:Class="Wesley.Client.Pages.FeedbackPage"
                        Title="{Binding Title}"
-                       Padding="15"
+                       Padding="0"
                        BackgroundColor="White"
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:FeedbackPageViewModel">
-    <Grid Style="{StaticResource GGrid}">
+    <Grid Style="{StaticResource GGrid}"
+          Margin="0,15,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="45" />
             <RowDefinition Height="45" />
@@ -32,14 +33,14 @@
         </Grid.ColumnDefinitions>
         <Label Text="问题类型 *"
                FontSize="{StaticResource FT16}"
-               
+               Margin="15,0,15,0"
                Grid.Row="0"
                Grid.Column="0"
                VerticalOptions="Center" />
         <yummy:PancakeView Grid.Row="1"
                            Grid.Column="0"
                            CornerRadius="10"
-                       
+                           Margin="15,0,15,0"
                            HorizontalOptions="FillAndExpand"
                            VerticalOptions="Center"
                            Padding="0">
@@ -66,12 +67,13 @@
         </yummy:PancakeView>
         <Label Text="问题描述 *"
                FontSize="{StaticResource FT16}"
-               
+               Margin="15,0,15,0"
                Grid.Row="2"
                Grid.Column="0"
                VerticalOptions="Center" />
         <StackLayout Grid.Row="3"
-                     Grid.Column="0">
+                     Grid.Column="0"
+                     Margin="15,0,15,0">
             <yummy:PancakeView CornerRadius="10"
                                BackgroundColor="#eeeeee"
                     
@@ -99,6 +101,7 @@
         </StackLayout>
         <StackLayout Grid.Row="4"
                      Grid.Column="0"
+                     Margin="15,0,15,0"
                      Orientation="Horizontal">
             <CollectionView HorizontalOptions="End"
                             ItemsSource="{Binding DisplayPhotos}">
@@ -157,12 +160,13 @@
         </StackLayout>
         <Label Text="联系方式 *"
                FontSize="{StaticResource FT16}"
-               
+               Margin="15,0,15,0"
                Grid.Row="5"
                Grid.Column="0"
                VerticalOptions="Center" />
         <StackLayout Grid.Row="6"
-                     Grid.Column="0">
+                     Grid.Column="0"
+                     Margin="15,0,15,0">
             <yummy:PancakeView CornerRadius="10"
                                BackgroundColor="#eeeeee"
                               
@@ -174,35 +178,33 @@
                                       FontSize="{StaticResource FT14}"></controls:CustomEntry>
             </yummy:PancakeView>
         </StackLayout>
-        <StackLayout Grid.Row="7"
-                     Grid.Column="0"
-                     Padding="0,20,0,0">
-            <Button Text="check-circle 提交"
-                    TextColor="White"
-                    CornerRadius="50"
-                    FontFamily="FAS"
-                    FontSize="{StaticResource FT14}"
-                    HeightRequest="45"
-                    HorizontalOptions="FillAndExpand"
-                    VerticalOptions="EndAndExpand"
-                    BackgroundColor="{StaticResource PrimaryColor}"
-                    Command="{Binding SubmitCommand}"
-                    IsEnabled="{Binding IsEnabled}">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button"
-                                 Binding="{Binding IsEnabled}"
-                                 Value="True">
-                        <Setter Property="BackgroundColor"
-                                Value="#53a245" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Button"
-                                 Binding="{Binding IsEnabled}"
-                                 Value="False">
-                        <Setter Property="BackgroundColor"
-                                Value="#eeeeee" />
-                    </DataTrigger>
-                </Button.Triggers>
-            </Button>
-        </StackLayout>
+        <Button Grid.Row="7"
+                Grid.Column="0"
+                Text="check-circle 提交"
+                TextColor="White"
+                CornerRadius="0"
+                FontFamily="FAS"
+                FontSize="{StaticResource FT14}"
+                HeightRequest="45"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="EndAndExpand"
+                BackgroundColor="{StaticResource PrimaryColor}"
+                Command="{Binding SubmitCommand}"
+                IsEnabled="{Binding IsEnabled}">
+            <Button.Triggers>
+                <DataTrigger TargetType="Button"
+                             Binding="{Binding IsEnabled}"
+                             Value="True">
+                    <Setter Property="BackgroundColor"
+                            Value="#53a245" />
+                </DataTrigger>
+                <DataTrigger TargetType="Button"
+                             Binding="{Binding IsEnabled}"
+                             Value="False">
+                    <Setter Property="BackgroundColor"
+                            Value="#eeeeee" />
+                </DataTrigger>
+            </Button.Triggers>
+        </Button>
     </Grid>
 </pages:BaseContentPage>

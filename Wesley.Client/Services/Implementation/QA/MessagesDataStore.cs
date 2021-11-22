@@ -24,12 +24,12 @@ namespace Wesley.Client.Services
 
         public Task<bool> DeleteItemAsync(string id)
         {
-            throw new NotImplementedException();
+             return null;
         }
 
         public Task<Message> GetItemAsync(string id)
         {
-            throw new NotImplementedException();
+             return null;
         }
 
         public Task<IEnumerable<Message>> GetItemsAsync(bool forceRefresh = false)
@@ -81,7 +81,7 @@ namespace Wesley.Client.Services
                 ISent = true,
                 SenderId = conversation.Peer.Id,
                 Sender = conversation.Peer,
-                ReplyTo = _messages[_messages.Count - 3]
+                ReplyTo = _messages[^3]
             });
             _messages.Add(new Message
             {
@@ -93,7 +93,7 @@ namespace Wesley.Client.Services
                 ISent = false,
                 SenderId = conversation.Peer.Id,
                 Sender = conversation.Peer,
-                ReplyTo = _messages[_messages.Count - 2]
+                ReplyTo = _messages[^2]
             });
             _messages.Add(new Message
             {
@@ -126,7 +126,7 @@ namespace Wesley.Client.Services
 
         public Task<bool> UpdateItemAsync(Message item)
         {
-            throw new NotImplementedException();
+             return null;
         }
     }
 }

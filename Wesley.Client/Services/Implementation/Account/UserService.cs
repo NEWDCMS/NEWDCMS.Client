@@ -30,7 +30,11 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IUserApi>(URL);
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetBusinessUsersAsync", storeId, ids, roleName);
-                var results = await _makeRequest.StartUseCache(api.GetBusinessUsersAsync(storeId, ids, roleName, calToken), cacheKey, force, calToken);
+
+                var results = await _makeRequest.StartUseCache(api.GetBusinessUsersAsync(storeId, ids, roleName, calToken), cacheKey, true, calToken);
+                if (results == null)
+                    return null;
+
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
                 else
@@ -53,7 +57,8 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IUserApi>(URL);
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetSubUsersAsync", storeId, userId);
-                var results = await _makeRequest.StartUseCache(api.GetSubUsersAsync(storeId, userId, calToken), cacheKey, force, calToken);
+
+                var results = await _makeRequest.StartUseCache(api.GetSubUsersAsync(storeId, userId, calToken), cacheKey, true, calToken);
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
                 else
@@ -70,26 +75,25 @@ namespace Wesley.Client.Services
         /// 获取权限记录配置
         /// </summary>
         /// <returns></returns>
-        public async Task<IList<PermissionRecordQuery>> GetPermissionRecordSettingAsync(Action<IList<PermissionRecordQuery>> action, CancellationToken calToken = default)
+        public void GetPermissionRecordSettingAsync(Action<IList<PermissionRecordQuery>> action, CancellationToken calToken = default)
         {
             try
             {
                 int storeId = Settings.StoreId;
                 int userId = Settings.UserId;
                 var api = RefitServiceBuilder.Build<IUserApi>(URL);
-                var results = await _makeRequest.Start(api.GetPermissionRecordSettingAsync(storeId, userId, calToken), calToken);
-                if (results != null && results?.Code >= 0)
-                {
-                    var data = results?.Data.ToList();
-                    action?.Invoke(data);
-                    return data;
-                }
-                else
-                    return null;
+                var cacheKey = RefitServiceBuilder.Cacher("GetPermissionRecordSettingAsync", storeId, userId);
+                _makeRequest.StartUseCache_Rx(api.GetPermissionRecordSettingAsync(storeId, userId, calToken), cacheKey, calToken)?.Subscribe((results) =>
+                    {
+                        if (results != null && results?.Code >= 0)
+                        {
+                            var data = results?.Data.ToList();
+                            action?.Invoke(data);
+                        }
+                    });
             }
             catch (Exception)
             {
-                return null;
             }
         }
 

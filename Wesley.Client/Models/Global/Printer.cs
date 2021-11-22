@@ -12,7 +12,7 @@ namespace Wesley.Client.Models.Global
         [Reactive] public string Name { get; set; }
         [Reactive] public string LocalName { get; set; }
         [Reactive] public string Address { get; set; }
-        [Reactive] public bool Selected { get; set; }
+        [Reactive] public bool Status { get; set; }
         public ReactiveCommand<Printer, Unit> SelectCommand { get; set; }
     }
 }

@@ -16,7 +16,6 @@ namespace Wesley.Client.Models.Finances
         public SelectList Manufacturers { get; set; }
         public int PaymentType { get; set; }
         public string AuditedUserName { get; set; }
-        public int? PrintNum { get; set; }
         public int? AccountingOptionId { get; set; }
         public string AccountingOptionName { get; set; }
         public SelectList AccountingOptions { get; set; }
@@ -32,6 +31,7 @@ namespace Wesley.Client.Models.Finances
     /// </summary>
     public class AdvancePaymenUpdateModel
     {
+        public string BillNumber { get; set; }
         public int Draweer { get; set; }
         public int ManufacturerId { get; set; }
         public decimal? AdvanceAmount { get; set; }

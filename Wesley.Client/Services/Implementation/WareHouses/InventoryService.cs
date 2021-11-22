@@ -16,7 +16,7 @@ namespace Wesley.Client.Services
         private readonly MakeRequest _makeRequest;
         //
         private static string URL => GlobalSettings.BaseEndpoint + "api/v3/dcms/warehouse/inventoryPartTask";
-
+        ///api/v{version}/dcms/warehouse/inventoryparttask/createorupdate/{store}/{userId}/{billId}
         public InventoryService(MakeRequest makeRequest)
         {
             _makeRequest = makeRequest;
@@ -106,8 +106,7 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
 
                 var api = RefitServiceBuilder.Build<IInventoryApi>(URL);
-                var cacheKey = RefitServiceBuilder.Cacher("GetInventoryPartTaskBillAsync", storeId, userId, billId);
-                var results = await _makeRequest.StartUseCache(api.GetInventoryPartTaskBillAsync(storeId, userId, billId, calToken), cacheKey, force, calToken);
+                var results = await _makeRequest.Start(api.GetInventoryPartTaskBillAsync(storeId, userId, billId, calToken));
                 return results?.Data;
             }
             catch (Exception e)

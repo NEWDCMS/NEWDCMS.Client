@@ -5,6 +5,7 @@ using Xamarin.Forms;
 
 namespace Wesley.Client.Converters
 {
+
     public class WrongBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -49,7 +50,7 @@ namespace Wesley.Client.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

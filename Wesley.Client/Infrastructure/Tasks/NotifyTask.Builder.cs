@@ -116,7 +116,7 @@ namespace Wesley.Infrastructure.Tasks
             /// <returns></returns>
             public NotifyTask Build()
             {
-                return new NotifyTask( 
+                return new NotifyTask(
                     TaskFunc(),
                     WhenCanceled,
                     WhenFaulted,

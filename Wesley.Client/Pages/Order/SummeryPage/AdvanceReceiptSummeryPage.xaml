@@ -11,8 +11,6 @@
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:AdvanceReceiptSummeryPageViewModel">
     <ContentPage.Resources>
-        
-        
     </ContentPage.Resources>
     <order:AdvanceReceiptSummeryView />
 </pages:BaseContentPage>

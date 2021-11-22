@@ -8,7 +8,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms", true, isAutoRegistrable: false), Cache(false), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IUserApi
     {
         [Get("/users/getBusinessUsers/{storeId}")]
@@ -21,7 +21,9 @@ namespace Wesley.Client.Services
         [Get("/auth/user/permission/{userId}")]
         Task<APIResult<IList<PermissionRecordQuery>>> GetPermissionRecordSettingAsync(int store, int userId, CancellationToken calToken = default);
 
+        //
         [Post("/auth/user/profiles/updateFaceImage/{userId}")]
+        //[Headers("Authorization: Bearer")]
         Task<APIResult<string>> UpLoadFaceImageAsync(int store, int userId, string image, CancellationToken calToken = default);
     }
 }

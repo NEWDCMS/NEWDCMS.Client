@@ -1,8 +1,11 @@
-﻿using Wesley.Client.Enums;
+﻿using Acr.UserDialogs;
+using Wesley.Client.CustomViews;
+using Wesley.Client.Enums;
 using Wesley.Client.Models;
 using Wesley.Client.Models.Finances;
 using Wesley.Client.Models.Sales;
 using Wesley.Client.Models.Terminals;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
@@ -10,8 +13,7 @@ using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-using Shiny;
-
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,19 +22,16 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Xamarin.Forms;
 
 namespace Wesley.Client.ViewModels
 {
     public class ReceiptBillPageViewModel : ViewModelBaseCutom<CashReceiptBillModel>
     {
-
         private readonly IReceiptCashService _receiptCashService;
-
         public ReactiveCommand<int, Unit> TextChangedCommand { get; }
         public ReactiveCommand<object, Unit> MorePaymentCommand { get; }
         public IReactiveCommand CrearFrom { get; set; }
-
-
         [Reactive] public CashReceiptItemModel Selecter { get; set; }
         [Reactive] public string ClearIcon { get; set; } = "fas-clock";
         //
@@ -43,21 +42,22 @@ namespace Wesley.Client.ViewModels
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
             IReceiptCashService receiptCashService,
+            IDialogService dialogService
 
-
-            IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "收款单";
 
             _receiptCashService = receiptCashService;
 
             InitBill();
+
             //验证
+            var valid_IsVieweBill = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
             var valid_TerminalId = this.ValidationRule(x => x.Bill.TerminalId, _isZero, "客户未指定");
             var valid_BusinessUserId = this.ValidationRule(x => x.Bill.BusinessUserId, _isZero, "业务员未指定");
             var valid_ProductCount = this.ValidationRule(x => x.Bill.Items.Count, _isZero, "无收款单据信息");
             var valid_SelectesCount = this.ValidationRule(x => x.Bill.CashReceiptBillAccountings.Count, _isZero, "请选择支付方式");
-            var valid_IsVieweBill = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
 
             //更改时间
             this.WhenAnyValue(x => x.Filter.EndTime).Subscribe(x =>
@@ -69,89 +69,87 @@ namespace Wesley.Client.ViewModels
                     ClearIcon = "fas-clock";
                     ((ICommand)Load)?.Execute(null);
                 }
-            }).DisposeWith(this.DeactivateWith);
+            }).DisposeWith(DeactivateWith);
 
             //绑定数据
             this.Load = BillItemsLoader.Load(async () =>
             {
                 if (Bill.Id == 0)
                 {
-                    var results = await Sync.Run(() =>
-                     {
-                         var inits = _receiptCashService.GetInitDataAsync(calToken: cts.Token).Result;
+                    var inits = await _receiptCashService.GetInitDataAsync(calToken: new System.Threading.CancellationToken());
+                    if (inits != null)
+                    {
+                        Bill.CashReceiptBillAccountings = inits.CashReceiptBillAccountings;
+                        if (this.PaymentMethods.Selectes.Count == 0)
+                        {
+                            var defaultPaymentMethods = inits.CashReceiptBillAccountings.Select(a =>
+                            {
+                                return new AccountingModel()
+                                {
+                                    Name = a.Name,
+                                    AccountingOptionId = a.AccountingOptionId,
+                                    CollectionAmount = 0,
+                                    AccountCodeTypeId = a.AccountCodeTypeId,
+                                    Number = a.AccountCodeTypeId
+                                };
+                            }).ToList();
+                            this.PaymentMethods.Selectes = new ObservableCollection<AccountingModel>(defaultPaymentMethods); ;
+                        }
+                    }
 
-                         if (inits != null)
-                         {
-                             Bill.CashReceiptBillAccountings = inits.CashReceiptBillAccountings;
-                             if (this.PaymentMethods.Selectes.Count == 0)
-                             {
-                                 var defaultPaymentMethods = inits.CashReceiptBillAccountings.Select(a =>
-                                 {
-                                     return new AccountingModel()
-                                     {
-                                         Name = a.Name,
-                                         AccountingOptionId = a.AccountingOptionId,
-                                         CollectionAmount = 0,
-                                         AccountCodeTypeId = a.AccountCodeTypeId,
-                                         Number = a.AccountCodeTypeId
-                                     };
-                                 }).ToList();
-                                 this.PaymentMethods.Selectes = new ObservableCollection<AccountingModel>(defaultPaymentMethods); ;
-                             }
-                         }
+                    var pending = new List<CashReceiptItemModel>();
 
-                         var pending = new List<CashReceiptItemModel>();
+                    int? terminalId = Filter.TerminalId;
+                    int? businessUserId = Filter.BusinessUserId;
 
-                         int? terminalId = Filter.TerminalId;
-                         int? businessUserId = Filter.BusinessUserId;
+                    string billNumber = "";
+                    string remark = "";
+                    DateTime? startTime = Filter.StartTime;
+                    DateTime? endTime = Filter.EndTime;
+                    int pageIndex = 0;
+                    int pageSize = 20;
 
-                         string billNumber = "";
-                         string remark = "";
-                         DateTime? startTime = Filter.StartTime;
-                         DateTime? endTime = Filter.EndTime;
-                         int pageIndex = 0;
-                         int pageSize = 20;
+                    if (terminalId.HasValue && terminalId.Value != 0)
+                    {
+                        var result = await _receiptCashService.GetOwecashBillsAsync(Settings.UserId, terminalId, null, billNumber, remark, startTime, endTime, pageIndex, pageSize, calToken: new System.Threading.CancellationToken());
 
-                         if (terminalId.HasValue && terminalId.Value != 0)
-                         {
-                             var result = _receiptCashService.GetOwecashBillsAsync(Settings.UserId, terminalId, null, billNumber, remark, startTime, endTime, pageIndex, pageSize, calToken: cts.Token).Result;
+                        if (result != null)
+                        {
+                            var curBills = result?.Where(s => s?.BillTypeId != (int)BillTypeEnum.FinancialIncomeBill).ToList();
+                            if (curBills != null && curBills.Count > 0)
+                            {
+                                foreach (var bill in curBills)
+                                {
+                                    pending.Add(new CashReceiptItemModel()
+                                    {
+                                        CashReceiptBillId = 0,
+                                        BillId = bill.BillId,
+                                        BillNumber = bill.BillNumber,
+                                        BillTypeId = bill.BillTypeId,
+                                        BillTypeName = bill.BillTypeName,
+                                        BillLink = bill.BillLink,
+                                        MakeBillDate = bill.MakeBillDate,
 
-                             if (result != null)
-                             {
+                                        //单据金额
+                                        Amount = bill.Amount,
+                                        //优惠
+                                        DiscountAmount = bill.DiscountAmount,
+                                        //已收金额
+                                        PaymentedAmount = bill.PaymentedAmount,
+                                        //欠款金额
+                                        ArrearsAmount = bill.ArrearsAmount,
 
-                                 foreach (var bill in result?.Where(s => s?.BillTypeId != (int)BillTypeEnum.FinancialIncomeBill).ToList())
-                                 {
-                                     pending.Add(new CashReceiptItemModel()
-                                     {
-                                         CashReceiptBillId = 0,
-                                         BillId = bill.BillId,
-                                         BillNumber = bill.BillNumber,
-                                         BillTypeId = bill.BillTypeId,
-                                         BillTypeName = bill.BillTypeName,
-                                         BillLink = bill.BillLink,
-                                         MakeBillDate = bill.MakeBillDate,
-
-
-                                         //单据金额
-                                         Amount = bill.Amount,
-                                         //优惠
-                                         DiscountAmount = bill.DiscountAmount,
-                                         //已收金额
-                                         PaymentedAmount = bill.PaymentedAmount,
-                                         //欠款金额
-                                         ArrearsAmount = bill.ArrearsAmount,
-
-                                         //本次优惠金额
-                                         DiscountAmountOnce = 0,
-                                         //本次收款金额
-                                         ReceivableAmountOnce = 0,
-                                         //收款后尚欠金额 = 欠款金额
-                                         AmountOwedAfterReceipt = bill.ArrearsAmount,
-                                         //应收金额 = 欠款金额
-                                         AmountReceivable = bill.ArrearsAmount,
-                                         Remark = bill.Remark,
-                                         //预览单据
-                                         RedirectCommand = ReactiveCommand.Create<CashReceiptItemModel>(async e =>
+                                        //本次优惠金额
+                                        DiscountAmountOnce = 0,
+                                        //本次收款金额
+                                        ReceivableAmountOnce = 0,
+                                        //收款后尚欠金额 = 欠款金额
+                                        AmountOwedAfterReceipt = bill.ArrearsAmount,
+                                        //应收金额 = 欠款金额
+                                        AmountReceivable = bill.ArrearsAmount,
+                                        Remark = bill.Remark,
+                                        //预览单据
+                                        RedirectCommand = ReactiveCommand.Create<CashReceiptItemModel>(async e =>
                                         {
                                             //销售单
                                             if (e?.BillTypeId == (int)BillTypeEnum.SaleBill)
@@ -179,59 +177,74 @@ namespace Wesley.Client.ViewModels
                                                 //移动端不支持（财务其它收入）收款
                                             }
                                         })
-                                     });
-                                 }
-                             }
-                         }
+                                    });
+                                }
+                            }
+                        }
+                    }
 
-                         return pending;
-
-                     }, (ex) => { Crashes.TrackError(ex); });
-                    Bill.Items = new ObservableRangeCollection<CashReceiptItemModel>(results);
-                    return results;
+                    if (pending != null && pending.Any())
+                        Bill.Items = new ObservableRangeCollection<CashReceiptItemModel>(pending);
                 }
+
                 return Bill.Items;
             });
-
 
             //提交单据
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.ReceiptBillsSave);
+                return await this.Access(AccessGranularityEnum.ReceiptBillsSave, async () =>
+                {
+                    if (this.Bill.ReversedStatus)
+                    {
+                        _dialogService.ShortAlert("已红冲单据不能操作");
+                        return Unit.Default;
+                    }
 
-                //验证
-                var receivableAmount = Bill.TotalReceivableAmountOnce ?? 0;
-                if (receivableAmount == 0)
-                {
-                    this.Alert("收款金额不能为空！"); return Unit.Default;
-                }
-                var totalReceiptAmount = Bill.CashReceiptBillAccountings?.Sum(s => s.CollectionAmount);
-                if (receivableAmount != totalReceiptAmount)
-                {
-                    this.Alert("本次单据收款合计不等于总收款方式合计！"); return Unit.Default;
-                }
+                    if (this.Bill.AuditedStatus)
+                    {
+                        _dialogService.ShortAlert("已审核单据不能操作");
+                        return Unit.Default;
+                    }
 
-                var postData = new CashReceiptUpdateModel()
-                {
-                    CustomerId = Bill.TerminalId,
-                    Payeer = Bill.BusinessUserId,
-                    PreferentialAmount = Bill.TotalDiscountAmountOnce ?? 0,
-                    OweCash = Bill.TotalAmountOwedAfterReceipt ?? 0,
-                    ReceivableAmount = Bill.TotalReceivableAmountOnce ?? 0,
-                    Remark = Bill.Remark,
-                    Items = Bill.Items,
-                    Accounting = Bill.CashReceiptBillAccountings,
-                    //预收金额(收款中包含的预收部分)
-                    AdvanceAmount = Bill.CashReceiptBillAccountings?.Where(s => s.AccountCodeTypeId == (int)AccountingCodeEnum.AdvancesReceived)
-                       .FirstOrDefault()?.CollectionAmount ?? 0,
-                    //预收款余额（客户余额）
-                    AdvanceAmountBalance = this.TBalance.AdvanceAmountBalance
-                };
+                    //验证
+                    var receivableAmount = Bill.TotalReceivableAmountOnce ?? 0;
+                    if (receivableAmount == 0)
+                    {
+                        this.Alert("收款金额不能为空！"); return Unit.Default;
+                    }
+                    var totalReceiptAmount = Bill.CashReceiptBillAccountings?.Sum(s => s.CollectionAmount);
+                    if (receivableAmount != totalReceiptAmount)
+                    {
+                        this.Alert("本次单据收款合计不等于总收款方式合计！"); return Unit.Default;
+                    }
 
-                return await SubmitAsync(postData, Bill.Id, _receiptCashService.CreateOrUpdateAsync, (result) =>
-                {
-                    Bill = new CashReceiptBillModel();
-                }, token: cts.Token);
+                    if (Bill.BusinessUserId == 0)
+                        Bill.BusinessUserId = Settings.UserId;
+
+                    var postData = new CashReceiptUpdateModel()
+                    {
+                        BillNumber = this.Bill.BillNumber,
+                        CustomerId = Bill.TerminalId,
+                        Payeer = Bill.BusinessUserId,
+                        PreferentialAmount = Bill.TotalDiscountAmountOnce ?? 0,
+                        OweCash = Bill.TotalAmountOwedAfterReceipt ?? 0,
+                        ReceivableAmount = Bill.TotalReceivableAmountOnce ?? 0,
+                        Remark = Bill.Remark,
+                        Items = Bill.Items,
+                        Accounting = Bill.CashReceiptBillAccountings,
+                        //预收金额(收款中包含的预收部分)
+                        AdvanceAmount = Bill.CashReceiptBillAccountings?.Where(s => s.AccountCodeTypeId == (int)AccountingCodeEnum.AdvancesReceived)
+                           .FirstOrDefault()?.CollectionAmount ?? 0,
+                        //预收款余额（客户余额）
+                        AdvanceAmountBalance = this.TBalance.AdvanceAmountBalance
+                    };
+
+                    return await SubmitAsync(postData, Bill.Id, _receiptCashService.CreateOrUpdateAsync, (result) =>
+                    {
+                        Bill = new CashReceiptBillModel();
+                    }, token: new System.Threading.CancellationToken());
+                });
             },
             this.IsValid());
 
@@ -264,43 +277,115 @@ namespace Wesley.Client.ViewModels
                 await this.Access(AccessGranularityEnum.ReceiptBillsApproved);
                 await SubmitAsync(Bill.Id, _receiptCashService.AuditingAsync, async (result) =>
                 {
-                    var db = Shiny.ShinyHost.Resolve<LocalDatabase>();
-                    await db.SetPending(SelecterMessage.Id, true);
-                }, token: cts.Token);
+                    //红冲审核水印
+                    this.Bill.AuditedStatus = true;
+
+                    var _conn = App.Resolve<ILiteDbService<MessageInfo>>();
+                    var ms = await _conn.Table.FindByIdAsync(SelecterMessage.Id);
+                    if (ms != null)
+                    {
+                        ms.IsRead = true;
+                        await _conn.UpsertAsync(ms);
+                    }
+
+                }, token: new System.Threading.CancellationToken());
             }, this.WhenAny(x => x.Bill.Id, (x) => x.GetValue() > 0));
 
-            //菜单选择
-            this.SetMenus(async (x) =>
+            //工具栏打印
+            this.PrintCommand = ReactiveCommand.Create(async () =>
             {
-                switch (x)
+                if (Bill.Items.Count == 0)
                 {
-                    case Enums.MenuEnum.REMARK: //整单备注
-                        AllRemak((result) => { Bill.Remark = result; }, Bill.Remark);
-                        break;
-                    case Enums.MenuEnum.CLEAR://清空单据
-                        {
-                            ClearBill<SaleBillModel, SaleItemModel>(null, DoClear);
-                        }
-                        break;
-                    case Enums.MenuEnum.PRINT: //打印
-                        {
-                            if (!valid_ProductCount.IsValid) { this.Alert(valid_IsVieweBill.Message[0]); return; }
-                            await SelectPrint(this.Bill);
-                        }
-                        break;
+                    Alert("请添加收款项目");
+                    return;
                 }
-            }, 3, 4, 5);
+                Bill.BillType = BillTypeEnum.CashReceiptBill;
+                await SelectPrint(Bill);
+            });
 
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
+            {
+                   //整单备注
+                { MenuEnum.REMARK,(m,vm)=>{
 
-            this.DeliverSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.MorePaymentCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.TextChangedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
+                 AllRemak((result) =>
+                     {
+                         Bill.Remark = result;
+                     }, Bill.Remark);
+
+                } },
+                //清空单据
+                { MenuEnum.CLEAR,(m,vm)=>{
+
+                 ClearBill<SaleBillModel, SaleItemModel>(null, DoClear);
+
+                } },
+                //打印
+                { MenuEnum.PRINT,async (m,vm)=>{
+
+                        this.Bill.BillType = BillTypeEnum.CashReceiptBill;
+                         await SelectPrint(Bill);
+
+                } },
+                //历史单据
+                { MenuEnum.HISTORY,async (m,vm)=>{
+                        await SelectHistory();
+                } },
+                //审核
+                { MenuEnum.SHENGHE,async (m,vm)=>{
+
+                    ResultData result = null;
+                         using (UserDialogs.Instance.Loading("审核中..."))
+                         {
+                             result = await _receiptCashService.AuditingAsync(Bill.Id);
+                         }
+                         if (result!=null&&result.Success)
+                         {
+                            //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.AuditedStatus = true;
+                            await ShowConfirm(true, "审核成功", true, goReceipt: false);
+                         }
+                         else
+                         {
+                             await ShowConfirm(false, $"审核失败！{result?.Message}", false, goReceipt: false);
+                         }
+
+                } },
+                //红冲
+                { MenuEnum.HONGCHOU,async (m,vm)=>{
+
+                    var remark = await CrossDiaglogKit.Current.GetInputTextAsync("红冲备注", "",Keyboard.Text);
+                    if (!string.IsNullOrEmpty(remark))
+                    {
+                      bool result = false;
+                        using (UserDialogs.Instance.Loading("红冲中..."))
+                        {
+                            result = await _receiptCashService.ReverseAsync(Bill.Id);
+                        }
+
+                        if (result)
+                        {
+                            //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.ReversedStatus = true;
+                            await ShowConfirm(true, "红冲成功", true);
+                        }
+                        else
+                        {
+                            await ShowConfirm(false, "红冲失败！", false, goReceipt: false);
+                        }
+                    }
+                } },
+                //冲改
+                { MenuEnum.CHOUGAI,async (m,vm)=>{
+                    await _receiptCashService.ReverseAsync(Bill.Id);
+                } }
+            });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
-
-
         public async override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -314,105 +399,161 @@ namespace Wesley.Client.ViewModels
                     if (paymentMethod != null)
                     {
                         PaymentMethods = paymentMethod;
-
-                        //获取当前经销商欠终端款总金额(费用支出，退货：欠终端)
+                        //本次收款金额
                         decimal tmpCurrentCollectionAmount = paymentMethod.CurrentCollectionAmount;
+                        //本次优惠金额
+                        decimal tempCurrentPreferentialAmount = paymentMethod.PreferentialAmount;
 
-                        if ((Bill.TotalArrearsAmountOnce ?? 0) > 0)
+                        //总应收款
+                        decimal totalOwed = Bill.TotalArrearsAmountOnce ?? 0;
+                        //收款后欠款金额
+                        decimal currentTotalOwed = totalOwed - tmpCurrentCollectionAmount - tempCurrentPreferentialAmount;
+                        //欠终端款
+                        decimal currentTotalOwedTerminal = Bill.Items.Where(p => p.AmountReceivable < 0).Sum(p => Math.Abs(p.AmountReceivable ?? 0));
+
+                        //备份欠终端款计算欠款抵扣
+                        decimal tempCurrentTotalOwedTerminal = currentTotalOwedTerminal;
+                        foreach (var b in Bill.Items)
                         {
-                            decimal owedAmountTotal = tmpCurrentCollectionAmount;
-                            foreach (var b in Bill.Items)
+                            if (b.AmountReceivable == 0)
+                                continue;
+                            if (b.AmountReceivable > 0)
                             {
-                                if ((b.AmountReceivable ?? 0) < 0)
+                                b.ReceivableAmountOnce = 0;
+                                b.DiscountAmountOnce = 0;
+                                //计算优惠
+                                if (b.AmountReceivable < tempCurrentPreferentialAmount)
                                 {
-                                    b.ReceivableAmountOnce = b.AmountReceivable;
-                                    //尚欠金额 = 0
-                                    b.AmountOwedAfterReceipt = 0;
-                                    owedAmountTotal += Math.Abs(b.AmountReceivable ?? 0);
+                                    b.ReceivableAmountOnce = 0;
+                                    b.DiscountAmountOnce = tempCurrentPreferentialAmount;
+                                    tempCurrentPreferentialAmount -= b.AmountReceivable ?? 0;
+                                    continue;
                                 }
-                            }
-
-                            foreach (var b in Bill.Items)
-                            {
-                                switch (b.BillTypeId)
+                                if (b.AmountReceivable == tempCurrentPreferentialAmount)
                                 {
-                                    //预收款
-                                    case (int)BillTypeEnum.AdvanceReceiptBill:
-                                    //其它收入
-                                    case (int)BillTypeEnum.FinancialIncomeBill:
-                                    //销售单
-                                    case (int)BillTypeEnum.SaleBill:
-                                        {
-                                            if (owedAmountTotal > 0 && owedAmountTotal >= b.AmountReceivable)
-                                            {
-                                                //本次收款 = 应收金额/尚欠金额
-                                                b.ReceivableAmountOnce = b.AmountReceivable;
-                                                owedAmountTotal = owedAmountTotal - b.AmountReceivable ?? 0;
-                                            }
-                                            else if (owedAmountTotal < b.AmountReceivable)
-                                            {
-                                                b.ReceivableAmountOnce = owedAmountTotal;
-                                                owedAmountTotal -= owedAmountTotal;
-                                            }
-                                        }
-                                        break;
+                                    b.ReceivableAmountOnce = 0;
+                                    b.DiscountAmountOnce = tempCurrentPreferentialAmount;
+                                    tempCurrentPreferentialAmount = 0;
+                                    continue;
                                 }
-                            }
-
-                        }
-                        else
-                        {
-                            decimal owedAmountTotal = tmpCurrentCollectionAmount;
-                            foreach (var b in Bill.Items)
-                            {
-                                if ((b.AmountReceivable ?? 0) < 0)
+                                if (b.AmountReceivable > tempCurrentPreferentialAmount)
                                 {
-                                    owedAmountTotal += Math.Abs(b.AmountReceivable ?? 0);
+                                    b.DiscountAmountOnce = tempCurrentPreferentialAmount;
+                                    tempCurrentPreferentialAmount = 0;
                                 }
-                            }
 
-                            foreach (var b in Bill.Items)
-                            {
-                                switch (b.BillTypeId)
+                                //计算实际收款
+                                decimal laveAmountReceivable = (b.AmountReceivable ?? 0) - (b.DiscountAmountOnce ?? 0);
+                                if (laveAmountReceivable == tmpCurrentCollectionAmount)
                                 {
-                                    //预收款
-                                    case (int)BillTypeEnum.AdvanceReceiptBill:
-                                    //其它收入
-                                    case (int)BillTypeEnum.FinancialIncomeBill:
-                                    //销售单
-                                    case (int)BillTypeEnum.SaleBill:
-                                        {
-                                            if (owedAmountTotal > 0 && owedAmountTotal >= b.AmountReceivable)
-                                            {
-                                                //本次收款 = 应收金额/尚欠金额
-                                                b.ReceivableAmountOnce = b.AmountReceivable;
-                                                owedAmountTotal = owedAmountTotal - b.AmountReceivable ?? 0;
-                                            }
-                                            else if (owedAmountTotal < b.AmountReceivable)
-                                            {
-                                                b.ReceivableAmountOnce = owedAmountTotal;
-                                            }
-                                        }
-                                        break;
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    tmpCurrentCollectionAmount = 0;
+                                    continue;
                                 }
-                            }
-
-                            foreach (var b in Bill.Items)
-                            {
-                                switch (b.BillTypeId)
+                                if (laveAmountReceivable < tmpCurrentCollectionAmount)
                                 {
-                                    //退货单
-                                    case (int)BillTypeEnum.ReturnBill:
-                                    //费用支出单
-                                    case (int)BillTypeEnum.CostExpenditureBill:
-                                        {
-                                            b.ReceivableAmountOnce = b.AmountReceivable + owedAmountTotal;
-                                        }
-                                        break;
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    tmpCurrentCollectionAmount -= laveAmountReceivable;
+                                    continue;
+                                }
+                                if (laveAmountReceivable > tmpCurrentCollectionAmount)
+                                {
+                                    b.ReceivableAmountOnce += tmpCurrentCollectionAmount;
+                                    tmpCurrentCollectionAmount = 0;
+                                }
+
+                                //计算欠款抵扣
+                                laveAmountReceivable -= (b.ReceivableAmountOnce ?? 0);
+                                if (laveAmountReceivable == currentTotalOwedTerminal)
+                                {
+                                    b.ReceivableAmountOnce += currentTotalOwedTerminal;
+                                    currentTotalOwedTerminal = 0;
+                                    break;
+                                }
+                                if (laveAmountReceivable < currentTotalOwedTerminal)
+                                {
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    currentTotalOwedTerminal -= laveAmountReceivable;
+                                    continue;
+                                }
+                                if (laveAmountReceivable > currentTotalOwedTerminal)
+                                {
+                                    b.ReceivableAmountOnce += currentTotalOwedTerminal;
+                                    currentTotalOwedTerminal = 0;
+                                    break;
                                 }
                             }
                         }
+                        tempCurrentTotalOwedTerminal -= currentTotalOwedTerminal;
+                        foreach (var b in Bill.Items)
+                        {
+                            if (b.AmountReceivable == 0)
+                                continue;
+                            if (b.AmountReceivable < 0)
+                            {
+                                b.ReceivableAmountOnce = 0;
+                                b.DiscountAmountOnce = 0;
+                                if (b.AmountReceivable > tempCurrentPreferentialAmount)
+                                {
+                                    b.ReceivableAmountOnce = 0;
+                                    b.DiscountAmountOnce = b.AmountReceivable;
+                                    tempCurrentPreferentialAmount -= b.AmountReceivable ?? 0;
+                                    continue;
+                                }
+                                if (b.AmountReceivable == tempCurrentPreferentialAmount)
+                                {
+                                    b.ReceivableAmountOnce = 0;
+                                    b.DiscountAmountOnce = tempCurrentPreferentialAmount;
+                                    tempCurrentPreferentialAmount = 0;
+                                    continue;
+                                }
+                                if (b.AmountReceivable < tempCurrentPreferentialAmount)
+                                {
+                                    b.DiscountAmountOnce = tempCurrentPreferentialAmount;
+                                    tempCurrentPreferentialAmount = 0;
+                                }
+                                //优惠后
+                                decimal laveAmountReceivable = (b.AmountReceivable ?? 0) - (b.DiscountAmountOnce ?? 0);
+                                if (laveAmountReceivable == -tempCurrentTotalOwedTerminal)
+                                {
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    tempCurrentTotalOwedTerminal = 0;
+                                    continue;
+                                }
+                                if (laveAmountReceivable > -tempCurrentTotalOwedTerminal)
+                                {
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    tempCurrentTotalOwedTerminal -= laveAmountReceivable;
+                                    continue;
+                                }
+                                if (laveAmountReceivable < -tempCurrentTotalOwedTerminal)
+                                {
+                                    b.ReceivableAmountOnce += (-tempCurrentTotalOwedTerminal);
+                                    tempCurrentTotalOwedTerminal = 0;
+                                }
+                                //抵扣后
+                                laveAmountReceivable -= (b.ReceivableAmountOnce ?? 0);
+                                if (laveAmountReceivable == tmpCurrentCollectionAmount)
+                                {
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    tmpCurrentCollectionAmount = 0;
+                                    break;
+                                }
+                                if (laveAmountReceivable < tmpCurrentCollectionAmount && tmpCurrentCollectionAmount != 0)
+                                {
+                                    b.ReceivableAmountOnce += laveAmountReceivable;
+                                    tmpCurrentCollectionAmount -= laveAmountReceivable;
+                                    continue;
+                                }
+                                if (laveAmountReceivable > tmpCurrentCollectionAmount && tmpCurrentCollectionAmount != 0)
+                                {
+                                    b.ReceivableAmountOnce += tmpCurrentCollectionAmount;
+                                    tmpCurrentCollectionAmount = 0;
+                                    break;
+                                }
 
+                            }
+                        }
 
 
                         if (paymentMethod.Selectes != null)
@@ -425,7 +566,7 @@ namespace Wesley.Client.ViewModels
                                     AccountingOptionId = a.AccountingOptionId,
                                     CollectionAmount = a.CollectionAmount,
                                     AccountCodeTypeId = a.AccountCodeTypeId,
-                                    Number = a.Number
+                                    Number = a.Number,
                                 };
                             });
                             //收款账户映射
@@ -433,14 +574,15 @@ namespace Wesley.Client.ViewModels
                         }
                     }
                     #endregion 
-
-                    UpdateUI(0);
+                    UpdateUI(-1);
+                    //返回不执行 load 
+                    return;
                 }
 
                 //选择客户
                 if (parameters.ContainsKey("Terminaler"))
                 {
-                    parameters.TryGetValue<TerminalModel>("Terminaler", out TerminalModel terminaler);
+                    parameters.TryGetValue("Terminaler", out TerminalModel terminaler);
                     Bill.TerminalId = terminaler != null ? terminaler.Id : 0;
                     Bill.TerminalName = terminaler != null ? terminaler.Name : "";
                     //获取余额
@@ -451,9 +593,12 @@ namespace Wesley.Client.ViewModels
 
                 //预览单据
                 CashReceiptBillModel bill = null;
+
                 if (parameters.ContainsKey("Bill"))
                 {
                     parameters.TryGetValue("Bill", out bill);
+                    parameters.TryGetValue("IsSubmitBill", out bool isSubmitBill);
+                    this.Bill.IsSubmitBill = isSubmitBill;
                 }
 
                 if (parameters.ContainsKey("BillId"))
@@ -463,7 +608,6 @@ namespace Wesley.Client.ViewModels
                     bill = await _receiptCashService.GetBillAsync(billId);
                 }
 
-
                 if (bill != null)
                 {
                     Bill = bill;
@@ -471,30 +615,20 @@ namespace Wesley.Client.ViewModels
                     Bill.BusinessUserName = bill.PayeerName;
                     this.PaymentMethods = this.ToPaymentMethod(Bill, bill.CashReceiptBillAccountings);
 
-                    if (bill.AuditedStatus)
+                    if (!bill.AuditedStatus)
                     {
+                        //控制显示菜单
+                        _popupMenu?.Show(34);
                     }
-                    else
-                    {
-                        this.SetMenus((x) =>
-                        {
-                            switch (x)
-                            {
-                                case Enums.MenuEnum.SHENGHE://审核
-                                    ((ICommand)AuditingDataCommand)?.Execute(null);
-                                    break;
-                            }
-                        }, 34);
-                    }
-                       ((ICommand)Load)?.Execute(null);
                 }
+
+                ((ICommand)Load)?.Execute(null);
             }
             catch (Exception ex)
             {
                 Crashes.TrackError(ex);
             }
         }
-
 
         /// <summary>
         /// 更新计算
@@ -507,21 +641,36 @@ namespace Wesley.Client.ViewModels
                 if (billId > 0)
                 {
                     //计算当前尚欠金额
-                    var item = Bill.Items.Where(s => s.BillId == billId).FirstOrDefault();
+                    var item = Bill.Items?.Where(s => s.BillId == billId).FirstOrDefault();
                     if (item != null)
                         item.AmountOwedAfterReceipt = item?.ArrearsAmount - (item?.ReceivableAmountOnce ?? 0) - (item?.DiscountAmountOnce ?? 0);
                 }
+                else if (-1 == billId && null != Bill && null != Bill.Items)
+                {
+                    foreach (var item in Bill.Items)
+                    {
+                        item.AmountOwedAfterReceipt = item?.ArrearsAmount - (item?.ReceivableAmountOnce ?? 0) - (item?.DiscountAmountOnce ?? 0);
+                    }
+                }
 
                 //本次单据应收合计
-                Bill.TotalArrearsAmountOnce = Bill.Items.Select(c => c.ArrearsAmount).Sum();
+                Bill.TotalArrearsAmountOnce = Bill.Items?.Select(c => c.ArrearsAmount).Sum();
                 //本次单据尚欠合计
-                Bill.TotalAmountOwedAfterReceipt = Bill.Items.Select(c => c.AmountOwedAfterReceipt).Sum();
+                Bill.TotalAmountOwedAfterReceipt = Bill.Items?.Select(c => c.AmountOwedAfterReceipt).Sum();
+
                 //本次单据优惠合计
-                Bill.TotalDiscountAmountOnce = Bill.Items.Select(c => c.DiscountAmountOnce).Sum();
+                if (this.PaymentMethods.PreferentialAmount != Bill.Items?.Select(c => c.DiscountAmountOnce).Sum())
+                    Bill.TotalDiscountAmountOnce = Bill.Items?.Select(c => c.DiscountAmountOnce).Sum();
+                else
+                    Bill.TotalDiscountAmountOnce = this.PaymentMethods.PreferentialAmount;
 
 
                 //本次单据收款合计
-                Bill.TotalReceivableAmountOnce = this.PaymentMethods.CurrentCollectionAmount;//  Bill.Items.Select(c => c.ReceivableAmountOnce).Sum();
+                if (this.PaymentMethods.CurrentCollectionAmount != Bill.Items?.Select(c => c.ReceivableAmountOnce).Sum())
+                    Bill.TotalReceivableAmountOnce = Bill.Items?.Select(c => c.ReceivableAmountOnce).Sum();
+                else
+                    Bill.TotalReceivableAmountOnce = this.PaymentMethods.CurrentCollectionAmount;
+
 
                 //单据收款 ReceivableAmount
                 Bill.ReceivableAmount = Bill.TotalArrearsAmountOnce ?? 0;
@@ -557,6 +706,9 @@ namespace Wesley.Client.ViewModels
                 });
                 Bill.CashReceiptBillAccountings = new ObservableCollection<AccountMaping>(accountings);
 
+                //红冲审核水印
+                if (this.Bill.Id > 0 && this.Bill.AuditedStatus)
+                    this.Bill.AuditedStatus = !this.Bill.ReversedStatus;
             }
             catch (Exception ex)
             {
@@ -564,7 +716,6 @@ namespace Wesley.Client.ViewModels
             }
 
         }
-
         private void InitBill()
         {
             this.BillType = BillTypeEnum.CashReceiptBill;
@@ -593,6 +744,9 @@ namespace Wesley.Client.ViewModels
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(3, 4, 5);
         }
     }
 }

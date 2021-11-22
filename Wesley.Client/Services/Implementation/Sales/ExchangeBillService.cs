@@ -48,7 +48,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> AuditingAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<ResultData> AuditingAsync(int billId = 0, CancellationToken calToken = default)
         {
             try
             {
@@ -57,13 +57,19 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<IExchangeBillApi>(URL);
                 var results = await _makeRequest.Start(api.AuditingAsync(storeId, userId, billId, calToken), calToken);
-                return (bool)(results?.Success);
+                return new ResultData
+                {
+                    Success = (bool)(results?.Success),
+                    Message = results?.Message
+                };
             }
             catch (Exception e)
             {
-
-                e.HandleException();
-                return false;
+                return new ResultData
+                {
+                    Success = false,
+                    Message = e.Message
+                };
             }
         }
 
@@ -72,7 +78,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> ReverseAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<bool> ReverseAsync(int billId = 0, string remark = "", CancellationToken calToken = default)
         {
             try
             {
@@ -80,7 +86,7 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
 
                 var api = RefitServiceBuilder.Build<IExchangeBillApi>(URL);
-                var results = await _makeRequest.Start(api.ReverseAsync(storeId, userId, billId, calToken), calToken);
+                var results = await _makeRequest.Start(api.ReverseAsync(storeId, userId, billId, remark, calToken), calToken);
                 return (bool)(results?.Success);
             }
             catch (Exception e)
@@ -104,7 +110,7 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<IExchangeBillApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetExchangeBillsAsync", storeId,
+                var results = await _makeRequest.Start(api.GetExchangeBillsAsync(storeId,
                     makeuserId,
                     terminalId,
                     terminalName,
@@ -122,28 +128,7 @@ namespace Wesley.Client.Services
                     showReturn,
                     alreadyChange,
                     pagenumber,
-                    pageSize);
-
-                var results = await _makeRequest.StartUseCache(api.GetExchangeBillsAsync(storeId,
-                    makeuserId,
-                    terminalId,
-                    terminalName,
-                    businessUserId,
-                    deliveryUserId,
-                    billNumber,
-                    wareHouseId,
-                    remark,
-                    districtId,
-                    startTime,
-                    endTime,
-                    auditedStatus,
-                    sortByAuditedTime,
-                    showReverse,
-                    showReturn,
-                    alreadyChange,
-                    pagenumber,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize, calToken), calToken);
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();

@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace Wesley.Client.Services
 {
-    //[Policy("TransientHttpError")]
-    //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/config/accounting", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IAccountingApi
     {
         [Get("/getpaymentmethods/{storeId}")]

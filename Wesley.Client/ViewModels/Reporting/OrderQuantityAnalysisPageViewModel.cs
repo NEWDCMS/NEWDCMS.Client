@@ -1,12 +1,13 @@
 ﻿using Wesley.Client.Models.Report;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+
 namespace Wesley.Client.ViewModels
 {
     public class OrderQuantityAnalysisPageViewModel : ViewModelBase
@@ -23,7 +24,8 @@ namespace Wesley.Client.ViewModels
 
         public OrderQuantityAnalysisPageViewModel(INavigationService navigationService,
             IReportingService reportingService,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "订单额分析";
 
@@ -61,7 +63,7 @@ namespace Wesley.Client.ViewModels
                 ChartData = data;
 #else
                 //初始化 
-                var data = await _reportingService.GetOrderQuantityAnalysisAsync(businessUserId, brandId, productId, categoryId, calToken: cts.Token);
+                var data = await _reportingService.GetOrderQuantityAnalysisAsync(businessUserId, brandId, productId, categoryId,calToken: new System.Threading.CancellationToken());
                 if (data != null)
                 {
                     data.NetAmountBalance = data.LastWeekSame.NetAmount - data.Today.NetAmount;
@@ -76,7 +78,7 @@ namespace Wesley.Client.ViewModels
             }));
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)

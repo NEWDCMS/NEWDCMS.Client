@@ -1,6 +1,6 @@
 ﻿using Wesley.Client.Commands;
+using Wesley.Client.Effects;
 using Wesley.Client.RenderedViews;
-using Wesley.Effects;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -107,9 +107,6 @@ namespace Wesley.Client.CustomViews.Tabs
         public new View Content
         {
             get => base.Content;
-            set =>
-                throw new NotSupportedException(
-                    "You can only add TabItem to the TabHostView through the Tabs property");
         }
 
         public View TabHostContent
@@ -233,13 +230,12 @@ namespace Wesley.Client.CustomViews.Tabs
         {
             if (TabType == TabType.Scrollable)
             {
-                base.Content = _scrollView
-                    ?? (_scrollView = new ScrollView()
-                    {
-                        Orientation = ScrollOrientation.Horizontal,
-                        HorizontalScrollBarVisibility =
+                base.Content = (_scrollView ??= new ScrollView()
+                {
+                    Orientation = ScrollOrientation.Horizontal,
+                    HorizontalScrollBarVisibility =
                             ShowScrollbar ? ScrollBarVisibility.Always : ScrollBarVisibility.Never,
-                    });
+                });
 
                 _scrollView.Content = _grid;
                 foreach (var definition in _grid.ColumnDefinitions)

@@ -24,6 +24,6 @@ namespace Wesley.Client.Services
 
         //api/v3/dcms/auth
         [Post("/user/qrlogin")]//string uuid, int userId
-        Task<APIResult<dynamic>> QRLoginAsync(string uuid, int userId, CancellationToken calToken = default);
+        Task<APIResult<bool>> QRLoginAsync(string uuid, int userId, CancellationToken calToken = default);
     }
 }

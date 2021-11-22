@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Android.Views;
+﻿using Android.Views;
 using Android.Widget;
+using System.Collections.Generic;
 
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
     public static class ViewOverlayCollector
     {

@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace Wesley.Client.CustomViews.Views
+namespace Wesley.Client.CustomViews
 {
 
     public partial class PopProgressBarView : ContentView
@@ -26,7 +26,7 @@ namespace Wesley.Client.CustomViews.Views
                     try
                     {
                         var _globalService = App.Resolve<IGlobalService>();
-                        var app = await _globalService?.GetAPPFeatures();
+                        _globalService?.GetAPPFeatures();
                         for (int i = 1; i <= 50; i++)
                         {
                             await Task.Delay(10);

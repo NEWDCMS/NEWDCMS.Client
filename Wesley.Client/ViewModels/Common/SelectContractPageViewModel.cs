@@ -7,6 +7,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,10 +34,9 @@ namespace Wesley.Client.ViewModels
            IUserService userService,
            IWareHousesService wareHousesService,
            IAccountingService accountingService,
-
-
            ICostContractService costContractService,
-           IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+           IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
 
             Title = "选择费用合同";
@@ -53,11 +53,14 @@ namespace Wesley.Client.ViewModels
                     CostContracts.Clear();
 
                     var items = await GetDataPages(0, PageSize);
-                    foreach (var item in items)
+                    if (items != null)
                     {
-                        if (CostContracts.Count(s => (s.BillNumber == item.BillNumber) && (s.Month == item.Month)) == 0)
+                        foreach (var item in items)
                         {
-                            CostContracts.Add(item);
+                            if (CostContracts.Count(s => (s.BillNumber == item.BillNumber) && (s.Month == item.Month)) == 0)
+                            {
+                                CostContracts.Add(item);
+                            }
                         }
                     }
                 }
@@ -81,20 +84,22 @@ namespace Wesley.Client.ViewModels
                         int pageIdex = CostContracts.Count / (PageSize == 0 ? 1 : PageSize);
                         var items = await GetDataPages(pageIdex, PageSize);
                         var previousLastItem = Terminals.Last();
-                        foreach (var item in items)
+                        if (items != null)
                         {
-                            if (CostContracts.Count(s => (s.BillNumber == item.BillNumber) && (s.Month == item.Month)) == 0)
+                            foreach (var item in items)
                             {
-                                CostContracts.Add(item);
+                                if (CostContracts.Count(s => (s.BillNumber == item.BillNumber) && (s.Month == item.Month)) == 0)
+                                {
+                                    CostContracts.Add(item);
+                                }
+                            }
+
+                            if (items.Count() == 0 || items.Count() == CostContracts.Count)
+                            {
+                                ItemTreshold = -1;
+                                return this.CostContracts;
                             }
                         }
-
-                        if (items.Count() == 0 || items.Count() == CostContracts.Count)
-                        {
-                            ItemTreshold = -1;
-                            return this.CostContracts;
-                        }
-
                     }
                     catch (Exception ex)
                     {
@@ -121,7 +126,7 @@ namespace Wesley.Client.ViewModels
             });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public async Task<IList<CostContractBindingModel>> GetDataPages(int pageNumber, int pageSize)
@@ -138,7 +143,7 @@ namespace Wesley.Client.ViewModels
                 null,
                 null,
                 pageNumber,
-                PageSize, this.ForceRefresh, calToken: cts.Token);
+                PageSize, this.ForceRefresh, new System.Threading.CancellationToken());
 
             if (result != null)
             {

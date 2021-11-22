@@ -1,7 +1,10 @@
-﻿using Wesley.Easycharts;
-using SkiaSharp;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Census;
+using Wesley.Client.Models.Report;
+using Wesley.Infrastructure.Helpers;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Linq;
 
 namespace Wesley.Client.Services
 {
@@ -10,376 +13,388 @@ namespace Wesley.Client.Services
     /// </summary>
     public static class ChartDataProvider
     {
-        public static readonly SKColor[] Colors = {
-            SKColor.Parse("#266489"),
-            SKColor.Parse("#68B9C0"),
-            SKColor.Parse("#90D585"),
-            SKColor.Parse("#F3C151"),
-            SKColor.Parse("#F37F64"),
-            SKColor.Parse("#424856"),
-            SKColor.Parse("#8F97A4"),
-            SKColor.Parse("#DAC096"),
-            SKColor.Parse("#76846E"),
-            SKColor.Parse("#DABFAF"),
-            SKColor.Parse("#A65B69"),
-            SKColor.Parse("#97A69D"),
-            SKColor.Parse("#266489"),
-            SKColor.Parse("#68B9C0"),
-            SKColor.Parse("#90D585"),
-            SKColor.Parse("#F3C151"),
-            SKColor.Parse("#F37F64"),
-            SKColor.Parse("#424856"),
-            SKColor.Parse("#8F97A4"),
-            SKColor.Parse("#DAC096"),
-            SKColor.Parse("#76846E"),
-            SKColor.Parse("#DABFAF"),
-            SKColor.Parse("#A65B69"),
-            SKColor.Parse("#97A69D")
-        };
-
-        #region Demo 测试
-
-#if DEBUG
-        public static ChartEntry[] Entries
+        /// <summary>
+        /// 客户排行榜
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetCustomerRanking(List<CustomerRanking> analysis)
         {
-            get
+            var labels = analysis.Select(s => s.TerminalName).ToArray();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.NetAmount ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
             {
-                var entries = new[]
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "客户排行榜",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
                 {
-                    new ChartEntry(212254.45f)
-                    {
-                        Label = "雪花勇闯天涯",
-                        ValueLabel = "212,254.45",
-                        Color = SKColor.Parse("#2c3e50")
-                    },
-                    new ChartEntry(248254.45f)
-                    {
-                        Label = "青岛九度",
-                        ValueLabel = "248,254.45",
-                        Color = SKColor.Parse("#77d065")
-                    },
-                    new ChartEntry(128254.45f)
-                    {
-                        Label = "雪花匠心营造",
-                        ValueLabel = "128,254.45",
-                        Color = SKColor.Parse("#b455b6")
-                    },
-                    new ChartEntry(514254.45f)
-                    {
-                        Label = "雪花脸谱",
-                        ValueLabel = "514,254.45",
-                        Color = SKColor.Parse("#3498db")
-                    },
-                    new ChartEntry(212254.45f)
-                    {
-                        Label = "雪花马尔斯绿",
-                        ValueLabel = "212,254.45",
-                        Color = SKColor.Parse("#2c3e50")
-                    },
-                    new ChartEntry(222254.45f)
-                    {
-                        Label = "青岛纯生啤酒",
-                        ValueLabel = "222,254.45",
-                        Color = SKColor.Parse("#77d065")
-                    }
-                };
-                return entries;
-            }
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
         }
 
-        public static ChartEntry[] Entries2
+        /// <summary>
+        /// 品牌销量汇总
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetBrandRanking(List<BrandRanking> analysis)
         {
-            get
+            var labels = analysis.Select(s => s.BrandName).ToList();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.NetAmount ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
             {
-                var entries = new[]
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "品牌销量汇总",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
                 {
-                    new ChartEntry(212254.45f)
-                    {
-                        Label = "雪花勇闯天涯",
-                        ValueLabel = "212,254.45",
-                        Color = SKColor.Parse("#2c3e50")
-                    },
-                    new ChartEntry(248254.45f)
-                    {
-                        Label = "青岛九度",
-                        ValueLabel = "248,254.45",
-                        Color = SKColor.Parse("#77d065")
-                    },
-                    new ChartEntry(128254.45f)
-                    {
-                        Label = "雪花匠心营造",
-                        ValueLabel = "128,254.45",
-                        Color = SKColor.Parse("#b455b6")
-                    },
-                    new ChartEntry(514254.45f)
-                    {
-                        Label = "雪花脸谱",
-                        ValueLabel = "514,254.45",
-                        Color = SKColor.Parse("#3498db")
-                    },new ChartEntry(212254.45f)
-                    {
-                        Label = "雪花马尔斯绿",
-                        ValueLabel = "212,254.45",
-                        Color = SKColor.Parse("#2c3e50")
-                    },
-                    new ChartEntry(222254.45f)
-                    {
-                        Label = "青岛纯生啤酒",
-                        ValueLabel = "222,254.45",
-                        Color = SKColor.Parse("#77d065")
-                    },
-                    new ChartEntry(678254.45f)
-                    {
-                        Label = "喜力啤酒",
-                        ValueLabel = "678,254.45",
-                        Color = SKColor.Parse("#b455b6")
-                    },
-                    new ChartEntry(934254.45f)
-                    {
-                        Label = "金威",
-                        ValueLabel = "934,254.45",
-                        Color = SKColor.Parse("#3498db")
-                    }
-                };
-                return entries;
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+        /// <summary>
+        /// 客户活跃度
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetCustomerActivity(List<CustomerActivityRanking> analysis)
+        {
+            var labels = analysis.Select(s => s.TerminalName).ToList();
+            var dataSets = new List<ChartNumberDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.VisitDaySum ?? 0).ToArray();
+
+            dataSets.Add(new ChartNumberDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Line,
+                label = "客户活跃度",
+                data = datas,
+                tension = 0.4,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+        /// <summary>
+        /// 客户拜访排行
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetCustomerVisitRank(List<BusinessVisitRank> analysis)
+        {
+            var labels = analysis.Select(s => s.BusinessUserName).ToList();
+            var dataSets = new List<ChartNumberDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.VisitedCount ?? 0).ToArray();
+
+            dataSets.Add(new ChartNumberDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "客户拜访排行",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+
+        /// <summary>
+        /// 热订排行榜
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetHotOrderRanking(List<HotSaleRanking> analysis)
+        {
+            var labels = analysis.Select(s => s.ProductName).ToList();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.TotalSumNetQuantity ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "热订排行榜",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+        /// <summary>
+        /// 热销排行榜
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetHotSalesRanking(List<HotSaleRanking> analysis, bool showLable = true)
+        {
+            var labels = analysis.Select(s => s.ProductName).ToList();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.TotalSumNetQuantity ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "热销排行榜",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+
+        /// <summary>
+        /// 销售利润排行
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetSalesProfitRanking(List<CostProfitRanking> analysis)
+        {
+            var labels = analysis.Select(s => s.ProductName).ToList();
+            var dataSets = new List<ChartNumberDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.TotalSumNetQuantity ?? 0).ToArray();
+
+            dataSets.Add(new ChartNumberDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "销售利润排行",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+
+        /// <summary>
+        /// 业务员销售排行
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetSalesRanking(List<BusinessRanking> analysis)
+        {
+            var labels = analysis.Select(s => s.BusinessUserName).ToArray();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.NetAmount ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Bar,
+                label = "销售排行",
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+
+        /// <summary>
+        /// 销量走势图
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetSaleTrendChat(List<SaleTrending> analysis)
+        {
+            var labels = analysis.Select(s => s.SaleDateName).ToList();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.NetAmount ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Line,
+                label = "销量走势图",
+                data = datas,
+                tension = 0.4,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+
+        /// <summary>
+        /// 库存滞销排行榜
+        /// </summary>
+        /// <param name="analysis"></param>
+        /// <returns></returns>
+        public static ChartData GetUnsalable(List<UnSaleRanking> analysis)
+        {
+            var labels = analysis.Select(s => s.ProductName).ToList();
+            var dataSets = new List<ChartDecimalDataset>();
+            var colors = RandomChartBuilder.GetDefaultColors();
+            var datas = analysis.Select(s => s.TotalSumNetQuantity ?? 0).ToArray();
+
+            dataSets.Add(new ChartDecimalDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Line,
+                label = "库存滞销排行榜",
+                data = datas,
+                tension = 0.4,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+
+
+        public static ChartData GetNewCustomers(NewCustomerAnalysis analysis)
+        {
+            var labels = analysis.ChartDatas.Keys.Select(s => s).ToList();
+            var dataSets = new List<ChartNumberDataset>();
+
+            var colors = RandomChartBuilder.GetDefaultColors();
+
+            var datas = analysis.ChartDatas.Values.Select(s => System.Convert.ToInt32(s)).ToList();
+
+            dataSets.Add(new ChartNumberDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Line,
+                label = "新增客户",
+                data = datas,
+                tension = 0.4,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
+        }
+        public static ChartData GetVisitingRate(CustomerVistAnalysis analysis)
+        {
+            float up = 100;
+            if (analysis.TotalCustomer - analysis.Today.VistCount != 0)
+            {
+                if (analysis.TotalCustomer == 0) analysis.TotalCustomer = 1;
+                up = (float)((analysis.TotalCustomer - analysis.Today.VistCount) / analysis.TotalCustomer) * 100;
             }
-        }
-#elif RELEASE
-		public static ChartEntry[] Entries
-		{
-			get
-			{
-				var entries = new[]
-				{
-					new ChartEntry(212254.45f)
-					{
-						Label = "雪花勇闯天涯",
-						ValueLabel = "212,254.45",
-						Color = SKColor.Parse("#2c3e50")
-					},
-					new ChartEntry(248254.45f)
-					{
-						Label = "青岛九度",
-						ValueLabel = "248,254.45",
-						Color = SKColor.Parse("#77d065")
-					},
-					new ChartEntry(128254.45f)
-					{
-						Label = "雪花匠心营造",
-						ValueLabel = "128,254.45",
-						Color = SKColor.Parse("#b455b6")
-					},
-					new ChartEntry(514254.45f)
-					{
-						Label = "雪花脸谱",
-						ValueLabel = "514,254.45",
-						Color = SKColor.Parse("#3498db")
-					},
-					new ChartEntry(212254.45f)
-					{
-						Label = "雪花马尔斯绿",
-						ValueLabel = "212,254.45",
-						Color = SKColor.Parse("#2c3e50")
-					},
-					new ChartEntry(222254.45f)
-					{
-						Label = "青岛纯生啤酒",
-						ValueLabel = "222,254.45",
-						Color = SKColor.Parse("#77d065")
-					}
-				};
-				return entries;
-			}
-		}
 
-		public static ChartEntry[] Entries2
-		{
-			get
-			{
-				var entries = new[]
-				{
-					new ChartEntry(212254.45f)
-					{
-						Label = "雪花勇闯天涯",
-						ValueLabel = "212,254.45",
-						Color = SKColor.Parse("#2c3e50")
-					},
-					new ChartEntry(248254.45f)
-					{
-						Label = "青岛九度",
-						ValueLabel = "248,254.45",
-						Color = SKColor.Parse("#77d065")
-					},
-					new ChartEntry(128254.45f)
-					{
-						Label = "雪花匠心营造",
-						ValueLabel = "128,254.45",
-						Color = SKColor.Parse("#b455b6")
-					},
-					new ChartEntry(514254.45f)
-					{
-						Label = "雪花脸谱",
-						ValueLabel = "514,254.45",
-						Color = SKColor.Parse("#3498db")
-					},new ChartEntry(212254.45f)
-					{
-						Label = "雪花马尔斯绿",
-						ValueLabel = "212,254.45",
-						Color = SKColor.Parse("#2c3e50")
-					},
-					new ChartEntry(222254.45f)
-					{
-						Label = "青岛纯生啤酒",
-						ValueLabel = "222,254.45",
-						Color = SKColor.Parse("#77d065")
-					},
-					new ChartEntry(678254.45f)
-					{
-						Label = "喜力啤酒",
-						ValueLabel = "678,254.45",
-						Color = SKColor.Parse("#b455b6")
-					},
-					new ChartEntry(934254.45f)
-					{
-						Label = "金威",
-						ValueLabel = "934,254.45",
-						Color = SKColor.Parse("#3498db")
-					}
-				};
-				return entries;
-			}
-		}
-#endif
+            var labels = new string[] { "总客户数", "拜访数", "拜访数", };
+            var dataSets = new List<ChartFloatDataset>();
 
-        /// <summary>
-        /// HorizontalBarChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreateHorizontalBarChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
+            var colors = RandomChartBuilder.GetDefaultColors();
 
-            return new HorizontalBarChart()
+            var datas = new float[] { analysis.TotalCustomer, (float)(analysis?.Today?.Percentage), (up == 0 ? 100 : up) };
+
+            dataSets.Add(new ChartFloatDataset
             {
-                Entries = entries,
-                LabelTextSize = 30,
-                Typeface = typeface,
+                type = Wesley.ChartJS.ChartTypes.Pie,
+                label = "客户拜访分析",
+                data = datas,
+                tension = 0.4,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
             };
         }
 
-
-        /// <summary>
-        /// BarChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreateBarChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
-
-            return new BarChart()
-            {
-                Entries = entries,
-                Typeface = typeface,
-                LabelTextSize = 30,
-                ValueLabelOrientation = Orientation.Horizontal,
-                LabelOrientation = Orientation.Rotate
-            };
-        }
-
-        /// <summary>
-        /// PointChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreatePointChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
-            return new PointChart()
-            {
-                Entries = entries,
-                Typeface = typeface,
-                LabelTextSize = 30,
-                ValueLabelOrientation = Orientation.Horizontal,
-                LabelOrientation = Orientation.Horizontal
-            };
-        }
-
-
-        /// <summary>
-        /// LineChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreateLineChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
-
-            Debug.WriteLine($"{ entries.Count}");
-            return new LineChart()
-            {
-                Entries = entries,
-                Typeface = typeface,
-                LineMode = LineMode.Straight,
-                LineSize = 2,
-                PointMode = PointMode.Circle,
-                PointSize = 18,
-                LabelTextSize = 30,
-
-                LabelOrientation = Orientation.Vertical
-            };
-        }
-
-        /// <summary>
-        /// DonutChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreateDonutChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
-            return new DonutChart()
-            {
-                Entries = entries,
-                Typeface = typeface,
-                LabelTextSize = 30
-            };
-        }
-
-        /// <summary>
-        /// RadialGaugeChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreateRadialGaugeChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
-            return new RadialGaugeChart()
-            {
-                Entries = entries,
-                Typeface = typeface,
-                LabelTextSize = 30
-            };
-        }
-
-        /// <summary>
-        /// RadarChart
-        /// </summary>
-        /// <returns></returns>
-        public static Chart CreateRadarChart(List<ChartEntry> entries)
-        {
-            var fontManager = SKFontManager.Default;
-            var typeface = fontManager.MatchCharacter('雪');
-            return new RadarChart()
-            {
-                Entries = entries,
-                Typeface = typeface,
-                LabelTextSize = 30
-            };
-        }
-
-
-        #endregion
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Wesley.Client.Validations
 {
     public class ActionValidationRule<T> : IValidationRule<T>

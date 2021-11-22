@@ -1,15 +1,14 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <t:SlideMenuView xmlns="http://xamarin.com/schemas/2014/forms"
                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                 xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-                 xmlns:t="clr-namespace:Wesley.SlideOverKit;assembly=Wesley.SlideOverKit"
-                 x:Class="Wesley.Client.Pages.RightProductCategoryMasterPage"
+                 xmlns:t="clr-namespace:DCMS.SlideOverKit;assembly=DCMS.SlideOverKit"
+                 x:Class="DCMS.Client.Pages.RightProductCategoryMasterPage"
                  x:Name="SideMaster">
     <AbsoluteLayout HorizontalOptions="FillAndExpand"
                     VerticalOptions="FillAndExpand">
         <ScrollView VerticalScrollBarVisibility="Always"
                     AbsoluteLayout.LayoutFlags="All"
-                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1">
+                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1" Padding="0,0,0,45">
 
             <CollectionView ItemsSource="{Binding Source={x:Reference SideMaster},Path=MenuItems,Mode=TwoWay}"
                             Margin="0,0,0,0"
@@ -29,7 +28,8 @@
                             </Grid.RowDefinitions>
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectedCommand}"
-                                                      CommandParameter="{Binding Id}" />
+                                                      CommandParameter="{Binding Id}"
+                                                      NumberOfTapsRequired="1" />
                             </Grid.GestureRecognizers>
                             <CheckBox Grid.Row="0"
                                       Grid.Column="0"

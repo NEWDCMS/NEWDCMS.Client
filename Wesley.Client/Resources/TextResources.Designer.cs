@@ -88,7 +88,7 @@ namespace Wesley.Client.Resources {
         }
         
         /// <summary>
-        ///   查找类似 前不见古人，后不见来者.... 的本地化字符串。
+        ///   查找类似 空空如也，刷新试试.... 的本地化字符串。
         /// </summary>
         internal static string EmptyText {
             get {

@@ -11,7 +11,7 @@ namespace Wesley.Client.Services
     public class CampaignService : ICampaignService
     {
         private readonly MakeRequest _makeRequest;
-        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/dcms/archives";
+        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/Wesley/archives";
 
         public CampaignService(MakeRequest makeRequest)
         {
@@ -31,23 +31,14 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<ICampaignApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetAllCampaigns",
-                    storeId,
-                    name,
-                    terminalId,
-                    channelId,
-                    wareHouseId,
-                    pagenumber,
-                    pageSize);
-
-                var results = await _makeRequest.StartUseCache(api.GetAllCampaigns(storeId,
+                var results = await _makeRequest.Start(api.GetAllCampaigns(storeId,
                     name,//360
                     terminalId,//185528
                     channelId,
                     wareHouseId,//259
                     pagenumber,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize,
+                    calToken));
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();

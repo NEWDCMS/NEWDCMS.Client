@@ -44,18 +44,9 @@
     <RelativeLayout>
         <Grid Style="{StaticResource GGrid}"
               RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
-              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="35" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+              RowDefinitions="40,.7,40,.7,*"
+              ColumnDefinitions="*,*">
             <!--0-->
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
@@ -132,13 +123,14 @@
                             ItemsSource="{Binding Bill.Items,Mode=TwoWay}"
                             x:Name="BillItems"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Selecter, Mode=TwoWay}">
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                            VerticalScrollBarVisibility="Always">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Style="{StaticResource GGrid}"
                               Padding="10,0,10,5">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height="30" />
                                 <RowDefinition Height="30" />
                                 <RowDefinition Height=".7" />
@@ -151,6 +143,7 @@
                             <Label Grid.Row="0"
                                    Grid.ColumnSpan="2"
                                    Text="{Binding ProductName}"
+                                   LineBreakMode="WordWrap"
                                    HorizontalOptions="Start"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
@@ -223,7 +216,13 @@
                IsVisible="{Binding Bill.AuditedStatus}"
                WidthRequest="100"
                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
-               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}"></Image>
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--红冲水印-->
+        <Image Source="have_gray.png"
+               IsVisible="{Binding Bill.ReversedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
         <!--footer-->
         <Grid HeightRequest="90"
               Style="{StaticResource GGrid}"

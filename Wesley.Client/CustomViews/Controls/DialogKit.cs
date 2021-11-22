@@ -1,12 +1,9 @@
-﻿using Wesley.Client.CustomViews.Views;
-using Wesley.Client.Models;
+﻿using Wesley.Client.Models;
 using Wesley.Client.Pages;
-using Microsoft.AppCenter.Crashes;
 using Rg.Plugins.Popup.Pages;
 using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -19,9 +16,9 @@ namespace Wesley.Client.CustomViews
         Task<string> GetVerificationCodeAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "");
         Task<string> GetInputTextAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "");
         Task<Tuple<DateTime, DateTime>> GetDateTimePickerRankAsync(string title, Keyboard keyboard = null);
-        Task<List<PopData>> GetCheckboxResultAsync(string title, string message, Func<Task<List<PopData>>> func);
+
         Task<PopData> GetRadioButtonResultAsync(string title, string message, Func<Task<List<PopData>>> func);
-        Task<object> GetMediaResultAsync(string title, string message);
+        void GetMediaResultAsync(string title, string message);
         Task<bool> GetUpgradeResultAsync(string title, string message);
         Task<bool> ShowSuccessAsync(string message, bool success, bool cutdown = false);
         Task<bool> PopViewAsync(string title, string message);
@@ -37,14 +34,14 @@ namespace Wesley.Client.CustomViews
 
     public class DialogKit : IDialogKit
     {
-        public Task<string> GetVerificationCodeAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "")
+        public async Task<string> GetVerificationCodeAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "")
         {
             if (keyboard == null)
             {
                 keyboard = Keyboard.Default;
             }
 
-            var cts = new TaskCompletionSource<string>();
+            var cts = new TaskCompletionSource<string>(TaskCreationOptions.AttachedToParent);
             try
             {
                 //文本输入框视图
@@ -59,32 +56,31 @@ namespace Wesley.Client.CustomViews
                     cts.TrySetResult(o);
                 };
 
-                PopupNavigation.Instance.PushAsync(new PopupPage { Content = _dialogView });
+                if (_dialogView != null)
+                    await PopupNavigation.Instance.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult("");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult("");
             }
 
-            return cts.Task;
+            return await cts.Task;
         }
         /// <summary>
         /// 手写板
         /// </summary>
         /// <returns></returns>
-        public Task<string> GetSignaturePadAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "")
+        public async Task<string> GetSignaturePadAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "")
         {
             if (keyboard == null)
             {
                 keyboard = Keyboard.Default;
             }
-            var cts = new TaskCompletionSource<string>();
+            var cts = new TaskCompletionSource<string>(TaskCreationOptions.AttachedToParent);
             try
             {
                 //手写输入视图
@@ -97,30 +93,29 @@ namespace Wesley.Client.CustomViews
                     }
                     cts.TrySetResult(o);
                 };
-                PopupNavigation.Instance.PushAsync(new PopupPage { Content = _dialogView });
+
+                if (_dialogView != null)
+                    await PopupNavigation.Instance.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult("");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult("");
             }
 
-            return cts.Task;
+            return await cts.Task;
         }
-
-        public Task<string> GetInputTextAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "")
+        public async Task<string> GetInputTextAsync(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "")
         {
             if (keyboard == null)
             {
                 keyboard = Keyboard.Default;
             }
 
-            var cts = new TaskCompletionSource<string>();
+            var cts = new TaskCompletionSource<string>(TaskCreationOptions.AttachedToParent);
             try
             {
                 //文本输入框视图
@@ -134,36 +129,31 @@ namespace Wesley.Client.CustomViews
                     }
                     cts.TrySetResult(o);
                 };
-
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+                if (_dialogView != null)
+                    await PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult("");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult("");
             }
 
-            return cts.Task;
+            return await cts.Task;
         }
-
-
-        public Task<Tuple<DateTime, DateTime>> GetDateTimePickerRankAsync(string title, Keyboard keyboard = null)
+        public async Task<Tuple<DateTime, DateTime>> GetDateTimePickerRankAsync(string title, Keyboard keyboard = null)
         {
             if (keyboard == null)
             {
                 keyboard = Keyboard.Default;
             }
 
-            var cts = new TaskCompletionSource<Tuple<DateTime, DateTime>>();
+            var cts = new TaskCompletionSource<Tuple<DateTime, DateTime>>(TaskCreationOptions.AttachedToParent);
             try
             {
                 var _dialogView = new PopTimePickerView(title, keyboard);
-                //_dialogView.FocusEntry();
                 _dialogView.Picked += async (s, o) =>
                 {
                     if (PopupNavigation.Instance?.PopupStack?.Count > 0)
@@ -172,120 +162,79 @@ namespace Wesley.Client.CustomViews
                     }
                     cts.TrySetResult(o);
                 };
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+
+                if (_dialogView != null)
+                    await PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult(null);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 cts.TrySetResult(null);
             }
 
-            return cts.Task;
+            return await cts.Task;
         }
 
 
-        public Task<List<PopData>> GetCheckboxResultAsync(string title, string message, Func<Task<List<PopData>>> func)
+        public async Task<PopData> GetRadioButtonResultAsync(string title, string message, Func<Task<List<PopData>>> func)
         {
-            var tcs = new TaskCompletionSource<List<PopData>>();
+            var tcs = new TaskCompletionSource<PopData>(TaskCreationOptions.AttachedToParent);
             try
             {
-                //复选框视图
-                var _dialogView = new PopCheckBoxView(title, message, func);
-                _dialogView.Completed += async (s, e) =>
-                {
-                    if (PopupNavigation.Instance?.PopupStack?.Count > 0)
-                    {
-                        await PopupNavigation.Instance.PopAllAsync();
-                    }
-                    tcs.TrySetResult(e?.ToList());
-                };
-                PopupNavigation.Instance.PushAsync(_dialogView, true);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Crashes.TrackError(ex);
-                tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-                Crashes.TrackError(ex);
-                tcs.TrySetResult(null);
-            }
-
-            return tcs.Task;
-        }
-
-
-        public Task<PopData> GetRadioButtonResultAsync(string title, string message, Func<Task<List<PopData>>> func)
-        {
-            var tcs = new TaskCompletionSource<PopData>();
-            try
-            {
-                //单选框视图
-                var _dialogView = new PopRadioButtonView(title, message, func);
+                //单选框视图 IPopupNavigation
+                var _dialogView = new PopRadioButtonPage(title, message, func);
                 _dialogView.Completed += async (sender, e) =>
                 {
-                    if (PopupNavigation.Instance?.PopupStack?.Count > 0)
+                    try
                     {
-                        await PopupNavigation.Instance.PopAllAsync();
+                        if (PopupNavigation.Instance?.PopupStack?.Count > 0)
+                        {
+                            await PopupNavigation.Instance.PopAllAsync();
+                        }
+                        tcs.TrySetResult(e);
                     }
-                    tcs.TrySetResult(e);
-                };
-                PopupNavigation.Instance.PushAsync(_dialogView);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Crashes.TrackError(ex, new Dictionary<string, string> { { "Exception1:", "InvalidOperationException" } });
-                tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-                Crashes.TrackError(ex, new Dictionary<string, string> { { "Exception2:", "InvalidOperationException" } });
-                tcs.TrySetResult(null);
-            }
-
-            return tcs.Task;
-        }
-
-        public Task<object> GetMediaResultAsync(string title, string message)
-        {
-            var tcs = new TaskCompletionSource<object>();
-            try
-            {
-                //单选框视图
-                var _dialogView = new PopMediaSelectView(title, message);
-                _dialogView.Completed += async (s, e) =>
-                {
-                    if (PopupNavigation.Instance?.PopupStack?.Count > 0)
+                    catch (Exception ex)
                     {
-                        await PopupNavigation.Instance.PopAllAsync();
+
                     }
-                    tcs.TrySetResult(_dialogView.SelectecItem);
                 };
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+
+                if (_dialogView != null)
+                    await PopupNavigation.Instance.PushAsync(_dialogView);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
-                tcs.TrySetResult(null);
+                tcs.TrySetResult(new PopData());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
-                tcs.TrySetResult(null);
+                tcs.TrySetResult(new PopData());
             }
-            return tcs.Task;
+            return await tcs.Task;
         }
 
 
-        public Task<bool> GetUpgradeResultAsync(string title, string message)
+        public async void GetMediaResultAsync(string title, string message)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            var _dialogView = new PopMediaSelectView(title, "");
+            var page = new PopupPage { Content = _dialogView, HasSystemPadding = false };
+            await PopupNavigation.Instance.PushAsync(page);
+            //_dialogView.Completed += (sender, result) =>
+            //{
+            //    if (result != null)
+            //    {
+            //        //call?.Invoke(result);
+            //    }
+            //};
+        }
+
+
+        public async Task<bool> GetUpgradeResultAsync(string title, string message)
+        {
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.AttachedToParent);
             try
             {
                 var _dialogView = new PopUpgradeView(title, message);
@@ -298,24 +247,23 @@ namespace Wesley.Client.CustomViews
                     tcs.TrySetResult(e);
                 };
 
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+                if (_dialogView != null)
+                    await PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
 
-            return tcs.Task;
+            return await tcs.Task;
         }
-        public Task<bool> ShowSuccessAsync(string message, bool success, bool cutdown = false)
+        public async Task<bool> ShowSuccessAsync(string message, bool success, bool cutdown = false)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.AttachedToParent);
             try
             {
                 var _dialogView = new PopConfirmView(message, success);
@@ -330,7 +278,14 @@ namespace Wesley.Client.CustomViews
                         tcs.TrySetResult(e);
                     }
                 };
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+
+                if (_dialogView != null)
+                    await PopupNavigation.Instance?.PushAsync(new PopupPage
+                    {
+                        Content = _dialogView,
+                        HasSystemPadding = false
+                    });
+
                 if (cutdown)
                 {
                     Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(x =>
@@ -342,22 +297,20 @@ namespace Wesley.Client.CustomViews
                     });
                 }
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
 
-            return tcs.Task;
+            return await tcs.Task;
         }
-        public Task<bool> PopViewAsync(string title, string message)
+        public async Task<bool> PopViewAsync(string title, string message)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.AttachedToParent);
             try
             {
                 var _dialogView = new PopView(title, message);
@@ -369,24 +322,24 @@ namespace Wesley.Client.CustomViews
                     }
                     tcs.TrySetResult(e);
                 };
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+
+                if (_dialogView != null)
+                    await PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
 
-            return tcs.Task;
+            return await tcs.Task;
         }
-        public Task<bool> ShowProgressBarAsync(string message)
+        public async Task<bool> ShowProgressBarAsync(string message)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.AttachedToParent);
             try
             {
                 var _dialogView = new PopProgressBarView(message);
@@ -399,20 +352,19 @@ namespace Wesley.Client.CustomViews
                     tcs.TrySetResult(e);
                 };
                 //退出
-                PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView });
+                if (_dialogView != null)
+                    await PopupNavigation.Instance?.PushAsync(new PopupPage { Content = _dialogView, HasSystemPadding = false });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Crashes.TrackError(ex);
                 tcs.TrySetResult(false);
             }
 
-            return tcs.Task;
+            return await tcs.Task;
         }
     }
 }

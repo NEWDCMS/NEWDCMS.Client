@@ -18,23 +18,10 @@
     </ContentPage.Resources>
     <RelativeLayout>
         <Grid Style="{StaticResource GGrid}"
-              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
-              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=0.88,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+              RowDefinitions="40,.7,40,.7,40,.7,40,.7,*"
+              ColumnDefinitions="*,*">
             <!--0-->
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
@@ -100,7 +87,8 @@
                 <Label Style="{StaticResource SearchArrow}"
                        IsEnabled="{Binding EnableOperation}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding CustomSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding CustomSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -132,7 +120,8 @@
                 <Label Style="{StaticResource DownArrow}"
                        Margin="{StaticResource MR10}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding StockSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding StockSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -168,7 +157,8 @@
                 </custom:CustomEntry>
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding DeliverSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding DeliverSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -213,7 +203,7 @@
                             SelectionMode="Single"
                             SelectedItem="{Binding Selecter, Mode=TwoWay}"
                             SelectionChangedCommand="{Binding ItemSelectedCommand, Mode=TwoWay}"
-                            SelectionChangedCommandParameter="{x:Reference BillItems}">
+                            SelectionChangedCommandParameter="{x:Reference BillItems}" VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
                     <custom:HeaderView ControlTemplate="{StaticResource ReturnBillPage_Template}" />
                 </CollectionView.Header>
@@ -223,7 +213,7 @@
                               VerticalOptions="CenterAndExpand"
                               HorizontalOptions="FillAndExpand">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -234,7 +224,7 @@
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0"
                                    Text="{Binding ProductName}"
-                                   LineBreakMode="TailTruncation"
+                                   LineBreakMode="WordWrap"
                                    HorizontalOptions="FillAndExpand"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
@@ -244,7 +234,24 @@
                                    HorizontalOptions="End"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
-                                   Margin="0,5,0,5" />
+                                   Margin="0,5,0,5">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsGifts}"
+                                                 Value="False">
+                                        <Setter Property="Text"
+                                                Value="{Binding Price,StringFormat='{0:F2}'}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsGifts}"
+                                                 Value="True">
+                                        <Setter Property="Text"
+                                                Value="{Binding Remark}" />
+                                        <Setter Property="TextColor"
+                                                Value="{StaticResource PrimaryDarkColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
                             <StackLayout Grid.Column="2"
                                          Orientation="Horizontal"
                                          HorizontalOptions="End">
@@ -259,7 +266,7 @@
                                        VerticalOptions="CenterAndExpand"
                                        Margin="0,5,0,5" />
                                 <Label Text="&#xf040;"
-                                       FontFamily="FAR"
+                                       FontFamily="FAS"
                                        HorizontalOptions="End"
                                        FontSize="{StaticResource FT14}"
                                        TextColor="{StaticResource PrimaryDarkColor}"
@@ -289,7 +296,13 @@
                IsVisible="{Binding Bill.AuditedStatus}"
                WidthRequest="100"
                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
-               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}"></Image>
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--红冲水印-->
+        <Image Source="have_gray.png"
+               IsVisible="{Binding Bill.ReversedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
         <!--footer-->
         <Grid HeightRequest="90"
               Style="{StaticResource GGrid}"

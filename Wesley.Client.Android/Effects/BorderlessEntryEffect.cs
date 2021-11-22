@@ -1,10 +1,10 @@
-﻿using Wesley.Effects;
-using Wesley.Effects.Droid;
+﻿using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
 [assembly: ExportEffect(typeof(BorderlessAndroidEntryEffect), nameof(BorderlessEntryEffect))]
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
     public class BorderlessAndroidEntryEffect : PlatformEffect
     {

@@ -38,7 +38,6 @@ namespace Wesley.Client.Models.Sales
         public int CollectionAccount { get; set; }
         public decimal? CollectionAmount { get; set; }
         public string AuditedUserName { get; set; }
-        public int PrintNum { get; set; }
         [Reactive] public ObservableCollection<ReturnItemModel> Items { get; set; } = new ObservableCollection<ReturnItemModel>();
         [Reactive] public ObservableCollection<AccountMaping> ReturnBillAccountings { get; set; } = new ObservableCollection<AccountMaping>();
         [Reactive] public string[] Accountings { get; set; } = new string[] { };
@@ -90,6 +89,23 @@ namespace Wesley.Client.Models.Sales
         public decimal TaxPrice { get; set; }
         public decimal ContainTaxPrice { get; set; }
         public decimal TaxPriceAmount { get; set; }
+
+
+        #region 赠品信息
+
+        public int? SaleProductTypeId { get; set; }
+        public string SaleProductTypeName { get; set; }
+        public int? GiveTypeId { get; set; }
+        public int? CampaignId { get; set; }
+        public string CampaignName { get; set; }
+        public int? CampaignBuyProductId { get; set; }
+        public int? CampaignGiveProductId { get; set; }
+        public string CampaignLinkNumber { get; set; }
+        public int? CostContractId { get; set; }
+        public int? CostContractItemId { get; set; }
+        public int? CostContractMonth { get; set; }
+
+        #endregion
     }
 
 
@@ -113,6 +129,7 @@ namespace Wesley.Client.Models.Sales
     /// </summary>
     public class ReturnBillUpdateModel : Base
     {
+        public string BillNumber { get; set; }
         [Reactive] public int TerminalId { get; set; }
         [Reactive] public int BusinessUserId { get; set; }
         [Reactive] public int WareHouseId { get; set; }

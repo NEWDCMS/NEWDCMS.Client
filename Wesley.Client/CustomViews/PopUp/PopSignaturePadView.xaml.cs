@@ -12,7 +12,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace Wesley.Client.CustomViews.Views
+namespace Wesley.Client.CustomViews
 {
 
     /// <summary>
@@ -109,14 +109,14 @@ namespace Wesley.Client.CustomViews.Views
             };
             using (var bitmap = await GetImageStreamAsync(SignatureImageFormat.Png, settings))
             {
-                //var saved = await App.SaveSignature(bitmap, "signature.png");
                 var httpClientHelper = new HttpClientHelper();
                 //上传图片
                 using (UserDialogs.Instance.Loading("上传中..."))
                 {
                     try
                     {
-                        var content = new MultipartFormDataContent { { new StreamContent(bitmap), "\"file\"", $"\"signature.png\"" } };
+                        var scb = new StreamContent(bitmap);
+                        var content = new MultipartFormDataContent { { scb, "\"file\"", $"\"signature.png\"" } };
                         var url = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
                         var result = await httpClientHelper.PostAsync(url, content);
                         var uploadResult = new UploadResult();
@@ -128,6 +128,12 @@ namespace Wesley.Client.CustomViews.Views
                         {
                             ImageId = uploadResult.Id;
                         }
+
+                        if (scb != null)
+                            scb.Dispose();
+
+                        if (content != null)
+                            content.Dispose();
                     }
                     catch (Exception ex)
                     {

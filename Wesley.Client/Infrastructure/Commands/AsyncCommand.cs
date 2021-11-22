@@ -137,7 +137,7 @@ namespace Wesley.Client.Commands
             private bool _commandExecuting;
             private CancellationTokenSource _cts = new CancellationTokenSource();
 
-            public CancellationToken Token => _cts.Token;
+            public CancellationToken Token => new System.Threading.CancellationToken();
 
             bool ICommand.CanExecute(object parameter)
             {

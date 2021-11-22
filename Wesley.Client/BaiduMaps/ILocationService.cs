@@ -1,5 +1,7 @@
 ﻿using Wesley.Client.Models.Census;
 using System;
+using System.Threading.Tasks;
+
 namespace Wesley.Client.BaiduMaps
 {
     public class LocationUpdatedEventArgs : EventArgs
@@ -25,13 +27,16 @@ namespace Wesley.Client.BaiduMaps
 
     public interface IBaiduLocationService
     {
+        Task UpdateCenter(Wesley.Client.BaiduMaps.Map map, Action action);
+        Task UpdateCenter(Wesley.Client.BaiduMaps.Map map);
+        bool IsStarted();
         void OnDestroy();
         void Start();
         void Stop();
         void Converter(double lat, double lng);
         void Converter(Wesley.Client.BaiduMaps.Map map, double lat, double lng);
-        static event EventHandler<LocationFailedEventArgs> Failed;
-        static event EventHandler<LocationUpdatedEventArgs> LocationUpdated;
+        //static event EventHandler<LocationFailedEventArgs> Failed;
+        //static event EventHandler<LocationUpdatedEventArgs> LocationUpdated;
     }
 
 }

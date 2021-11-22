@@ -24,8 +24,8 @@ namespace Wesley.Client.Droid
                         //Resource.Drawable.q10660 not include .mp3
                         //int rsid = (int)typeof(Resource.Drawable).GetField(image.ResourceName).GetValue(null);
                         //return BitmapDescriptorFactory.FromResource(rsid);
-                        var rsid = Xamarin.Forms.Platform.Android.ResourceManager.GetDrawableByName(image.ResourceName);
-                        return BitmapDescriptorFactory.FromResource(rsid);
+                        //var rsid = Xamarin.Forms.Platform.Android.ResourceManager.g(image.ResourceId);
+                        return BitmapDescriptorFactory.FromResource(image.ResourceId);
                     }
                 case ImageSource.Stream:
                     return BitmapDescriptorFactory.FromBitmap(BitmapFactory.DecodeStream(image.Stream));

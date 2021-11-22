@@ -5,8 +5,8 @@
                               xmlns:pages="clr-namespace:Wesley.Client.Pages"
                               xmlns:maps="clr-namespace:Wesley.Client.BaiduMaps;assembly=Wesley.Client"
                               xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
-                              prism:ViewModelLocator.AutowireViewModel="True"
-                              x:Class="Wesley.Client.Pages.Common.SelectLocationPage"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.SelectLocationPage"
                               x:Name="CurrentContentView"
                               Title="{Binding Title}"
                               BackgroundColor="White"
@@ -74,70 +74,62 @@
                        FontFamily="FAS"
                        TextColor="#53a245" />
             </StackLayout>
-            <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
-                         Command="{Binding RefreshCommand}"
-                         RefreshColor="{StaticResource PrimaryDarkColor}">
-                <ScrollView>
-                    <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
-                                           ViewModelLoader="{Binding GpsEventsLoader}">
-                        <CollectionView ItemsSource="{Binding GpsEvents}"
-                                        Margin="10,0,10,0"
-                                        x:Name="businessusers"
-                                        ItemSizingStrategy="MeasureAllItems"
-                                        SelectedItem="{Binding Selecter, Mode=TwoWay}"
-                                        SelectionMode="Single">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Style="{StaticResource GGrid}"
-                                          Margin="0,0,0,0"
-                                          VerticalOptions="CenterAndExpand"
-                                          HorizontalOptions="FillAndExpand">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height=".7" />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Row="0"
-                                               Grid.Column="0"
-                                               Text="{Binding Address}"
-                                               HorizontalOptions="Start"
-                                               TextColor="{StaticResource PrimaryTextColor}"
-                                               VerticalOptions="CenterAndExpand"
-                                               Margin="0,5,0,0" />
-                                        <Label Grid.Row="1"
-                                               Grid.Column="0"
-                                               HorizontalOptions="Start"
-                                               FontSize="12"
-                                               TextColor="{StaticResource SecondaryAccentColor}"
-                                               VerticalOptions="CenterAndExpand"
-                                               Margin="0,0,0,5">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding Latitude}" />
-                                                    <Span Text=" , " />
-                                                    <Span Text="{Binding Longitude}" />
-                                                    <Span Text=" : " />
-                                                    <Span Text="{Binding CreateDateTime}" /> 
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
-                                        <BoxView Grid.Row="2"
-                                                 Grid.Column="0"
-                                                 VerticalOptions="Start"
-                                                 Style="{StaticResource SeparatorGrid}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                            <CollectionView.EmptyView>
-                                <Label Text="未检索到有效地址！" />
-                            </CollectionView.EmptyView>
-                        </CollectionView>
-                    </custom:TaskLoaderView>
-                </ScrollView>
-            </RefreshView>
+            <CollectionView ItemsSource="{Binding GpsEvents}"
+                            Margin="10,0,10,0"
+                            x:Name="businessusers"
+                            ItemSizingStrategy="MeasureAllItems"
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                            SelectionMode="Single"
+                            VerticalScrollBarVisibility="Always">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Style="{StaticResource GGrid}"
+                              Margin="0,0,0,0"
+                              VerticalOptions="CenterAndExpand"
+                              HorizontalOptions="FillAndExpand">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height=".7" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{Binding Address}"
+                                   HorizontalOptions="Start"
+                                   TextColor="{StaticResource PrimaryTextColor}"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="0,5,0,0" />
+                            <Label Grid.Row="1"
+                                   Grid.Column="0"
+                                   HorizontalOptions="Start"
+                                   FontSize="12"
+                                   TextColor="{StaticResource SecondaryAccentColor}"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="0,0,0,5">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Latitude}" />
+                                        <Span Text=" , " />
+                                        <Span Text="{Binding Longitude}" />
+                                        <Span Text=" : " />
+                                        <Span Text="{Binding CreateDateTime}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <BoxView Grid.Row="2"
+                                     Grid.Column="0"
+                                     VerticalOptions="Start"
+                                     Style="{StaticResource SeparatorGrid}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="未检索到有效地址！" />
+                </CollectionView.EmptyView>
+            </CollectionView>
         </StackLayout>
         <Button Text="paper-plane 重新定位"
                 x:Name="ReceiveLocationCommand"

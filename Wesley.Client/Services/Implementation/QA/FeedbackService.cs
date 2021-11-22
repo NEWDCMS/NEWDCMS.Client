@@ -35,5 +35,25 @@ namespace Wesley.Client.Services.QA
                 return null;
             }
         }
+
+        /// <summary>
+        /// 创建
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public async Task<APIResult<MarketFeedback>> CreateOrUpdateMarketAsync(MarketFeedback data, CancellationToken calToken = default)
+        {
+            try
+            {
+                var api = RefitServiceBuilder.Build<ITTSApi>(URL);
+                var results = await _makeRequest.Start(api.InsertMarketFeedback(data, Settings.StoreId));
+                return results;
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
+        }
     }
 }

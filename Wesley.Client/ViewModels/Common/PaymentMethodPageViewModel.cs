@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -28,9 +29,8 @@ namespace Wesley.Client.ViewModels
 
         public PaymentMethodPageViewModel(INavigationService navigationService,
             IAccountingService accountingService,
-
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "请输入支付金额";
 
@@ -202,6 +202,8 @@ namespace Wesley.Client.ViewModels
                     //初始
                     if (this.PaymentMethods.Selectes?.Count > 0)
                     {
+                        //BUG
+                        //this.PaymentMethods.Selectes.Clear();
                         foreach (var p in this.PaymentMethods.Selectes.ToList())
                         {
                             var cup = options.Where(s => s.AccountCodeTypeId == p.AccountCodeTypeId).FirstOrDefault();
@@ -288,7 +290,8 @@ namespace Wesley.Client.ViewModels
             //更改输入
             this.TextChangedCommand = ReactiveCommand.Create<object>(e =>
             {
-                Observable.Timer(TimeSpan.FromSeconds(2)).Subscribe(x =>
+                Observable.Timer(TimeSpan.FromSeconds(2))
+                .Subscribe(x =>
                 {
                     //动态行
                     var allAmount = PaymentMethods.Selectes.Distinct().Sum(s => s.CollectionAmount);
@@ -298,15 +301,11 @@ namespace Wesley.Client.ViewModels
 
                     //欠款(待收/付款)
                     PaymentMethods.OweCash = PaymentMethods.SubAmount - PaymentMethods.PreferentialAmount - allAmount;
-                });
+                }).DisposeWith(DeactivateWith);
             });
 
-            this.TextChangedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.MorePaymentCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SaveCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
 

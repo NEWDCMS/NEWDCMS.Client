@@ -1,0 +1,17 @@
+﻿using Wesley.Client.ViewModels;
+using Microsoft.AppCenter.Crashes;
+using System;
+namespace Wesley.Client.Pages
+{
+    public partial class MarketFeedbackPage : BaseContentPage<MarketFeedbackPageViewModel>
+    {
+        public MarketFeedbackPage()
+        {
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception ex) { Crashes.TrackError(ex); }
+        }
+    }
+}

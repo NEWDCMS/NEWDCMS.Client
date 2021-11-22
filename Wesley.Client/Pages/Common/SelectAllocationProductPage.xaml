@@ -52,7 +52,8 @@
             <Label Style="{StaticResource SearchArrow}"
                    Margin="{StaticResource MR10}">
                 <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding Path=SelectCommand}" />
+                    <TapGestureRecognizer Command="{Binding Path=SelectCommand}"
+                                          NumberOfTapsRequired="1" />
                 </Label.GestureRecognizers>
             </Label>
         </StackLayout>

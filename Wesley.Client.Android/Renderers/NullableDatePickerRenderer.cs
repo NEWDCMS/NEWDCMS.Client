@@ -16,7 +16,7 @@ namespace Wesley.Client.Droid.Renderers
     /// </summary>
     public class NullableDatePickerRenderer : ViewRenderer<NullableDatePicker, EditText>
     {
-        DatePickerDialog _dialog;
+        private DatePickerDialog _dialog;
 
         public NullableDatePickerRenderer(Context context) : base(context)
         {
@@ -60,7 +60,7 @@ namespace Wesley.Client.Droid.Renderers
             base.OnElementPropertyChanged(sender, e);
         }
 
-        void OnPickerFocusChange(object sender, Android.Views.View.FocusChangeEventArgs e)
+        private void OnPickerFocusChange(object sender, Android.Views.View.FocusChangeEventArgs e)
         {
             if (e.HasFocus)
             {
@@ -90,12 +90,12 @@ namespace Wesley.Client.Droid.Renderers
             base.Dispose(disposing);
         }
 
-        void OnPickerClick(object sender, EventArgs e)
+        private void OnPickerClick(object sender, EventArgs e)
         {
             ShowDatePicker();
         }
 
-        void SetDate(DateTime date)
+        private void SetDate(DateTime date)
         {
             this.Control.Text = date.ToString(Element.Format);
             Element.Date = date;
@@ -107,7 +107,7 @@ namespace Wesley.Client.Droid.Renderers
             _dialog.Show();
         }
 
-        void CreateDatePickerDialog(int year, int month, int day)
+        private void CreateDatePickerDialog(int year, int month, int day)
         {
             NullableDatePicker view = Element;
             _dialog = new DatePickerDialog(Context, (o, e) =>

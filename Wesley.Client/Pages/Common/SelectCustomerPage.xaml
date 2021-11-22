@@ -13,168 +13,182 @@
                        Title="{Binding Title}"
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:SelectCustomerPageViewModel">
-    <StackLayout Spacing="0">
-        <!--header-->
-        <Grid Style="{StaticResource GGrid}"
-              VerticalOptions="Start">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <!--搜索-->
-            <custom:CrossSearchBar Grid.Row="0"
-                                   Grid.Column="0"
-                                   Margin="0,0,0,0"
-                                   x:Name="SearchBar"
-                                   Placeholder="客户首拼/编号/电话"
-                                   FontSize="{StaticResource FT14}"
-                                   Text="{Binding Filter.SerchKey,Mode=TwoWay}"
-                                   HorizontalOptions="Start"
-                                   VerticalOptions="CenterAndExpand"
-                                   CancelButtonColor="#53a245" />
-            <StackLayout Orientation="Horizontal"
-                         HeightRequest="{StaticResource RH45}"
-                         VerticalOptions="FillAndExpand"
-                         Spacing="0"
-                         Grid.Row="0"
-                         Grid.Column="1">
-                <custom:CustomEntry x:Name="SelectArea"
-                                    Margin="{StaticResource ML10}"
-                                    HorizontalOptions="Start"
-                                    VerticalOptions="CenterAndExpand"
-                                    Style="{StaticResource DefaultEntry}"
-                                    FontSize="{StaticResource FT14}"
-                                    ShowVirtualKeyboardOnFocus="False"
-                                    Text="{Binding Filter.DistrictName,Mode=TwoWay}"
-                                    Placeholder="请选择片区">
-                    <custom:CustomEntry.Behaviors>
-                        <b:EventToCommandBehavior EventName="Focused"
-                                                  Command="{Binding Path=BindingContext.DistrictSelected,Source={x:Reference CurrentContentView}}"
-                                                  CommandParameter="" />
-                    </custom:CustomEntry.Behaviors>
-                </custom:CustomEntry>
-                <Label Style="{StaticResource DownArrow}"
-                       Margin="{StaticResource MR10}">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=DistrictSelected}"></TapGestureRecognizer>
-                    </Label.GestureRecognizers>
-                </Label>
-            </StackLayout>
-            <BoxView VerticalOptions="Start"
-                     Style="{StaticResource SeparatorGrid}"
-                     Grid.Row="1"
-                     Grid.ColumnSpan="2" />
-        </Grid>
-        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+    <Grid Style="{StaticResource GGrid}"
+          VerticalOptions="Start"
+          RowDefinitions="50,.7,*"
+          ColumnDefinitions="*,*">
+        <!--搜索-->
+        <custom:CrossSearchBar Grid.Row="0"
+                               Grid.Column="0"
+                               Margin="0,0,0,0"
+                               x:Name="SearchBar"
+                               Placeholder="客户首拼/编号/电话"
+                               FontSize="{StaticResource FT14}"
+                               Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                               HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"
+                               CancelButtonColor="#53a245" />
+        <StackLayout Orientation="Horizontal"
+                     HeightRequest="{StaticResource RH45}"
+                     VerticalOptions="FillAndExpand"
+                     Spacing="0"
+                     Grid.Row="0"
+                     Grid.Column="1">
+            <custom:CustomEntry x:Name="SelectArea"
+                                Margin="{StaticResource ML10}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="CenterAndExpand"
+                                Style="{StaticResource DefaultEntry}"
+                                FontSize="{StaticResource FT14}"
+                                ShowVirtualKeyboardOnFocus="False"
+                                Text="{Binding Filter.DistrictName,Mode=TwoWay}"
+                                Placeholder="请选择片区">
+                <custom:CustomEntry.Behaviors>
+                    <b:EventToCommandBehavior EventName="Focused"
+                                              Command="{Binding Path=BindingContext.DistrictSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="" />
+                </custom:CustomEntry.Behaviors>
+            </custom:CustomEntry>
+            <Label Style="{StaticResource DownArrow}"
+                   Margin="{StaticResource MR10}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Path=DistrictSelected}"
+                                          NumberOfTapsRequired="1" />
+                </Label.GestureRecognizers>
+            </Label>
+        </StackLayout>
+        <BoxView VerticalOptions="Start"
+                 Style="{StaticResource SeparatorGrid}"
+                 Grid.Row="1"
+                 Grid.ColumnSpan="2" />
+        <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
+                     IsVisible="{Binding DataVewEnable}"
                      Command="{Binding RefreshCommand}"
-                     RefreshColor="{StaticResource PrimaryDarkColor}">
-            <ScrollView>
-                <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
-                                       ViewModelLoader="{Binding TerminalsLoader}">
-                    <CollectionView ItemsSource="{Binding Terminals}"
-                                    x:Name="terminals"
-                                    ItemSizingStrategy="MeasureAllItems"
-                                    SelectedItem="{Binding Selecter, Mode=TwoWay}"
-                                    RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
-                                    RemainingItemsThreshold="{Binding ItemTreshold}"
-                                    SelectionMode="Single">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="0,0,0,0"
-                                      Style="{StaticResource GGrid}"
-                                      HorizontalOptions="FillAndExpand">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height=".7" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="70" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <ffimageloading:CachedImage Grid.Row="0"
-                                                                Grid.Column="0"
-                                                                Grid.RowSpan="3"
-                                                                HorizontalOptions="Center"
-                                                                VerticalOptions="Center"
-                                                                LoadingPlaceholder="profile_placeholder.png"
-                                                                ErrorPlaceholder="profile_placeholder.png"
-                                                                DownsampleToViewSize="True"
-                                                                Aspect="AspectFill"
-                                                                HeightRequest="50"
-                                                                WidthRequest="50"
-                                                                Source="{Binding DoorwayPhoto}">
-                                        <ffimageloading:CachedImage.Transformations>
-                                            <fftransformations:CircleTransformation BorderSize="2"
-                                                                                    BorderHexColor="#ffffff" />
-                                        </ffimageloading:CachedImage.Transformations>
-                                    </ffimageloading:CachedImage>
-                                    <Label Grid.Row="0"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Margin="0,5,0,0"
-                                           Text="{Binding Name}"
-                                           FontSize="{StaticResource FT16}"
-                                           FontAttributes="Bold"
-                                           HorizontalOptions="Start"
-                                           LineBreakMode="TailTruncation"
-                                           
-                                           TextColor="{StaticResource PrimaryTextColor}"
-                                           VerticalOptions="CenterAndExpand"></Label>
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Text="{Binding BossCall, StringFormat='电话：{0}'}"
-                                           HorizontalOptions="Start"
-                                           FontSize="{StaticResource FT14}"
-                                           VerticalOptions="CenterAndExpand"
-                                           Margin="0,0,0,5" />
-                                    <StackLayout Grid.Row="1"
-                                                 Grid.Column="2"
-                                                 Orientation="Horizontal"
-                                                 HorizontalOptions="End"
-                                                 VerticalOptions="CenterAndExpand"
-                                                 Margin="0,0,0,5">
-                                        <Label Text="{Binding Distance, Converter={StaticResource MetersToMilesConverter}, StringFormat='{0:N2}公里'}"
-                                               HorizontalOptions="Start"
-                                               FontSize="{StaticResource FT14}"
-                                               VerticalOptions="CenterAndExpand" />
-                                        <Label Text="{StaticResource FontAwesomeMap}"
-                                               FontFamily="FAS"
-                                               VerticalOptions="CenterAndExpand"
-                                               HorizontalOptions="End"
-                                               TextColor="{StaticResource PrimaryDarkColor}"
-                                               FontSize="{StaticResource FT16}"
-                                               Margin="5,0,10,0" />
-                                    </StackLayout>
-                                    <Label Grid.Row="2"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding Address,StringFormat='地址：{0}'}"
-                                           HorizontalOptions="Start"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource DividerColor}"
-                                           VerticalOptions="CenterAndExpand"
-                                           Margin="0,0,0,5" />
-                                    <BoxView  Grid.Row="3"
-                                              Grid.Column="1"
-                                              Grid.ColumnSpan="2"
-                                              VerticalOptions="Center"
-                                              Style="{StaticResource SeparatorGrid}" />
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                        <CollectionView.EmptyView>
-                            <custom:NullView />
-                        </CollectionView.EmptyView>
-                    </CollectionView>
-                </custom:TaskLoaderView>
-            </ScrollView>
+                     RefreshColor="{StaticResource PrimaryDarkColor}"
+                     Grid.Row="2"
+                     Grid.ColumnSpan="2">
+            <CollectionView Grid.Row="2"
+                            Grid.ColumnSpan="2"
+                            IsVisible="{Binding DataVewEnable}"
+                            ItemsSource="{Binding Terminals}"
+                            x:Name="terminals"
+                            ItemSizingStrategy="MeasureAllItems"
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                            RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                            RemainingItemsThreshold="{Binding ItemTreshold}"
+                            SelectionMode="Single"
+                            VerticalScrollBarVisibility="Always">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="0,0,0,0"
+                              Style="{StaticResource GGrid}"
+                              HorizontalOptions="FillAndExpand">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height=".7" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ffimageloading:CachedImage Grid.Row="0"
+                                                        Grid.Column="0"
+                                                        Grid.RowSpan="3"
+                                                        HorizontalOptions="Center"
+                                                        VerticalOptions="Center"
+                                                        LoadingPlaceholder="profile_placeholder.png"
+                                                        ErrorPlaceholder="profile_placeholder.png"
+                                                        DownsampleToViewSize="True"
+                                                        Aspect="AspectFill"
+                                                        HeightRequest="50"
+                                                        WidthRequest="50"
+                                                        Source="{Binding DoorwayPhoto}">
+                                <ffimageloading:CachedImage.Transformations>
+                                    <fftransformations:CircleTransformation BorderSize="2"
+                                                                            BorderHexColor="#ffffff" />
+                                </ffimageloading:CachedImage.Transformations>
+                            </ffimageloading:CachedImage>
+                            <Label Grid.Row="0"
+                                   Grid.Column="1"
+                                   Grid.ColumnSpan="2"
+                                   Margin="0,5,0,0"
+                                   Text="{Binding Name}"
+                                   FontSize="{StaticResource FT16}"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Start"
+                                   LineBreakMode="TailTruncation"
+                                   TextColor="{StaticResource PrimaryTextColor}"
+                                   VerticalOptions="End"></Label>
+                            <Label Grid.Row="1"
+                                   Grid.Column="1"
+                                   HorizontalOptions="Start"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="End"
+                                   Margin="0,0,0,5">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span  Text="电话：" />
+                                        <Span  Text="{Binding BossCall}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <StackLayout Grid.Row="1"
+                                         Grid.Column="2"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="End"
+                                         Margin="0,0,0,5">
+                                <Label HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="End">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span  Text="{Binding Distance, Converter={StaticResource MetersToMilesConverter}, StringFormat='{0:N2}'}" />
+                                            <Span  Text="公里" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Text="{StaticResource FontAwesomeMap}"
+                                       FontFamily="FAS"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="End"
+                                       TextColor="{StaticResource PrimaryDarkColor}"
+                                       FontSize="{StaticResource FT16}"
+                                       Margin="5,8,10,0" />
+                            </StackLayout>
+                            <Label Grid.Row="2"
+                                   Grid.Column="1"
+                                   Grid.ColumnSpan="2"
+                                   HorizontalOptions="Start"
+                                   FontSize="{StaticResource FT14}"
+                                   TextColor="{StaticResource DividerColor}"
+                                   VerticalOptions="Start"
+                                   Margin="0,0,0,5">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span  Text="地址：" />
+                                        <Span  Text="{Binding Address}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <BoxView  Grid.Row="3"
+                                      Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      VerticalOptions="Center"
+                                      Style="{StaticResource SeparatorGrid}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <custom:NullView />
+                </CollectionView.EmptyView>
+            </CollectionView>
         </RefreshView>
-    </StackLayout>
+        <!--<custom:LoadingContentView  Grid.Row="2"
+                          Grid.ColumnSpan="2"
+                          IsVisible="{Binding NullViewEnable}"
+                          Margin="0,150,0,0" />-->
+    </Grid>
 </pages:BaseContentPage>

@@ -31,7 +31,7 @@ namespace Wesley.Client.Converters
         //Must implement this if Binding with Mode=TwoWay
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+             return null;
         }
     }
 
@@ -51,7 +51,7 @@ namespace Wesley.Client.Converters
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+             return null;
         }
     }
 }

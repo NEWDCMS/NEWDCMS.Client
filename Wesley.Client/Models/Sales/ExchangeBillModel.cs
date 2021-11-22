@@ -100,6 +100,7 @@ namespace Wesley.Client.Models.Sales
     /// </summary>
     public class ExchangeBillUpdateModel : BaseBalance
     {
+        public string BillNumber { get; set; }
         public int TerminalId { get; set; } = 0;
         public int BusinessUserId { get; set; } = 0;
         public int DeliveryUserId { get; set; } = 0;

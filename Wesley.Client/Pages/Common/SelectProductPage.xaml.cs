@@ -2,38 +2,30 @@
 using Microsoft.AppCenter.Crashes;
 using System;
 using System.Linq;
-using Xamarin.Forms;
 namespace Wesley.Client.Pages.Common
 {
-
     public partial class SelectProductPage : BaseContentPage<SelectProductPageViewModel>
     {
         public SelectProductPage()
         {
-            this.SlideMenu = new RightProductCategoryMasterPage();
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
+                InitializeComponent();
+
+                //计算DockRight占位宽度
+                this.DockRight.WidthRequest = App.ScreenWidth - 100;
+                ToolbarItems?.Clear();
+                //string btnIco = "保存";
+                foreach (var toolBarItem in this.GetProductToolBarItems(ViewModel, true).ToList())
                 {
-                    try
-                    {
-                        InitializeComponent();
-                        ToolbarItems.Clear();
-                        foreach (var toolBarItem in this.GetProductToolBarItems(ViewModel, true).ToList())
-                        {
-                            ToolbarItems.Add(toolBarItem);
-                        }
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                    ToolbarItems.Add(toolBarItem);
+                }
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
+        //protected override void OnAppearing()
+        //{
+        //    base.OnAppearing();
+        //}
     }
 }

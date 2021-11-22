@@ -5,17 +5,17 @@ using CoreGraphics;
 using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
-using Wesley.Effects;
-using Wesley.Effects.iOS;
-using Wesley.Effects.iOS.GestureCollectors;
-using Wesley.Effects.iOS.GestureRecognizers;
+using Wesley.Client.Effects;
+using Wesley.Client.Effects.iOS;
+using Wesley.Client.Effects.iOS.GestureCollectors;
+using Wesley.Client.Effects.iOS.GestureRecognizers;
 using System;
 using System.Linq;
 using Foundation;
 
 [assembly: ExportEffect(typeof(TouchEffectPlatform), nameof(TouchEffect))]
 
-namespace Wesley.Effects.iOS {
+namespace Wesley.Client.Effects.iOS {
     public class TouchEffectPlatform : PlatformEffect {
         public bool IsDisposed => (Container as IVisualElementRenderer)?.Element == null;
         public UIView View => Control ?? Container;

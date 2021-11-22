@@ -3,8 +3,11 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
+    /// <summary>
+    /// 关联 - AndroidTapCommandEffect
+    /// </summary>
     [Preserve]
     public static class TapCommandEffect
     {
@@ -138,11 +141,6 @@ namespace Wesley.Effects
 
     public class TapCommandRoutingEffect : RoutingEffect
     {
-        public static readonly string Name = $"Silly.{nameof(TapCommandEffect)}";
-
-        public TapCommandRoutingEffect()
-            : base(Name)
-        {
-        }
+        public TapCommandRoutingEffect() : base($"Wesley.Client.{nameof(TapCommandEffect)}") { }
     }
 }

@@ -9,7 +9,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/warehouse", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IWareHousesApi
     {
         [Get("/allocationbill/auditing/{storeId}/{userId}/{billId}")]
@@ -25,6 +25,6 @@ namespace Wesley.Client.Services
         Task<APIResult<IList<InventoryReportSummaryModel>>> GetInventoryReportAsync(int storeId, int? makeuserId, int? businessUserId, int? terminalId, int? channelId, int? rankId, int? districtId, int? productId, DateTime? startTime = null, DateTime? endTime = null, int pageIndex = 0, int pageSize = 20, CancellationToken calToken = default);
 
         [Get("/wareHouse/getWareHouses/{storeId}")]
-        Task<APIResult<IList<WareHouseModel>>> GetWareHousesAsync(int storeId, int type, string searchStr = "", int pageIndex = 0, int pageSize = 50, CancellationToken calToken = default);
+        Task<APIResult<IList<WareHouseModel>>> GetWareHousesAsync(int storeId, int? makeuserId, int? btype, string searchStr = "", int pageIndex = 0, int pageSize = 50, CancellationToken calToken = default);
     }
 }

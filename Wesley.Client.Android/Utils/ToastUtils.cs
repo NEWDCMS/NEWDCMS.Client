@@ -1,6 +1,6 @@
-﻿using Android.Content;
+﻿using Android.Views;
 using Android.Widget;
-using System;
+using Java.Lang;
 
 namespace Wesley.Client.Droid.Utils
 {
@@ -9,86 +9,15 @@ namespace Wesley.Client.Droid.Utils
     /// </summary>
     public class ToastUtils
     {
-        private static Toast mToast;
-        private static readonly Context context = AppUtils.GetAppContext();
-
-        #region 非连续弹出的Toast
-
-        public static void ShowSingleToast(int resId)
+        public static void ShowSingleToast(string text)
         {
-            GetSingleToast(resId, ToastLength.Short).Show();
-        }
-
-        public static void ShowSingleToast(String text)
-        {
-            GetSingleToast(text, ToastLength.Short).Show();
-        }
-
-        public static void ShowSingleLongToast(int resId)
-        {
-            GetSingleToast(resId, ToastLength.Long).Show();
-        }
-
-        public static void ShowSingleLongToast(String text)
-        {
-            GetSingleToast(text, ToastLength.Long).Show();
-        }
-
-        #endregion
-
-        #region  连续弹出的Toast
-
-        public static void ShowToast(int resId)
-        {
-            GetToast(resId, ToastLength.Short).Show();
-        }
-
-        public static void ShowToast(String text)
-        {
-            GetToast(text, ToastLength.Short).Show();
-        }
-
-        public static void ShowLongToast(int resId)
-        {
-            GetToast(resId, ToastLength.Long).Show();
-        }
-
-        public static void ShowLongToast(String text)
-        {
-            GetToast(text, ToastLength.Long).Show();
-        }
-
-        #endregion
-
-
-        public static Toast GetSingleToast(int resId, ToastLength duration)
-        {
-            //连续调用不会连续弹出，只是替换文本
-            return GetSingleToast(context.Resources.GetText(resId).ToString(), duration);
-        }
-
-        public static Toast GetSingleToast(String text, ToastLength duration)
-        {
-            if (mToast == null)
+            try
             {
-                mToast = Toast.MakeText(context, text, duration);
+                var toast = Toast.MakeText(Android.App.Application.Context, text, ToastLength.Short);
+                toast.SetGravity(GravityFlags.Center, 0, 0);
+                toast.Show();
             }
-            else
-            {
-                mToast.SetText(text);
-            }
-            return mToast;
-        }
-
-        public static Toast GetToast(int resId, ToastLength duration)
-        {
-            // 连续调用会连续弹出
-            return GetToast(context.Resources.GetText(resId).ToString(), duration);
-        }
-
-        public static Toast GetToast(String text, ToastLength duration)
-        {
-            return Toast.MakeText(context, text, duration);
+            catch (Exception e) { }
         }
     }
 }

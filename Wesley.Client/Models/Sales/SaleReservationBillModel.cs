@@ -71,6 +71,7 @@ namespace Wesley.Client.Models.Sales
         public int? SmallGiftQuantity { get; set; }
         public bool IsManufactureDete { get; set; }
         public DateTime? ManufactureDete { get; set; }
+        public string ManufactureDateStr { get; set; }
         public IList<string> ProductTimes { get; set; } = new List<string>();
 
         #region 赠品信息
@@ -101,6 +102,7 @@ namespace Wesley.Client.Models.Sales
     /// </summary>
     public class SaleReservationBillUpdateModel : BaseBalance
     {
+        public string BillNumber { get; set; }
         public int TerminalId { get; set; } = 0;
         public int BusinessUserId { get; set; } = 0;
         public int DeliveryUserId { get; set; } = 0;

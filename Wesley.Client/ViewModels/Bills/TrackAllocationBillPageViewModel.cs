@@ -1,7 +1,9 @@
-﻿using Wesley.Client.Enums;
+﻿using Acr.UserDialogs;
+using Wesley.Client.Enums;
+using Wesley.Client.Models;
 using Wesley.Client.Models.Products;
-using Wesley.Client.Models.Sales;
 using Wesley.Client.Models.WareHouses;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
@@ -9,12 +11,14 @@ using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-
+using System.Reactive.Disposables;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Diagnostics;
 
 namespace Wesley.Client.ViewModels
 {
@@ -29,7 +33,8 @@ namespace Wesley.Client.ViewModels
             ITerminalService terminalService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-              IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "装车调拨";
 
@@ -113,90 +118,121 @@ namespace Wesley.Client.ViewModels
                    }
 
                    this.Selecter = null;
-               }, ex => _dialogService.ShortAlert(ex.ToString()));
+               }, ex => _dialogService.ShortAlert(ex.ToString()))
+                .DisposeWith(DeactivateWith);
 
             //提交单据
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.TrackSchedulingScheduling);
-
-                if (!valid_ShipmentWareHouseId.IsValid) { this.Alert(valid_ShipmentWareHouseId.Message[0]); return Unit.Default; }
-                if (!valid_IncomeWareHouseId.IsValid) { this.Alert(valid_IncomeWareHouseId.Message[0]); return Unit.Default; }
-                if (!valid_ProductCount.IsValid) { this.Alert(valid_ProductCount.Message[0]); return Unit.Default; }
-
-                var postMData = new AllocationUpdateModel()
+                //await this.Access(AccessGranularityEnum.TrackSchedulingScheduling);
+                return await this.Access(AccessGranularityEnum.TrackSchedulingScheduling, async () =>
                 {
-                    ShipmentWareHouseId = Bill.ShipmentWareHouseId,
-                    IncomeWareHouseId = Bill.IncomeWareHouseId,
-                    CreatedOnUtc = Bill.CreatedOnUtc,
-                    AllocationByMinUnit = false,
-                    Remark = Bill.Remark,
-                    //商品项目
-                    Items = Bill.Items.Where(i => i.Quantity > 0).ToList(),
-                };
+                    if (!valid_ShipmentWareHouseId.IsValid) { this.Alert(valid_ShipmentWareHouseId.Message[0]); return Unit.Default; }
+                    if (!valid_IncomeWareHouseId.IsValid) { this.Alert(valid_IncomeWareHouseId.Message[0]); return Unit.Default; }
+                    if (!valid_ProductCount.IsValid) { this.Alert(valid_ProductCount.Message[0]); return Unit.Default; }
 
-                return await SubmitAsync(postMData, Bill.Id, _wareHousesService.CreateOrUpdateAllocationbillAsync, (result) =>
-                {
-                    Bill = new AllocationBillModel();
+                    var postMData = new AllocationUpdateModel()
+                    {
+                        BillNumber = this.Bill.BillNumber,
+                        ShipmentWareHouseId = Bill.ShipmentWareHouseId,
+                        IncomeWareHouseId = Bill.IncomeWareHouseId,
+                        CreatedOnUtc = Bill.CreatedOnUtc,
+                        AllocationByMinUnit = false,
+                        Remark = Bill.Remark,
+                        //商品项目
+                        Items = Bill.Items?.Where(i => i.Quantity > 0).ToList(),
+                    };
+
+                    return await SubmitAsync(postMData, Bill.Id, _wareHousesService.CreateOrUpdateAllocationbillAsync, (result) =>
+                    {
+                        Bill = new AllocationBillModel();
+                    });
                 });
             },
             this.IsValid());
 
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
+            {
+                //整单备注
+                { MenuEnum.REMARK,(m,vm)=>{
 
-            //菜单选择
-            this.SetMenus(async (x) =>
-           {
-               switch (x)
-               {
-                   case Enums.MenuEnum.REMARK: //整单备注
-                       AllRemak((result) => { Bill.Remark = result; }, Bill.Remark);
-                       break;
-                   case Enums.MenuEnum.CLEAR: //清空单据
-                       {
-                           ClearBill<SaleReservationBillModel, SaleReservationItemModel>(null, DoClear);
-                       }
-                       break;
-                   case Enums.MenuEnum.AXBH:
-                       {
-                           if (Bill.IncomeWareHouseId == 0)
-                           {
-                               _dialogService.ShortAlert("入仓为必选");
-                               return;
-                           }
+                     AllRemak((result) =>
+                     {
+                             Bill.Remark = result;
+                     }, Bill.Remark);
 
-                           await this.NavigateAsync("SelectAllocationProductPage", ("WareHouseId", Bill.IncomeWareHouseId));
-                       }
-                       break;
-                   case Enums.MenuEnum.ATDB:
-                       {
-                           if (Bill.ShipmentWareHouseId == 0)
-                           {
+                } },
+                //清空单据
+                { MenuEnum.CLEAR,(m,vm)=>{
+
+                    ClearBill<AllocationBillModel, AllocationItemModel>(Bill, DoClear);
+                } },
+                //AXBH
+                { MenuEnum.AXBH,async (m,vm)=>{
+
+                    if (Bill.IncomeWareHouseId == 0)
+                    {
+                        _dialogService.ShortAlert("入仓为必选");
+                        return;
+                    }
+                    await this.NavigateAsync("SelectAllocationProductPage", ("WareHouseId", Bill.IncomeWareHouseId));
+                } },
+                 //ATDB
+                { MenuEnum.ATDB,async (m,vm)=>{
+
+                    if (Bill.ShipmentWareHouseId == 0)
+                    {
+                        _dialogService.ShortAlert("出仓为必选");
+                        return;
+                    }
+                    await this.NavigateAsync("SelectAllocationProductPage", ("WareHouseId", Bill.ShipmentWareHouseId));
+                } },
+                //AKCDB
+                { MenuEnum.AKCDB,async (m,vm)=>{
+                    if (Bill.ShipmentWareHouseId == 0)
+                    {
                                _dialogService.ShortAlert("出仓为必选");
                                return;
-                           }
+                    }
+                    await this.NavigateAsync("SelectAllocationProductPage", ("WareHouseId", Bill.ShipmentWareHouseId));
+                } },
+                 //打印
+                { MenuEnum.PRINT,async (m,vm)=>{
 
-                           await this.NavigateAsync("SelectAllocationProductPage", ("WareHouseId", Bill.ShipmentWareHouseId));
-                       }
-                       break;
-                   case Enums.MenuEnum.AKCDB:
-                       {
-                           if (Bill.ShipmentWareHouseId == 0)
-                           {
-                               _dialogService.ShortAlert("出仓为必选");
-                               return;
-                           }
+                     this.Bill.BillType = BillTypeEnum.AllocationBill;
+                     await SelectPrint(Bill);
+                } },
+                //历史单据
+                { MenuEnum.HISTORY,async (m,vm)=>{
+                        await SelectHistory();
+                } },
+                //审核
+                { MenuEnum.SHENGHE,async (m,vm)=>{
 
-                           await this.NavigateAsync("SelectAllocationProductPage", ("WareHouseId", Bill.ShipmentWareHouseId));
-                       }
-                       break;
-               }
-           }, 3, 4, 22, 23, 24);
+                    ResultData result = null;
+                         using (UserDialogs.Instance.Loading("审核中..."))
+                         {
+                             result = await _wareHousesService.AuditingAsync(Bill.Id);
+                         }
+                         if (result!=null&&result.Success)
+                         {
+                            //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.AuditedStatus = true;
+                            await ShowConfirm(true, "审核成功", true, goReceipt: false);
+                         }
+                         else
+                         {
+                             await ShowConfirm(false, $"审核失败！{result?.Message}", false, goReceipt: false);
+                         }
+
+                } }
+            });
 
 
-            this.StockSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddProductCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-            this.ExceptionsSubscribe();
+            this.AddProductCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SubmitDataCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
         }
 
         private void InitBill()
@@ -231,28 +267,28 @@ namespace Wesley.Client.ViewModels
                     parameters.TryGetValue<ProductModel>("DelProduct", out ProductModel p);
                     if (p != null)
                     {
-                        var bigProduct = Bill.Items.Where(b => b.Id == p.Id && b.BigUnitId == p.UnitId).FirstOrDefault();
-                        var smalProduct = Bill.Items.Where(b => b.Id == p.Id && b.SmallUnitId == p.UnitId).FirstOrDefault();
+                        var bigProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.BigUnitId == p.UnitId).FirstOrDefault();
+                        var smalProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.SmallUnitId == p.UnitId).FirstOrDefault();
                         if (bigProduct != null)
                         {
-                            Bill.Items.Remove(bigProduct);
+                            Bill.Items?.Remove(bigProduct);
                         }
 
                         if (smalProduct != null)
                         {
-                            Bill.Items.Remove(smalProduct);
+                            Bill.Items?.Remove(smalProduct);
                         }
                     }
                 }
 
                 if (parameters.ContainsKey("UpdateProduct"))//编辑商品更新
                 {
-                    //var p = parameters.GetValue<ProductModel>("UpdateProduct"); //(ProductModel)parameters["UpdateProduct"];
+
                     parameters.TryGetValue<ProductModel>("UpdateProduct", out ProductModel p);
                     if (p != null)
                     {
-                        var bigProduct = Bill.Items.Where(b => b.Id == p.Id && b.BigUnitId == p.UnitId).FirstOrDefault();
-                        var smalProduct = Bill.Items.Where(b => b.Id == p.Id && b.SmallUnitId == p.UnitId).FirstOrDefault();
+                        var bigProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.BigUnitId == p.UnitId).FirstOrDefault();
+                        var smalProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.SmallUnitId == p.UnitId).FirstOrDefault();
                         if (bigProduct != null)
                         {
                             bigProduct.UnitName = p.UnitName;
@@ -269,20 +305,44 @@ namespace Wesley.Client.ViewModels
                             smalProduct.BigUnitId = p.UnitId;
                             smalProduct.Subtotal = p.Quantity;
                         }
+
+                        if (Bill.Items?.Any() ?? false)
+                        {
+                            foreach (var ip in Bill.Items)
+                            {
+                                if (smalProduct != null && (ip.UnitId == smalProduct.SmallUnitId || ip.SmallUnitId == smalProduct.SmallUnitId))
+                                {
+                                    ip.UnitName = smalProduct.UnitName;
+                                    ip.Quantity = smalProduct.Quantity;
+                                    ip.Remark = smalProduct.Remark;
+                                    ip.SmallUnitId = smalProduct.SmallUnitId;
+                                    ip.Subtotal = smalProduct.Subtotal;
+                                }
+                                else if (bigProduct != null && (ip.UnitId == bigProduct.SmallUnitId || ip.BigUnitId == bigProduct.BigUnitId))
+                                {
+                                    ip.UnitName = bigProduct.UnitName;
+                                    ip.Quantity = bigProduct.Quantity;
+                                    ip.Remark = bigProduct.Remark;
+                                    ip.BigUnitId = bigProduct.UnitId;
+                                    ip.Subtotal = bigProduct.Subtotal;
+                                }
+                            }
+                        }
                     }
                 }
 
                 if (parameters.ContainsKey("ProductSeries"))//选择商品序列
                 {
                     parameters.TryGetValue("ProductSeries", out ObservableCollection<ProductModel> productSeries);
-                    this.ProductSeries = productSeries;
-                    if (productSeries != null)
+                    if (productSeries != null && productSeries.Count > 0)
                     {
+                        this.ProductSeries = productSeries;
                         foreach (var p in productSeries)
                         {
                             var bigItem = new AllocationItemModel()
                             {
                                 Id = p.Id,
+                                GUID = p.GUID,
                                 UnitId = p.BigPriceUnit.UnitId,
                                 ProductId = p.Id,
                                 ProductName = p.ProductName,
@@ -298,6 +358,7 @@ namespace Wesley.Client.ViewModels
                             var smallItem = new AllocationItemModel()
                             {
                                 Id = p.Id,
+                                GUID = p.GUID,
                                 UnitId = p.SmallPriceUnit.UnitId,
                                 ProductId = p.Id,
                                 ProductName = p.ProductName,
@@ -310,8 +371,8 @@ namespace Wesley.Client.ViewModels
                                 Subtotal = p.SmallPriceUnit.Quantity
                             };
 
-                            Bill.Items.Add(bigItem);
-                            Bill.Items.Add(smallItem);
+                            Bill.Items?.Add(bigItem);
+                            Bill.Items?.Add(smallItem);
                         }
 
                         ProductSeries = new ObservableCollection<ProductModel>(productSeries);
@@ -322,6 +383,14 @@ namespace Wesley.Client.ViewModels
             {
                 Crashes.TrackError(ex);
             }
+        }
+
+        public override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(3, 4, 22, 23, 24);
         }
 
     }

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using BMap = Com.Baidu.Mapapi.Map;
-using Android.Graphics;
 
 namespace Wesley.Client.Droid
 {
@@ -30,10 +29,8 @@ namespace Wesley.Client.Droid
             options.Draggable(item.Draggable);
             options.Flat(!item.Enabled3D);
 
-            //BitmapDescriptor bdA = BitmapDescriptorFactory.fromResource(R.drawable.icon_marka);
-
-
-            BitmapDescriptor bitmap = item.Image?.ToNative();
+            BitmapDescriptor bitmap = BitmapDescriptorFactory.FromResource(Resource.Drawable.water_drop);
+            //BitmapDescriptor bitmap = item.Image?.ToNative();
             if (null == bitmap)
             {
                 throw new Exception("必须提供一个图标");
@@ -49,29 +46,29 @@ namespace Wesley.Client.Droid
             Marker marker = (Marker)NativeMap.Map.AddOverlay(options);
             marker.Scale = 0.5f;
             marker.Title = item.Title;
-
             item.NativeObject = marker;
+
             return marker;
         }
 
-        private Bitmap ScaleBitmap(Bitmap origin, float ratio)
-        {
-            if (origin == null)
-            {
-                return null;
-            }
-            int width = origin.Width;
-            int height = origin.Height;
-            Matrix matrix = new Matrix();
-            matrix.PreScale(ratio, ratio);
-            Bitmap newBM = Bitmap.CreateBitmap(origin, 0, 0, width, height, matrix, false);
-            if (newBM.Equals(origin))
-            {
-                return newBM;
-            }
-            origin.Recycle();
-            return newBM;
-        }
+        //private Bitmap ScaleBitmap(Bitmap origin, float ratio)
+        //{
+        //    if (origin == null)
+        //    {
+        //        return null;
+        //    }
+        //    int width = origin.Width;
+        //    int height = origin.Height;
+        //    Matrix matrix = new Matrix();
+        //    matrix.PreScale(ratio, ratio);
+        //    Bitmap newBM = Bitmap.CreateBitmap(origin, 0, 0, width, height, matrix, false);
+        //    if (newBM.Equals(origin))
+        //    {
+        //        return newBM;
+        //    }
+        //    origin.Recycle();
+        //    return newBM;
+        //}
 
         protected override void UpdateNativeItem(Pin item)
         {
@@ -80,7 +77,6 @@ namespace Wesley.Client.Droid
             {
                 return;
             }
-
             item.SetValueSilent(Pin.CoordinateProperty, native.Position.ToUnity());
         }
 

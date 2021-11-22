@@ -1,8 +1,8 @@
 ﻿using Wesley.Client.Enums;
 using Wesley.Infrastructure.Helpers;
+using LiteDB;
 using Newtonsoft.Json;
 using ReactiveUI.Fody.Helpers;
-using SQLite;
 using System;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
@@ -13,10 +13,31 @@ namespace Wesley.Client.Models
     public class EntityBase : Base
     {
         [DataMember]
-        [PrimaryKey, AutoIncrement]
+        [BsonId]
         public int Id { get; set; }
         public int StoreId { get; set; }
+
+        [BsonIgnore]
+        public string GUID { get; set; } = Guid.NewGuid().ToString();
     }
+
+
+    [JsonObject(MemberSerialization.OptOut)]
+    public class CacheBillData : EntityBase
+    {
+        public int TypeId { get; set; }
+        public string DataValue { get; set; }
+    }
+
+
+    [JsonObject(MemberSerialization.OptOut)]
+    public class CachePaymentMethod : EntityBase
+    {
+        public int BillTypeId { get; set; }
+        public string BillGuid { get; set; }
+        public string DataValue { get; set; }
+    }
+
     public interface IBCollection<T>
     {
         /// <summary>
@@ -34,7 +55,9 @@ namespace Wesley.Client.Models
         /// 单据类型Id
         /// </summary>
         public int BillTypeId { get; set; }
+        [Reactive] public int PrintNum { get; set; }
         public string BillTypeName { get; set; }
+        public string Navigation { get; set; }
         public BillTypeEnum BillType
         {
             get { return (BillTypeEnum)BillTypeId; }
@@ -70,19 +93,22 @@ namespace Wesley.Client.Models
 
         [Reactive] public string Remark { get; set; }
         public int MakeUserId { get; set; }
-        public string MakeUserName { get; set; }
+        [Reactive] public string MakeUserName { get; set; }
         public DateTime CreatedOnUtc { get; set; } = DateTime.Now;
         public int? AuditedUserId { get; set; }
-        public bool AuditedStatus { get; set; }
+
+        [Reactive] public bool AuditedStatus { get; set; }
+        [Reactive] public bool IsSubmitBill { get; set; }
         public DateTime? AuditedDate { get; set; }
         public int? ReversedUserId { get; set; }
-        public bool ReversedStatus { get; set; }
+        [Reactive] public bool ReversedStatus { get; set; }
         public DateTime? ReversedDate { get; set; }
 
         [Reactive] public decimal SumAmount { get; set; }
         [Reactive] public decimal PreferentialAmount { get; set; }
         [Reactive] public decimal OweCash { get; set; }
 
+        [Reactive] public DateTime? ManufactureDete { get; set; }
 
         /// <summary>
         /// 生成单号
@@ -110,6 +136,7 @@ namespace Wesley.Client.Models
             return 0;
         }
 
+        [Reactive] public PaymentMethodBaseModel PaymentMethods { get; set; } = new PaymentMethodBaseModel();
 
     }
     public class AccountMaping : EntityBase
@@ -128,4 +155,5 @@ namespace Wesley.Client.Models
         public int Id { get; set; }
         public int Counter { get; set; }
     }
+
 }

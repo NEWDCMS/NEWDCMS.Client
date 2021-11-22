@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public class ViewStyleEffect : RoutingEffect
     {
-        public ViewStyleEffect() : base(nameof(ViewStyleEffect))
+        public ViewStyleEffect() : base($"Wesley.Client.{nameof(ViewStyleEffect)}")
         {
         }
     }
@@ -20,7 +20,7 @@ namespace Wesley.Effects
                 Color.Default,
                 propertyChanged: AttachEffect
             );
-        
+
         public static Color GetTouchFeedbackColor(BindableObject view)
         {
             return (Color)view.GetValue(TouchFeedbackColorProperty);
@@ -40,7 +40,7 @@ namespace Wesley.Effects
 
         public static double GetBorderWidth(BindableObject element)
         {
-            return (double) element.GetValue(BorderWidthProperty);
+            return (double)element.GetValue(BorderWidthProperty);
         }
 
         public static void SetBorderWidth(BindableObject element, double value)
@@ -57,7 +57,7 @@ namespace Wesley.Effects
 
         public static Color GetBorderColor(BindableObject element)
         {
-            return (Color) element.GetValue(BorderColorProperty);
+            return (Color)element.GetValue(BorderColorProperty);
         }
 
         public static void SetBorderColor(BindableObject element, Color value)
@@ -74,7 +74,7 @@ namespace Wesley.Effects
 
         public static double GetCornerRadius(BindableObject element)
         {
-            return (double) element.GetValue(CornerRadiusProperty);
+            return (double)element.GetValue(CornerRadiusProperty);
         }
 
         public static void SetCornerRadius(BindableObject element, double value)
@@ -91,7 +91,7 @@ namespace Wesley.Effects
 
         public static double GetShadowRadius(BindableObject element)
         {
-            return (double) element.GetValue(ShadowRadiusProperty);
+            return (double)element.GetValue(ShadowRadiusProperty);
         }
 
         public static void SetShadowRadius(BindableObject element, double value)
@@ -108,7 +108,7 @@ namespace Wesley.Effects
 
         public static Color GetShadowColor(BindableObject element)
         {
-            return (Color) element.GetValue(ShadowColorProperty);
+            return (Color)element.GetValue(ShadowColorProperty);
         }
 
         public static void SetShadowColor(BindableObject element, Color value)
@@ -125,7 +125,7 @@ namespace Wesley.Effects
 
         public static float GetShadowOpacity(BindableObject element)
         {
-            return (float) element.GetValue(ShadowOpacityProperty);
+            return (float)element.GetValue(ShadowOpacityProperty);
         }
 
         public static void SetShadowOpacity(BindableObject element, float value)
@@ -144,7 +144,7 @@ namespace Wesley.Effects
 
         public static double GetShadowOffsetX(BindableObject element)
         {
-            return (double) element.GetValue(ShadowOffsetXProperty);
+            return (double)element.GetValue(ShadowOffsetXProperty);
         }
 
         public static void SetShadowOffsetX(BindableObject element, double value)
@@ -163,7 +163,7 @@ namespace Wesley.Effects
 
         public static double GetShadowOffsetY(BindableObject element)
         {
-            return (double) element.GetValue(ShadowOffsetYProperty);
+            return (double)element.GetValue(ShadowOffsetYProperty);
         }
 
         public static void SetShadowOffsetY(BindableObject element, double value)
@@ -174,13 +174,13 @@ namespace Wesley.Effects
         public static bool IsStyleSet(BindableObject element)
         {
             return ViewEffect.GetBorderColor(element) != Color.Default
-                || ViewEffect.GetBorderWidth(element) != default(double)
-                || ViewEffect.GetCornerRadius(element) != default(double)
+                || ViewEffect.GetBorderWidth(element) != default
+                || ViewEffect.GetCornerRadius(element) != default
                 || ViewEffect.GetShadowColor(element) != Color.Default
-                || ViewEffect.GetShadowOffsetX(element) != default(double)
-                || ViewEffect.GetShadowOffsetY(element) != default(double)
-                || ViewEffect.GetShadowOpacity(element) != default(float)
-                || ViewEffect.GetShadowRadius(element) != default(double);
+                || ViewEffect.GetShadowOffsetX(element) != default
+                || ViewEffect.GetShadowOffsetY(element) != default
+                || ViewEffect.GetShadowOpacity(element) != default
+                || ViewEffect.GetShadowRadius(element) != default;
         }
 
         public static bool IsTapFeedbackColorSet(BindableObject element)

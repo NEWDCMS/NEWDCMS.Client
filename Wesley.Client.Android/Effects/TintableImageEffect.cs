@@ -1,17 +1,16 @@
 ﻿using Android.Widget;
-using Wesley.Effects.Droid;
-using Wesley.Effects;
+using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
 using System;
 using System.Linq;
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 
 
 [assembly: ExportEffect(typeof(AndroidTintableImageEffect), nameof(TintableImageEffect))]
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
-    [Preserve]
+    [Android.Runtime.Preserve(AllMembers = true)]
     public class AndroidTintableImageEffect : PlatformEffect
     {
         protected override void OnAttached()

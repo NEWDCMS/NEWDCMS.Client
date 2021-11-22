@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<t:SlideMenuView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-        xmlns:t="clr-namespace:Wesley.SlideOverKit;assembly=Wesley.SlideOverKit"
-        x:Class="Wesley.Client.Pages.RightSideMasterPage" x:Name="SideMaster">
+<t:SlideMenuView xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:t="clr-namespace:DCMS.SlideOverKit;assembly=DCMS.SlideOverKit"
+                 x:Class="DCMS.Client.Pages.RightSideMasterPage" x:Name="SideMaster">
 
     <CollectionView ItemsSource="{Binding Source={x:Reference SideMaster},Path=MenuItems,Mode=TwoWay}"
                     x:Name="RepeaterOptions"
@@ -23,21 +23,14 @@
                     </Grid.RowDefinitions>
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SelectedCommand}"
-                                              CommandParameter="{Binding MenuEnum}" />
+                                              CommandParameter="{Binding MenuEnum}"
+                                              NumberOfTapsRequired="1" />
                     </Grid.GestureRecognizers>
                     <Label Grid.Row="0"
                            Grid.Column="0"
-                           x:Name="iconImage"
-                           Text="{Binding Icon,Converter={StaticResource IconConverter}}"
-                           FontFamily="FAS"
-                           HorizontalOptions="Start"
-                           VerticalOptions="Center"
-                           Margin="10,0,8,0"
-                           TextColor="{StaticResource PrimaryDarkColor}"
-                           FontSize="{StaticResource FT14}" />
-                    <Label Grid.Row="0"
-                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
                            x:Name="Text"
+                           FontFamily="FAS"
                            Text="{Binding Text}"
                            FontSize="{StaticResource FT14}"
                            VerticalOptions="Center"

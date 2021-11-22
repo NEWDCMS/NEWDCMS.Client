@@ -31,8 +31,8 @@
                        FontAttributes="Bold"
                        FontSize="16"
                        Margin="{StaticResource ML10}" />
-                <ffimageloading:CachedImage LoadingPlaceholder="nophoto.png"
-                                            ErrorPlaceholder="nophoto.png"
+                <ffimageloading:CachedImage LoadingPlaceholder="PhotoIcon.png"
+                                            ErrorPlaceholder="PhotoIcon.png"
                                             Aspect="AspectFill"
                                             WidthRequest="50"
                                             Source="{Binding PostMData.DoorwayPhoto}">
@@ -41,7 +41,8 @@
                                                                 BorderHexColor="#dddddd" />
                     </ffimageloading:CachedImage.Transformations>
                     <ffimageloading:CachedImage.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding UploadFaceCommand}" />
+                        <TapGestureRecognizer Command="{Binding UploadFaceCommand}"
+                                              NumberOfTapsRequired="1" />
                     </ffimageloading:CachedImage.GestureRecognizers>
                 </ffimageloading:CachedImage>
             </StackLayout>
@@ -551,10 +552,10 @@
                     </custom:CustomEntry>
                 </Grid>
             </yummy:PancakeView>
-            <Button Margin="10,0,10,10"
+            <Button Margin="0"
                     Text="check-circle 保存"
                     FontFamily="FAS"
-                    CornerRadius="100"
+                    CornerRadius="0"
                     HeightRequest="45"
                     TextColor="White"
                     BackgroundColor="#53a245"

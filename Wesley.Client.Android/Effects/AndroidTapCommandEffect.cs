@@ -1,16 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
-using Android.Widget;
+﻿using Android.Widget;
+using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
 using Wesley.Infrastructure.Tasks;
-using Wesley.Effects.Droid;
-using Wesley.Effects;
+using System;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 using View = Android.Views.View;
 
 [assembly: ExportEffect(typeof(AndroidTapCommandEffect), nameof(TapCommandEffect))]
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
     [Preserve]
     public class AndroidTapCommandEffect : PlatformEffect
@@ -32,7 +32,8 @@ namespace Wesley.Effects.Droid
         protected override void OnDetached()
         {
             var renderer = Container as IVisualElementRenderer;
-            if (renderer?.Element != null) // Check disposed
+            // Check disposed
+            if (renderer?.Element != null)
             {
                 _clickOverlay.Click -= ViewOnClick;
                 _clickOverlay.LongClick -= ViewOnLongClick;
@@ -47,7 +48,7 @@ namespace Wesley.Effects.Droid
                 async () =>
                 {
                     await Task.Delay(50);
-                    TapCommandEffect.GetTap(Element)?.Execute(TapCommandEffect.GetTapParameter(Element)); 
+                    TapCommandEffect.GetTap(Element)?.Execute(TapCommandEffect.GetTapParameter(Element));
                 });
         }
 

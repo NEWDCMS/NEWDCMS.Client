@@ -5,13 +5,13 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Wesley.Client.Services
+namespace DCMS.Client.Services
 {
     public class AkavacheCacheHandler : ICacheHandler
     {
         public AkavacheCacheHandler()
         {
-            Registrations.Start($"Wesley.Client.{nameof(AkavacheCacheHandler)}");
+            Registrations.Start($"DCMS.Client.{nameof(AkavacheCacheHandler)}");
         }
 
         public Task Set(string key, object value, TimeSpan? lifeSpan = null,

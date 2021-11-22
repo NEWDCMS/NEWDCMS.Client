@@ -90,6 +90,7 @@ namespace Wesley.Client.Models.Finances
     /// </summary>
     public class CashReceiptUpdateModel : BaseBalance
     {
+        public string BillNumber { get; set; }
         public int CustomerId { get; set; }
         public int? Payeer { get; set; }
         public string Remark { get; set; }

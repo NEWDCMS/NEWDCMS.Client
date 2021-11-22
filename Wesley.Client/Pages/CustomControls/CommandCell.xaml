@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Wesley.Client.CommandCell">
+    <ContentView.Content>
+        <SwipeView>
+            <SwipeView.RightItems>
+                <SwipeItems Mode="Reveal">
+                    <!--Text="取消"-->
+                    <SwipeItem Command="{Binding SecondaryCommand}"
+                               BackgroundColor="#3B5998">
+                        <SwipeItem.IconImageSource>
+                            <FontImageSource Glyph="&#xf00d;"
+                                             FontFamily="FAS"
+                                             Color="White"
+                                             Size="10" />
+                        </SwipeItem.IconImageSource>
+                    </SwipeItem>
+                    <!--Text="运行"-->
+                    <SwipeItem BackgroundColor="#53a245"
+                               Command="{Binding PrimaryCommand}">
+                        <SwipeItem.IconImageSource>
+                            <FontImageSource Glyph="&#xf011;"
+                                             FontFamily="FAS"
+                                             Color="White" 
+                                             Size="10"/>
+                        </SwipeItem.IconImageSource>
+                    </SwipeItem>
+                </SwipeItems>
+            </SwipeView.RightItems>
+            <StackLayout >
+                <Label Text="{Binding Text}"
+                       FontSize="Body"
+                       LineBreakMode="WordWrap" />
+
+                <Label Text="{Binding Detail}"
+                       FontSize="Caption"
+                       LineBreakMode="TailTruncation" />
+
+                <BoxView HorizontalOptions="FillAndExpand"
+                         VerticalOptions="Center"
+                         BackgroundColor="Gainsboro"
+                         HeightRequest="1" />
+            </StackLayout>
+        </SwipeView>
+    </ContentView.Content>
+</ContentView>

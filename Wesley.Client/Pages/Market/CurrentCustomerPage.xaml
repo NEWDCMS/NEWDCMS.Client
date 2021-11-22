@@ -16,314 +16,346 @@
                        BackgroundColor="White">
     <RelativeLayout>
         <!--列表视图-->
-        <StackLayout Orientation="Vertical"
-                     HorizontalOptions="FillAndExpand"
-                     VerticalOptions="Start"
-                     Grid.Row="0"
-                     Padding="0,0,0,0"
-                     Spacing="0"
-                     Margin="0,0,0,0"
-                     IsVisible="{Binding ListVewEnable}"
-                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+        <Grid Margin="0"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="Start"
+              RowDefinitions="50,40,.7,*"
+              ColumnDefinitions="*,*"
+              IsVisible="{Binding ListVewEnable}"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
                                                                        Property=Height,
                                                                        Factor=1,
                                                                        Constant=0}"
-                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
                                                                       Property=Width,
                                                                       Factor=1,
                                                                       Constant=0}">
-            <!--header-->
-            <Grid Margin="0"
-                  Style="{StaticResource GGrid}"
-                  HorizontalOptions="FillAndExpand"
-                  VerticalOptions="Start">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="40" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <!--搜索-->
-                <yummy:PancakeView CornerRadius="5"
-                                   Grid.Row="0"
-                                   Grid.Column="0"
-                                   Grid.ColumnSpan="2"
-                                   Margin="10,10,10,0"
-                                   BackgroundColor="#eeeeee">
-                    <custom:CrossSearchBar Margin="0,0,0,0"
-                                           x:Name="SearchBar"
-                                           Placeholder="客户首拼/终端编号/电话号码"
-                                           FontSize="{StaticResource FT14}"
-                                           Text="{Binding Filter.SerchKey,Mode=TwoWay}"
-                                           HorizontalOptions="FillAndExpand"
-                                           VerticalOptions="CenterAndExpand"
-                                           CancelButtonColor="#53a245" />
-                </yummy:PancakeView>
-
-                <StackLayout Orientation="Horizontal"
-                             Padding="0,0,0,0"
-                             Margin="0"
-                             Grid.Row="1"
-                             Grid.Column="0">
-                    <custom:CustomEntry x:Name="SelectArea"
-                                        Margin="10,0,0,0"
-                                        HorizontalOptions="Start"
-                                        VerticalOptions="CenterAndExpand"
-                                        Style="{StaticResource DefaultEntry}"
-                                        FontSize="{StaticResource FT14}"
-                                        Text="{Binding Filter.DistrictName,Mode=TwoWay}"
-                                        Placeholder="请选择片区">
-                        <custom:CustomEntry.Behaviors>
-                            <b:EventToCommandBehavior EventName="Focused"
-                                                      Command="{Binding Path=BindingContext.DistrictSelected,Source={x:Reference CurrentContentView}}" />
-                        </custom:CustomEntry.Behaviors>
-                    </custom:CustomEntry>
-                    <Label Style="{StaticResource DownArrow}"
-                           Margin="0,0,10,0"
-                           HorizontalOptions="StartAndExpand">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Path=DistrictSelected}"></TapGestureRecognizer>
-                        </Label.GestureRecognizers>
-                    </Label>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal"
-                             Padding="0,0,0,0"
-                             Margin="0"
-                             Grid.Row="1"
-                             Grid.Column="1">
-                    <Label Text="距离优先"
-                           TextColor="{StaticResource DividerColor}"
-                           FontSize="14"
-                           HorizontalOptions="EndAndExpand">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding DistanceOrderCommand}" />
-                        </Label.GestureRecognizers>
-                    </Label>
-                    <Label Text="&#xf161;"
-                           TextColor="{StaticResource PrimaryDarkColor}"
-                           HorizontalOptions="End"
-                           FontFamily="FAS"
-                           Margin="0,0,10,0">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label"
-                                         Binding="{Binding Filter.DistanceOrderBy}"
-                                         Value="1">
-                                <Setter Property="Text"
-                                        Value="&#xf161;" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label"
-                                         Binding="{Binding Filter.DistanceOrderBy}"
-                                         Value="2">
-                                <Setter Property="Text"
-                                        Value="&#xf160;" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding DistanceOrderCommand}" />
-                        </Label.GestureRecognizers>
-                    </Label>
-                </StackLayout>
-            </Grid>
-            <BoxView VerticalOptions="Start"
+            <!--搜索-->
+            <yummy:PancakeView CornerRadius="5"
+                               Grid.Row="0"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2"
+                               Margin="10,10,10,0"
+                               BackgroundColor="#eeeeee">
+                <custom:CrossSearchBar Margin="0,0,0,0"
+                                       x:Name="SearchBar"
+                                       Placeholder="客户首拼/终端编号/电话号码"
+                                       FontSize="{StaticResource FT14}"
+                                       Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                                       HorizontalOptions="FillAndExpand"
+                                       VerticalOptions="CenterAndExpand"
+                                       CancelButtonColor="#53a245" />
+            </yummy:PancakeView>
+            <!--过滤-->
+            <StackLayout Orientation="Horizontal"
+                         Padding="0,0,0,0"
+                         Margin="0"
+                         Grid.Row="1"
+                         Grid.Column="0">
+                <custom:CustomEntry x:Name="SelectArea"
+                                    Margin="10,0,0,0"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    FontSize="{StaticResource FT14}"
+                                    Text="{Binding Filter.DistrictName,Mode=TwoWay}"
+                                    Placeholder="请选择片区">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.DistrictSelected,Source={x:Reference CurrentContentView}}" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource DownArrow}"
+                       Margin="0,0,10,0"
+                       HorizontalOptions="StartAndExpand">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=DistrictSelected}"
+                                              NumberOfTapsRequired="1" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal"
+                         Padding="0,0,0,0"
+                         Margin="0"
+                         Grid.Row="1"
+                         Grid.Column="1">
+                <Label Text="距离优先"
+                       TextColor="{StaticResource DividerColor}"
+                       FontSize="14"
+                       HorizontalOptions="EndAndExpand">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding DistanceOrderCommand}"
+                                              NumberOfTapsRequired="1" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Text="&#xf161;"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       HorizontalOptions="End"
+                       FontFamily="FAS"
+                       Margin="0,0,10,0">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Filter.DistanceOrderBy}"
+                                     Value="1">
+                            <Setter Property="Text"
+                                    Value="&#xf161;" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Filter.DistanceOrderBy}"
+                                     Value="2">
+                            <Setter Property="Text"
+                                    Value="&#xf160;" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding DistanceOrderCommand}"
+                                              NumberOfTapsRequired="1" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <BoxView Grid.Row="2"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     VerticalOptions="Start"
                      Style="{StaticResource SeparatorGrid}"
                      Margin="0" />
-            <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+            <!--列表-->
+            <RefreshView Grid.Row="3"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="2"
+                         IsVisible="{Binding DataVewEnable}"
+                         IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                          Command="{Binding RefreshCommand}"
                          RefreshColor="{StaticResource PrimaryDarkColor}">
-                <ScrollView>
-                    <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
-                                           ViewModelLoader="{Binding TerminalsLoader}">
-                        <CollectionView ItemsSource="{Binding Terminals}"
-                                        Margin="0,0,0,0"
-                                        x:Name="terminals"
-                                        ItemSizingStrategy="MeasureAllItems"
-                                        SelectedItem="{Binding Selecter, Mode=TwoWay}"
-                                        RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
-                                        RemainingItemsThreshold="{Binding ItemTreshold}"
-                                        SelectionMode="Single">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Style="{StaticResource GGrid}"
-                                          BackgroundColor="White">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="40" />
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height=".7" />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <AbsoluteLayout   Grid.Row="0"
-                                                          Grid.Column="0"
-                                                          Grid.RowSpan="3" Padding="0,20,0,0">
-                                            <BoxView BackgroundColor="#4a89dc"
-                                                     HeightRequest="25"
-                                                     WidthRequest="30"
-                                                     CornerRadius="0,5,0,5">
-                                                <BoxView.Triggers>
-                                                    <DataTrigger TargetType="BoxView"
-                                                                 Binding="{Binding RankName}"
-                                                                 Value="A级">
-                                                        <Setter Property="BackgroundColor"
-                                                                Value="#4a89dc" />
-                                                    </DataTrigger>
-                                                    <DataTrigger TargetType="BoxView"
-                                                                 Binding="{Binding RankName}"
-                                                                 Value="B级">
-                                                        <Setter Property="BackgroundColor"
-                                                                Value="#626262" />
-                                                    </DataTrigger>
-                                                    <DataTrigger TargetType="BoxView"
-                                                                 Binding="{Binding RankName}"
-                                                                 Value="C级">
-                                                        <Setter Property="BackgroundColor"
-                                                                Value="#f6bb42" />
-                                                    </DataTrigger>
-                                                    <DataTrigger TargetType="BoxView"
-                                                                 Binding="{Binding RankName}"
-                                                                 Value="D级">
-                                                        <Setter Property="BackgroundColor"
-                                                                Value="#8942dc " />
-                                                    </DataTrigger>
-                                                </BoxView.Triggers>
-                                            </BoxView>
-                                            <Label Text="{Binding RankName}"
-                                                   TextColor="White"
-                                                   FontSize="11"
-                                                   Margin="5"></Label>
-                                        </AbsoluteLayout>
-                                        <StackLayout Grid.Row="0"
-                                                     Grid.Column="1"
-                                                     Grid.ColumnSpan="2"
-                                                     Orientation="Horizontal">
-                                            <yummy:PancakeView CornerRadius="50"
-                                                               WidthRequest="20"
-                                                               Margin="0,20,0,0"
-                                                               BackgroundColor="#4a89dc">
-                                                <Label TextColor="White"
-                                                       FontSize="10"
-                                                       Margin="0"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center">
-                                                    <Label.Triggers>
-                                                        <DataTrigger Binding="{Binding IsNewAdd}"
-                                                                     TargetType="Label"
-                                                                     Value="True">
-                                                            <Setter Property="Text"
-                                                                    Value="新" />
-                                                        </DataTrigger>
-                                                    </Label.Triggers>
-                                                </Label>
-                                                <yummy:PancakeView.Triggers>
-                                                    <DataTrigger Binding="{Binding IsNewAdd}"
-                                                                 TargetType="yummy:PancakeView"
-                                                                 Value="True">
-                                                        <Setter Property="BackgroundColor"
-                                                                Value="#4a89dc" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsNewAdd}"
-                                                                 TargetType="yummy:PancakeView"
-                                                                 Value="False">
-                                                        <Setter Property="IsVisible"
-                                                                Value="False" />
-                                                    </DataTrigger>
-                                                </yummy:PancakeView.Triggers>
-                                            </yummy:PancakeView>
-                                            <Label Margin="0,5,0,0"
-                                                   Text="{Binding Name}"
-                                                   FontSize="{StaticResource FT16}"
-                                                   FontAttributes="Bold"
-                                                   HorizontalOptions="StartAndExpand"
-                                                   TextColor="{StaticResource PrimaryTextColor}"
-                                                   VerticalOptions="End" />
-                                            <yummy:PancakeView CornerRadius="50"
-                                                               IsVisible="{Binding TodayIsVisit}"
-                                                               WidthRequest="40"
-                                                               Margin="0,10,10,10"
-                                                               HorizontalOptions="End"
-                                                               BackgroundColor="#eeeeee"
-                                                               Padding="5,0,5,0">
-                                                <Label Text="已拜访"
-                                                       FontSize="10"
-                                                       TextColor="#cccccc"
-                                                       HorizontalOptions="Center" />
-                                            </yummy:PancakeView>
-                                        </StackLayout>
-                                        <Label Grid.Row="1"
-                                               Grid.Column="1"
-                                               FontSize="{StaticResource FT14}"
-                                               Text="{Binding BossCall,StringFormat='电话：{0}'}"
-                                               HorizontalOptions="Start"
-                                               VerticalOptions="CenterAndExpand"
-                                               TextColor="{StaticResource PrimaryTextColor}"
-                                               Margin="0,0,10,0" />
-                                        <StackLayout Grid.Row="1"
-                                                     Grid.Column="2"
-                                                     Orientation="Vertical"
-                                                     HorizontalOptions="End"
-                                                     VerticalOptions="Center"
-                                                     Margin="0,0,0,0">
-                                            <!--导航-->
-                                            <Label Text="{StaticResource FontAwesomeMap}"
-                                                   FontFamily="FAS"
-                                                   VerticalOptions="End"
-                                                   HorizontalOptions="Center"
-                                                   TextColor="{StaticResource PrimaryDarkColor}"
-                                                   FontSize="20"
-                                                   Margin="0,0,30,0" />
-                                            <StackLayout.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding Path=BindingContext.OpenNavigationToCommand,Source={x:Reference CurrentContentView}}"
-                                                                      CommandParameter="{Binding .}" />
-                                            </StackLayout.GestureRecognizers>
-                                        </StackLayout>
-                                        <Label Grid.Row="2"
-                                               Grid.Column="1"
-                                               Grid.ColumnSpan="2"
-                                               WidthRequest="220"
-                                               LineBreakMode="TailTruncation"
-                                               Text="{Binding Address,StringFormat='地址：{0}'}"
-                                               HorizontalOptions="Start"
-                                               FontSize="{StaticResource FT14}"
-                                               TextColor="{StaticResource DividerColor}"
-                                               VerticalOptions="Start"
-                                               Margin="0,0,0,5" />
-                                        <Label Grid.Row="2"
-                                               Grid.Column="1"
-                                               Grid.ColumnSpan="2"
-                                               Text="{Binding Distance, Converter={StaticResource MetersToMilesConverter}, StringFormat='{0:N2}公里'}"
-                                               HorizontalOptions="End"
-                                               FontSize="{StaticResource FT14}"
-                                               TextColor="{StaticResource DividerColor}"
-                                               VerticalOptions="Start"
-                                               Margin="0,0,10,0" />
-                                        <BoxView Grid.Row="3"
-                                                 Grid.Column="1"
-                                                 Grid.ColumnSpan="2"
-                                                 BackgroundColor="#ebecef"
-                                                 HeightRequest=".7"
-                                                 Margin="0" />
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                            <CollectionView.EmptyView>
-                                <custom:NullView />
-                            </CollectionView.EmptyView>
-                        </CollectionView>
-                    </custom:TaskLoaderView>
-                </ScrollView>
+                <CollectionView Grid.Row="3"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                IsVisible="{Binding DataVewEnable}"
+                                ItemsSource="{Binding Terminals}"
+                                Margin="0,0,0,0"
+                                x:Name="terminals"
+                                ItemSizingStrategy="MeasureAllItems"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                                RemainingItemsThreshold="{Binding ItemTreshold}"
+                                SelectionMode="Single"
+                                VerticalScrollBarVisibility="Always">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}"
+                                  BackgroundColor="White">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <AbsoluteLayout   Grid.Row="0"
+                                                  Grid.Column="0"
+                                                  Grid.RowSpan="3"
+                                                  Padding="0,20,0,0">
+                                    <BoxView BackgroundColor="#4a89dc"
+                                             HeightRequest="25"
+                                             WidthRequest="30"
+                                             CornerRadius="0,5,0,5">
+                                        <BoxView.Triggers>
+                                            <DataTrigger TargetType="BoxView"
+                                                         Binding="{Binding RankName}"
+                                                         Value="A级">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="#4a89dc" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="BoxView"
+                                                         Binding="{Binding RankName}"
+                                                         Value="B级">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="#626262" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="BoxView"
+                                                         Binding="{Binding RankName}"
+                                                         Value="C级">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="#f6bb42" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="BoxView"
+                                                         Binding="{Binding RankName}"
+                                                         Value="D级">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="#8942dc " />
+                                            </DataTrigger>
+                                        </BoxView.Triggers>
+                                    </BoxView>
+                                    <Label Text="{Binding RankName}"
+                                           TextColor="White"
+                                           FontSize="11"
+                                           Margin="5"></Label>
+                                </AbsoluteLayout>
+                                <StackLayout Grid.Row="0"
+                                             Grid.Column="1"
+                                             Grid.ColumnSpan="2"
+                                             Orientation="Horizontal">
+                                    <yummy:PancakeView CornerRadius="50"
+                                                       WidthRequest="20"
+                                                       Margin="0,20,0,0"
+                                                       BackgroundColor="#4a89dc">
+                                        <Label TextColor="White"
+                                               FontSize="10"
+                                               Margin="0"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger Binding="{Binding IsNewAdd}"
+                                                             TargetType="Label"
+                                                             Value="True">
+                                                    <Setter Property="Text"
+                                                            Value="新" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <yummy:PancakeView.Triggers>
+                                            <DataTrigger Binding="{Binding IsNewAdd}"
+                                                         TargetType="yummy:PancakeView"
+                                                         Value="True">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="#4a89dc" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsNewAdd}"
+                                                         TargetType="yummy:PancakeView"
+                                                         Value="False">
+                                                <Setter Property="IsVisible"
+                                                        Value="False" />
+                                            </DataTrigger>
+                                        </yummy:PancakeView.Triggers>
+                                    </yummy:PancakeView>
+                                    <Label Margin="0,5,0,0"
+                                           Text="{Binding Name}"
+                                           FontSize="{StaticResource FT16}"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="StartAndExpand"
+                                           TextColor="{StaticResource PrimaryTextColor}"
+                                           VerticalOptions="End" />
+                                    <yummy:PancakeView CornerRadius="50"
+                                                       IsVisible="{Binding TodayIsVisit}"
+                                                       WidthRequest="40"
+                                                       Margin="0,10,10,10"
+                                                       HorizontalOptions="End"
+                                                       BackgroundColor="#eeeeee"
+                                                       Padding="5,0,5,0">
+                                        <Label Text="已拜访"
+                                               FontSize="10"
+                                               TextColor="#cccccc"
+                                               HorizontalOptions="Center" />
+                                    </yummy:PancakeView>
+                                </StackLayout>
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       FontSize="{StaticResource FT14}"
+                                       HorizontalOptions="Start"
+                                       VerticalOptions="CenterAndExpand"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       Margin="0,0,10,0">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="电话：" />
+                                            <Span Text="{Binding BossCall}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <StackLayout Grid.Row="1"
+                                             Grid.Column="2"
+                                             Orientation="Vertical"
+                                             HorizontalOptions="End"
+                                             VerticalOptions="Center"
+                                             Margin="0,0,0,0">
+                                    <!--导航-->
+                                    <Label Text="{StaticResource FontAwesomeMap}"
+                                           FontFamily="FAS"
+                                           VerticalOptions="End"
+                                           HorizontalOptions="Center"
+                                           TextColor="{StaticResource PrimaryDarkColor}"
+                                           FontSize="20"
+                                           Margin="0,0,30,0" />
+                                    <StackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Path=BindingContext.OpenNavigationToCommand,Source={x:Reference CurrentContentView}}"
+                                                              CommandParameter="{Binding .}"
+                                                              NumberOfTapsRequired="1" />
+                                    </StackLayout.GestureRecognizers>
+                                </StackLayout>
+
+                                <Label Grid.Row="2"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       WidthRequest="220"
+                                       LineBreakMode="TailTruncation"
+                                       Text="{Binding Address,StringFormat='地址：{0}'}"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource DividerColor}"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,0,5" />
+                                <Label Grid.Row="2"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Distance, Converter={StaticResource MetersToMilesConverter}, StringFormat='{0:N2}公里'}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource DividerColor}"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,10,0" />
+
+                                <Label Grid.Row="3"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Margin="0,0,0,8"
+                                       FontSize="14"
+                                       TextColor="{StaticResource DividerColor}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="最近：" />
+                                            <Span Text="{Binding LastSigninDateTimeName}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+
+                                <BoxView Grid.Row="4"
+                                         Grid.Column="1"
+                                         Grid.ColumnSpan="2"
+                                         BackgroundColor="#ebecef"
+                                         HeightRequest=".7"
+                                         Margin="0" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <custom:NullView />
+                    </CollectionView.EmptyView>
+                </CollectionView>
             </RefreshView>
-        </StackLayout>
+            <ActivityIndicator Grid.Row="3"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2"
+                               IsRunning="True"
+                               IsVisible="{Binding NullViewEnable}"
+                               HorizontalOptions="CenterAndExpand"
+                               VerticalOptions="Start"
+                               Margin="0,200,0,0" />
+        </Grid>
+
         <!--地图视图-->
         <maps:Map x:Name="map"
-                  ShowZoomControl="False"
                   IsVisible="{Binding MapVewEnable}"
                   RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
                   RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}" />
+        <!--地图工具栏-->
         <StackLayout IsVisible="{Binding MapVewEnable}"
                      RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Y,Factor=1,Constant=50}"
                      RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=.15, Constant=0}">
@@ -420,7 +452,8 @@
                 </yummy:PancakeView.Shadow>
             </yummy:PancakeView>
         </StackLayout>
-        <!--footer-->
+        
+        <!--视图切换-->
         <Grid Style="{StaticResource GGrid}"
               RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
                                                                        Property=Height,
@@ -431,9 +464,13 @@
                                                                       Factor=1,
                                                                       Constant=0}"
               HorizontalOptions="FillAndExpand"
-              VerticalOptions="EndAndExpand">
+              VerticalOptions="EndAndExpand"
+              BackgroundColor="#eee"
+              HeightRequest="40"
+              RowSpacing="0"
+              Padding="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="60" />
+                <RowDefinition Height="40" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -444,11 +481,12 @@
                     Grid.Column="0"
                     Text="map-marker 位置视图"
                     Style="{StaticResource CustomIconButtonStyle}"
-                    CornerRadius="50"
+                    TextColor="#53a245"
+                    BackgroundColor="#eee"
+                    CornerRadius="0"
                     FontFamily="FAS"
                     x:Name="OtherCustomer"
-                    Clicked="OtherCustomer_Clicked"
-                    Margin="10,10,5,10">
+                    Clicked="OtherCustomer_Clicked">
                 <Button.Triggers>
                     <DataTrigger TargetType="Button"
                                  Binding="{Binding MapVewEnable}"
@@ -467,9 +505,8 @@
             <!--新建客户-->
             <Button Grid.Row="0"
                     Grid.Column="1"
-                    Margin="5,10,10,10"
                     Text="plus 新建客户"
-                    CornerRadius="50"
+                    CornerRadius="0"
                     Style="{StaticResource CustomIconButtonStyle}"
                     FontFamily="FAS"
                     Command="{Binding Path=AddCustomerCommand}" />

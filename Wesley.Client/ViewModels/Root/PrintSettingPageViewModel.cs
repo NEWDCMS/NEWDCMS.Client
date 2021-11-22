@@ -6,12 +6,14 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Shiny;
+
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace Wesley.Client.ViewModels
@@ -24,18 +26,25 @@ namespace Wesley.Client.ViewModels
         [Reactive] public bool EnableBluetooth { get; set; }
         [Reactive] public bool EnableSplitPrint { get; set; }
 
+        [Reactive] public int PrintStyleSelected { get; set; } = Settings.PrintStyleSelected;
+
         [Reactive] public ObservableRangeCollection<Printer> Drives { get; set; } = new ObservableRangeCollection<Printer>();
-        [Reactive] public Printer Selecter { get; set; }
         [Reactive] public AbstractBill PrintData { get; set; }
+        public int RepeatPrintNum { get; set; } = 1;
+        public ReactiveCommand<Printer, Unit> AdaptationCmd { get; }
 
         public PrintSettingPageViewModel(INavigationService navigationService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _blueToothService = DependencyService.Get<IBlueToothService>();
 
             Title = "蓝牙打印机";
             this.PrintData = null;
             this.EnableBluetooth = Settings.EnableBluetooth;
+
+            this.WhenAnyValue(x => x.PrintStyleSelected).Subscribe(x => { Settings.PrintStyleSelected = x; })
+              .DisposeWith(this.DeactivateWith);
 
             //启用蓝牙
             this.WhenAnyValue(x => x.EnableBluetooth)
@@ -50,64 +59,106 @@ namespace Wesley.Client.ViewModels
                          var micAccessGranted = await _blueToothService.GetPermissionsAsync();
                          if (!micAccessGranted)
                          {
+                             this.EnableBluetooth = false;
                              this.Alert("请打先启用手机蓝牙功能");
                              return;
                          }
 
-                         using (UserDialogs.Instance.Loading("搜索中..."))
+                         Device.BeginInvokeOnMainThread(async () =>
                          {
-                             var results = _blueToothService.PairedDevices();
-                             if (results != null && results.Any())
+                             using (var dig = UserDialogs.Instance.Loading("扫描中..."))
                              {
-                                 this.DrivesHeight = results.Count() * 40.7;
-                                 this.Drives = results;
+                                 long timeOutTime = 8000;
+                                 long curRunTime = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                                 long tempTime = curRunTime;
+                                 while (this.Drives.Count == 0 && (curRunTime - tempTime) <= timeOutTime)
+                                 {
+                                     curRunTime = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                                     var results = _blueToothService.PairedDevices();
+                                     if (results != null && results.Any())
+                                     {
+                                         this.DrivesHeight = results.Count() * 40.7;
+                                         this.Drives = new ObservableRangeCollection<Printer>(results);
+                                     }
+                                     await Task.Delay(1000);
+                                 }
                              }
-                         }
+
+                             if (this.Drives.Count == 0)
+                             {
+                                 _dialogService.LongAlert("没有扫描蓝牙到设备！");
+                                 this.EnableBluetooth = false;
+                                 Settings.EnableBluetooth = false;
+                             }
+                         });
                      }
                      else
                      {
                          Settings.EnableBluetooth = false;
+                         this.EnableBluetooth = false;
                          this.Drives.Clear();
                      }
                  }
                  catch (NullReferenceException)
                  {
+                     this.EnableBluetooth = false;
+                     Settings.EnableBluetooth = false;
                      _dialogService.LongAlert("没有找到蓝牙设备！");
                  }
              })
               .DisposeWith(this.DeactivateWith);
 
 
-            //选择设备
-            this.WhenAnyValue(x => x.Selecter).Throttle(TimeSpan.FromMilliseconds(500))
-            .Skip(1)
-            .Where(x => x != null)
-            .SubOnMainThread(item =>
+            //适配
+            this.AdaptationCmd = ReactiveCommand.CreateFromTask<Printer>(async (item) =>
             {
-                if (item != null)
+                if (!item.Status && Drives != null && Drives.Where(s => s.Status).Count() > 0)
                 {
-                    item.Selected = !item.Selected;
-                    Settings.SelectedDeviceName = item.Name;
-                    _dialogService.ShortAlert(item.Name);
+                    _dialogService.LongAlert("请先断开当前适配");
+                    return;
                 }
-                Selecter = null;
-            }, ex => _dialogService.ShortAlert(ex.ToString()));
+
+                using (var dig = UserDialogs.Instance.Loading("请稍等..."))
+                {
+                    try
+                    {
+                        await Task.Delay(500);
+                        await Task.Run(() =>
+                       {
+                           Device.BeginInvokeOnMainThread(async () =>
+                           {
+                               if (!item.Status)
+                               {
+                                   var connected = await _blueToothService.ConnectDevice(item);
+                                   if (connected)
+                                   {
+                                       item.Status = true;
+                                   }
+                               }
+                               else
+                               {
+                                   _blueToothService.PrintStop();
+                                   App.BtAddress = "";
+                                   item.Status = false;
+                               }
+                           });
+                       });
+                    }
+                    catch (Exception)
+                    {
+                        _dialogService.LongAlert("适配不到设备，请确保打印机开启");
+                    }
+                }
+            });
 
             //打印测试
             this.PrintCommand = ReactiveCommand.Create(() =>
             {
                 try
                 {
-                    if (!string.IsNullOrEmpty(Settings.SelectedDeviceName))
+                    if (!string.IsNullOrEmpty(App.BtAddress))
                     {
-                        if (this.PrintData == null)
-                        {
-                            _dialogService.LongAlert("数据未准备就绪！");
-                            return;
-                        }
-
-                        _blueToothService.SendData(PrintData);
-                        _blueToothService.Connect(Settings.SelectedDeviceName);
+                        _blueToothService.Print(this.PrintData, Settings.PrintStyleSelected, this.RepeatPrintNum);
                     }
                     else
                     {
@@ -121,6 +172,8 @@ namespace Wesley.Client.ViewModels
             });
         }
 
+
+
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -133,6 +186,12 @@ namespace Wesley.Client.ViewModels
                     {
                         this.PrintData = bill;
                     }
+                }
+
+                if (parameters.ContainsKey("PrintNum"))
+                {
+                    parameters.TryGetValue("PrintNum", out int printNum);
+                    this.RepeatPrintNum = printNum;
                 }
             }
             catch (Exception ex)

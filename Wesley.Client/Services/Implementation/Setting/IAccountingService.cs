@@ -10,5 +10,7 @@ namespace Wesley.Client.Services
     {
         Task<Tuple<AccountingOption, List<AccountingOption>, List<AccountingOption>, Dictionary<int, string>>> GetDefaultAccountingAsync(int billTypeId = 0, bool force = false, CancellationToken calToken = default);
         Task<IList<AccountingOptionModel>> GetPaymentMethodsAsync(int billTypeId = 0, bool force = false, CancellationToken calToken = default);
+
+
     }
 }

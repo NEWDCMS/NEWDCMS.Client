@@ -1,6 +1,6 @@
-﻿using Wesley.Client.Models.Products;
-using Wesley.Client.Services;
-using Wesley.SlideOverKit;
+﻿using DCMS.Client.Models.Products;
+using DCMS.Client.Services;
+using DCMS.SlideOverKit;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -8,12 +8,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Xamarin.Forms;
-namespace Wesley.Client.Pages
+namespace DCMS.Client.Pages
 {
     public partial class RightProductCategoryMasterPage : SlideMenuView
     {
         [Reactive] public ObservableCollection<CategoryModel> MenuItems { get; set; } = new ObservableCollection<CategoryModel>();
         private string ViewModelName { get; set; }
+        ProductCategoryPage
 
         private readonly IDialogService _dialogService;
         public RightProductCategoryMasterPage()

@@ -14,10 +14,10 @@ using System.Text;
 using StringBuilder = System.Text.StringBuilder;
 
 
-namespace Wesley.Client.Droid.Utils
+namespace DCMS.Client.Droid.Utils
 {
     /// <summary>
-    /// （实验性：待提交到Wesley.logger里程碑)）
+    /// （实验性：待提交到DCMS.logger里程碑)）
     /// </summary>
     public class Constant
     {
@@ -37,7 +37,7 @@ namespace Wesley.Client.Droid.Utils
     }
 
     /// <summary>
-    /// （实验性：待提交到Wesley.logger里程碑)）
+    /// （实验性：待提交到DCMS.logger里程碑)）
     /// </summary>
     public class FileUtils
     {

@@ -1,9 +1,11 @@
 ﻿using Wesley.Infrastructure.Helpers;
+using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+
 
 namespace Wesley.Client.Models.Products
 {
@@ -19,6 +21,7 @@ namespace Wesley.Client.Models.Products
     [Serializable]
     public partial class ProductModel : ProductBaseModel
     {
+        [Reactive] public bool Favorited { get; set; }
         [Reactive] public bool IsShowStock { get; set; } = true;
         [Reactive] public bool IsShowGiveEnabled { get; set; } = true;
         public int CombinationId { get; set; }
@@ -36,6 +39,7 @@ namespace Wesley.Client.Models.Products
         public SelectList StrokeUnits { get; set; }
         public int? BigUnitId { get; set; }
         [Reactive] public string BigUnitName { get; set; }
+
         public SelectList BigUnits { get; set; }
         public bool IsAdjustPrice { get; set; }
         public bool Status { get; set; }
@@ -67,23 +71,35 @@ namespace Wesley.Client.Models.Products
         [Reactive] public PriceUnit SmallPriceUnit { get; set; } = new PriceUnit();
         [Reactive] public GiveProduct GiveProduct { get; set; } = new GiveProduct();
 
-
         [Reactive] public Dictionary<string, string> UnitPriceDicts { get; set; } = new Dictionary<string, string>();
-        [Reactive] public int ShipmentWareHouseQuantity { get; set; }
-        [Reactive] public int IncomeWareHouseQuantity { get; set; }
+
+        [Reactive] public int ShipmentUsableQuantity { get; set; }
+        [Reactive] public int IncomeUsableQuantity { get; set; }
+        [Reactive] public int ShipmentCurrentQuantity { get; set; }
+        [Reactive] public int IncomeCurrentQuantity { get; set; }
+
+        [Reactive] public string ShipmentWareHouseName { get; set; }
+        [Reactive] public string IncomeWareHouseName { get; set; }
+
         public DateTime? ManufactureDete { get; set; }
+        [Reactive] public string ManufactureDateStr { get; set; }
+        
         public bool IsShowCreateDate { get; set; }
         public int DisplayOrder { get; set; }
         public int CurrentStock { get; set; }
         public List<string> ProductTimes { get; set; }
-
+        //是否赠品
+        public bool IsGifts { get; set; } = false;
         //促销活动
         public int TypeId { get; set; }
         public string TypeName { get; set; }
         public int QuantityCopy { get; set; }
-        public int CampaignId { get; set; }
+        public int CampaignId { get; set; } = 0;
         public string CampaignName { get; set; }
+
+        [JsonIgnore]
         public ReactiveCommand<UProduct, Unit> RemarkSelected { get; set; }
+        [JsonIgnore]
         public ReactiveCommand<ProductModel, Unit> RemarkSelected2 { get; set; }
     }
 
@@ -91,9 +107,17 @@ namespace Wesley.Client.Models.Products
     [Serializable]
     public class StockQuantityModel : Base
     {
+        /// <summary>
+        /// 可用
+        /// </summary>
         public int UsableQuantity { get; set; }
+        /// <summary>
+        /// 现货
+        /// </summary>
         public int CurrentQuantity { get; set; }
-        public int StockQuantity { get; set; }
+
+        ///public int StockQuantity { get; set; }
+        ///
         [Reactive] public int WareHouseId { get; set; }
     }
 
@@ -133,8 +157,8 @@ namespace Wesley.Client.Models.Products
     {
         public int UnitId { get; set; }
         [Reactive] public int Quantity { get; set; }
-        [Reactive] public decimal? Price { get; set; }
-        [Reactive] public decimal? Amount { get; set; }
+        [Reactive] public decimal Price { get; set; }
+        [Reactive] public decimal Amount { get; set; }
         [Reactive] public string UnitName { get; set; }
     }
 

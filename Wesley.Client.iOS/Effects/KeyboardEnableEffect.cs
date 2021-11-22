@@ -1,12 +1,12 @@
 ﻿using System;
 using UIKit;
-using Wesley.Effects.iOS;
+using Wesley.Client.Effects.iOS;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 
-[assembly: ResolutionGroupName("Wesley.Effects")]
+[assembly: ResolutionGroupName("Wesley.Client.Effects")]
 [assembly: ExportEffect(typeof(KeyboardEnableEffect), nameof(KeyboardEnableEffect))]
-namespace Wesley.Effects.iOS
+namespace Wesley.Client.Effects.iOS
 {
     [Foundation.Preserve(AllMembers = true)]
     public class KeyboardEnableEffect : PlatformEffect

@@ -9,7 +9,7 @@ using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using Wesley.Client.iOS.Effects;
-using Wesley.Effects;
+using Wesley.Client.Effects;
 
 
 [assembly: ResolutionGroupName("Wesley")]

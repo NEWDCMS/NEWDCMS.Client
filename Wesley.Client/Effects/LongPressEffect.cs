@@ -1,14 +1,13 @@
 ﻿using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public class LongPressEffect : RoutingEffect
     {
-        public LongPressEffect() : base("Wesley.LongPressEffect")
-        {
+        public LongPressEffect() : base($"Wesley.Client.{nameof(LongPressEffect)}") { }
 
-        }
+
         public static readonly BindableProperty CommandProperty = BindableProperty.CreateAttached("Command", typeof(ICommand), typeof(LongPressEffect), (object)null);
         public static ICommand GetCommand(BindableObject view)
         {

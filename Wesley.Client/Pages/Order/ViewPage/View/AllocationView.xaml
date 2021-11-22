@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+         x:Class="Wesley.Client.Pages.Order.AllocationView"
+        x:Name="Current_AllocationView">
+    <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}" Command="{Binding RefreshCommand}"
+            RefreshColor="{StaticResource PrimaryDarkColor}">
+     
+      
+            <CollectionView ItemsSource="{Binding Bills}"
+                            x:Name="orders"
+                            ItemSizingStrategy="MeasureAllItems"
+                                SelectionMode="Single"
+                                VerticalScrollBarVisibility="Always">
+                <CollectionView.Header>
+                    <custom:HeaderView ControlTemplate="{StaticResource AllocationSummeryView_Template}" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Style="{StaticResource GGrid}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <!-- 单号-->
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding BillNumber,StringFormat='单号：{0}'}"
+                                   LineBreakMode="TailTruncation"
+                                   FontSize="{StaticResource FT14}"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="{StaticResource ML10}" />
+                            <BoxView Grid.Row="0"
+                                     Grid.Column="1"
+                                     Margin="{StaticResource MR10}"
+                                     CornerRadius="50"
+                                     HeightRequest="25"
+                                     HorizontalOptions="End"
+                                     Opacity=".7"
+                                     VerticalOptions="Center"
+                                     WidthRequest="50"
+                                     Color="{StaticResource PrimaryColor}" />
+                            <!--状态-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Margin="0,0,17,0"
+                                       Text="未审核"
+                                       TextColor="White"
+                                       FontSize="{StaticResource FT12}"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="CenterAndExpand">
+                                </Label>
+                            <!--出仓-->
+                            <Label Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="{Binding ShipmentWareHouseName}"
+                                   TextColor="{StaticResource PrimaryColor}"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Start"
+                                   FontSize="{StaticResource FT14}"
+                                   Margin="{StaticResource ML10}"
+                                   VerticalOptions="CenterAndExpand" />
+                            <!--入仓-->
+                            <Label Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding IncomeWareHouseName}"
+                                   TextColor="{StaticResource PrimaryColor}"
+                                   HorizontalOptions="End"
+                                   FontAttributes="Bold"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="{StaticResource MR10}" />
+                            <BoxView Grid.Row="1"
+                                     Grid.ColumnSpan="2"
+                                     Margin="{StaticResource MR10}"
+                                     HeightRequest=".7"
+                                     HorizontalOptions="Center"
+                                     Opacity=".7"
+                                     VerticalOptions="CenterAndExpand"
+                                     WidthRequest="150"
+                                     Color="#dddddd" />
+                            <!--业务员-->
+                            <Label Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="{Binding  BusinessUserName,StringFormat='业务员：{0}'}"
+                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   HorizontalOptions="Start"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="Start"
+                                   Margin="{StaticResource ML10}" />
+                            <!--开单时间-->
+                            <Label Grid.Row="2"
+                                   Grid.Column="1"
+                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   Text="{Binding CreatedOnUtc}"
+                                   HorizontalOptions="End"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="Start"
+                                   Margin="{StaticResource MR10}" />
+                            <custom:DashedBar Grid.Row="3"
+                                              Grid.Column="0"
+                                              Grid.ColumnSpan="2"
+                                              IsVisible="{Binding IsLast}" />
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                            Command="{Binding Path=BindingContext.SelectedCommand,Source={x:Reference Current_AllocationView}}"
+                                                          CommandParameter="{Binding .}"
+                                                          NumberOfTapsRequired="1" />
+                            </Grid.GestureRecognizers>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <custom:NullView />
+                </CollectionView.EmptyView>
+            </CollectionView>
+    
+    </RefreshView>
+</ContentView>

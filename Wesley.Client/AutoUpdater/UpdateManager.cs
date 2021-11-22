@@ -10,7 +10,6 @@ namespace Wesley.Client.AutoUpdater
     /// </summary>
     public class UpdateManager
     {
-
         /// <summary>
         /// 检查并更新
         /// </summary>
@@ -20,32 +19,6 @@ namespace Wesley.Client.AutoUpdater
         private bool didCheck;
         private readonly Page mainPage;
         private readonly UpdateMode mode;
-
-
-#if DEBUG
-        public static string AppIDDummy
-        {
-            get
-            {
-                if (Device.RuntimePlatform == Device.Android)
-                {
-                    return "com.dcms.client";
-                }
-
-                if (Device.RuntimePlatform == Device.UWP)
-                {
-                    return "9ncbcszsjrsb";
-                }
-
-                if (Device.RuntimePlatform == Device.iOS)
-                {
-                    return "id324684580";
-                }
-
-                return String.Empty;
-            }
-        }
-#endif
 
         private static UpdateManager instance;
 
@@ -59,7 +32,7 @@ namespace Wesley.Client.AutoUpdater
         {
             if (instance != null)
             {
-                throw new AutoUpdateException("更新管理器已经初始化.");
+                //throw new AutoUpdateException("更新管理器已经初始化.");
             }
 
             instance = new UpdateManager(parameters, mode);
@@ -86,7 +59,7 @@ namespace Wesley.Client.AutoUpdater
         {
             if (mode == UpdateMode.MissingNo)
             {
-                throw new AutoUpdateException("不支持次选择模式.");
+                //throw new AutoUpdateException("不支持次选择模式.");
             }
 
             this.mode = mode;
@@ -148,19 +121,9 @@ namespace Wesley.Client.AutoUpdater
                 }
                 else
                 {
-                    throw new AutoUpdateException("自动安装只支持android和uwp.");
+                    //throw new AutoUpdateException("自动安装只支持android和uwp.");
                 }
             }
         }
-
-        //private async Task CheckAndOpenAppStoreAsync()
-        //{
-        //    UpdatesCheckResponse response = await checkForUpdatesFunction();
-        //    if (response.IsNewVersionAvailable && await mainPage.DisplayAlert(title, message, confirm, cancel))
-        //    {
-        //        DependencyService.Get<IStoreOpener>().OpenStore();
-        //    }
-        //}
-
     }
 }

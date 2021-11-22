@@ -1,12 +1,14 @@
-﻿using Wesley.Client.Services;
+﻿using Wesley.Client.Camera;
+using Wesley.Client.Services;
+using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Xamarin.Forms;
 using ZXing;
 using ZXing.Mobile;
-using Newtonsoft.Json;
 
 namespace Wesley.Client.ViewModels
 {
@@ -14,11 +16,14 @@ namespace Wesley.Client.ViewModels
     {
         [Reactive] public bool IsAnalyzing { get; set; }
         [Reactive] public bool IsScanning { get; set; }
+        [Reactive] public OverlayShape OverlayShape { get; internal set; } = OverlayShape.Rect;
+
 
         public ICommand ScanResultCommand { get; set; }
         public MobileBarcodeScanningOptions Options { get; }
 
-        public ScanBarcodePageViewModel(INavigationService navigationService, IDialogService dialogService) : base(navigationService, dialogService)
+        public ScanBarcodePageViewModel(INavigationService navigationService, IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "扫一扫";
             _navigationService = navigationService;
@@ -27,10 +32,19 @@ namespace Wesley.Client.ViewModels
             this.ScanResultCommand = new Command<object>((r) => this.OnScanResult(r));
             this.Options = new MobileBarcodeScanningOptions
             {
-                PossibleFormats = new List<BarcodeFormat> { BarcodeFormat.QR_CODE },
+                PossibleFormats = new List<BarcodeFormat>
+                {
+                    BarcodeFormat.CODE_39 ,
+                    BarcodeFormat.CODE_93,
+                    BarcodeFormat.CODE_128,
+                    BarcodeFormat.EAN_8,
+                    BarcodeFormat.EAN_13,
+                    BarcodeFormat.QR_CODE,
+                    BarcodeFormat.IMB
+                },
                 //CameraResolutionSelector = (r) => this.CameraResolutionSelector(r),
-                //DelayBetweenAnalyzingFrames = 150, // Default value: 150
-                //DelayBetweenContinuousScans = 1000, // Default value: 1000
+                //DelayBetweenAnalyzingFrames = 150,
+                //DelayBetweenContinuousScans = 1000,
             };
         }
 
@@ -43,15 +57,30 @@ namespace Wesley.Client.ViewModels
                 {
                     if (!string.IsNullOrEmpty(result.ToString()))
                     {
-                        var data = JsonConvert.DeserializeObject<ScanData>(result.ToString());
-                        if (data.Type == "Login")
+                        try
                         {
-                            await _navigationService.NavigateAsync("ScanLoginPage", ("ScanData", data));
+                            var data = JsonConvert.DeserializeObject<ScanData>(result.ToString());
+                            if (data.Type == "Login")
+                            {
+                                await _navigationService.NavigateAsync("ScanLoginPage", ("ScanData", data));
+                            }
+                            else if (data.Type == "Redeem")
+                            {
+                                await _navigationService.GoBackAsync(("Data", result.ToString()));
+                            }
+                            else
+                            {
+                                _dialogService.LongAlert(result.ToString());
+                                await _navigationService.GoBackAsync();
+                            }
                         }
-                        else
+                        catch (Exception)
                         {
-                            _dialogService.LongAlert(result.ToString());
-                            await _navigationService.GoBackAsync();
+                            var ok = await _dialogService.ShowConfirmAsync("无法识别扫描信息！", okText: "", cancelText: "确定");
+                            if (!ok)
+                            {
+                                await _navigationService.GoBackAsync();
+                            }
                         }
                     }
                 });
@@ -73,12 +102,10 @@ namespace Wesley.Client.ViewModels
         public override void OnDisappearing()
         {
             base.OnDisappearing();
-
             this.IsAnalyzing = false;
             this.IsScanning = false;
         }
     }
-
 
     public class ScanData
     {

@@ -1,5 +1,4 @@
-﻿using Android.Graphics;
-using Wesley.Client.CustomViews;
+﻿using Wesley.Client.CustomViews;
 using Wesley.Client.Droid.Renderers;
 using System.ComponentModel;
 using Xamarin.Forms;

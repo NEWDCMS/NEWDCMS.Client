@@ -3,11 +3,10 @@ using Wesley.Client.Models;
 using Wesley.Client.Resources;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
-
+using LiteDB;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,11 +14,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using System.Reactive.Disposables;
+
 namespace Wesley.Client.ViewModels
 {
     public class ViewSubscribePageViewModel : ViewModelBase
     {
-        private readonly LocalDatabase _conn;
+        private readonly ILiteDbService<MessageInfo> _conn;
 
         [Reactive] public ObservableCollection<MessageItemsGroup> Notifs { get; set; } = new ObservableCollection<MessageItemsGroup>();
         [Reactive] public MessageInfo Selecter { get; set; }
@@ -30,8 +31,9 @@ namespace Wesley.Client.ViewModels
 
 
         public ViewSubscribePageViewModel(INavigationService navigationService,
-              LocalDatabase conn,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              ILiteDbService<MessageInfo> conn,
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _conn = conn;
 
@@ -47,7 +49,8 @@ namespace Wesley.Client.ViewModels
                 //取待办
                 if (MType == MTypeEnum.Message || MType == MTypeEnum.Receipt || MType == MTypeEnum.Hold)
                 {
-                    var messages = await _conn?.GetAllMessageInfos(new[] { 0, 1, 2, 3 });
+                    var data = await _conn.Table.FindAllAsync();
+                    var messages = data.Where(a => new[] { 0, 1, 2, 3 }.Contains(a.MTypeId));
                     if (messages != null)
                     {
                         messageItems = messages.Where(s => s.MType == MType).ToList();
@@ -56,7 +59,8 @@ namespace Wesley.Client.ViewModels
                 //取通知
                 else
                 {
-                    var messages = await _conn?.GetAllMessageInfos(new[] { 4, 5, 6, 7, 8, 9, 10, 11, 12 });
+                    var data = await _conn.Table.FindAllAsync();
+                    var messages = data.Where(a => new[] { 4, 5, 6, 7, 8, 9, 10, 11, 12 }.Contains(a.MTypeId));
                     if (messages != null)
                     {
                         messageItems = messages.Where(s => s.MType == MType).ToList();
@@ -109,11 +113,18 @@ namespace Wesley.Client.ViewModels
               {
                   using (UserDialogs.Instance.Loading("加载中..."))
                   {
-                      await _conn.SetPending(x.Id, true);
+                      var result = await _conn.Table.FindByIdAsync(x.Id);
+                      if (result != null)
+                      {
+                          result.IsRead = true;
+                          await _conn.UpsertAsync(result);
+                      }
+
                       await RedirectAsync(x);
                   }
                   Selecter = null;
-              });
+              })
+              .DisposeWith(DeactivateWith);
 
             //删除消息
             this.RemoveCommand = ReactiveCommand.Create<MessageInfo>(async x =>
@@ -121,7 +132,7 @@ namespace Wesley.Client.ViewModels
                 var ok = await _dialogService.ShowConfirmAsync("是否要删除该消息?", okText: "确定", cancelText: "取消");
                 if (ok)
                 {
-                    await _conn.RemoveMessageInfo(x.Id);
+                    await _conn.Table.DeleteAsync(x.Id);
                     ((ICommand)Load)?.Execute(null);
                 }
             });
@@ -134,16 +145,14 @@ namespace Wesley.Client.ViewModels
                     var ok = await _dialogService.ShowConfirmAsync("是否要删除全部消息?", okText: "确定", cancelText: "取消");
                     if (ok)
                     {
-                        await _conn.ResetMessageInfos();
+                        await _conn.DeleteAllAsync();
                         ((ICommand)Load)?.Execute(null);
                     }
                 }
             }, this.WhenAny(x => x.Notifs, (n) => { return n.GetValue().Count > 0; }));
 
-            this.RemoveCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void Initialize(INavigationParameters parameters)

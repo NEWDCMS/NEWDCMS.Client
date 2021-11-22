@@ -4,6 +4,7 @@ using Wesley.Client.Models;
 using Wesley.Client.Models.Finances;
 using Wesley.Client.Models.Sales;
 using Wesley.Client.Models.Terminals;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
@@ -11,14 +12,15 @@ using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-
+using System.Reactive.Disposables;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows.Input;
 using Xamarin.Forms;
+using System.Diagnostics;
 
 namespace Wesley.Client.ViewModels
 {
@@ -43,7 +45,8 @@ namespace Wesley.Client.ViewModels
                   IAccountingService accountingService,
                   ICostExpenditureService costExpenditureService,
                   ISaleBillService saleBillService,
-                  IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+                  IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "费用支出";
 
@@ -51,37 +54,50 @@ namespace Wesley.Client.ViewModels
             _saleBillService = saleBillService;
 
             InitBill();
+
             //验证
+            var valid_IsReversed = this.ValidationRule(x => x.Bill.ReversedStatus, _isBool, "已红冲单据不能操作");
+            var valid_IsAudited = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
             var valid_TerminalId = this.ValidationRule(x => x.Bill.TerminalId, _isZero, "客户未指定");
             var valid_ItemCount = this.ValidationRule(x => x.Bill.Items.Count, _isZero, "请添加费用项目");
             var valid_SelectesCount = this.ValidationRule(x => x.PaymentMethods.Selectes.Count, _isZero, "请选择支付方式");
-            var valid_IsVieweBill = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
 
             //提交单据
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.ExpenseExpenditureSave);
-                var postData = new CostExpenditureUpdateModel()
+                //await this.Access(AccessGranularityEnum.ExpenseExpenditureSave);
+                return await this.Access(AccessGranularityEnum.ExpenseExpenditureSave, async () =>
                 {
-                    EmployeeId = Settings.UserId,
-                    OweCash = Bill.OweCash,
-                    Remark = Bill.Remark,
-                    Items = Bill.Items,
-                    Accounting = PaymentMethods.Selectes.Select(a =>
+                    if (this.Bill.ReversedStatus)
                     {
-                        return new AccountMaping()
+                        _dialogService.ShortAlert("已红冲单据不能操作");
+                        return Unit.Default;
+                    }
+
+                    var postData = new CostExpenditureUpdateModel()
+                    {
+                        CustomerId = this.Bill.TerminalId,
+                        BillNumber = this.Bill.BillNumber,
+                        EmployeeId = Settings.UserId,
+                        OweCash = Bill.OweCash,
+                        Remark = Bill.Remark,
+                        Items = Bill.Items,
+                        Accounting = PaymentMethods.Selectes.Select(a =>
                         {
-                            AccountingOptionId = a.AccountingOptionId,
-                            CollectionAmount = a.CollectionAmount,
-                            Name = a.Name,
-                            BillId = 0,
-                        };
-                    }).ToList(),
-                };
-                return await SubmitAsync(postData, 0, _costExpenditureService.CreateOrUpdateAsync, (result) =>
-                {
-                    Bill = new CostExpenditureBillModel();
-                }, token: cts.Token);
+                            return new AccountMaping()
+                            {
+                                AccountingOptionId = a.AccountingOptionId,
+                                CollectionAmount = a.CollectionAmount,
+                                Name = a.Name,
+                                BillId = 0,
+                            };
+                        }).ToList(),
+                    };
+                    return await SubmitAsync(postData, 0, _costExpenditureService.CreateOrUpdateAsync, (result) =>
+                    {
+                        Bill = new CostExpenditureBillModel();
+                    }, token: new System.Threading.CancellationToken());
+                });
             },
             this.IsValid());
 
@@ -106,9 +122,22 @@ namespace Wesley.Client.ViewModels
              .Where(x => x != null)
              .SubOnMainThread(async x =>
             {
+                if (this.Bill.ReversedStatus)
+                {
+                    _dialogService.ShortAlert("已红冲单据不能操作");
+                    return;
+                }
+
+                if (this.Bill.AuditedStatus)
+                {
+                    _dialogService.ShortAlert("已审核单据不能操作");
+                    return;
+                }
+
                 await this.NavigateAsync("AddCostPage", ("Terminaler", this.Terminal), ("Selecter", x));
                 this.Selecter = null;
-            });
+            })
+             .DisposeWith(DeactivateWith);
 
             //添加费用
             this.AddCostCommand = ReactiveCommand.Create<object>(async e =>
@@ -134,8 +163,16 @@ namespace Wesley.Client.ViewModels
                 await this.Access(AccessGranularityEnum.ExpenseExpenditureApproved);
                 await SubmitAsync(Bill.Id, _costExpenditureService.AuditingAsync, async (result) =>
                 {
-                    var db = Shiny.ShinyHost.Resolve<LocalDatabase>();
-                    await db.SetPending(SelecterMessage.Id, true);
+                    //红冲审核水印
+                    this.Bill.AuditedStatus = true;
+
+                    var _conn = App.Resolve<ILiteDbService<MessageInfo>>();
+                    var ms = await _conn.Table.FindByIdAsync(SelecterMessage.Id);
+                    if (ms != null)
+                    {
+                        ms.IsRead = true;
+                        await _conn.UpsertAsync(ms);
+                    }
                 });
             }, this.WhenAny(x => x.Bill.Id, (x) => x.GetValue() > 0));
 
@@ -179,7 +216,7 @@ namespace Wesley.Client.ViewModels
                 try
                 {
                     //如果签收距离>50 则计数
-                    if ((Terminal.Distance ?? 0) > 50)
+                    if (Terminal.CalcDistance() > 50)
                     {
                         var tmp = Settings.Abnormal;
                         if (tmp != null)
@@ -197,6 +234,7 @@ namespace Wesley.Client.ViewModels
                     var signature = await CrossDiaglogKit.Current.GetSignaturePadAsync("手写签名", "", Keyboard.Default, defaultValue: "", placeHolder: "请手写签名...");
                     if (!string.IsNullOrEmpty(signature))
                     {
+
                         var postMData = new DeliverySignUpdateModel()
                         {
                             //不关联调拨单
@@ -212,17 +250,17 @@ namespace Wesley.Client.ViewModels
                         };
 
                         //如果终端异常签收大于5次，则拍照
-                        if (Settings.Abnormal.Counter > 5)
-                        {
-                            await TakePhotograph((u, m) =>
-                            {
-                                var photo = new RetainPhoto
-                                {
-                                    DisplayPath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + ""
-                                };
-                                postMData.RetainPhotos.Add(photo);
-                            });
-                        }
+                        //if (Settings.Abnormal.Counter > 5)
+                        //{
+                        //    await TakePhotograph((u, m) =>
+                        //    {
+                        //        var photo = new RetainPhoto
+                        //        {
+                        //            DisplayPath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + ""
+                        //        };
+                        //        postMData.RetainPhotos.Add(photo);
+                        //    });
+                        //}
 
                         if (Settings.Abnormal.Counter > 5 && postMData.RetainPhotos.Count == 0)
                         {
@@ -242,27 +280,23 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
-            //菜单选择
-            this.SetMenus((x) =>
+
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
             {
-                switch (x)
-                {
-                    case Enums.MenuEnum.REMARK: //整单备注
-                        AllRemak((result) => { Bill.Remark = result; }, Bill.Remark);
-                        break;
-                    case Enums.MenuEnum.CLEAR: //清空单据
-                        {
-                            ClearBill<CostContractBillModel, CostContractItemModel>(null, DoClear);
-                        }
-                        break;
-
-                }
-            }, 3, 4);
-
-            this.AddCostCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.MorePaymentCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-            this.ExceptionsSubscribe();
+                 //整单备注
+                { MenuEnum.REMARK, (m,vm) => {
+                    AllRemak((result) => { Bill.Remark = result; }, Bill.Remark);
+                } }, 
+                //清空单据
+                { MenuEnum.CLEAR, (m,vm) => {
+                      ClearBill<CostContractBillModel, CostContractItemModel>(null, DoClear);
+                } },
+                 //销售备注
+                { MenuEnum.SALEREMARK, (m,vm) => {
+                    AllRemak((result) => { Bill.Remark = result; }, Bill.Remark);
+                } }
+            });
         }
 
         private void InitBill(bool clear = false)
@@ -301,7 +335,6 @@ namespace Wesley.Client.ViewModels
         {
             InitBill(true);
         }
-
         public async override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -336,10 +369,10 @@ namespace Wesley.Client.ViewModels
                     {
                         if (ce.CostContractId > 0)
                         {
-                            if (Bill.Items.Where(s => s.AccountingOptionId == ce.AccountingOptionId && s.CostContractId == ce.CostContractId).Count() > 0)
+                            if (Bill.Items?.Where(s => s.AccountingOptionId == ce.AccountingOptionId && s.CostContractId == ce.CostContractId).Count() > 0)
                             {
                                 //_dialogService.ShortAlert("项目已经添加！"); return;
-                                var item = Bill.Items.Where(s => s.AccountingOptionId == ce.AccountingOptionId && s.CostContractId == ce.CostContractId).FirstOrDefault();
+                                var item = Bill.Items?.Where(s => s.AccountingOptionId == ce.AccountingOptionId && s.CostContractId == ce.CostContractId).FirstOrDefault();
                                 item.CostContractId = ce.CostContractId;
                                 item.AccountingOptionId = ce.AccountingOptionId;
                                 item.AccountingOptionName = ce.AccountingOptionName;
@@ -349,10 +382,10 @@ namespace Wesley.Client.ViewModels
                         }
                         else
                         {
-                            if (Bill.Items.Where(s => s.AccountingOptionId == ce.AccountingOptionId).Count() > 0)
+                            if (Bill.Items?.Where(s => s.AccountingOptionId == ce.AccountingOptionId).Count() > 0)
                             {
                                 //_dialogService.ShortAlert("项目已经添加！"); return;
-                                var item = Bill.Items.Where(s => s.AccountingOptionId == ce.AccountingOptionId).FirstOrDefault();
+                                var item = Bill.Items?.Where(s => s.AccountingOptionId == ce.AccountingOptionId).FirstOrDefault();
                                 item.CostContractId = ce.CostContractId;
                                 item.AccountingOptionId = ce.AccountingOptionId;
                                 item.AccountingOptionName = ce.AccountingOptionName;
@@ -361,8 +394,8 @@ namespace Wesley.Client.ViewModels
                             }
                         }
 
-                        Bill.Items.Add(ce);
-                        Bill.TotalAmount = Bill.Items.Select(s => s.Amount).Sum() ?? 0;
+                        Bill.Items?.Add(ce);
+                        Bill.TotalAmount = Bill.Items?.Select(s => s.Amount).Sum() ?? 0;
                         UpdateUI();
                     }
                 }
@@ -373,24 +406,24 @@ namespace Wesley.Client.ViewModels
                     parameters.TryGetValue("RemoveCostExpenditure", out CostExpenditureItemModel ce);
                     if (ce != null)
                     {
-                        var cur = Bill.Items.Where(s => s.AccountingOptionId == ce.AccountingOptionId).FirstOrDefault();
+                        var cur = Bill.Items?.Where(s => s.AccountingOptionId == ce.AccountingOptionId).FirstOrDefault();
                         if (ce.CostContractId > 0)
                         {
-                            cur = Bill.Items.Where(s => s.AccountingOptionId == ce.AccountingOptionId && s.CostContractId == ce.CostContractId).FirstOrDefault();
+                            cur = Bill.Items?.Where(s => s.AccountingOptionId == ce.AccountingOptionId && s.CostContractId == ce.CostContractId).FirstOrDefault();
                             if (cur != null)
                             {
-                                Bill.Items.Remove(cur);
+                                Bill.Items?.Remove(cur);
                             }
                         }
                         else
                         {
                             if (cur != null)
                             {
-                                Bill.Items.Remove(cur);
+                                Bill.Items?.Remove(cur);
                             }
                         }
 
-                        Bill.TotalAmount = Bill.Items.Select(s => s.Amount).Sum() ?? 0;
+                        Bill.TotalAmount = Bill.Items?.Select(s => s.Amount).Sum() ?? 0;
                         UpdateUI();
                     }
                 }
@@ -399,6 +432,8 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("Bill"))
                 {
                     parameters.TryGetValue("Bill", out bill);
+                    parameters.TryGetValue("IsSubmitBill", out bool isSubmitBill);
+                    this.Bill.IsSubmitBill = isSubmitBill;
                 }
 
                 if (parameters.ContainsKey("BillId"))
@@ -423,15 +458,8 @@ namespace Wesley.Client.ViewModels
                     }
                     else
                     {
-                        this.SetMenus((x) =>
-                        {
-                            switch (x)
-                            {
-                                case Enums.MenuEnum.SHENGHE://审核
-                                    ((ICommand)AuditingDataCommand)?.Execute(null);
-                                    break;
-                            }
-                        }, 34);
+                        //控制显示菜单
+                        _popupMenu?.Show(34);
                     }
 
                     //来自费用签收单
@@ -450,13 +478,12 @@ namespace Wesley.Client.ViewModels
             }
         }
 
-
         public void UpdateUI()
         {
             try
             {
                 //合计
-                this.Bill.TotalAmount = decimal.Round(Bill.Items.Select(p => p.Amount ?? 0).Sum(), 2);
+                this.Bill.TotalAmount = decimal.Round(Bill.Items?.Select(p => p.Amount ?? 0).Sum() ?? 0, 2);
 
                 //支付
                 var totalAccountingAmount = PaymentMethods.Selectes.Sum(s => s.CollectionAmount);
@@ -469,11 +496,22 @@ namespace Wesley.Client.ViewModels
                 this.PaymentMethods.SubAmount = this.Bill.TotalAmount;
                 this.PaymentMethods.OweCash = this.Bill.OweCash;
 
+                //红冲审核水印
+                if (this.Bill.Id > 0)
+                    this.Bill.AuditedStatus = !this.Bill.ReversedStatus;
             }
             catch (Exception ex)
             {
                 Crashes.TrackError(ex);
             }
+        }
+
+        public override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(3, 4, 20);
         }
     }
 }

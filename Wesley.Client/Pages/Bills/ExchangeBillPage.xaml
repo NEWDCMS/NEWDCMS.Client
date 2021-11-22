@@ -19,23 +19,10 @@
     </ContentPage.Resources>
     <RelativeLayout>
         <Grid Style="{StaticResource GGrid}"
-              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
-              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=0.88,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+              RowDefinitions="40,.7,40,.7,40,.7,40,.7,*"
+              ColumnDefinitions="180,*">
             <!--0-->
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
@@ -89,7 +76,8 @@
                 <Label Style="{StaticResource SearchArrow}"
                        IsEnabled="{Binding EnableOperation}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=BindingContext.CustomSelected}" />
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.CustomSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -121,7 +109,8 @@
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding StockSelected}"
-                                              CommandParameter="0" />
+                                              CommandParameter="0"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -157,7 +146,8 @@
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding DeliverSelected}"
-                                              CommandParameter="0" />
+                                              CommandParameter="0"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -201,7 +191,8 @@
                             ItemsSource="{Binding Bill.Items,Mode=TwoWay}"
                             x:Name="BillItems"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Selecter, Mode=TwoWay}">
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                            VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
                     <custom:HeaderView ControlTemplate="{StaticResource ExchangeBillPage_Template}" />
                 </CollectionView.Header>
@@ -210,7 +201,7 @@
                         <Grid Style="{StaticResource GGrid}"
                               HorizontalOptions="FillAndExpand">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -221,7 +212,7 @@
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0"
                                    Text="{Binding ProductName}"
-                                   LineBreakMode="TailTruncation"
+                                   LineBreakMode="WordWrap"
                                    HorizontalOptions="FillAndExpand"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
@@ -266,6 +257,12 @@
         <!--红冲/审核水印-->
         <Image Source="have_black.png"
                IsVisible="{Binding Bill.AuditedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--红冲水印-->
+        <Image Source="have_gray.png"
+               IsVisible="{Binding Bill.ReversedStatus}"
                WidthRequest="100"
                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
@@ -379,7 +376,8 @@
                      RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,Property=Height,Factor=1,Constant=0}"
                      RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,Property=Width, Factor=1, Constant=0}">
             <ContentView.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding SpeechCommand}" />
+                <TapGestureRecognizer Command="{Binding SpeechCommand}"
+                                      NumberOfTapsRequired="1" />
             </ContentView.GestureRecognizers>
         </ContentView>
         <!--配送选择-->
@@ -426,7 +424,8 @@
                                         </Grid.RowDefinitions>
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding SelectedCommand}"
-                                                                  CommandParameter="{Binding .}" />
+                                                                  CommandParameter="{Binding .}"
+                                                                  NumberOfTapsRequired="1" />
                                         </Grid.GestureRecognizers>
                                         <Label Text="{Binding Wname}"
                                                Grid.Row="0"

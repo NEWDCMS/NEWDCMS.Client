@@ -147,6 +147,16 @@ namespace Wesley.Client.Models.Configuration
         //允许开单距离
         public double SalesmanDeliveryDistance { get; set; } = 50;
 
+        /// <summary>
+        /// 门头照片数
+        /// </summary>
+        public int DoorheadPhotoNum { get; set; } = 1;
+
+        /// <summary>
+        /// 陈列照片数
+        /// </summary>
+        public int DisplayPhotoNum { get; set; } = 4;
+
         #endregion
 
         #region 财务管理
@@ -181,7 +191,6 @@ namespace Wesley.Client.Models.Configuration
         public string PhotographedWater { get; set; }
 
         #endregion
-
 
     }
 

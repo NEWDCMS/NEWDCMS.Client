@@ -21,8 +21,4 @@ namespace Wesley.Client.Models.Configuration
             return Name;
         }
     }
-
-
-
-
 }

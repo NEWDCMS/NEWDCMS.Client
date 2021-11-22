@@ -1,10 +1,10 @@
-﻿using Android.Graphics.Drawables;
+﻿using Android.Graphics;
+using Android.Graphics.Drawables;
 using Wesley.Client.CustomViews;
 using Wesley.Client.Droid.Renderers;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Android.Graphics;
-using System;
 
 [assembly: ExportRenderer(typeof(CustomButton), typeof(CustomButtonRenderer))]
 namespace Wesley.Client.Droid.Renderers

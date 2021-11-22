@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
-		<Version>1.0.0.0</Version>
-		<Company>Wesley</Company>
-		<Description>Wesley</Description>
-		<Copyright>Wesley © 2021</Copyright>
+		<Version>3.0.0</Version>
+		<Company>Wesley.Client</Company>
+		<Description>Wesley is a SaaS based fast consumer solution</Description>
+		<Copyright>DCMS © 2020</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>czhcom@163.com</Authors>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<NoWarn>1701;1702;0067;IDE1006;CS8632;</NoWarn>
+		<NoWarn>1701;1702;0067;IDE1006;CS8632;IDE0060;XLS0517;</NoWarn>
 		<CodeAnalysisRuleSet />
 		<DefineConstants>TRACE;XIAOHUI;MSCHEN;</DefineConstants>
 	</PropertyGroup>
@@ -28,8 +28,12 @@
 		<Compile Remove="CustomViews\Map\**" />
 		<Compile Remove="Helpers\**" />
 		<Compile Remove="Models\OnBoarding\**" />
+		<Compile Remove="Pages\Delivery\ContentView\**" />
+		<Compile Remove="Pages\Jobs\**" />
+		<Compile Remove="Pages\TabsLayout\view\**" />
+		<Compile Remove="Pages\TabView\**" />
 		<Compile Remove="Services\Fake\**" />
-		<Compile Remove="Wesley.Client\**" />
+		<Compile Remove="DCMS.Client\**" />
 		<Compile Remove="Delegates\**" />
 		<Compile Remove="Logging\**" />
 		<Compile Remove="Models\Home\**" />
@@ -37,6 +41,7 @@
 		<Compile Remove="Setup\**" />
 		<Compile Remove="Pages\Notifications\**" />
 		<Compile Remove="Pages\Report\**" />
+		<Compile Remove="ViewModels\Jobs\**" />
 		<EmbeddedResource Remove="Animations\**" />
 		<EmbeddedResource Remove="Caching\**" />
 		<EmbeddedResource Remove="Connectivity\**" />
@@ -44,8 +49,12 @@
 		<EmbeddedResource Remove="CustomViews\Map\**" />
 		<EmbeddedResource Remove="Helpers\**" />
 		<EmbeddedResource Remove="Models\OnBoarding\**" />
+		<EmbeddedResource Remove="Pages\Delivery\ContentView\**" />
+		<EmbeddedResource Remove="Pages\Jobs\**" />
+		<EmbeddedResource Remove="Pages\TabsLayout\view\**" />
+		<EmbeddedResource Remove="Pages\TabView\**" />
 		<EmbeddedResource Remove="Services\Fake\**" />
-		<EmbeddedResource Remove="Wesley.Client\**" />
+		<EmbeddedResource Remove="DCMS.Client\**" />
 		<EmbeddedResource Remove="Delegates\**" />
 		<EmbeddedResource Remove="Logging\**" />
 		<EmbeddedResource Remove="Models\Home\**" />
@@ -53,6 +62,7 @@
 		<EmbeddedResource Remove="Setup\**" />
 		<EmbeddedResource Remove="Pages\Notifications\**" />
 		<EmbeddedResource Remove="Pages\Report\**" />
+		<EmbeddedResource Remove="ViewModels\Jobs\**" />
 		<None Remove="Animations\**" />
 		<None Remove="Caching\**" />
 		<None Remove="Connectivity\**" />
@@ -60,8 +70,12 @@
 		<None Remove="CustomViews\Map\**" />
 		<None Remove="Helpers\**" />
 		<None Remove="Models\OnBoarding\**" />
+		<None Remove="Pages\Delivery\ContentView\**" />
+		<None Remove="Pages\Jobs\**" />
+		<None Remove="Pages\TabsLayout\view\**" />
+		<None Remove="Pages\TabView\**" />
 		<None Remove="Services\Fake\**" />
-		<None Remove="Wesley.Client\**" />
+		<None Remove="DCMS.Client\**" />
 		<None Remove="Delegates\**" />
 		<None Remove="Logging\**" />
 		<None Remove="Models\Home\**" />
@@ -69,11 +83,15 @@
 		<None Remove="Setup\**" />
 		<None Remove="Pages\Notifications\**" />
 		<None Remove="Pages\Report\**" />
+		<None Remove="ViewModels\Jobs\**" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Remove="AppNotifications.cs" />
 		<Compile Remove="CustomViews\Controls\MyZXingOverlay.cs" />
 		<Compile Remove="CustomViews\Controls\PullToRefreshLayout.cs" />
+		<Compile Remove="Infrastructure\Connecting\IConnectivityHandler.cs" />
+		<Compile Remove="Infrastructure\Connecting\ShinyConnectivityHandler.cs" />
 		<Compile Remove="Infrastructure\Converters\SvgToImageSourceConverter.cs" />
 		<Compile Remove="CoreEntryPoint.cs" />
 		<Compile Remove="CustomViews\Controls\BadgeView.xaml.cs" />
@@ -86,27 +104,38 @@
 		<Compile Remove="CustomViews\MyNavigationPage.cs" />
 		<Compile Remove="CustomViews\Views\PopCheckBoxView.xaml.cs" />
 		<Compile Remove="CustomViews\Views\PopRadioButtonView.xaml.cs" />
-		<Compile Remove="CustomViews\Views\PopupMenu.xaml.cs" />
-		<Compile Remove="WesleySqliteConnection.cs" />
+		<Compile Remove="DCMSSqliteConnection.cs" />
 		<Compile Remove="Infrastructure\DbContext.cs" />
 		<Compile Remove="Infrastructure\Delegate\BleClientDelegate.cs" />
+		<Compile Remove="Infrastructure\Delegate\GeofenceDelegate.cs" />
 		<Compile Remove="Infrastructure\Delegate\GpsDelegate.cs" />
 		<Compile Remove="Infrastructure\Delegate\LocationSyncDelegates.cs" />
 		<Compile Remove="Infrastructure\ErrorEmulator.cs" />
 		<Compile Remove="Infrastructure\Extension\BottomBarExtension.cs" />
 		<Compile Remove="Infrastructure\ChartSetting.cs" />
+		<Compile Remove="Infrastructure\Extension\DialogExtension.cs" />
 		<Compile Remove="Infrastructure\GlobalExceptionHandler.cs" />
 		<Compile Remove="Infrastructure\IAppSettings.cs" />
+		<Compile Remove="Infrastructure\LocalStores\LocalDatabase.cs" />
+		<Compile Remove="JobTask\DataSyncJob.cs" />
+		<Compile Remove="JobTask\JobLoggerTask.cs" />
+		<Compile Remove="JobTask\MQSubsribeJob.cs" />
+		<Compile Remove="JobTask\TrackingJob.cs" />
+		<Compile Remove="Models\ISyncTable.cs" />
 		<Compile Remove="Pages\Archive\FieldTrackPage.xaml.cs" />
-		<Compile Remove="Pages\Delivery\ContentView\UnDeliveryView.xaml.cs" />
+		<Compile Remove="Pages\Base\RightProductCategoryMasterPage.xaml.cs" />
+		<Compile Remove="Pages\Base\RightSideMasterPage.xaml.cs" />
 		<Compile Remove="Pages\MainPage.cs" />
-		<Compile Remove="Pages\TabsLayout\HomePage.xaml.cs" />
 		<Compile Remove="Pages\TabsLayout\HomeView - 复制.xaml.cs" />
 		<Compile Remove="Pages\Welecome\BoardingPage.xaml.cs" />
 		<Compile Remove="CustomViews\RenderedViews\PlatformHelper.cs" />
+		<Compile Remove="Pages\Welecome\LoginPage - 复制.xaml.cs" />
 		<Compile Remove="Services\Communal\BaseService.cs" />
 		<Compile Remove="Services\Communal\IFileOperator.cs" />
 		<Compile Remove="Services\INotifierService.cs" />
+		<Compile Remove="Services\Network\AkavacheCacheHandler.cs" />
+		<Compile Remove="Services\Network\ICacheHandler.cs" />
+		<Compile Remove="Startup.cs" />
 		<Compile Remove="ViewModels\Archive\FieldTrackPageViewModel.cs" />
 		<Compile Remove="ViewModels\Market\InventoryReportingViewPageViewModel.cs" />
 		<Compile Remove="ViewModels\MessageItemPageViewModel.cs" />
@@ -127,20 +156,44 @@
 		<EmbeddedResource Remove="CustomViews\Controls\UserProfileImageControl.xaml" />
 		<EmbeddedResource Remove="CustomViews\Views\PopCheckBoxView.xaml" />
 		<EmbeddedResource Remove="CustomViews\Views\PopRadioButtonView.xaml" />
-		<EmbeddedResource Remove="CustomViews\Views\PopupMenu.xaml" />
 		<EmbeddedResource Remove="Pages\AllfunPage - 复制.xaml" />
 		<EmbeddedResource Remove="Pages\Archive\FieldTrackPage.xaml" />
-		<EmbeddedResource Remove="Pages\Delivery\ContentView\UnDeliveryView.xaml" />
+		<EmbeddedResource Remove="Pages\Base\RightProductCategoryMasterPage.xaml" />
+		<EmbeddedResource Remove="Pages\Base\RightSideMasterPage.xaml" />
 		<EmbeddedResource Remove="Pages\MessageItemPage.xaml" />
 		<EmbeddedResource Remove="Pages\MessagesPage-1.xaml" />
 		<EmbeddedResource Remove="Pages\NewsItemPage.xaml" />
-		<EmbeddedResource Remove="Pages\TabsLayout\HomePage.xaml" />
 		<EmbeddedResource Remove="Pages\TabsLayout\HomeView - 复制.xaml" />
 		<EmbeddedResource Remove="Pages\TrackLocationPage.xaml" />
 		<EmbeddedResource Remove="Pages\Welecome\BoardingPage.xaml" />
+		<EmbeddedResource Remove="Pages\Welecome\LoginPage - 复制.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Remove="BitImageEditor\Resources\16_9.png" />
+		<None Remove="BitImageEditor\Resources\2_3.png" />
+		<None Remove="BitImageEditor\Resources\3_2.png" />
+		<None Remove="BitImageEditor\Resources\3_4.png" />
+		<None Remove="BitImageEditor\Resources\4_3.png" />
+		<None Remove="BitImageEditor\Resources\9_16.png" />
+		<None Remove="BitImageEditor\Resources\arrow_back.png" />
+		<None Remove="BitImageEditor\Resources\clear.png" />
+		<None Remove="BitImageEditor\Resources\crop_free.png" />
+		<None Remove="BitImageEditor\Resources\crop_full.png" />
+		<None Remove="BitImageEditor\Resources\crop_rotate.png" />
+		<None Remove="BitImageEditor\Resources\crop_square.png" />
+		<None Remove="BitImageEditor\Resources\done.png" />
+		<None Remove="BitImageEditor\Resources\format_shapes.png" />
+		<None Remove="BitImageEditor\Resources\gesture.png" />
+		<None Remove="BitImageEditor\Resources\published.png" />
+		<None Remove="BitImageEditor\Resources\rotate_right.png" />
+		<None Remove="BitImageEditor\Resources\save.png" />
+		<None Remove="BitImageEditor\Resources\stickers.png" />
+		<None Remove="BitImageEditor\Resources\text_fill.png" />
+		<None Remove="BitImageEditor\Resources\text_not_fill.png" />
+		<None Remove="BitImageEditor\Resources\trash.png" />
+		<None Remove="BitImageEditor\Resources\trash_open.png" />
+		<None Remove="BitImageEditor\Resources\undo.png" />
 		<None Remove="obj.rar" />
 		<None Remove="Pages\Bills\ClassDiagram1.cd" />
 		<None Remove="Resources\arrow_down.png" />
@@ -154,8 +207,6 @@
 		<None Remove="Resources\cross.png" />
 		<None Remove="Resources\DeliverGradient.svg" />
 		<None Remove="Resources\dot.png" />
-		<None Remove="Resources\fa-brands-400.ttf" />
-		<None Remove="Resources\fa-regular-400.ttf" />
 		<None Remove="Resources\fa-solid-900.otf" />
 		<None Remove="Resources\FolderClosed.png" />
 		<None Remove="Resources\FolderOpen.png" />
@@ -164,12 +215,37 @@
 		<None Remove="Resources\Item.png" />
 		<None Remove="Resources\OpenGlyph.png" />
 		<None Remove="Resources\PaymentFailed.svg" />
+		<None Remove="Resources\raw\cactus.mp3" />
 		<None Remove="Resources\raw\S6238.mp3" />
 		<None Remove="Resources\raw\S9442.mp3" />
 		<None Remove="ViewModels\Bills\ClassDiagram1.cd" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="BitImageEditor\Resources\16_9.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\2_3.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\3_2.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\3_4.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\4_3.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\9_16.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\arrow_back.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\clear.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\crop_free.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\crop_full.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\crop_rotate.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\crop_square.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\done.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\format_shapes.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\gesture.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\published.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\rotate_right.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\save.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\stickers.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\text_fill.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\text_not_fill.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\trash.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\trash_open.png" />
+		<EmbeddedResource Include="BitImageEditor\Resources\undo.png" />
 		<EmbeddedResource Include="Resources\arrow_down.png">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
@@ -194,8 +270,6 @@
 		<EmbeddedResource Include="Resources\dot.png">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
-		<EmbeddedResource Include="Resources\fa-brands-400.ttf" />
-		<EmbeddedResource Include="Resources\fa-regular-400.ttf" />
 		<EmbeddedResource Include="Resources\fa-solid-900.otf" />
 		<EmbeddedResource Include="Resources\FolderClosed.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -211,6 +285,7 @@
 		<EmbeddedResource Include="Resources\OpenGlyph.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</EmbeddedResource>
+		<EmbeddedResource Include="Resources\raw\cactus.mp3" />
 		<EmbeddedResource Include="Resources\raw\S6238.mp3" />
 		<EmbeddedResource Include="Resources\raw\S9442.mp3" />
 		<EmbeddedResource Include="Resources\raw\S1553.mp3" />
@@ -231,56 +306,50 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.481" />
-		<PackageReference Include="akavache" Version="7.2.1" />
+		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.514" />
+		<PackageReference Include="akavache" Version="7.3.1" />
+		<PackageReference Include="CardsView" Version="2.8.0" />
 		<PackageReference Include="EasyNetQ" Version="6.3.1" />
-		<PackageReference Include="Microsoft.AppCenter" Version="4.1.0" />
-		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="4.1.0" />
-		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="4.1.0" />
-		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.15.0" />
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="NETStandard.Library" Version="2.0.3" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="LiteDB.Async" Version="0.0.9" />
+		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="4.3.0" />
+		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="4.3.0" />
+		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.18.0" />
 		<PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
-		<PackageReference Include="Prism.DryIoc.Forms" Version="7.2.0.1422" />
-		<PackageReference Include="Prism.Plugin.Popups" Version="7.2.0.1046" />
-		<PackageReference Include="ReactiveUI.Fody" Version="13.2.2" />
+		<PackageReference Include="Prism.Plugin.Popups" Version="8.0.76" />
+		<PackageReference Include="Prism.Unity.Forms" Version="8.1.97" />
+		<PackageReference Include="ReactiveUI.Fody" Version="14.2.1" />
 		<PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
-		<PackageReference Include="Refit" Version="6.0.24" />
-		<PackageReference Include="Refit.Newtonsoft.Json" Version="6.0.24" />
-		<PackageReference Include="Shiny.Notifications" Version="2.0.0.2373-preview" />
-		<PackageReference Include="SkiaSharp.Views.Forms" Version="1.68.3" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
-		<PackageReference Include="System.Reactive" Version="5.0.0" />
+		<PackageReference Include="Refit.Newtonsoft.Json" Version="6.0.94" />
+		<PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.3" />
 		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
+		<PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
 		<PackageReference Include="Xam.Plugin.Media" Version="5.0.1" />
-		<PackageReference Include="Xam.Plugin.SimpleAudioPlayer" Version="1.4.0" />
+		<PackageReference Include="Xam.Plugin.SimpleAudioPlayer" Version="1.5.0" />
 		<PackageReference Include="Xam.Plugins.Forms.ImageCircle" Version="3.0.0.5" />
 		<PackageReference Include="Xam.Plugins.Settings" Version="3.1.1" />
+		<PackageReference Include="Xamarin.CommunityToolkit" Version="1.3.0-pre2" />
 		<PackageReference Include="Xamarin.Controls.SignaturePad.Forms" Version="3.0.0" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-		<PackageReference Include="Xamarin.Essentials.Interfaces" Version="1.6.1" />
+		<PackageReference Include="Xamarin.Essentials.Interfaces" Version="1.7.0" />
 		<PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
 		<PackageReference Include="Xamarin.FFImageLoading.Transformations" Version="2.4.11.982" />
-		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
 		<PackageReference Include="Xamarin.Forms.PancakeView" Version="2.3.0.759" />
-		<PackageReference Include="ZXing.Net.Mobile" Version="3.0.0-beta5" />
 		<PackageReference Include="ZXing.Net.Mobile.Forms" Version="3.0.0-beta5" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Infrastructure\Connecting\" />
 		<Folder Include="Models\Archives\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Wesley.BitImageEditor\Wesley.BitImageEditor\Wesley.BitImageEditor.csproj" />
-		<ProjectReference Include="..\Wesley.Easycharts\Wesley.Easycharts.csproj" />
-		<ProjectReference Include="..\Wesley.Easycharts\Easycharts.Forms\Wesley.Easycharts.Forms.csproj" />
-		<ProjectReference Include="..\Wesley.SlideOverKit\Wesley.SlideOverKit\Wesley.SlideOverKit.csproj" />
+		<ProjectReference Include="..\ChartJS\Wesley.ChartJS.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="BitImageEditor\EditorPage\ImageEditorPage.xaml.cs">
+		  <DependentUpon>%(Filename)</DependentUpon>
+		</Compile>
 		<Compile Update="CustomViews\Loading\Loading.xaml.cs">
 			<DependentUpon>Loading.xaml</DependentUpon>
 		</Compile>
@@ -296,17 +365,20 @@
 		<Compile Update="CustomViews\PopUp\PopVerificationCodeView.xaml.cs">
 			<DependentUpon>PopVerificationCodeView.xaml</DependentUpon>
 		</Compile>
+		<Compile Update="CustomViews\Views\DashedVBar.xaml.cs">
+		  <DependentUpon>DashedVBar.xaml</DependentUpon>
+		</Compile>
 		<Compile Update="CustomViews\Views\DashedBar.xaml.cs">
 			<DependentUpon>DashedBar.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="CustomViews\Views\SetNullView.xaml.cs">
+		  <DependentUpon>SetNullView.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="CustomViews\Views\SpeechView.xaml.cs">
 			<DependentUpon>SpeechView.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="CustomViews\Views\NullView.xaml.cs">
 			<DependentUpon>NullView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="CustomViews\Views\ChartBar.xaml.cs">
-			<DependentUpon>ChartBar.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\Archive\AddReportPage.xaml.cs">
 			<DependentUpon>AddReportPage.xaml</DependentUpon>
@@ -316,9 +388,6 @@
 		</Compile>
 		<Compile Update="CustomViews\PopUp\PopConfirmView.xaml.cs">
 			<DependentUpon>PopConfirmView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Base\RightProductCategoryMasterPage.xaml.cs">
-			<DependentUpon>RightProductCategoryMasterPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\Bills\ExchangeBillPage.xaml.cs">
 		  <DependentUpon>ExchangeBillPage.xaml</DependentUpon>
@@ -353,56 +422,35 @@
 		<Compile Update="Pages\DataTemplates\ControlTemplates\ReportTemplates.xaml.cs">
 			<DependentUpon>ReportTemplates.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Delivery\ContentView\UnSaleView.xaml.cs">
-		  <DependentUpon>UnSaleView.xaml</DependentUpon>
+		<Compile Update="Pages\Delivery\Page\DeliveriedPage.xaml.cs">
+		  <DependentUpon>DeliveriedPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Delivery\ContentView\UnOrderView.xaml.cs">
-		  <DependentUpon>UnOrderView.xaml</DependentUpon>
+		<Compile Update="Pages\Delivery\Page\UnCostExpenditurePage.xaml.cs">
+		  <DependentUpon>UnCostExpenditurePage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Delivery\ContentView\UnCostExpenditureView.xaml.cs">
-		  <DependentUpon>UnCostExpenditureView.xaml</DependentUpon>
+		<Compile Update="Pages\Delivery\Page\UnOrderPage.xaml.cs">
+		  <DependentUpon>UnOrderPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Dialogs\PopCheckBoxView.xaml.cs">
-			<DependentUpon>%(Filename)</DependentUpon>
+		<Compile Update="Pages\Delivery\Page\UnSalePage.xaml.cs">
+		  <DependentUpon>UnSalePage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Dialogs\PopRadioButtonView.xaml.cs">
-			<DependentUpon>%(Filename)</DependentUpon>
+		<Compile Update="Pages\Dialogs\ProductCategoryPage.xaml.cs">
+		  <DependentUpon>ProductCategoryPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ContentView\AdvanceReceiptView.xaml.cs">
-			<DependentUpon>AdvanceReceiptView.xaml</DependentUpon>
+		<Compile Update="Pages\Dialogs\PopupMenu.xaml.cs">
+		  <DependentUpon>PopupMenu.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ContentView\AllocationView.xaml.cs">
-			<DependentUpon>AllocationView.xaml</DependentUpon>
+		<Compile Update="Pages\Dialogs\GoReceiptPage.xaml.cs">
+		  <DependentUpon>GoReceiptPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ContentView\CashReceiptView.xaml.cs">
-			<DependentUpon>CashReceiptView.xaml</DependentUpon>
+		<Compile Update="Pages\Dialogs\ChangeMenuPage.xaml.cs">
+		  <DependentUpon>ChangeMenuPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ContentView\CostContractView.xaml.cs">
-			<DependentUpon>CostContractView.xaml</DependentUpon>
+		<Compile Update="Pages\Dialogs\PopCheckBoxPage.xaml.cs">
+			<DependentUpon>PopCheckBoxPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ContentView\CostExpenditureView.xaml.cs">
-			<DependentUpon>CostExpenditureView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\InventoryView.xaml.cs">
-			<DependentUpon>InventoryView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\InventoryReportView.xaml.cs">
-			<DependentUpon>InventoryReportView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\PurchaseView.xaml.cs">
-			<DependentUpon>PurchaseView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\ReturnOrderView.xaml.cs">
-			<DependentUpon>ReturnOrderView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\ReturnView.xaml.cs">
-			<DependentUpon>ReturnView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\SaleOrderView.xaml.cs">
-			<DependentUpon>SaleOrderView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ContentView\SaleView.xaml.cs">
-			<DependentUpon>SaleView.xaml</DependentUpon>
+		<Compile Update="Pages\Dialogs\PopRadioButtonPage.xaml.cs">
+			<DependentUpon>PopRadioButtonPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\Order\SummeryPage\AdvanceReceiptSummeryPage.xaml.cs">
 			<DependentUpon>AdvanceReceiptSummeryPage.xaml</DependentUpon>
@@ -437,38 +485,41 @@
 		<Compile Update="Pages\Order\SummeryPage\SaleSummeryPage.xaml.cs">
 			<DependentUpon>SaleSummeryPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\AdvanceReceiptSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\AdvanceReceiptSummeryView.xaml.cs">
 			<DependentUpon>AdvanceReceiptSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\AllocationSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\AllocationSummeryView.xaml.cs">
 			<DependentUpon>AllocationSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\CashReceiptSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\CashReceiptSummeryView.xaml.cs">
 			<DependentUpon>CashReceiptSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\CostContractSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\CostContractSummeryView.xaml.cs">
 			<DependentUpon>CostContractSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\CostExpenditureSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\CostExpenditureSummeryView.xaml.cs">
 			<DependentUpon>CostExpenditureSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\InventorySummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\InventorySummeryView.xaml.cs">
 			<DependentUpon>InventorySummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\PurchaseSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\PurchaseSummeryView.xaml.cs">
 			<DependentUpon>PurchaseSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\ReturnOrderSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\ReturnOrderSummeryView.xaml.cs">
 			<DependentUpon>ReturnOrderSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\ReturnSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\ReturnSummeryView.xaml.cs">
 			<DependentUpon>ReturnSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\SaleOrderSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\SaleOrderSummeryView.xaml.cs">
 			<DependentUpon>SaleOrderSummeryView.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\SummeryView\SaleSummeryView.xaml.cs">
+		<Compile Update="Pages\Order\SummeryPage\View\SaleSummeryView.xaml.cs">
 			<DependentUpon>SaleSummeryView.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\QA\MarketFeedbackPage.xaml.cs">
+		  <DependentUpon>MarketFeedbackPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\QA\feedbackPage.xaml.cs">
 			<DependentUpon>FeedbackPage.xaml</DependentUpon>
@@ -484,6 +535,9 @@
 		</Compile>
 		<Compile Update="Pages\Reconciliation\ReconciliationHistoryPage.xaml.cs">
 			<DependentUpon>ReconciliationHistoryPage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\Reporting\Chart\VisitReportPage.xaml.cs">
+		  <DependentUpon>VisitReportPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\Reporting\Chart\CustomerActivityPage.xaml.cs">
 			<DependentUpon>CustomerActivityPage.xaml</DependentUpon>
@@ -509,41 +563,11 @@
 		<Compile Update="Pages\Common\SelectContractPage.xaml.cs">
 			<DependentUpon>SelectContractPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ViewPage\InventoryReportViewPage.xaml.cs">
-			<DependentUpon>InventoryReportViewPage.xaml</DependentUpon>
+		<Compile Update="Pages\Reporting\ReceivablesPage - 复制.xaml.cs">
+		  <DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\Order\ViewPage\AllocationPage.xaml.cs">
-			<DependentUpon>AllocationPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\CashReceiptPage.xaml.cs">
-			<DependentUpon>CashReceiptPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\CostExpenditurePage.xaml.cs">
-			<DependentUpon>CostExpenditurePage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\AdvanceReceiptPage.xaml.cs">
-			<DependentUpon>AdvanceReceiptPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\CostContractPage.xaml.cs">
-			<DependentUpon>CostContractPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\PurchasePage.xaml.cs">
-			<DependentUpon>PurchasePage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\InventoryPage.xaml.cs">
-			<DependentUpon>InventoryPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\ReturnOrderPage.xaml.cs">
-			<DependentUpon>ReturnOrderPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\ReturnPage.xaml.cs">
-			<DependentUpon>ReturnPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\SalePage.xaml.cs">
-			<DependentUpon>SalePage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Order\ViewPage\SaleOrderPage.xaml.cs">
-			<DependentUpon>SaleOrderPage.xaml</DependentUpon>
+		<Compile Update="Pages\Root\AdvancedPage.xaml.cs">
+		  <DependentUpon>AdvancedPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\Root\SystemSettingPage.xaml.cs">
 		  <DependentUpon>SystemSettingPage.xaml</DependentUpon>
@@ -559,9 +583,6 @@
 		</Compile>
 		<Compile Update="Pages\Common\AddReportProductPage.xaml.cs">
 			<DependentUpon>AddReportProductPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\Delivery\ContentView\DeliveriedView.xaml.cs">
-			<DependentUpon>DeliveriedView.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\Archive\AddProductArchivePage.xaml.cs">
 			<DependentUpon>AddProductArchivePage.xaml</DependentUpon>
@@ -605,26 +626,26 @@
 		<Compile Update="Pages\Root\ResetPasswordPage.xaml.cs">
 			<DependentUpon>ResetPasswordPage.xaml</DependentUpon>
 		</Compile>
-		<Compile Update="Pages\TabsLayout\AllfunView.xaml.cs">
-			<DependentUpon>AllfunView.xaml</DependentUpon>
+		<Compile Update="Pages\TabsLayout\AllfunPage.xaml.cs">
+		  <DependentUpon>AllfunPage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\TabsLayout\HomePage.xaml.cs">
+		  <DependentUpon>HomePage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\TabsLayout\ProfilePage.xaml.cs">
+		  <DependentUpon>ProfilePage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\TabsLayout\NotificationsPage.xaml.cs">
+		  <DependentUpon>NotificationsPage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\TabsLayout\NewsPage.xaml.cs">
+		  <DependentUpon>NewsPage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Pages\TabsLayout\MessagesPage.xaml.cs">
+		  <DependentUpon>MessagesPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Pages\TabsLayout\MainLayoutPage.xaml.cs">
 			<DependentUpon>MainLayoutPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\TabsLayout\HomeView.xaml.cs">
-			<DependentUpon>HomeView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\TabsLayout\NewsPage.xaml.cs">
-			<DependentUpon>NewsPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\TabsLayout\MessagesView.xaml.cs">
-			<DependentUpon>MessagesView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\TabsLayout\NotificationsView.xaml.cs">
-			<DependentUpon>NotificationsView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Pages\TabsLayout\ProfileView.xaml.cs">
-			<DependentUpon>ProfileView.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Resources\TextResources.Designer.cs">
 			<DesignTime>True</DesignTime>
@@ -640,11 +661,17 @@
 		<EmbeddedResource Update="CustomViews\Loading\LoadingContentView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
+		<EmbeddedResource Update="CustomViews\Views\DashedVBar.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</EmbeddedResource>
 		<EmbeddedResource Update="CustomViews\Views\DashedBar.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
 		<EmbeddedResource Update="CustomViews\Views\DashedLineView.xaml">
 			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="CustomViews\Views\SetNullView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
 		<EmbeddedResource Update="CustomViews\Views\SpeechView.xaml">
 			<Generator>MSBuild:Compile</Generator>
@@ -652,23 +679,32 @@
 		<EmbeddedResource Update="CustomViews\Views\NullView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
-		<EmbeddedResource Update="CustomViews\Views\ChartBar.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
 		<EmbeddedResource Update="CustomViews\Views\Toolbar.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\Base\RightProductCategoryMasterPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\Base\RightSideMasterPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
+		<EmbeddedResource Update="Pages\Base\CameraViewPage.xaml">
+		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Pages\Common\EditAllocationProductPage.xaml">
 		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 		</EmbeddedResource>
+		<EmbeddedResource Update="Pages\CustomControls\CommandCell.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</EmbeddedResource>
 		<EmbeddedResource Update="Pages\Home\NewOrderPage.xaml">
 			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Pages\Market\RedeemedPage.xaml">
+		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Pages\Market\RedeemPage.xaml">
+		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Pages\Market\ViewRedeemPage.xaml">
+		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Pages\Root\AdvancedPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Pages\Root\SystemSettingPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
@@ -677,21 +713,6 @@
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Pages\TabsLayout\MainLayoutPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\TabsLayout\AllfunView.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\TabsLayout\HomeView.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\TabsLayout\NewsPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\TabsLayout\MessagesView.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Pages\TabsLayout\NotificationsView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Resources\TextResources.resx">

@@ -1,8 +1,7 @@
-﻿using Wesley.SlideOverKit;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 namespace Wesley.Client.CustomViews
 {
-    public class TopTabbedPage : MenuTabbedPage
+    public class TopTabbedPage : TabbedPage
     {
         private bool _isTabPageVisible;
 
@@ -58,18 +57,15 @@ namespace Wesley.Client.CustomViews
         {
             base.OnAppearing();
 
-            // the tabbed page is now visible...
             _isTabPageVisible = true;
 
-            // go ahead and update the Selected Child-Tab page..
-            this.CurrentPage = this.Children[SelectedTabIndex];
+            if (this.Children.Count > 0)
+                this.CurrentPage = this.Children[SelectedTabIndex];
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-
-            // the Tabbed Page is not visible anymore...
             _isTabPageVisible = false;
         }
 

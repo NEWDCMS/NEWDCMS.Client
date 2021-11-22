@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using Acr.UserDialogs;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
-using Acr.UserDialogs;
 
+using System;
 
 namespace Wesley.Client.ViewModels
 {
@@ -21,7 +20,8 @@ namespace Wesley.Client.ViewModels
 
         public ScanLoginPageViewModel(INavigationService navigationService,
             IAuthenticationService authenticationService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "扫码登录";
 

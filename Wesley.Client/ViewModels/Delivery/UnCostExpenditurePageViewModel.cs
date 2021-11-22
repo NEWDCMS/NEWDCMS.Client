@@ -1,10 +1,11 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Enums;
 using Wesley.Client.Models.Finances;
 using Wesley.Client.Services;
-using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -37,16 +38,18 @@ namespace Wesley.Client.ViewModels
             IReturnReservationBillService returnReservationBillService,
             IReturnBillService returnBillService,
             ISaleReservationBillService saleReservationBillService,
-            ISaleBillService saleBillService) : base(navigationService, globalService, allocationService, advanceReceiptService, receiptCashService, costContractService, costExpenditureService, inventoryService, purchaseBillService, returnReservationBillService, returnBillService, saleReservationBillService, saleBillService, dialogService)
+            ISaleBillService saleBillService
+            ) : base(navigationService, globalService, allocationService, advanceReceiptService, receiptCashService, costContractService, costExpenditureService, inventoryService, purchaseBillService, returnReservationBillService, returnBillService, saleReservationBillService, saleBillService, dialogService)
         {
             Title = "费用支出(0)";
 
             this.Bills = new ObservableCollection<CostExpenditureBillModel>();
 
             //载入未签收费用支出单据
-            this.Load = BillsLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
-                var results = await Sync.Run(() =>
+                var pending = new List<CostExpenditureBillModel>();
+                try
                 {
                     DateTime? startTime = Filter.StartTime;
                     DateTime? endTime = Filter.EndTime;
@@ -62,8 +65,7 @@ namespace Wesley.Client.ViewModels
                     int pagenumber = 0;
                     int pageSize = 20;
 
-                    var pending = new List<CostExpenditureBillModel>();
-                    var result = _costExpenditureService.GetCostExpendituresAsync(makeuserId,
+                    var result = await _costExpenditureService.GetCostExpendituresAsync(makeuserId,
                         customerId,
                         "",
                         employeeId,
@@ -75,7 +77,7 @@ namespace Wesley.Client.ViewModels
                         sortByAuditedTime,
                         0,
                         pagenumber,
-                        pageSize, this.ForceRefresh, calToken: cts.Token).Result;
+                        pageSize, this.ForceRefresh, new System.Threading.CancellationToken());
 
                     if (result != null)
                     {
@@ -87,16 +89,15 @@ namespace Wesley.Client.ViewModels
 
                             return sm;
                         }).ToList();
+
+                        TotalAmount = pending.Select(b => b.SumAmount).Sum();
+                        Title = $"费用支出({pending.Count})";
+
+                        if (pending != null && pending.Any())
+                            Bills = new ObservableCollection<CostExpenditureBillModel>(pending);
                     }
-
-                    TotalAmount = pending.Select(b => b.SumAmount).Sum();
-                    Title = $"费用支出({pending.Count})";
-                    return pending;
-
-                }, (ex) => { Crashes.TrackError(ex); });
-
-                Bills = results;
-                return results;
+                }
+                catch (System.Exception) { }
             });
 
             //费用支出单签收
@@ -116,29 +117,45 @@ namespace Wesley.Client.ViewModels
             });
 
             //菜单选择
-            this.SetMenus((x) =>
+            this.SubscribeMenus((x) =>
             {
-                string key = string.Format("Wesley.CLIENT.PAGES.MARKET.{0}_SELECTEDTAB_{1}", this.PageViewName.ToUpper(), 0);
-                this.MenuBusKey = string.Format(Constants.MENU_KEY, key);
+                //获取当前UTC时间
+                DateTime dtime = DateTime.Now;
+                switch (x)
+                {
+                    case MenuEnum.TODAY:
+                        {
+                            Filter.StartTime = DateTime.Parse(dtime.ToString("yyyy-MM-dd 00:00:00"));
+                            Filter.EndTime = dtime;
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                    case MenuEnum.YESTDAY:
+                        {
+                            Filter.StartTime = dtime.AddDays(-1);
+                            Filter.EndTime = dtime;
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                    case MenuEnum.OTHER:
+                        {
+                            SelectDateRang();
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                }
 
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
-
-            }, 8, 9, 14);
+            }, string.Format(Constants.MENU_DEV_KEY, 1));
 
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()
         {
             base.OnAppearing();
             ((ICommand)Load)?.Execute(null);
-        }
-
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
         }
     }
 }

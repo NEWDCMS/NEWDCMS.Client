@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             xmlns:custom="clr-namespace:DCMS.Client.CustomViews;assembly=DCMS.Client"
              xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
              xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              prism:ViewModelLocator.AutowireViewModel="True"
              x:Name="Current_UnSaleView"
-             x:Class="Wesley.Client.Pages.Market.UnSaleView">
+             x:Class="DCMS.Client.Pages.Market.UnSaleView">
     <AbsoluteLayout>
         <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
                      Command="{Binding RefreshCommand}"
                      RefreshColor="{StaticResource PrimaryDarkColor}">
             <ScrollView>
-                <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                <custom:TaskLoaderView Style="{StaticResource DCMSTaskLoader}"
                                        ViewModelLoader="{Binding BillsLoader}">
                     <CollectionView ItemsSource="{Binding Bills}"
                                     x:Name="orders"

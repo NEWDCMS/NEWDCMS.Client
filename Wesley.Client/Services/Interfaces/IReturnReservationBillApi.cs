@@ -9,7 +9,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/sales/returnreservationbill", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IReturnReservationBillApi
     {
 
@@ -29,6 +29,6 @@ namespace Wesley.Client.Services
         Task<APIResult<ReturnReservationBillModel>> GetBillAsync(int storeId, int userId, int billId, CancellationToken calToken = default);
 
         [Get("/reverse/{storeId}/{userId}/{billId}")]
-        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId, CancellationToken calToken = default);
+        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId, string remark = "", CancellationToken calToken = default);
     }
 }

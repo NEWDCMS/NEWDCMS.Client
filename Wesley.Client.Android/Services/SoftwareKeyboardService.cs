@@ -1,13 +1,19 @@
 ﻿using Wesley.Client.Services;
 using System;
-using Android.App;
-using Wesley.Client.Droid.Utils;
 
-
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(SoftwareKeyboardService))]
 namespace Wesley.Client.Droid.Services
 {
+
+    //public static class Keyboards
+    //{
+    //    internal static Activity Activity;
+    //    public static void Init(Activity activity)
+    //    {
+    //        //Activity = activity;
+    //        //Activity.Window.DecorView.ViewTreeObserver.AddOnGlobalLayoutListener(new SoftKeyboardService());
+    //        //SoftwareKeyboardService softwarekeyboardservice = new SoftwareKeyboardService(this);
+    //    }
+    //}
 
     public class SoftwareKeyboardService : ISoftwareKeyboardService
     {

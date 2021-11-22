@@ -4,6 +4,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
     public class SelectUserPageViewModel : ViewModelBaseCutom
@@ -31,7 +33,8 @@ namespace Wesley.Client.ViewModels
                IUserService userService,
                IWareHousesService wareHousesService,
                IAccountingService accountingService,
-                 IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+                 IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "选择业务员";
             _navigationService = navigationService;
@@ -47,7 +50,7 @@ namespace Wesley.Client.ViewModels
                 .Subscribe(s =>
                 {
                     ((ICommand)SerchCommand)?.Execute(s);
-                }).DisposeWith(DestroyWith);
+                }).DisposeWith(DeactivateWith);
             this.SerchCommand = ReactiveCommand.Create<string>(e =>
             {
                 if (string.IsNullOrEmpty(Filter.SerchKey))
@@ -61,7 +64,7 @@ namespace Wesley.Client.ViewModels
             this.Load = BusinessVisitLoader.Load(async () =>
             {
                 var pending = new List<BusinessVisitList>();
-                var result = await _terminalService.GetAllUserVisitedListAsync(SelectDateTime, this.ForceRefresh, calToken: cts.Token);
+                var result = await _terminalService.GetAllUserVisitedListAsync(SelectDateTime, this.ForceRefresh, new System.Threading.CancellationToken());
                 if (result != null)
                 {
                     var lists = result.ToList();
@@ -94,7 +97,7 @@ namespace Wesley.Client.ViewModels
             });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)

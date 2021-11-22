@@ -9,15 +9,15 @@ using CoreGraphics;
 using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
-using Wesley.Effects;
-using Wesley.Effects.Helpers;
-using Wesley.Effects.iOS.GestureCollectors;
-using Wesley.Effects.iOS.GestureRecognizers;
-using Wesley.Effects.iOS.Renderers;
+using Wesley.Client.Effects;
+using Wesley.Client.Effects.Helpers;
+using Wesley.Client.Effects.iOS.GestureCollectors;
+using Wesley.Client.Effects.iOS.GestureRecognizers;
+using Wesley.Client.Effects.iOS.Renderers;
 
 [assembly: ExportRenderer(typeof(BorderView), typeof(BorderViewRenderer))]
 
-namespace Wesley.Effects.iOS.Renderers {
+namespace Wesley.Client.Effects.iOS.Renderers {
     public class BorderViewRenderer : VisualElementRenderer<BorderView> {
         public static void Link() {
         }

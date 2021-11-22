@@ -45,10 +45,10 @@
                    HorizontalOptions="End"
                    VerticalOptions="CenterAndExpand"></Label>
         </Grid>
-        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+        <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                      Command="{Binding RefreshCommand}"
                      RefreshColor="{StaticResource PrimaryDarkColor}">
-            <ScrollView>
+
                 <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
                                        ViewModelLoader="{Binding CostContractLoader}">
                     <CollectionView ItemsSource="{Binding CostContracts}"
@@ -60,7 +60,7 @@
                                     SelectionChangedCommandParameter="{x:Reference CostContracts}"
                                     RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
                                     RemainingItemsThreshold="{Binding ItemTreshold}"
-                                    SelectionMode="Single">
+                                    SelectionMode="Single" VerticalScrollBarVisibility="Always">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Style="{StaticResource GGrid}"
@@ -115,7 +115,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </custom:TaskLoaderView>
-            </ScrollView>
+
         </RefreshView>
     </StackLayout>
 </pages:BaseContentPage>

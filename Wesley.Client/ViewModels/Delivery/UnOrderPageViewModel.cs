@@ -6,6 +6,8 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,7 +30,8 @@ namespace Wesley.Client.ViewModels
 
         public UnOrderPageViewModel(INavigationService navigationService,
             ISaleBillService saleBillService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "订单签收(0)";
 
@@ -36,20 +39,21 @@ namespace Wesley.Client.ViewModels
 
             this.Bills = new ObservableCollection<DispatchItemModel>();
 
-
             //载入未签收单据
             this.Load = DispatchItemsLoader.Load(async () =>
             {
-                var results = await Sync.Run(() =>
-                {
-                    var pending = new List<DispatchItemModel>();
+                var pending = new List<DispatchItemModel>();
 
+                try
+                {
                     //获取未签收订单单据
-                    var result = _saleBillService.GetUndeliveredSignsAsync(Settings.UserId,
+                    var result = await _saleBillService.GetUndeliveredSignsAsync(Settings.UserId,
                         Filter.StartTime,
                         Filter.EndTime,
                         Filter.BusinessUserId,
-                        Filter.TerminalId, force: this.ForceRefresh, calToken: cts.Token).Result;
+                        Filter.TerminalId,
+                        force: this.ForceRefresh,
+                        calToken: (cts?.Token) ?? new System.Threading.CancellationToken());
 
                     if (result != null)
                     {
@@ -65,12 +69,26 @@ namespace Wesley.Client.ViewModels
 
                         TotalAmount = pending.Select(b => b.OrderAmount).Sum();
                         Title = $"未签收({pending.Count})";
-                    }
-                    return pending;
-                }, (ex) => { Crashes.TrackError(ex); });
 
-                Bills = results;
-                return results;
+                        if (pending != null)
+                            Bills = new ObservableCollection<DispatchItemModel>(pending);
+                        else
+                            Bills = new ObservableCollection<DispatchItemModel>();
+
+                    }
+                    else
+                    {
+                        TotalAmount = 0;
+                        Title = $"未签收(0)";
+                        Bills = new ObservableCollection<DispatchItemModel>();
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Crashes.TrackError(ex);
+                }
+
+                return pending;
             });
 
 
@@ -143,28 +161,45 @@ namespace Wesley.Client.ViewModels
 
 
             //菜单选择
-            this.SetMenus((x) =>
+            this.SubscribeMenus((x) =>
             {
-                string key = string.Format("Wesley.CLIENT.PAGES.MARKET.{0}_SELECTEDTAB_{1}", this.PageViewName.ToUpper(), 0);
-                this.MenuBusKey = string.Format(Constants.MENU_KEY, key);
+                //获取当前UTC时间
+                DateTime dtime = DateTime.Now;
+                switch (x)
+                {
+                    case MenuEnum.TODAY:
+                        {
+                            Filter.StartTime = DateTime.Parse(dtime.ToString("yyyy-MM-dd 00:00:00"));
+                            Filter.EndTime = dtime;
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                    case MenuEnum.YESTDAY:
+                        {
+                            Filter.StartTime = dtime.AddDays(-1);
+                            Filter.EndTime = dtime;
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                    case MenuEnum.OTHER:
+                        {
+                            SelectDateRang();
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                }
 
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
+            }, string.Format(Constants.MENU_DEV_KEY, 0));
 
-            }, 8, 9, 14);
 
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
-        }
 
+        }
         public override void OnAppearing()
         {
             base.OnAppearing();
             ((ICommand)Load)?.Execute(null);
-        }
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
         }
     }
 }

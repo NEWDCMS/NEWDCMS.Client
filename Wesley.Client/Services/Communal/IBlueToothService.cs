@@ -10,11 +10,11 @@ namespace Wesley.Client.Services
     /// </summary>
     public interface IBlueToothService
     {
-        void Connect(string name);
+        Task<bool> ConnectDevice(Printer printer);
         void Disconnect();
-        void SendData(AbstractBill data);
+        void PrintStop();
+        void Print(AbstractBill bill, int type = 58, int repeatPrintNum = 1);
         ObservableRangeCollection<Printer> PairedDevices();
-        void StartDiscovery();
         Task<bool> GetPermissionsAsync();
     }
 }

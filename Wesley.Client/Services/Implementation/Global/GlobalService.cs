@@ -1,5 +1,4 @@
-﻿using Wesley.Client.Enums;
-using Wesley.Client.Models;
+﻿using Wesley.Client.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,13 +16,14 @@ namespace Wesley.Client.Services
         private readonly IProductService _productService;
         private readonly ITerminalService _terminalService;
         private readonly IWareHousesService _wareHousesService;
-
+        private readonly ISettingService _settingService;
 
         private static string URL => GlobalSettings.BaseEndpoint + "api/v3/dcms";
 
 
         public GlobalService(MakeRequest makeRequest,
             IUserService userService,
+            ISettingService settingService,
             IProductService productService,
             ITerminalService terminalService,
             IWareHousesService wareHousesService)
@@ -33,6 +33,7 @@ namespace Wesley.Client.Services
             _productService = productService;
             _terminalService = terminalService;
             _wareHousesService = wareHousesService;
+            _settingService = settingService;
         }
 
         /// <summary>
@@ -71,26 +72,20 @@ namespace Wesley.Client.Services
         /// 初始同步基础数据
         /// </summary>
         /// <returns></returns>
-        public async void InitData(CancellationToken calToken = default)
+        public void InitData(CancellationToken calToken = default)
         {
             try
             {
-                var taskList = new List<Task>
-                {
-                    _userService.GetBusinessUsersAsync(null, "Salesmans",calToken: calToken),
-                    _productService.GetSpecificationAttributeOptionsAsync(calToken:calToken),
-                    _productService.GetBrandsAsync("", 0, 50, calToken:calToken),
-                    _productService.GetAllCategoriesAsync(calToken:calToken),
-                    _terminalService.GetRanksAsync(calToken:calToken),
-                    _terminalService.GetLineTiersByUserAsync(calToken:calToken),
-                    _terminalService.GetLineTiersAsync(calToken:calToken),
-                    _terminalService.GetChannelsAsync(calToken:calToken),
-                    _terminalService.GetDistrictsAsync(calToken:calToken),
-                    _wareHousesService.GetWareHousesAsync((int)WareHouseType.CangKu, calToken:calToken),
-                    _wareHousesService.GetWareHousesAsync((int)WareHouseType.CheLiang, calToken:calToken)
-                };
-
-                await Task.WhenAll(taskList.ToArray()).ConfigureAwait(false);
+                _settingService.GetCompanySettingAsync(new CancellationToken());
+                //_userService.GetBusinessUsersAsync(null, "Salesmans", calToken: calToken);
+                //_productService.GetSpecificationAttributeOptionsAsync(calToken: calToken);
+                //_productService.GetBrandsAsync("", 0, 50, calToken: calToken);
+                //_productService.GetAllCategoriesAsync(calToken: calToken);
+                //_terminalService.GetRanksAsync(calToken: calToken);
+                //_terminalService.GetLineTiersByUserAsync(calToken: calToken);
+                //_terminalService.GetLineTiersAsync(calToken: calToken);
+                //_terminalService.GetChannelsAsync(calToken: calToken);
+                //_terminalService.GetDistrictsAsync(calToken: calToken);
             }
             catch (Exception e)
             {
@@ -101,15 +96,14 @@ namespace Wesley.Client.Services
         /// <summary>
         /// 同步权限
         /// </summary>
-        public async Task SynchronizationPermission(CancellationToken calToken = default)
+        public void SynchronizationPermission(CancellationToken calToken = default)
         {
-
-            await _userService?.GetPermissionRecordSettingAsync((result) =>
-            {
-                if (result != null)
+            _userService?.GetPermissionRecordSettingAsync((result) =>
+           {
+               if (result != null)
                     //用户有效权限集合
                     Settings.AvailablePermissionRecords = JsonConvert.SerializeObject(result);
-            }, calToken);
+           }, calToken);
         }
 
         /// <summary>
@@ -118,97 +112,128 @@ namespace Wesley.Client.Services
         /// <param name="storeId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<APPFeatures> GetAPPFeatures(bool force = false, CancellationToken calToken = default)
+        public void GetAPPFeatures(bool force = false, CancellationToken calToken = default)
         {
-            var model = new APPFeatures();
             try
             {
+                calToken = new CancellationToken();
+
                 int storeId = Settings.StoreId;
                 int userId = Settings.UserId;
-
                 var api = RefitServiceBuilder.Build<IGlobalApi>(URL);
-
                 var cacheKey = RefitServiceBuilder.Cacher("GetAPPFeatures", storeId, userId);
-                var results = await _makeRequest.StartUseCache(api.GetAPPFeatures(storeId, userId, calToken), cacheKey, force, calToken);
-                if (results != null && results?.Code >= 0)
-                {
-                    model.ReportsDatas = results?.Data.ReportsDatas;
-                    model.AppDatas = results?.Data.AppDatas;
-                    model.SubscribeDatas = results?.Data.SubscribeDatas;
-
-                    //报表功能
-                    if (!string.IsNullOrEmpty(Settings.ReportsDatas) && Settings.ReportsDatas != "[]")
+                _makeRequest.StartUseCache_Rx(api.GetAPPFeatures(storeId, userId, calToken), cacheKey, calToken)?.Subscribe((results) =>
                     {
-                        var tapps = results?.Data.ReportsDatas;
-                        var apps = GlobalSettings.ReportsDatas;
-                        if (tapps != null)
+                        if (results != null && results?.Code >= 0)
                         {
-                            foreach (var r in tapps)
+
+                            var oldAppDatas = Settings.AppDatas;
+                            if (force)
                             {
-                                if (!apps.Select(s => s.Id).Contains(r.Id))
+                                Settings.AppDatas = "";
+                                Settings.SubscribeDatas = "";
+                                Settings.ReportsDatas = "";
+                            }
+
+                            //报表功能
+                            var rtapps = results?.Data.ReportsDatas;
+                            if (!string.IsNullOrEmpty(Settings.ReportsDatas) && Settings.ReportsDatas != "[]")
+                            {
+
+                                var apps = GlobalSettings.ReportsDatas;
+                                if (rtapps != null)
                                 {
-                                    apps.Add(r);
+                                    foreach (var r in rtapps)
+                                    {
+                                        if (!apps.Select(s => s.Id).Contains(r.Id))
+                                        {
+                                            apps.Add(r);
+                                        }
+                                    }
+                                }
+                                if (apps != null && apps.Any())
+                                    Settings.ReportsDatas = JsonConvert.SerializeObject(apps);
+                            }
+                            else
+                            {
+                                if (rtapps != null && rtapps.Any())
+                                    Settings.ReportsDatas = JsonConvert.SerializeObject(rtapps);
+                            }
+
+                            //应用功能
+                            var tapps = results?.Data.AppDatas;
+                            if (!string.IsNullOrEmpty(Settings.AppDatas) && Settings.AppDatas != "[]")
+                            {
+                                if (tapps != null)
+                                {
+                                    var apps = GlobalSettings.AppDatas;
+                                    foreach (var r in tapps)
+                                    {
+                                        if (!apps.Select(s => s.Id).Contains(r.Id))
+                                        {
+                                            apps.Add(r);
+                                        }
+                                    }
+                                    if (apps != null && apps.Any())
+                                        Settings.AppDatas = JsonConvert.SerializeObject(apps);
                                 }
                             }
-                        }
-                        Settings.ReportsDatas = JsonConvert.SerializeObject(apps);
-                    }
-                    else
-                    {
-                        Settings.ReportsDatas = JsonConvert.SerializeObject(results?.Data.ReportsDatas);
-                    }
-
-                    //应用功能
-                    if (!string.IsNullOrEmpty(Settings.AppDatas) && Settings.AppDatas != "[]")
-                    {
-                        var tapps = results?.Data.AppDatas;
-                        var apps = GlobalSettings.AppDatas;
-                        if (tapps != null)
-                        {
-                            foreach (var r in tapps)
+                            else
                             {
-                                if (!apps.Select(s => s.Id).Contains(r.Id))
+                                //oldAppDatas
+                                if (!string.IsNullOrEmpty(oldAppDatas))
                                 {
-                                    apps.Add(r);
+                                    var oldapps = JsonConvert.DeserializeObject<List<Module>>(oldAppDatas);
+                                    if (oldapps != null && oldapps.Any())
+                                    {
+                                        var oldNoSelects = oldapps.Where(s => s.Selected == false).ToList();
+                                        foreach (var am in oldNoSelects)
+                                        {
+                                            var cur = tapps.Where(s => s.Id == am.Id).FirstOrDefault();
+                                            if (cur != null)
+                                            {
+                                                cur.Selected = false;
+                                            }
+                                        }
+                                    }
                                 }
+
+                                if (tapps != null && tapps.Any())
+                                    Settings.AppDatas = JsonConvert.SerializeObject(tapps);
+                            }
+
+                            //订阅功能
+                            var stapps = results?.Data.SubscribeDatas;
+                            if (!string.IsNullOrEmpty(Settings.SubscribeDatas) && Settings.SubscribeDatas != "[]")
+                            {
+
+                                var apps = GlobalSettings.SubscribeDatas;
+                                if (stapps != null)
+                                {
+                                    foreach (var r in stapps)
+                                    {
+                                        if (!apps.Select(s => s.Id).Contains(r.Id))
+                                        {
+                                            apps.Add(r);
+                                        }
+                                    }
+                                }
+
+                                if (apps != null && apps.Any())
+                                    Settings.SubscribeDatas = JsonConvert.SerializeObject(apps);
+                            }
+                            else
+                            {
+                                if (stapps != null && stapps.Any())
+                                    Settings.SubscribeDatas = JsonConvert.SerializeObject(stapps);
                             }
                         }
-                        Settings.AppDatas = JsonConvert.SerializeObject(apps);
-                    }
-                    else
-                    {
-                        Settings.AppDatas = JsonConvert.SerializeObject(results?.Data.AppDatas);
-                    }
+                    });
 
-                    //订阅功能
-                    if (!string.IsNullOrEmpty(Settings.SubscribeDatas) && Settings.SubscribeDatas != "[]")
-                    {
-                        var tapps = results?.Data.SubscribeDatas;
-                        var apps = GlobalSettings.SubscribeDatas;
-                        if (tapps != null)
-                        {
-                            foreach (var r in tapps)
-                            {
-                                if (!apps.Select(s => s.Id).Contains(r.Id))
-                                {
-                                    apps.Add(r);
-                                }
-                            }
-                        }
-                        Settings.SubscribeDatas = JsonConvert.SerializeObject(apps);
-                    }
-                    else
-                    {
-                        Settings.SubscribeDatas = JsonConvert.SerializeObject(results?.Data.SubscribeDatas);
-                    }
-                }
-
-                return model;
             }
             catch (Exception e)
             {
                 e.HandleException();
-                return null;
             }
         }
 

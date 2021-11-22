@@ -1,9 +1,6 @@
 ﻿using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
-
-using System;
 using System.Reactive;
 
 namespace Wesley.Client.ViewModels
@@ -24,7 +21,8 @@ namespace Wesley.Client.ViewModels
            ITerminalService terminalService,
            IWareHousesService wareHousesService,
            IAccountingService accountingService,
-            IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
 
             Title = "筛选";
@@ -38,7 +36,9 @@ namespace Wesley.Client.ViewModels
 
             this.CancelCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                await _navigationService.GoBackAsync();
+                var filter = new Models.FilterModel();
+                this.Filter = filter;
+                await _navigationService.GoBackAsync(("Filter", filter));
             });
 
             this.CheckCommand = ReactiveCommand.CreateFromTask<object>(async e =>
@@ -57,16 +57,22 @@ namespace Wesley.Client.ViewModels
            {
                await SelectUser((data) =>
                 {
-                    Filter.BusinessUserId = data.Id;
-                    Filter.BusinessUserName = data.Column;
+                    if (data != null)
+                    {
+                        Filter.BusinessUserId = data.Id;
+                        Filter.BusinessUserName = data.Column;
+                    }
                 }, Enums.UserRoleType.Employees, true);
            });
             this.CatagorySelected = ReactiveCommand.Create<object>(async e =>
            {
                await SelectCatagory((data) =>
                 {
-                    Filter.CatagoryId = data.Id;
-                    Filter.CatagoryName = data.Name;
+                    if (data != null)
+                    {
+                        Filter.CatagoryId = data.Id;
+                        Filter.CatagoryName = data.Name;
+                    }
                 });
            });
             this.ProductSelected = ReactiveCommand.Create<object>(async e =>
@@ -75,13 +81,6 @@ namespace Wesley.Client.ViewModels
                   ("Reference", "FilterPage"),
                   ("SerchKey", Filter.SerchKey));
           });
-
-            this.CheckCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.CustomerSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.UserSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.CatagorySelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ProductSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.CancelCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
         }
 
         /// <summary>

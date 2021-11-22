@@ -5,10 +5,12 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Commands;
 using Prism.Navigation;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+
 namespace Wesley.Client.ViewModels
 {
     public class AddAllocationProductPageViewModel : ViewModelBase
@@ -17,7 +19,8 @@ namespace Wesley.Client.ViewModels
         public AllocationBillModel Bill { get; set; }
 
 
-        public AddAllocationProductPageViewModel(INavigationService navigationService, IDialogService dialogService) : base(navigationService, dialogService)
+        public AddAllocationProductPageViewModel(INavigationService navigationService, IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加调拨商品";
 
@@ -186,32 +189,53 @@ namespace Wesley.Client.ViewModels
             base.OnNavigatedTo(parameters);
             try
             {
+
+                //if (parameters.ContainsKey("Bill"))
+                //{
+                //    if (ReferencePage.Equals("AllocationBillPage"))
+                //    {
+                //        parameters.TryGetValue("Bill", out AllocationBillModel bill);
+                //        if (bill != null)
+                //        {
+                //            foreach (var p in ProductSeries.ToList())
+                //            {
+                //                var outs = p.StockQuantities.Where(q => q.WareHouseId == bill.ShipmentWareHouseId).FirstOrDefault();
+                //                var ins = p.StockQuantities.Where(q => q.WareHouseId == bill.IncomeWareHouseId).FirstOrDefault();
+                //                p.ShipmentUsableQuantity = outs != null ? outs.StockQuantity : 0;
+                //                p.IncomeUsableQuantity = ins != null ? ins.StockQuantity : 0;
+                //            }
+                //        }
+                //    }
+                //}
+
                 if (parameters.ContainsKey("Products"))
                 {
                     parameters.TryGetValue("Products", out List<ProductModel> products);
-                    ProductSeries = new ObservableCollection<ProductModel>(products);
-                }
+                    parameters.TryGetValue("Bill", out AllocationBillModel bill);
 
-
-                if (parameters.ContainsKey("Bill"))
-                {
-                    if (ReferencePage.Equals("AllocationBillPage"))
+                    if (products != null && products.Any())
                     {
-                        parameters.TryGetValue("Bill", out AllocationBillModel Bill);
-
-                        if (Bill != null)
+                        foreach (var p in products)
                         {
-                            foreach (var p in ProductSeries.ToList())
+                            if (bill != null)
                             {
-                                var outs = p.StockQuantities.Where(q => q.WareHouseId == Bill.ShipmentWareHouseId).FirstOrDefault();
-                                var ins = p.StockQuantities.Where(q => q.WareHouseId == Bill.IncomeWareHouseId).FirstOrDefault();
-                                p.ShipmentWareHouseQuantity = outs != null ? outs.StockQuantity : 0;
-                                p.IncomeWareHouseQuantity = ins != null ? ins.StockQuantity : 0;
+                                var outs = p.StockQuantities.Where(q => q.WareHouseId == bill.ShipmentWareHouseId).FirstOrDefault();
+                                var ins = p.StockQuantities.Where(q => q.WareHouseId == bill.IncomeWareHouseId).FirstOrDefault();
+
+                                p.ShipmentUsableQuantity = outs != null ? outs.UsableQuantity : 0;
+                                p.IncomeUsableQuantity = ins != null ? ins.UsableQuantity : 0;
+
+                                p.ShipmentCurrentQuantity = outs != null ? outs.CurrentQuantity : 0;
+                                p.IncomeCurrentQuantity = ins != null ? ins.CurrentQuantity : 0;
+
+                                p.ShipmentWareHouseName = bill.ShipmentWareHouseName;
+                                p.IncomeWareHouseName = bill.IncomeWareHouseName;
                             }
                         }
+
+                        ProductSeries = new ObservableCollection<ProductModel>(products);
                     }
                 }
-
             }
             catch (Exception ex)
             {

@@ -3,10 +3,9 @@
 <tabs:TabTextItem x:Class="Wesley.Client.CustomViews.Tabs.BottomTabItem"
                   xmlns="http://xamarin.com/schemas/2014/forms"
                   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                  xmlns:effects="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                  xmlns:effects="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
                   xmlns:tabs="clr-namespace:Wesley.Client.CustomViews.Tabs;assembly=Wesley.Client"
                   x:Name="RootLayout">
-
     <ContentView.Resources>
         <ResourceDictionary>
             <Style x:Key="TabIcon" TargetType="Image">

@@ -1,6 +1,8 @@
 ﻿using Wesley.Client.Enums;
+using Wesley.Client.Models;
 using Wesley.Client.Models.Terminals;
 using Wesley.Client.Models.WareHouses;
+using Wesley.Client.Pages;
 using Wesley.Client.Pages.Market;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
@@ -9,8 +11,9 @@ using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-
+using System.Reactive.Disposables;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -30,16 +33,13 @@ namespace Wesley.Client.ViewModels
                  IUserService userService,
                  IWareHousesService wareHousesService,
                  IAccountingService accountingService,
-
-
-                 IDialogService dialogService) : base(navigationService,
+                 IDialogService dialogService
+            ) : base(navigationService,
                      productService,
                      terminalService,
                      userService,
                      wareHousesService,
                      accountingService,
-
-
                      dialogService)
         {
             Title = "库存上报";
@@ -59,7 +59,8 @@ namespace Wesley.Client.ViewModels
           {
               await this.NavigateAsync("AddReportProductPage", ("InventoryReportItemModel", item));
               this.Selecter = null;
-          });
+          })
+           .DisposeWith(DeactivateWith);
 
             //添加商品
             this.AddProductCommand = ReactiveCommand.Create<object>(async e =>
@@ -80,41 +81,33 @@ namespace Wesley.Client.ViewModels
             //提交
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.StockReportSave);
+                //await this.Access(AccessGranularityEnum.StockReportSave);
+                return await this.Access(AccessGranularityEnum.StockReportSave, async () =>
+                {
+                    Bill.StoreId = Settings.StoreId;
+                    Bill.BusinessUserId = Settings.UserId;
+                    Bill.ReversedUserId = 0;
+                    Bill.ReversedStatus = false;
 
-                Bill.StoreId = Settings.StoreId;
-                Bill.BusinessUserId = Settings.UserId;
-                Bill.ReversedUserId = 0;
-                Bill.ReversedStatus = false;
-
-                return await SubmitAsync(Bill, 0, _wareHousesService.CreateOrUpdateAsync, (result) =>
-                 {
-                     Bill = new InventoryReportBillModel();
-                 }, token: cts.Token);
+                    return await SubmitAsync(Bill, 0, _wareHousesService.CreateOrUpdateAsync, (result) =>
+                     {
+                         Bill = new InventoryReportBillModel();
+                     }, token: new System.Threading.CancellationToken());
+                });
             },
             this.IsValid());
 
-            //菜单选择
-            this.SetMenus((x) =>
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
             {
-                switch (x)
-                {
-                    case Enums.MenuEnum.CLEAR:
-                        {
-                            ClearForm(() =>
+                { MenuEnum.CLEAR, (m,vm) => {
+                    ClearForm(() =>
                             {
-                                Bill.Items.Clear();
+                                Bill.Items?.Clear();
                             });
-                        }
-                        break;
-                }
-            }, 4);
+                } },
+            });
 
-
-            this.AddProductCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-
-            this.ExceptionsSubscribe();
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
@@ -142,11 +135,11 @@ namespace Wesley.Client.ViewModels
                         {
                             product.BigStoreQuantity = product.InventoryReportStoreQuantities.Select(b => b.BigStoreQuantity).Sum();
                             product.SmallStoreQuantity = product.InventoryReportStoreQuantities.Select(b => b.SmallStoreQuantity).Sum();
-                            Bill.Items.Add(product);
+                            Bill.Items?.Add(product);
                         }
                         else
                         {
-                            var p = Bill.Items.Where(x => x.ProductId == product.ProductId).FirstOrDefault();
+                            var p = Bill.Items?.Where(x => x.ProductId == product.ProductId).FirstOrDefault();
                             p.SmallQuantity = product.SmallQuantity;
                             p.BigQuantity = product.BigQuantity;
                             p.SmallStoreQuantity = product.InventoryReportStoreQuantities.Select(b => b.SmallStoreQuantity).Sum();
@@ -159,6 +152,14 @@ namespace Wesley.Client.ViewModels
             {
                 Crashes.TrackError(ex);
             }
+        }
+
+        public override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(4);
         }
     }
 }

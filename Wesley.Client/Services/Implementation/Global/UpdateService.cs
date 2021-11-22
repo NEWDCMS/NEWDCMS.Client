@@ -22,7 +22,10 @@ namespace Wesley.Client.Services
         {
             try
             {
-                var api = RefitServiceBuilder.Build<IUpdateApi>(URL);
+                if (!Settings.IsAuthenticated)
+                    return null;
+
+                var api = RefitServiceBuilder.Build<IUpdateApi>(URL, false);
                 var result = await _makeRequest.Start(api.GetCurrentVersionAsync(calToken), calToken);
                 if (result != null)
                     return result;

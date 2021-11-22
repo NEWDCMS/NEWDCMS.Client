@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                       xmlns:customControls="clr-namespace:Wesley.Client.Pages.CustomControls"
+                       xmlns:loading="clr-namespace:Wesley.Client.CustomViews"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
@@ -63,7 +63,7 @@
                            Text="{Binding Description}"
                            TextColor="{StaticResource DividerColor}"
                            VerticalOptions="Start"
-                           Style="{StaticResource H4-Regular}" />
+                            />
                     <!--2-->
                     <BoxView HeightRequest=".7"
                              Grid.Row="2"
@@ -73,24 +73,7 @@
             </DataTemplate>
         </CollectionView.ItemTemplate>
         <CollectionView.EmptyView>
-            <ContentView>
-                <StackLayout VerticalOptions="CenterAndExpand">
-                    <customControls:FloatingButton Icon="{StaticResource FontAwesomeRefresh}"
-                                                   TextColor="{StaticResource AccentColor}"
-                                                  
-                                                   BackgroundColor="Transparent"
-                                                   HorizontalOptions="Center"
-                                                   FontSize="25"
-                                                   CornerRadius="90"
-                                                   WidthRequest="40"
-                                                   HeightRequest="{StaticResource RH45}"
-                                                   PressedCommand="{Binding RefreshCommand}" />
-                    <Label Text="抱歉，网络开小差了...."
-                           FontSize="{StaticResource FT14}"
-                           Margin="10"
-                           HorizontalOptions="CenterAndExpand" />
-                </StackLayout>
-            </ContentView>
+            <loading:LoadingContentView />
         </CollectionView.EmptyView>
     </CollectionView>
 </pages:BaseContentPage>

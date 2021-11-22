@@ -14,7 +14,7 @@ namespace Wesley.Client.Pages
                 try
                 {
                     InitializeComponent();
-                    ToolbarItems.Clear();
+                    ToolbarItems?.Clear();
                     var item = PageExtensions.BulidButton("\uf1f8", () =>
                     {
                         if (ViewModel != null)

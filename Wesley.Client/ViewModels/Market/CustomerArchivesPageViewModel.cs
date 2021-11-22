@@ -1,13 +1,12 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Models.Census;
 using Wesley.Client.Models.Terminals;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -18,8 +17,14 @@ namespace Wesley.Client.ViewModels
 {
     public class CustomerArchivesPageViewModel : ViewModelBaseCutom
     {
+        private readonly ILiteDbService<VisitStore> _conn;
         public ReactiveCommand<object, Unit> BusinessSelected { get; }
         [Reactive] public TerminalModel Selecter { get; set; }
+        [Reactive] public bool DataVewEnable { get; set; } = true;
+        [Reactive] public bool NullViewEnable { get; set; }
+        public double Longitude { get; set; } = 0;
+        public double Latitude { get; set; } = 0;
+
 
         public ReactiveCommand<TerminalModel, Unit> OpenNavigationToCommand { get; }
 
@@ -29,19 +34,18 @@ namespace Wesley.Client.ViewModels
                ITerminalService terminalService,
                IWareHousesService wareHousesService,
                IAccountingService accountingService,
-                 IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+               IDialogService dialogService,
+               ILiteDbService<VisitStore> conn) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "客户档案";
-
-            Filter.BusinessUserName = Settings.UserRealName;
-            Filter.BusinessUserId = Settings.UserId;
-
+            _conn = conn;
 
             //搜索
             this.WhenAnyValue(x => x.Filter.SerchKey)
+                .Skip(1)
                 .Select(s => s)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
-                .Subscribe(s => ((ICommand)Load)?.Execute(null)).DisposeWith(DestroyWith);
+                .Subscribe(s => ((ICommand)Load)?.Execute(null)).DisposeWith(DeactivateWith);
 
             //片区选择
             this.WhenAnyValue(x => x.Filter.DistrictId)
@@ -49,83 +53,139 @@ namespace Wesley.Client.ViewModels
                .Select(s => s)
                .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
                .Subscribe(s => ((ICommand)Load)?.Execute(null))
-               .DisposeWith(DestroyWith);
-
+               .DisposeWith(DeactivateWith);
 
             //加载数据
-            this.Load = TerminalsLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
-                //重载时排它
-                ItemTreshold = 1;
                 try
                 {
-                    //清除列表
-                    Terminals.Clear();
-                    var items = await _terminalService.GetTerminalsPage(Filter, LineTier, 0, PageSize, this.ForceRefresh, calToken: cts.Token);
-                    foreach (var item in items)
+                    //重载时排它
+                    ItemTreshold = 1;
+                    Terminals?.Clear();
+
+                    DataVewEnable = false;
+                    NullViewEnable = true;
+
+                    string searchStr = Filter?.SerchKey;
+                    int? districtId = Filter?.DistrictId;
+                    int? channelId = Filter?.ChannelId;
+                    int? businessUserId = Filter?.BusinessUserId;
+                    int? rankId = Filter?.RankId;
+                    int pageNumber = 0;
+                    int pageSize = PageSize;
+                    int? lineTierId = Filter?.LineId;
+                    int distanceOrderBy = Filter.DistanceOrderBy;
+
+                    var tuple = await _terminalService.SearchTerminals(searchStr,
+                                districtId,
+                                channelId,
+                                rankId,
+                                lineTierId,
+                                businessUserId,
+                                true,
+                                distanceOrderBy,
+                                0,
+                                0,
+                                0,
+                                pageIndex: pageNumber,
+                                pageSize: pageSize);
+
+                    var series = tuple.Item2;
+                    Title = $"客户档案({tuple.Item1})家";
+
+                    if (series != null && series.Any())
                     {
-                        if (Terminals.Count(s => s.Id == item.Id) == 0)
-                        {
-                            Terminals.Add(item);
-                        }
+                        this.Terminals = new AsyncObservableCollection<TerminalModel>(series);
+                    }
+                    else 
+                    {
+                        ItemTreshold = -1;
                     }
                 }
                 catch (Exception ex)
                 {
                     Crashes.TrackError(ex);
                 }
-
-                if (Terminals.Count > 0)
-                    this.Terminals = new ObservableRangeCollection<TerminalModel>(Terminals);
-
-                return Terminals;
+                finally
+                {
+                    NullViewEnable = false;
+                    DataVewEnable = true;
+                }
             });
+
             //以增量方式加载数据
             this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
             {
-                int pageIdex = 0;
-                if (Terminals.Count != 0)
-                    pageIdex = Terminals.Count / (PageSize == 0 ? 1 : PageSize);
+                if (ItemTreshold == -1) return;
 
-                if (PageCounter < pageIdex)
+                try
                 {
-                    PageCounter = pageIdex;
-                    using (var dig = UserDialogs.Instance.Loading("加载中..."))
+                    int pageIdex = Terminals.Count / (PageSize == 0 ? 1 : PageSize);
+                    if (pageIdex > 0)
                     {
-                        try
+                        using (var dig = UserDialogs.Instance.Loading("加载中..."))
                         {
-                            var items = await _terminalService.GetTerminalsPage(Filter, LineTier, pageIdex, PageSize, this.ForceRefresh, calToken: cts.Token);
-                            var previousLastItem = Terminals.Last();
-                            foreach (var item in items)
+                            string searchStr = Filter?.SerchKey;
+                            int? districtId = Filter?.DistrictId;
+                            int? channelId = Filter?.ChannelId;
+                            int? businessUserId = Filter?.BusinessUserId;
+                            int? rankId = Filter?.RankId;
+                            int pageNumber = pageIdex;
+                            int pageSize = PageSize;
+                            int? lineTierId = Filter?.LineId;
+                            int distanceOrderBy = Filter.DistanceOrderBy;
+
+                            //string searchStr = "", int? districtId = 0, int? channelId = 0, int? rankId = 0, int? lineId = 0, int? businessUserId = 0, bool status = true, int distanceOrderBy = 0, double lat = 0, double lng = 0, double range = 1.5, int pageIndex = 0, int pageSize = 20
+                            var tuple = await _terminalService.SearchTerminals(searchStr,
+                                districtId,
+                                channelId,
+                                rankId,
+                                lineTierId,
+                                businessUserId,
+                                true,
+                                distanceOrderBy,
+                                0,
+                                0,
+                                0,
+                                pageIndex: pageNumber,
+                                pageSize: pageSize);
+
+                            var series = tuple.Item2;
+                            if (series != null && series.Any())
                             {
-                                if (Terminals.Count(s => s.Id == item.Id) == 0)
+                                foreach (var s in series)
                                 {
-                                    Terminals.Add(item);
+                                    if (!(this.Terminals?.Select(s => s.Id).Contains(s.Id) ?? false))
+                                    {
+                                        this.Terminals?.Add(s);
+                                    }
                                 }
                             }
-
-                            if (items.Count() == 0 || items.Count() == Terminals.Count)
+                            else
                             {
                                 ItemTreshold = -1;
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Crashes.TrackError(ex);
-                            ItemTreshold = -1;
-                        }
                     }
                 }
-            }, this.WhenAny(x => x.Terminals, x => x.GetValue().Count > 0));
-
+                catch (Exception ex)
+                {
+                    Crashes.TrackError(ex);
+                    ItemTreshold = -1;
+                }
+            });
 
             //打开导航
             this.OpenNavigationToCommand = ReactiveCommand.Create<TerminalModel>(e =>
             {
                 try
                 {
-                    var _baiduLocationService = App.Resolve<IBaiduNavigationService>();
-                    _baiduLocationService?.OpenNavigationTo(e.Location_Lat ?? 0, e.Location_Lng ?? 0, e.Address);
+                    if (e != null)
+                    {
+                        var _baiduLocationService = App.Resolve<IBaiduNavigationService>();
+                        _baiduLocationService?.OpenNavigationTo(e.Location_Lat ?? 0, e.Location_Lng ?? 0, e.Address);
+                    }
                 }
                 catch (Exception)
                 {
@@ -139,9 +199,11 @@ namespace Wesley.Client.ViewModels
             .Where(x => x != null)
             .SubOnMainThread(async item =>
            {
-               await this.NavigateAsync("AddCustomerPage", ("Terminaler", item), ("Edit", true));
+               if (item != null)
+                   await this.NavigateAsync("AddCustomerPage", ("Terminaler", item), ("Edit", true));
                this.Selecter = null;
-           });
+           })
+           .DisposeWith(DeactivateWith);
 
             //添加客户
             this.AddCommand = ReactiveCommand.Create<object>(async e => await this.NavigateAsync("AddCustomerPage", ("Edit", false)));
@@ -151,22 +213,44 @@ namespace Wesley.Client.ViewModels
             {
                 await SelectUser((data) =>
                  {
-                     Filter.BusinessUserId = data.Id;
-                     Filter.BusinessUserName = data.Column;
-                     ((ICommand)Load)?.Execute(null);
+                     if (data != null)
+                     {
+                         Filter.BusinessUserId = data.Id;
+                         Filter.BusinessUserName = data.Column;
+                         ((ICommand)Load)?.Execute(null);
+                     }
                  }, Enums.UserRoleType.Employees);
             });
-
-            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.BusinessSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
+
+        public override void OnNavigatedTo(INavigationParameters parameters)
+        {
+            base.OnNavigatedTo(parameters);
+            try
+            {
+                if (parameters.ContainsKey("reffPage"))
+                {
+                    parameters.TryGetValue("reffPage", out string reffPage);
+                    if (reffPage.Equals("AddCustomerPage"))
+                    {
+                        ((ICommand)Load)?.Execute(null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
+            }
+        }
+
 
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            if (!this.Terminals.Any())
+                ((ICommand)Load)?.Execute(null);
         }
     }
 }

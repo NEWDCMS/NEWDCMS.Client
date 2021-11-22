@@ -1,7 +1,6 @@
 ﻿using System;
-using Xamarin.Forms.Internals;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public delegate void SoftKeyboardEventHandler(SoftKeyboardEventArgs e);
 

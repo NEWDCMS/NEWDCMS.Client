@@ -56,7 +56,6 @@ namespace Wesley.Client.ViewModels
         /// 空状态消息
         /// </summary>
         string EmptyStateMessage { get; }
-
         /// <summary>
         /// 显示Loader
         /// </summary>
@@ -92,29 +91,17 @@ namespace Wesley.Client.ViewModels
             EmptyStateMessage = emptyStateMessage;
         }
 
-        /// <summary>
-        /// 重载
-        /// </summary>
         public IReactiveCommand ReloadCommand { get; protected set; }
-        /// <summary>
-        /// 刷新
-        /// </summary>
         public IReactiveCommand RefreshCommand { get; protected set; }
-
         public bool IsCompleted => CurrentLoadingTask.IsCompleted;
-
         public abstract bool IsNotStarted { get; }
-
         public bool IsNotCompleted => CurrentLoadingTask.IsNotCompleted;
-
         public bool IsSuccessfullyCompleted => CurrentLoadingTask.IsSuccessfullyCompleted;
-
         public bool IsCanceled => CurrentLoadingTask.IsCanceled;
-
         public bool IsFaulted => CurrentLoadingTask.IsFaulted;
 
 
-        [Reactive] public bool ShowLoader { get; set; }
+        [Reactive] public bool ShowLoader { get; set; } = true;
         [Reactive] public bool ShowRefresher { get; set; }
         [Reactive] public bool ShowResult { get; set; }
         [Reactive] public bool ShowError { get; set; }
@@ -125,7 +112,7 @@ namespace Wesley.Client.ViewModels
         [Reactive] public string EmptyStateMessage { get; set; }
 
         /// <summary>
-        /// 排它锁（同步互斥）
+        /// 同步互斥
         /// </summary>
         protected object SyncRoot { get; } = new object();
 
@@ -147,7 +134,6 @@ namespace Wesley.Client.ViewModels
         {
             // Log.Info("Task completed with fault");
             //RaisePropertyChanged(nameof(IsFaulted));
-
             ShowLoader = false;
             ShowError = !isRefreshing;
             ShowErrorNotification = isRefreshing;
@@ -383,7 +369,6 @@ namespace Wesley.Client.ViewModels
         protected override void Reset(bool isRefreshing)
         {
             base.Reset(isRefreshing);
-
             //RaisePropertyChanged(nameof(Result));
         }
 

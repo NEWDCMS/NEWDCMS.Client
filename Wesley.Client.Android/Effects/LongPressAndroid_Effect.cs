@@ -1,10 +1,10 @@
-﻿using Wesley.Effects.Droid;
+﻿using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Wesley.Effects;
 
 [assembly: ExportEffect(typeof(LongPressAndroid_Effect), nameof(LongPressEffect))]
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
     /// <summary>
     /// 长按事件响应
@@ -39,8 +39,8 @@ namespace Wesley.Effects.Droid
 
         private void Control_LongClick(object sender, Android.Views.View.LongClickEventArgs e)
         {
-            var command = Wesley.Effects.LongPressEffect.GetCommand(Element);
-            command?.Execute(Wesley.Effects.LongPressEffect.GetCommandParameter(Element));
+            var command = Wesley.Client.Effects.LongPressEffect.GetCommand(Element);
+            command?.Execute(Wesley.Client.Effects.LongPressEffect.GetCommandParameter(Element));
         }
 
 

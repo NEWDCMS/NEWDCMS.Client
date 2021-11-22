@@ -24,7 +24,6 @@ namespace Wesley.Client.Models.Finances
         public int AccountingOptionId { get; set; }
         public string AccountingOptionName { get; set; }
         public string AuditedUserName { get; set; }
-        public int? PrintNum { get; set; }
         public IList<FinancialIncomeItemModel> Items { get; set; }
         public IList<AccountMaping> FinancialIncomeBillAccountings { get; set; }
 
@@ -52,6 +51,7 @@ namespace Wesley.Client.Models.Finances
     /// </summary>
     public class FinancialIncomeUpdateModel
     {
+        public string BillNumber { get; set; }
         public int SalesmanId { get; set; }
         public string Remark { get; set; }
         public List<FinancialIncomeItemModel> Items { get; set; } = new List<FinancialIncomeItemModel>();

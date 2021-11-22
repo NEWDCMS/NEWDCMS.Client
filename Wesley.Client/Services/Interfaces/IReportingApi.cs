@@ -1,4 +1,5 @@
 ﻿using Wesley.Client.Models.Report;
+using Wesley.Client.Models.Sales;
 using Wesley.Client.Models.WareHouses;
 using Refit;
 using System;
@@ -10,7 +11,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/reporting", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:10:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IReportingApi
     {
         [Get("/saleReport/getBrandRanking/{storeId}")]
@@ -38,6 +39,10 @@ namespace Wesley.Client.Services
         [Get("/saleReport/getHotSaleRanking/{storeId}")]
         Task<APIResult<IList<HotSaleRanking>>> GetHotSaleRankingAsync(int storeId, int? terminalId = null, int? businessUserId = null, int? brandId = null, int? categoryId = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken calToken = default);
 
+
+        [Get("/saleReport/getSaleReportItem/{storeId}")]
+        Task<APIResult<IList<SaleReportItem>>> GetHotSaleReportItemAsync(int storeId, int? productId = null, string productName = null, int? categoryId = null, int? brandId = null, int? terminalId = null, string terminalName = null, string billNumber = null, int? saleTypeId = null, int? businessUserId = null, int? wareHouseId = null, int? payTypeId = null, int? deliveryUserId = null, int? rankId = null, string remark = null, int? channelId = null, DateTime? startTime = null, DateTime? endTime = null, bool? costContractProduct = null, int? districtId = null, int pagenumber = 0, CancellationToken calToken = default);
+
         [Get("/saleReport/getNewCustomerAnalysis/{storeId}")]
         Task<APIResult<NewCustomerAnalysis>> GetNewCustomerAnalysisAsync(int storeId, int? businessUserId = null, CancellationToken calToken = default);
 
@@ -58,5 +63,8 @@ namespace Wesley.Client.Services
 
         [Get("/saleReport/getUnSaleRanking/{storeId}")]
         Task<APIResult<IList<UnSaleRanking>>> GetUnSaleRankingAsync(int storeId, int? businessUserId = null, int? brandId = null, int? categoryId = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken calToken = default);
+
+        [Get("/saleReport/getBusinessAnalysis/{storeId}")]
+        Task<APIResult<BusinessAnalysis>> GetBusinessAnalysis(int storeId, int? type, bool force = false, CancellationToken calToken = default);
     }
 }

@@ -9,7 +9,7 @@ namespace Wesley.Client.CustomViews
     {
         private bool _hideBadgeIfTextIsZero = true;
 
-        public event EventHandler Clicked;
+        //public event EventHandler Clicked;
 
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(BadgeButton));
         public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(BadgeButton));

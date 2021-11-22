@@ -1,10 +1,11 @@
-﻿using Wesley.Client.Models.Report;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Report;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Forms;
 
 namespace Wesley.Client.ViewModels
 {
@@ -25,77 +27,26 @@ namespace Wesley.Client.ViewModels
         public SaleTrendChatPageViewModel(INavigationService navigationService,
            IProductService productService,
            IReportingService reportingService,
-             IDialogService dialogService) : base(navigationService,
+             IDialogService dialogService
+            ) : base(navigationService,
                productService,
                reportingService,
-
-
                dialogService)
         {
             Title = "销量走势图";
             this.PageType = Enums.ChartPageEnum.SaleTrendChat_Template;
 
-            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DestroyWith);
+            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DeactivateWith);
             this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
                 try
                 {
                     //初始化 
-                    var result = await _reportingService.GetSaleTrendingAsync(string.IsNullOrEmpty(DateType) ? "day" : DateType, this.ForceRefresh, calToken: cts.Token);
+                    var result = await _reportingService.GetSaleTrendingAsync(string.IsNullOrEmpty(DateType) ? "day" : DateType, this.ForceRefresh, new System.Threading.CancellationToken());
                     if (result != null)
                     {
                         RefreshData(result.ToList());
                     }
-
-
-#if DEBUG
-                    //模拟
-                    var random = new Random();
-                    var series = new List<SaleTrending>();
-
-                    series.Add(new SaleTrending
-                    {
-                        DateType = "day",
-                        SaleDate = DateTime.Now.AddDays(random.Next(0, 10)),
-                        SaleAmount = random.Next(100, 10000),
-                        SaleReturnAmount = random.Next(20, 10000),
-                        NetAmount = random.Next(10, 1000)
-                    });
-                    series.Add(new SaleTrending
-                    {
-                        DateType = "day",
-                        SaleDate = DateTime.Now.AddDays(random.Next(0, 10)),
-                        SaleAmount = random.Next(100, 10000),
-                        SaleReturnAmount = random.Next(20, 10000),
-                        NetAmount = random.Next(10, 1000)
-                    });
-                    series.Add(new SaleTrending
-                    {
-                        DateType = "day",
-                        SaleDate = DateTime.Now.AddDays(random.Next(0, 10)),
-                        SaleAmount = random.Next(100, 10000),
-                        SaleReturnAmount = random.Next(20, 10000),
-                        NetAmount = random.Next(10, 1000)
-                    });
-                    series.Add(new SaleTrending
-                    {
-                        DateType = "day",
-                        SaleDate = DateTime.Now.AddDays(random.Next(0, 10)),
-                        SaleAmount = random.Next(100, 10000),
-                        SaleReturnAmount = random.Next(20, 10000),
-                        NetAmount = random.Next(10, 1000)
-                    });
-                    series.Add(new SaleTrending
-                    {
-                        DateType = "day",
-                        SaleDate = DateTime.Now.AddDays(random.Next(0, 10)),
-                        SaleAmount = random.Next(100, 10000),
-                        SaleReturnAmount = random.Next(20, 10000),
-                        NetAmount = random.Next(10, 1000)
-                    });
-
-                    RefreshData(series);
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -103,31 +54,12 @@ namespace Wesley.Client.ViewModels
                 }
             }));
 
-            //菜单选择
-            this.SetMenus((x) =>
-           {
-               switch (x)
-               {
-                   case Enums.MenuEnum.TODAY:
-                       {
-                           DateType = "DAY";
-                       }
-                       break;
-                   case Enums.MenuEnum.MONTH:
-                       {
-                           DateType = "MONTH";
-                       }
-                       break;
-                   case Enums.MenuEnum.THISWEEBK:
-                       {
-                           DateType = "WEEK";
-                       }
-                       break;
-               }
-           }, 8, 10, 13);
+            //绑定页面菜单
+            BindFilterDateMenus(true);
+
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
@@ -168,25 +100,33 @@ namespace Wesley.Client.ViewModels
             RankSeries = new ObservableCollection<SaleTrending>(series);
             TotalAmount = RankSeries.Select(s => s.NetAmount).Sum();
 
-
-            var entries = new List<ChartEntry>();
-            int j = 0;
-            foreach (var t in RankSeries.Take(10))
+            var ranks = series.ToList();
+            if (ranks.Count > 10)
             {
-                entries.Add(new ChartEntry((float)(t?.NetAmount ?? 0))
-                {
-                    Label = t.SaleDateName,
-                    ValueLabel = (t?.NetAmount ?? 0).ToString(),
-                    Color = ChartDataProvider.Colors[j]
-                });
-                j++;
+                ranks = ranks.Take(10).ToList();
             }
-            ChartData = ChartDataProvider.CreateLineChart(entries);
+            var data = new ChartViewConfig()
+            {
+                BackgroundColor = Color.White,
+                ChartConfig = new ChartConfig
+                {
+                    type = Wesley.ChartJS.ChartTypes.Line,
+                    data = ChartDataProvider.GetSaleTrendChat(ranks),
+                }
+            };
+            ChartConfig = data;
         }
+
+
+
 
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+
+            _popupMenu?.Show(8, 10, 13, 14);
+
             ((ICommand)Load)?.Execute(null);
         }
     }

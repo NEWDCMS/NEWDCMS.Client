@@ -14,5 +14,7 @@ namespace Wesley.Client.Services
         Task<IList<BrandModel>> GetBrandsAsync(string name = "", int pagenumber = 0, int pageSize = 50, bool force = false, CancellationToken calToken = default);
         Task<PageData<ProductModel>> GetProductsAsync(int[] categoryIds, string key = "", int? terminalid = 0, int wareHouseId = 0, int pageIndex = 0, int pageSize = 20, bool? usablequantity = true, bool force = false, CancellationToken calToken = default);
         Task<SpecificationModel> GetSpecificationAttributeOptionsAsync(bool force = false, CancellationToken calToken = default);
+        Task<ProductModel> GetProductByIdAsync(int productId, CancellationToken calToken = default);
+        Task<IList<ProductModel>> GetProductByIdsAsync(int wareHouseId, int[] productIds, CancellationToken calToken = default);
     }
 }

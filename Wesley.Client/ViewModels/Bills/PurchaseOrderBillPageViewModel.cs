@@ -1,8 +1,11 @@
-﻿using Wesley.Client.Enums;
+﻿using Acr.UserDialogs;
+using Wesley.Client.CustomViews;
+using Wesley.Client.Enums;
 using Wesley.Client.Models;
 using Wesley.Client.Models.Products;
 using Wesley.Client.Models.Purchases;
 using Wesley.Client.Models.Settings;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
@@ -10,7 +13,7 @@ using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,6 +24,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+
 
 namespace Wesley.Client.ViewModels
 {
@@ -45,7 +49,8 @@ namespace Wesley.Client.ViewModels
            IPurchaseBillService purchaseBillService,
            IManufacturerService manufacturerService,
            IMicrophoneService microphoneService,
-             IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+             IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "采购单";
 
@@ -59,16 +64,35 @@ namespace Wesley.Client.ViewModels
 
 
             //验证
+            var valid_IsReversed = this.ValidationRule(x => x.Bill.ReversedStatus, _isBool, "已红冲单据不能操作");
+            var valid_IsAudited = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
             var valid_ManufacturerId = this.ValidationRule(x => x.Bill.ManufacturerId, _isZero, "供应商未指定");
             var valid_WareHouseId = this.ValidationRule(x => x.Bill.WareHouseId, _isZero, "仓库未指定");
             var valid_ProductCount = this.ValidationRule(x => x.Bill.Items.Count, _isZero, "请添加商品项目");
             var valid_SelectesCount = this.ValidationRule(x => x.PaymentMethods.Selectes.Count, _isZero, "请选择支付方式");
-            var valid_IsVieweBill = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
+
 
             //初始化 
             this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
-                var result = await _purchaseBillService.GetInitDataAsync(calToken: cts.Token);
+                var whs = await _wareHousesService.GetWareHousesAsync(this.BillType, force: true);
+                if (whs != null && whs.FirstOrDefault() != null)
+                {
+                    var wh = whs.FirstOrDefault();
+                    if (Bill.WareHouseId == 0)
+                    {
+                        WareHouse = wh;
+                        Bill.WareHouseId = wh.Id;
+                    }
+
+                    if (string.IsNullOrEmpty(Bill.WareHouseName))
+                        Bill.WareHouseName = wh.Name;
+
+
+
+                }
+
+                var result = await _purchaseBillService.GetInitDataAsync(calToken: new System.Threading.CancellationToken());
                 if (result != null)
                 {
                     var defaultAccs = result.PurchaseBillAccountings.Select(s => new AccountingModel()
@@ -81,61 +105,75 @@ namespace Wesley.Client.ViewModels
                     }).ToList();
 
                     PaymentMethods.Selectes = new ObservableCollection<AccountingModel>(defaultAccs);
-
-                    //if (Bill.WareHouseId == 0)
-                    //    Bill.WareHouseId = result.WareHouseId;
-
-                    //if (string.IsNullOrEmpty(Bill.WareHouseName))
-                    //    Bill.WareHouseName = result.WareHouseName;
                 }
             }));
 
             //提交单据
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.PurchaseBillsSave);
+                //await this.Access(AccessGranularityEnum.PurchaseBillsSave);
 
-                var dateTime = UtcHelper.ConvertDateTimeInt(DateTime.Now.ToUniversalTime());
-                var postMData = new PurchaseItemUpdateModel()
+                return await this.Access(AccessGranularityEnum.PurchaseBillsSave, async () =>
                 {
-                    //供应商
-                    ManufacturerId = Bill.ManufacturerId,
-                    //业务员
-                    BusinessUserId = Bill.BusinessUserId,
-                    //仓库
-                    WareHouseId = Bill.WareHouseId,
-                    //交易日期
-                    //TransactionDate = DateTime.Now,
-                    TransactionDate = dateTime,
-                    //按最小单位采购
-                    IsMinUnitPurchase = true,
-                    //备注
-                    Remark = Bill.Remark,
-                    //优惠金额
-                    PreferentialAmount = Bill.PreferentialAmount,
-                    //优惠后金额
-                    PreferentialEndAmount = Bill.SumAmount - Bill.PreferentialAmount,
-                    //欠款金额
-                    OweCash = Bill.OweCash,
-                    //商品项目(保存量大于零的商品)
-                    Items = Bill.Items.Where(i => i.Quantity > 0).ToList(),
-                    //收款账户
-                    Accounting = PaymentMethods.Selectes.Select(a =>
+                    if (this.Bill.ReversedStatus)
                     {
-                        return new AccountMaping()
-                        {
-                            AccountingOptionId = a.AccountingOptionId,
-                            CollectionAmount = a.CollectionAmount,
-                            Name = a.Name,
-                            BillId = 0,
-                        };
-                    }).ToList()
-                };
+                        _dialogService.ShortAlert("已红冲单据不能操作");
+                        return Unit.Default;
+                    }
 
-                return await SubmitAsync(postMData, Bill.Id, _purchaseBillService.CreateOrUpdateAsync, (result) =>
-                {
-                    Bill = new PurchaseBillModel();
-                }, token: cts.Token);
+                    if (this.Bill.AuditedStatus)
+                    {
+                        _dialogService.ShortAlert("已审核单据不能操作");
+                        return Unit.Default;
+                    }
+
+                    var dateTime = UtcHelper.ConvertDateTimeInt(DateTime.Now.ToUniversalTime());
+
+                    if (Bill.BusinessUserId == 0)
+                        Bill.BusinessUserId = Settings.UserId;
+
+                    var postMData = new PurchaseItemUpdateModel()
+                    {
+                        BillNumber = this.Bill.BillNumber,
+                        //供应商
+                        ManufacturerId = Bill.ManufacturerId,
+                        //业务员
+                        BusinessUserId = Bill.BusinessUserId,
+                        //仓库
+                        WareHouseId = Bill.WareHouseId,
+                        //交易日期
+                        //TransactionDate = DateTime.Now,
+                        TransactionDate = dateTime,
+                        //按最小单位采购
+                        IsMinUnitPurchase = true,
+                        //备注
+                        Remark = Bill.Remark,
+                        //优惠金额
+                        PreferentialAmount = Bill.PreferentialAmount,
+                        //优惠后金额
+                        PreferentialEndAmount = Bill.SumAmount - Bill.PreferentialAmount,
+                        //欠款金额
+                        OweCash = Bill.OweCash,
+                        //商品项目(保存量大于零的商品)
+                        Items = Bill.Items?.Where(i => i.Quantity > 0).ToList(),
+                        //收款账户
+                        Accounting = PaymentMethods.Selectes.Select(a =>
+                        {
+                            return new AccountMaping()
+                            {
+                                AccountingOptionId = a.AccountingOptionId,
+                                CollectionAmount = a.CollectionAmount,
+                                Name = a.Name,
+                                BillId = 0,
+                            };
+                        }).ToList()
+                    };
+
+                    return await SubmitAsync(postMData, Bill.Id, _purchaseBillService.CreateOrUpdateAsync, (result) =>
+                    {
+                        Bill = new PurchaseBillModel();
+                    }, token: new System.Threading.CancellationToken());
+                });
             },
             this.IsValid());
 
@@ -147,7 +185,7 @@ namespace Wesley.Client.ViewModels
                 var c4 = this.Bill.Items?.Count != (Settings.PurchaseBill?.Items?.Count ?? 0);
                 if (!this.Bill.AuditedStatus && (c1 || c3 || c4))
                 {
-                    if (!this.Bill.AuditedStatus)
+                    if (!this.Bill.AuditedStatus && !this.Bill.IsSubmitBill)
                     {
                         var ok = await _dialogService.ShowConfirmAsync("你是否要保存单据？", "提示", "确定", "取消");
                         if (ok)
@@ -169,6 +207,25 @@ namespace Wesley.Client.ViewModels
             //商品编辑
             this.ItemSelectedCommand = ReactiveCommand.Create<CollectionView>(async e =>
            {
+
+               if (this.Bill.ReversedStatus)
+               {
+                   _dialogService.ShortAlert("已红冲单据不能操作");
+                   return;
+               }
+
+               if (this.Bill.AuditedStatus)
+               {
+                   _dialogService.ShortAlert("已审核单据不能操作");
+                   return;
+               }
+
+               if (this.Bill.IsSubmitBill)
+               {
+                   _dialogService.ShortAlert("已提交的单据不能编辑");
+                   return;
+               }
+
                if (e.SelectedItem != null)
                {
                    var item = Selecter;
@@ -184,7 +241,7 @@ namespace Wesley.Client.ViewModels
                            product.Remark = item.Remark;
                            product.Subtotal = item.Subtotal;
                            product.UnitName = item.UnitName;
-
+                           product.GUID = item.GUID;
                            if (item.BigUnitId > 0)
                            {
                                product.bigOption.Name = item.UnitName;
@@ -203,7 +260,7 @@ namespace Wesley.Client.ViewModels
                                product.SmallPriceUnit.Remark = item.Remark;
                            }
 
-                           await this.NavigateAsync("EditProductPage", ("Product", product));
+                           await this.NavigateAsync("EditProductPage", ("Product", product), ("Reference", PageName), ("Item", item), ("WareHouse", WareHouse));
                        }
                    }
                }
@@ -212,7 +269,7 @@ namespace Wesley.Client.ViewModels
             //添加商品
             this.AddProductCommand = ReactiveCommand.Create<object>(async e =>
            {
-               if (!valid_IsVieweBill.IsValid)
+               if (!valid_IsAudited.IsValid)
                {
                    _dialogService.ShortAlert("已审核单据不能操作！");
                    return;
@@ -225,7 +282,7 @@ namespace Wesley.Client.ViewModels
                    return;
                }
 
-               if (!valid_WareHouseId.IsValid)
+               if (!valid_WareHouseId.IsValid || WareHouse == null)
                {
                    _dialogService.ShortAlert("请选择仓库！");
                    ((ICommand)StockSelected)?.Execute(null);
@@ -245,65 +302,18 @@ namespace Wesley.Client.ViewModels
                 await this.Access(AccessGranularityEnum.PurchaseBillsApproved);
                 await SubmitAsync(Bill.Id, _purchaseBillService.AuditingAsync, async (result) =>
                 {
-                    var db = Shiny.ShinyHost.Resolve<LocalDatabase>();
-                    await db.SetPending(SelecterMessage.Id, true);
+                    //红冲审核水印
+                    this.Bill.AuditedStatus = true;
+
+                    var _conn = App.Resolve<ILiteDbService<MessageInfo>>();
+                    var ms = await _conn.Table.FindByIdAsync(SelecterMessage.Id);
+                    if (ms != null)
+                    {
+                        ms.IsRead = true;
+                        await _conn.UpsertAsync(ms);
+                    }
                 });
             }, this.WhenAny(x => x.Bill.Id, (x) => x.GetValue() > 0));
-
-            //菜单选择
-            this.SetMenus(async (x) =>
-            {
-                switch (x)
-                {
-                    case Enums.MenuEnum.PAY: //支付方式
-                        {
-                            if (Bill.SumAmount == 0) { this.Alert("请添加商品项目！"); break; }
-                            SelectPaymentMethods(("PaymentMethods", PaymentMethods),
-                                         ("ManufacturerId", Bill.ManufacturerId),
-                                         ("MBalance", this.MBalance),
-                                         ("BillType", BillTypeEnum.PurchaseBill), ("Reference", PageName));
-                        }
-                        break;
-                    case Enums.MenuEnum.ARREARS: //欠款
-                        {
-                            SetOweCash((result) =>
-                            {
-                                decimal.TryParse(result, out decimal oweCash);
-                                PaymentMethods.OweCash = oweCash;
-                                PaymentMethods.OweCashShowFiled = oweCash > 0;
-                                PaymentMethods.OweCashShowFiled = oweCash > 0;
-                                Update();
-                            }, Bill.OweCash);
-                        }
-                        break;
-                    case Enums.MenuEnum.DISCOUNT: //优惠
-                        {
-                            SetDiscount((result) =>
-                            {
-                                decimal.TryParse(result, out decimal preferentialAmount);
-                                PaymentMethods.PreferentialAmount = preferentialAmount;
-                                PaymentMethods.PreferentialAmountShowFiled = preferentialAmount > 0;
-                                PaymentMethods.PreferentialAmountShowFiled = preferentialAmount > 0;
-                                Update();
-                            }, Bill.PreferentialAmount);
-                        }
-                        break;
-                    case Enums.MenuEnum.REMARK: //整单备注
-                        AllRemak((result) => { Bill.Remark = result; }, Bill.Remark);
-                        break;
-                    case Enums.MenuEnum.CLEAR: //清空单据
-                        {
-                            ClearBill<PurchaseBillModel, PurchaseItemModel>(Bill, DoClear);
-                        }
-                        break;
-                    case Enums.MenuEnum.PRINT: //打印
-                        {
-                            if (!valid_ProductCount.IsValid) { this.Alert(valid_IsVieweBill.Message[0]); return; }
-                            await SelectPrint(this.Bill);
-                        }
-                        break;
-                }
-            }, 0, 1, 2, 3, 4, 5);
 
             //启用麦克风
             this.WhenAnyValue(x => x.EnableMicrophone)
@@ -314,8 +324,7 @@ namespace Wesley.Client.ViewModels
                   {
                       this.Alert("请打开麦克风");
                   }
-              })
-              .DisposeWith(this.DeactivateWith);
+              }).DisposeWith(DeactivateWith);
             //匹配声音
             this.RecognitionCommand = ReactiveCommand.Create(() =>
             {
@@ -355,15 +364,150 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
-            this.RecognitionCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.StockSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddProductCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
+            //工具栏打印
+            this.PrintCommand = ReactiveCommand.Create(async () =>
+            {
+                if (Bill.Items.Count == 0)
+                {
+                    Alert("请添加商品项目");
+                    return;
+                }
+                Bill.BillType = BillTypeEnum.PurchaseBill;
+                await SelectPrint(Bill);
+            });
+
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
+            {
+                //支付方式
+                { MenuEnum.PAY,(m,vm)=> {
+                  if (Bill.SumAmount == 0) { this.Alert("请添加商品项目！"); return; }
+                         PaymentMethodBaseModel payments = this.PaymentMethods;
+                         SelectPaymentMethods(("PaymentMethods", payments),
+                                     ("TBalance", this.TBalance),
+                                     ("BillType", this.BillType),
+                                     ("Reference", PageName));
+                } },
+                //欠款
+                { MenuEnum.ARREARS,(m,vm)=> {
+
+                        SetOweCash((result) =>
+                         {
+                             decimal.TryParse(result, out decimal oweCash);
+                             PaymentMethods.OweCash = oweCash;
+                             PaymentMethods.OweCashShowFiled = oweCash > 0;
+                             PaymentMethods.OweCashShowFiled = oweCash > 0;
+                             UpdateUI();
+                         }, Bill.OweCash);
+                } },
+                //优惠
+                { MenuEnum.DISCOUNT,(m,vm)=>{
+
+                SetDiscount((result) =>
+                         {
+                             decimal.TryParse(result, out decimal preferentialAmount);
+                             PaymentMethods.PreferentialAmount = preferentialAmount;
+                             PaymentMethods.PreferentialAmountShowFiled = preferentialAmount > 0;
+                             PaymentMethods.PreferentialAmountShowFiled = preferentialAmount > 0;
+                             UpdateUI();
+                         }, Bill.PreferentialAmount);
+                } },
+                //整单备注
+                { MenuEnum.REMARK,(m,vm)=>{
+
+                 AllRemak((result) =>
+                     {
+                         Bill.Remark = result;
+                     }, Bill.Remark);
+
+                } },
+                //清空单据
+                { MenuEnum.CLEAR,(m,vm)=>{
+
+                 ClearBill<PurchaseBillModel, PurchaseItemModel>(Bill, DoClear);
+
+                } },
+                //打印
+                { MenuEnum.PRINT,async (m,vm)=>{
+
+                     if (Bill.Items.Count == 0)
+                         {
+                             Alert("请添加商品项目");
+                             return;
+                         }
+
+                         Bill.BillType = BillTypeEnum.PurchaseBill;
+                         await SelectPrint(Bill);
+
+                } },
+                //历史单据
+                { MenuEnum.HISTORY,async (m,vm)=>{
+                        await SelectHistory();
+                } },
+                //审核
+                { MenuEnum.SHENGHE,async (m,vm)=>{
+
+                    ResultData result = null;
+                         using (UserDialogs.Instance.Loading("审核中..."))
+                         {
+                             result = await _purchaseBillService.AuditingAsync(Bill.Id);
+                         }
+                         if (null!=result&&result.Success)
+                         {
+                            //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.AuditedStatus = true;
+                            await ShowConfirm(true, "审核成功", true, goReceipt: false);
+                         }
+                         else
+                         {
+                             await ShowConfirm(false, $"审核失败！{result?.Message}", false, goReceipt: false);
+                         }
+
+                } },
+                //红冲
+                { MenuEnum.HONGCHOU,async (m,vm)=>{
+
+                    var remark = await CrossDiaglogKit.Current.GetInputTextAsync("红冲备注", "",Keyboard.Text);
+                    if (!string.IsNullOrEmpty(remark))
+                    {
+                        bool result = false;
+                        using (UserDialogs.Instance.Loading("红冲中..."))
+                        {
+                            result = await _purchaseBillService.ReverseAsync(Bill.Id);
+                        }
+
+                        if (result)
+                        {
+                            //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.ReversedStatus = true;
+                            await ShowConfirm(true, "红冲成功", true);
+                        }
+                        else
+                        {
+                            await ShowConfirm(false, "红冲失败！", false, goReceipt: false);
+                        }
+                    }
+                } },
+                //冲改
+                { MenuEnum.CHOUGAI,async (m,vm)=>{
+                    await _purchaseBillService.ReverseAsync(Bill.Id);
+                } }
+            });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
-
+        private void BillAddItem(PurchaseItemModel item)
+        {
+            if (null == Bill.Items?.FirstOrDefault(p => p.GUID == item.GUID))
+            {
+                item.SortIndex = Bill.Items?.Count ?? 0;
+                Bill.Items?.Add(item);
+            }
+        }
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -388,19 +532,19 @@ namespace Wesley.Client.ViewModels
                     parameters.TryGetValue<ProductModel>("DelProduct", out ProductModel p);
                     if (p != null)
                     {
-                        var bigProduct = Bill.Items.Where(b => b.ProductId == p.Id && b.BigUnitId == p.UnitId).FirstOrDefault();
-                        var smalProduct = Bill.Items.Where(b => b.ProductId == p.Id && b.SmallUnitId == p.UnitId).FirstOrDefault();
+                        var bigProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.BigUnitId == p.UnitId).FirstOrDefault();
+                        var smalProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.SmallUnitId == p.UnitId).FirstOrDefault();
                         if (bigProduct != null)
                         {
-                            Bill.Items.Remove(bigProduct);
+                            Bill.Items?.Remove(bigProduct);
                         }
 
                         if (smalProduct != null)
                         {
-                            Bill.Items.Remove(smalProduct);
+                            Bill.Items?.Remove(smalProduct);
                         }
 
-                        Update();
+                        UpdateUI();
                     }
                 }
 
@@ -410,8 +554,8 @@ namespace Wesley.Client.ViewModels
                     parameters.TryGetValue<ProductModel>("UpdateProduct", out ProductModel p);
                     if (p != null)
                     {
-                        var bigProduct = Bill.Items.Where(b => b.Id == p.Id && b.BigUnitId == p.UnitId).FirstOrDefault();
-                        var smalProduct = Bill.Items.Where(b => b.Id == p.Id && b.SmallUnitId == p.UnitId).FirstOrDefault();
+                        var bigProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.BigUnitId == p.UnitId).FirstOrDefault();
+                        var smalProduct = Bill.Items?.Where(b => b.GUID == p.GUID && b.SmallUnitId == p.UnitId).FirstOrDefault();
                         if (bigProduct != null)
                         {
                             bigProduct.UnitName = p.UnitName;
@@ -432,7 +576,31 @@ namespace Wesley.Client.ViewModels
                             smalProduct.BigUnitId = p.UnitId;
                             smalProduct.Subtotal = (p.Price ?? 0) * p.Quantity;
                         }
-                        Update();
+
+                        if (Bill.Items?.Any() ?? false)
+                        {
+                            foreach (var ip in Bill.Items)
+                            {
+                                if (smalProduct != null && (ip.UnitId == smalProduct.SmallUnitId || ip.SmallUnitId == smalProduct.SmallUnitId))
+                                {
+                                    ip.UnitName = smalProduct.UnitName;
+                                    ip.Quantity = smalProduct.Quantity;
+                                    ip.Remark = smalProduct.Remark;
+                                    ip.SmallUnitId = smalProduct.SmallUnitId;
+                                    ip.Subtotal = smalProduct.Subtotal;
+                                }
+                                else if (bigProduct != null && (ip.UnitId == bigProduct.SmallUnitId || ip.BigUnitId == bigProduct.BigUnitId))
+                                {
+                                    ip.UnitName = bigProduct.UnitName;
+                                    ip.Quantity = bigProduct.Quantity;
+                                    ip.Remark = bigProduct.Remark;
+                                    ip.BigUnitId = bigProduct.UnitId;
+                                    ip.Subtotal = bigProduct.Subtotal;
+                                }
+                            }
+                        }
+
+                        UpdateUI();
                     }
                 }
 
@@ -443,7 +611,7 @@ namespace Wesley.Client.ViewModels
                     if (paymentMethod != null)
                     {
                         this.PaymentMethods = paymentMethod;
-                        Update();
+                        UpdateUI();
                     }
                 }
 
@@ -451,63 +619,71 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("ProductSeries"))
                 {
                     var productSeries = parameters.GetValue<List<ProductModel>>("ProductSeries");
-                    foreach (var p in productSeries)
+                    if (productSeries != null && productSeries.Count > 0)
                     {
-                        var bigItem = new PurchaseItemModel()
+                        foreach (var p in productSeries)
                         {
-                            Id = 0,
-                            UnitId = p.BigPriceUnit.UnitId,
-                            ProductId = p.Id,
-                            ProductName = p.ProductName,
-                            StoreId = Settings.StoreId,
-                            PurchaseBillId = 0,
-                            UnitName = p.bigOption.Name,
-                            Quantity = p.BigPriceUnit.Quantity,
-                            Price = p.BigPriceUnit.Price ?? 0,
-                            Amount = (p.BigPriceUnit.Quantity) * (p.BigPriceUnit.Price ?? 0),
-                            Remark = p.BigPriceUnit.Remark,
-                            BigUnitId = p.BigPriceUnit.UnitId,
-                            SmallUnitId = 0,
-                            Subtotal = (p.BigPriceUnit.Price ?? 0) * p.BigPriceUnit.Quantity
-                        };
+                            var bigItem = new PurchaseItemModel()
+                            {
+                                Id = 0,
+                                //GUID = p.GUID,
+                                UnitId = p.BigPriceUnit.UnitId,
+                                ProductId = p.Id,
+                                ProductName = p.ProductName,
+                                StoreId = Settings.StoreId,
+                                PurchaseBillId = 0,
+                                UnitName = p.bigOption.Name,
+                                Quantity = p.BigPriceUnit.Quantity,
+                                Price = p.BigPriceUnit.Price,
+                                Amount = (p.BigPriceUnit.Quantity) * (p.BigPriceUnit.Price),
+                                Remark = p.BigPriceUnit.Remark,
+                                BigUnitId = p.BigPriceUnit.UnitId,
+                                SmallUnitId = 0,
+                                Subtotal = (p.BigPriceUnit.Price) * p.BigPriceUnit.Quantity
+                            };
 
-                        var smallItem = new PurchaseItemModel()
-                        {
-                            Id = 0,
-                            UnitId = p.SmallPriceUnit.UnitId,
-                            ProductId = p.Id,
-                            ProductName = p.ProductName,
-                            StoreId = Settings.StoreId,
-                            PurchaseBillId = 0,
-                            UnitName = p.smallOption.Name,
-                            Quantity = p.SmallPriceUnit.Quantity,
-                            Price = p.SmallPriceUnit.Price ?? 0,
-                            Amount = (p.SmallPriceUnit.Quantity) * (p.SmallPriceUnit.Price ?? 0),
-                            Remark = p.SmallPriceUnit.Remark,
-                            SmallUnitId = p.SmallPriceUnit.UnitId,
-                            BigUnitId = 0,
-                            Subtotal = (p.SmallPriceUnit.Price ?? 0) * p.SmallPriceUnit.Quantity
-                        };
+                            var smallItem = new PurchaseItemModel()
+                            {
+                                Id = 0,
+                                //GUID = p.GUID,
+                                UnitId = p.SmallPriceUnit.UnitId,
+                                ProductId = p.Id,
+                                ProductName = p.ProductName,
+                                StoreId = Settings.StoreId,
+                                PurchaseBillId = 0,
+                                UnitName = p.smallOption.Name,
+                                Quantity = p.SmallPriceUnit.Quantity,
+                                Price = p.SmallPriceUnit.Price,
+                                Amount = (p.SmallPriceUnit.Quantity) * (p.SmallPriceUnit.Price),
+                                Remark = p.SmallPriceUnit.Remark,
+                                SmallUnitId = p.SmallPriceUnit.UnitId,
+                                BigUnitId = 0,
+                                Subtotal = (p.SmallPriceUnit.Price) * p.SmallPriceUnit.Quantity
+                            };
 
-                        if (bigItem.Quantity > 0)
-                        {
-                            Bill.Items.Add(bigItem);
+                            if (bigItem.Quantity > 0)
+                            {
+                                BillAddItem(bigItem);
+                            }
+
+                            if (smallItem.Quantity > 0)
+                            {
+                                BillAddItem(smallItem);
+                            }
+                            ProductSeries.Add(p);
                         }
-
-                        if (smallItem.Quantity > 0)
-                        {
-                            Bill.Items.Add(smallItem);
-                        }
+                        //ProductSeries = new ObservableCollection<ProductModel>(productSeries);
                     }
-
-                    ProductSeries = new ObservableCollection<ProductModel>(productSeries);
-                    Update();
+                    UpdateUI();
                 }
 
                 //预览单据
                 if (parameters.ContainsKey("Bill"))
                 {
                     parameters.TryGetValue("Bill", out PurchaseBillModel bill);
+                    parameters.TryGetValue("IsSubmitBill", out bool isSubmitBill);
+                    this.Bill.IsSubmitBill = isSubmitBill;
+
                     if (bill != null)
                     {
                         this.loaded = true;
@@ -516,9 +692,7 @@ namespace Wesley.Client.ViewModels
                         Bill.WareHouseName = bill.WareHouseName;
 
                         this.PaymentMethods = this.ToPaymentMethod(Bill, bill.PurchaseBillAccountings);
-                        Update();
-
-                        ViewBill(Bill, _purchaseBillService.ReverseAsync, _purchaseBillService.AuditingAsync);
+                        UpdateUI();
                     }
                 }
 
@@ -529,12 +703,12 @@ namespace Wesley.Client.ViewModels
             }
         }
 
-        public void Update()
+        public void UpdateUI()
         {
             try
             {
                 //合计
-                this.Bill.SumAmount = decimal.Round(Bill.Items.Select(p => p.Subtotal).Sum(), 2);
+                this.Bill.SumAmount = decimal.Round(Bill.Items?.Select(p => p.Subtotal).Sum() ?? 0, 2);
 
                 //惠
                 this.Bill.PreferentialAmount = PaymentMethods.PreferentialAmount;
@@ -550,6 +724,10 @@ namespace Wesley.Client.ViewModels
                 this.PaymentMethods.SubAmount = this.Bill.SumAmount;
                 this.PaymentMethods.OweCash = this.Bill.OweCash;
                 this.PaymentMethods.PreferentialAmount = this.Bill.PreferentialAmount;
+
+                //红冲审核水印
+                if (this.Bill.Id > 0 && this.Bill.AuditedStatus)
+                    this.Bill.AuditedStatus = !this.Bill.ReversedStatus;
             }
             catch (Exception ex)
             {
@@ -600,15 +778,23 @@ namespace Wesley.Client.ViewModels
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            //控制显示菜单
+            if (Bill.Id > 0)
+            {
+                AppendMenus(Bill);
+            }
+            else
+            {
+                //控制显示菜单
+                _popupMenu?.Show(0, 1, 2, 3, 4, 5);
+            }
+
             if (!loaded)
             {
                 loaded = true;
                 ((ICommand)Load)?.Execute(null);
             }
-        }
-        public override void OnDisappearing()
-        {
-            base.OnDisappearing();
         }
     }
 }

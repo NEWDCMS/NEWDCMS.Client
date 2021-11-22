@@ -23,7 +23,7 @@
                VerticalOptions="CenterAndExpand"
                HorizontalOptions="Start"
                
-               Style="{StaticResource H4-Regular}"
+               
                Margin="0,0,0,0" />
         <Switch Grid.Column="1"
                 Grid.Row="0"

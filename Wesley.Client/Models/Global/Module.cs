@@ -25,8 +25,9 @@ namespace Wesley.Client.Models
         [Reactive] public bool Column1Enable { get; set; }
 
         [Reactive] public bool Selected { get; set; }
-        public dynamic Data { get; set; }
-        public ReactiveCommand<int, Unit> SelectedCommand { get; set; }
+        public object Data { get; set; }
+
+        //public ReactiveCommand<int, Unit> SelectedCommand { get; set; }
     }
 
 
@@ -52,7 +53,9 @@ namespace Wesley.Client.Models
         [DataMember]
         public string Icon { get; set; }
         [DataMember]
-        public string Color { get; set; } = "#53a245";
+        public string Color { get; set; } = "#ffffff";
+        [DataMember]
+        public string BgColor { get; set; } = "#53a245";
         [DataMember]
         public string Navigation { get; set; }
         [DataMember]

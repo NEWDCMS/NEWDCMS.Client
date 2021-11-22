@@ -2,7 +2,7 @@
 using System;
 using Xamarin.Forms;
 
-namespace Wesley.Client.Pages.Market
+namespace DCMS.Client.Pages.Market
 {
 
     public partial class DeliveriedView : ContentView

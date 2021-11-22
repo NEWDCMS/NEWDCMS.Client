@@ -1,31 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
-
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <resources>
 
 	<style name="MainTheme"
-		   parent="MainTheme.Base"/>
+		   parent="MainTheme.Base">
+	</style>
 	<!-- Base theme applied no matter what API -->
 	<style name="MainTheme.Base"
 		   parent="Theme.AppCompat.Light.NoActionBar">
+		<!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
 		<item name="windowNoTitle">true</item>
+		<!--We will be using the toolbar so no need to show ActionBar-->
 		<item name="windowActionBar">false</item>
+		<!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
+		<!-- colorPrimary is used for the default action bar background -->
 		<item name="colorPrimary">@color/colorPrimary</item>
+		<!-- colorPrimaryDark is used for the status bar -->
 		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+		<!-- colorAccent is used as the default value for colorControlActivated
+         which is used to tint widgets -->
 		<item name="colorAccent">@color/colorAccent</item>
-
-		<!--<item name="windowActionModeOverlay">true</item>
-		<item name="android:windowDrawsSystemBarBackgrounds">true</item>
-		<item name="android:windowLightStatusBar">true</item>-->
-		<item name="android:statusBarColor">@android:color/transparent</item>
-
-		<item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
-		<!--ActivityIndicator-->
-		<!--Toolbar高度-->
-		<item name="actionBarSize">45dp</item>
-
 		<!-- You can also set colorControlNormal, colorControlActivated
          colorControlHighlight and colorSwitchThumbNormal. -->
-		<item name="android:windowTranslucentStatus">true</item>
 		<item name="windowActionModeOverlay">true</item>
 		<item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
 		<item name="android:colorPressedHighlight">@color/ListViewSelected</item>
@@ -37,41 +32,19 @@
 		<item name="actionOverflowMenuStyle">@style/OverflowMenuStyle</item>
 		<item name="android:actionBarTabTextStyle">@style/MyActionBarTabText</item>
 
+		<item name="android:windowTranslucentStatus">false</item>
+		<item name="android:windowTranslucentNavigation">true</item>
+		<!--Android 5.x开始需要把颜色设置透明，否则导航栏会呈现系统默认的浅灰色-->
+		<item name="android:statusBarColor">@android:color/transparent</item>
 
-		<!--ListViewSelected-->
-		<item name="android:colorPressedHighlight">@color/ListViewSelected</item>
-		<item name="android:colorLongPressedHighlight">@color/ListViewHighlighted</item>
-		<item name="android:colorFocusedHighlight">@color/ListViewSelected</item>
-		<item name="android:colorActivatedHighlight">@color/ListViewSelected</item>
-		<item name="android:activatedBackgroundIndicator">@color/ListViewSelected</item>
 
-		<!--Translucent-->
-		<item name="android:windowBackground">@drawable/background</item>
-		<item name="android:windowIsTranslucent">true</item>
-		<!--<item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>-->
 	</style>
-
-	<style name="SplashScreen"
-		   parent="Theme.AppCompat.Light.NoActionBar">
-		<item name="android:windowBackground">@drawable/boot</item>
-		<item name="android:windowNoTitle">true</item>
-		<item name="android:windowFullscreen">true</item>
-		<item name="android:windowIsTranslucent">false</item>
-		<item name="android:windowIsFloating">false</item>
-		<item name="android:windowContentOverlay">@null</item>
-	</style>
-
+	<color name="ListViewSelected">@android:color/transparent</color>
+	<color name="ListViewHighlighted">#E39696</color>
 	<style name="AppCompatDialogStyle"
 		   parent="Theme.AppCompat.Light.Dialog">
-		<item name="colorAccent">@color/colorAccent</item>
+		<item name="colorAccent">@color/colorPrimary</item>
 	</style>
-
-	<style name="TabTextStyle"
-		   parent="@android:style/TextAppearance.Medium">
-		<item name="android:textSize">11dp</item>
-		<item name="android:textColor">#53a245</item>
-	</style>
-
 	<style name="OverflowMenuStyle"
 		   parent="@style/Widget.AppCompat.PopupMenu.Overflow">
 		<item name="overlapAnchor">false</item>
@@ -84,7 +57,6 @@
 		<item name="android:textColor">#333333</item>
 		<item name="android:textSize">20dp</item>
 	</style>
-	
 </resources>
 
-
+<!--Binary XML file line #1 in com.dcms.clientv3:layout/tabbar: Binary XML file line #1 in com.dcms.clientv3:layout/tabbar: Error inflating class android.support.design.widget.TabLayout'-->

@@ -1,12 +1,12 @@
-﻿using Wesley.Client.Enums;
-using Wesley.Client.Models;
-using Wesley.SlideOverKit;
+﻿using DCMS.Client.Enums;
+using DCMS.Client.Models;
+using DCMS.SlideOverKit;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Xamarin.Forms;
-namespace Wesley.Client.Pages
+namespace DCMS.Client.Pages
 {
     public partial class RightSideMasterPage : SlideMenuView
     {
@@ -43,6 +43,7 @@ namespace Wesley.Client.Pages
                         this.HideWithoutAnimations();
                         var key = string.Format(Constants.MENU_KEY, this.ViewModelName);
                         MessageBus.Current.SendMessage(r, key.ToUpper());
+                        System.Diagnostics.Debug.Print($"{key}----------SendMessage------------->");
                     });
                 }
                 MenuItems = new ObservableCollection<SubMenu>(menus);

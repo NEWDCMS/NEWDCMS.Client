@@ -3,27 +3,28 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
-                       prism:ViewModelLocator.AutowireViewModel="True"
                        x:Name="CurrentContentView"
+                       xmlns:prism="http://prismlibrary.com"
+                       prism:ViewModelLocator.AutowireViewModel="True"
                        Title="{Binding Title}"
                        x:Class="Wesley.Client.Pages.NewsPage"
                        BackgroundColor="#eeeeee"
-                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:NewsPageViewModel">
-    <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+    
+    <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                  Command="{Binding RefreshCommand}"
                  RefreshColor="{StaticResource PrimaryDarkColor}">
-        <ScrollView>
+
             <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
                                    ViewModelLoader="{Binding NewsInfosLoader}">
                 <CollectionView ItemsSource="{Binding NewsSeries}"
                                 x:Name="newsSeries"
                                 ItemSizingStrategy="MeasureAllItems"
                                 SelectedItem="{Binding Selecter, Mode=TwoWay}"
-                                SelectionMode="Single">
+                                SelectionMode="Single" VerticalScrollBarVisibility="Always">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <StackLayout Padding="20,20,20,0">
@@ -56,7 +57,6 @@
                                                Margin="10,0,10,0"
                                                FontAttributes="Bold"
                                                VerticalOptions="Center"
-                                               
                                                LineBreakMode="TailTruncation"
                                                Text="{Binding Title, Converter={StaticResource ToUpperConverter}}" />
                                         <Label Grid.Row="2"
@@ -106,7 +106,7 @@
                                                 <FormattedString>
                                                     <Span Text="&#xf017; "
                                                           FontFamily="FAS" />
-                                                    <Span Text="{Binding CreateDate, StringFormat='{0:dd/MM/yyyy}'}"/>
+                                                    <Span Text="{Binding CreateDate, StringFormat='{0:dd/MM/yyyy}'}" />
                                                 </FormattedString>
                                             </Label.FormattedText>
                                         </Label>
@@ -120,6 +120,6 @@
                     </CollectionView.EmptyView>
                 </CollectionView>
             </custom:TaskLoaderView>
-        </ScrollView>
+
     </RefreshView>
 </pages:BaseContentPage>

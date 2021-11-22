@@ -1,8 +1,8 @@
 ﻿using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
-using Wesley.Effects;
-using Wesley.Effects.Droid;
+using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
 using Google.Android.Material.TextField;
 using System;
 using Xamarin.Forms;
@@ -10,7 +10,7 @@ using Context = Android.Content.Context;
 
 
 [assembly: ExportEffect(typeof(KeyboardEnableAndroidEffect), nameof(KeyboardEnableEffect))]
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
 
     [Xamarin.Forms.Internals.Preserve(AllMembers = true)]
@@ -20,17 +20,22 @@ namespace Wesley.Effects.Droid
 
         private static bool _wasAcceptingText;
 
+
+
+
         public void OnGlobalLayout()
         {
             try
             {
+                var currentActivity = MainActivity.Instance;
+
                 if (_inputManager is null || _inputManager.Handle == IntPtr.Zero)
                 {
-                    _inputManager = (InputMethodManager)Effects.Activity.GetSystemService(Context.InputMethodService);
+                    _inputManager = (InputMethodManager)currentActivity.GetSystemService(Context.InputMethodService);
                 }
 
                 // Set visibility to false when focus on background view.
-                var currentFocus = Effects.Activity.CurrentFocus;
+                var currentFocus = currentActivity.CurrentFocus;
 
                 if (currentFocus.AccessibilityClassName == "android.view.ViewGroup")
                 {

@@ -17,7 +17,7 @@ namespace Wesley.Client.Styles.ValueConverters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+             return null;
         }
     }
 }

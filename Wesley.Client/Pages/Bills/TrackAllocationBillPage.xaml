@@ -76,7 +76,8 @@
                 </custom:CustomEntry>
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=OutStockSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding Path=OutStockSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -108,7 +109,8 @@
                 <Label Style="{StaticResource DownArrow}"
                        Margin="{StaticResource MR10}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=InStockSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding Path=InStockSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -147,7 +149,8 @@
                             ItemsSource="{Binding Bill.Items,Mode=TwoWay}"
                             x:Name="BillItems"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Selecter, Mode=TwoWay}">
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                            VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
                     <custom:HeaderView ControlTemplate="{StaticResource TrackAllocationBillPage_Template}" />
                 </CollectionView.Header>
@@ -157,7 +160,7 @@
                               VerticalOptions="CenterAndExpand"
                               HorizontalOptions="FillAndExpand">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -168,12 +171,13 @@
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0"
                                    Text="{Binding ProductName}"
+                                   LineBreakMode="WordWrap"
                                    HorizontalOptions="StartAndExpand"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
                                    Margin="10,5,0,5"></Label>
                             <Label Grid.Column="1"
-                                   Text="{Binding TradePrice,Converter={StaticResource NullableDecimalConverter}, ConverterParameter='0.00', StringFormat='{0:F2}'}"
+                                   Text="{Binding TradePrice,Converter={StaticResource NullableDecimalConverter}, StringFormat='{0:F2}'}"
                                    HorizontalOptions="End"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"

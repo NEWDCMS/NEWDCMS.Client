@@ -1,10 +1,10 @@
 ﻿using Wesley.Client.Models;
 using Wesley.Client.Pages;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive.Disposables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,7 +22,8 @@ namespace Wesley.Client.ViewModels
         [Reactive] public NewsInfoModel Selecter { get; set; }
         public NewsPageViewModel(INavigationService navigationService,
             INewsService newsService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _navigationService = navigationService;
             _dialogService = dialogService;
@@ -34,7 +35,7 @@ namespace Wesley.Client.ViewModels
             this.Load = NewsInfosLoader.Load(async () =>
             {
                 var pending = new List<NewsInfoModel>();
-                var result = await _newsService.GetNewsAsync(this.ForceRefresh, cts.Token);
+                var result = await _newsService.GetNewsAsync(this.ForceRefresh, new System.Threading.CancellationToken());
                 if (result != null)
                 {
                     var ram = new Random();
@@ -60,16 +61,19 @@ namespace Wesley.Client.ViewModels
                   await this.NavigateAsync($"{nameof(NewsViewerPage)}", ("newsId", item.Id));
               }
               this.Selecter = null;
-          });
+          }).DisposeWith(DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()
         {
             base.OnAppearing();
-            ((ICommand)Load)?.Execute(null);
+            ThrottleLoad(() =>
+            {
+                ((ICommand)Load)?.Execute(null);
+            });
         }
     }
 }

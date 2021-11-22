@@ -1,7 +1,8 @@
-﻿using Acr.UserDialogs;
-using Wesley.Client.Enums;
+﻿using Wesley.Client.Enums;
+using Wesley.Client.Models;
 using Wesley.Client.Models.Products;
 using Wesley.Client.Models.WareHouses;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
@@ -9,7 +10,7 @@ using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-
+using System.Reactive.Disposables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,6 +19,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Diagnostics;
 
 namespace Wesley.Client.ViewModels
 {
@@ -39,16 +41,13 @@ namespace Wesley.Client.ViewModels
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
             IInventoryService inventoryService,
-
-
-            IDialogService dialogService) : base(navigationService,
+            IDialogService dialogService
+            ) : base(navigationService,
                 productService,
                 terminalService,
                 userService,
                 wareHousesService,
                 accountingService,
-
-
                 dialogService)
         {
             Title = "盘点单";
@@ -65,6 +64,8 @@ namespace Wesley.Client.ViewModels
             };
 
             //验证
+            var valid_IsReversed = this.ValidationRule(x => x.Bill.ReversedStatus, _isBool, "已红冲单据不能操作");
+            var valid_IsAudited = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
             var valid_WareHouseId = this.ValidationRule(x => x.Bill.WareHouseId, _isZero, "仓库未指定");
             var valid_InventoryPerson = this.ValidationRule(x => x.Bill.InventoryPerson, _isZero, "盘点人未指定");
             var valid_IsVieweBill = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
@@ -73,8 +74,7 @@ namespace Wesley.Client.ViewModels
             //初始化 
             this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
-
-                var result = await _inventoryService.GetInventoryPartTaskBillAsync(Bill.Id, calToken: cts.Token);
+                var result = await _inventoryService.GetInventoryPartTaskBillAsync(Bill.Id, calToken: new System.Threading.CancellationToken());
                 if (result != null)
                 {
                     UpdateUI(result);
@@ -85,10 +85,10 @@ namespace Wesley.Client.ViewModels
             this.DeleteCommand = ReactiveCommand.Create<object>(e =>
             {
                 int productId = (int)e;
-                var product = Bill.Items.Select(p => p).Where(p => p.ProductId == productId).FirstOrDefault();
+                var product = Bill.Items?.Select(p => p).Where(p => p.ProductId == productId).FirstOrDefault();
                 if (product != null)
                 {
-                    Bill.Items.Remove(product);
+                    Bill.Items?.Remove(product);
                     var lists = Bill.Items;
                     Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
                 }
@@ -111,76 +111,83 @@ namespace Wesley.Client.ViewModels
             this.StockSelected = ReactiveCommand.Create<object>(async e =>
             {
                 await SelectStock(async (result) =>
-                 {
-                     if (result != null)
-                     {
-                         WareHouse.Id = result.Id;
-                         WareHouse.Name = result.Column;
-                         Bill.WareHouseId = result.Id;
-                         Bill.WareHouseName = result.Column;
+                {
+                    if (result != null && WareHouse != null && Bill != null)
+                    {
+                        WareHouse.Id = result.Id;
+                        WareHouse.Name = result.Column;
+                        Bill.WareHouseId = result.Id;
+                        Bill.WareHouseName = result.Column;
 
-                         var pendings = await _inventoryService.CheckInventoryAsync(result.Id, calToken: cts.Token);
-                         if (pendings != null && pendings.Any())
-                         {
-                             WareHouse.Id = 0;
-                             WareHouse.Name = "";
-                             Bill.WareHouseId = 0;
-                             Bill.WareHouseName = "";
-                             await UserDialogs.Instance.AlertAsync("库存正在盘点中，不能在生成盘点单.", okText: "确定");
-                             return;
-                         }
-                     }
+                        var pendings = await _inventoryService.CheckInventoryAsync(result.Id, new System.Threading.CancellationToken());
+                        if (pendings != null && pendings.Any())
+                        {
+                            WareHouse.Id = 0;
+                            WareHouse.Name = "";
+                            Bill.WareHouseId = 0;
+                            Bill.WareHouseName = "";
+                            this.Alert("库存正在盘点中，不能在生成盘点单！");
+                            return;
+                        }
+                    }
 
-                 }, WareHouseType.All);
+                }, BillTypeEnum.InventoryAllTaskBill);
             });
 
             //保存盘点
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.InventoryAllSave);
-
-                if (Bill.InventoryPerson == 0) { this.Alert("盘点人未指定！"); return Unit.Default; }
-                if (Bill.WareHouseId == 0) { this.Alert("仓库未指定！"); return Unit.Default; }
-                if (Bill.Items.Count == 0) { this.Alert("请添加商品项目！"); return Unit.Default; }
-
-                var postMData = new InventoryPartTaskUpdateModel()
+                return await this.Access(AccessGranularityEnum.InventoryAllSave, async () =>
                 {
-                    InventoryPerson = Bill.InventoryPerson,
-                    WareHouseId = Bill.WareHouseId,
-                    InventoryDate = DateTime.Now,
-                    Items = Bill.Items
-                };
+                    if (Bill.InventoryPerson == 0) { this.Alert("盘点人未指定！"); return Unit.Default; }
+                    if (Bill.WareHouseId == 0) { this.Alert("仓库未指定！"); return Unit.Default; }
+                    if (Bill.Items?.Count == 0) { this.Alert("请添加商品项目！"); return Unit.Default; }
 
-                var confirm = await _dialogService.ShowConfirmAsync("确认保存盘点吗？", okText: "确定", cancelText: "取消");
-                if (confirm)
-                {
-                    return await SubmitAsync(postMData, Bill.Id, _inventoryService.CreateOrUpdateAsync, (result) =>
+                    var postMData = new InventoryPartTaskUpdateModel()
                     {
-                        Bill.Id = result.Return;
-                        Bill.InventoryPerson = postMData.InventoryPerson;
-                        Bill.WareHouseId = postMData.WareHouseId;
-                    }, false, token: cts.Token);
-                }
-                else
-                {
-                    return Unit.Default;
-                }
+                        BillNumber = this.Bill.BillNumber,
+                        InventoryPerson = Bill.InventoryPerson,
+                        WareHouseId = Bill.WareHouseId,
+                        InventoryDate = DateTime.Now,
+                        Items = Bill.Items
+                    };
+
+                    var confirm = await _dialogService.ShowConfirmAsync("确认保存盘点吗？", okText: "确定", cancelText: "取消");
+                    if (confirm)
+                    {
+                        return await SubmitAsync(postMData, Bill.Id, _inventoryService.CreateOrUpdateAsync, (result) =>
+                        {
+                            Bill.Id = result.Return;
+                            Bill.InventoryPerson = postMData.InventoryPerson;
+                            Bill.WareHouseId = postMData.WareHouseId;
+                        }, false, token: new System.Threading.CancellationToken());
+                    }
+                    else
+                    {
+                        return Unit.Default;
+                    }
+                });
             },
             this.IsValid());
 
             //放弃盘点
             this.CancelCommand = ReactiveCommand.CreateFromTask<object>(async e =>
            {
+
+               if (Bill.Id == 0)
+               {
+                   this.Alert("操作失败，你需要先保存盘点！");
+                   return;
+               }
+
+               if (Bill.InventoryPerson == 0) { this.Alert("盘点人未指定！"); return; }
+               if (Bill.WareHouseId == 0) { this.Alert("仓库未指定！"); return; }
+               if (Bill.Items?.Count == 0) { this.Alert("请添加商品项目！"); return; }
+
                var confirm = await _dialogService.ShowConfirmAsync("确认放弃盘点吗？", okText: "确定", cancelText: "取消");
                if (confirm)
                {
-                   if (Bill.Id == 0)
-                   {
-                       await _navigationService.GoBackAsync();
-                       return;
-                   }
-
-                   await _inventoryService.CancelTakeInventoryAsync(Bill.Id, calToken: cts.Token);
+                   await _inventoryService.CancelTakeInventoryAsync(Bill.Id, new System.Threading.CancellationToken());
 
                }
            });
@@ -188,18 +195,24 @@ namespace Wesley.Client.ViewModels
             //完成确认
             this.CompletedCommand = ReactiveCommand.CreateFromTask<object>(async e =>
             {
+                if (Bill.Id == 0)
+                {
+                    this.Alert("操作失败，你需要先保存盘点！");
+                    return;
+                }
+
+                if (Bill.InventoryPerson == 0) { this.Alert("盘点人未指定！"); return; }
+                if (Bill.WareHouseId == 0) { this.Alert("仓库未指定！"); return; }
+                if (Bill.Items?.Count == 0) { this.Alert("请添加商品项目！"); return; }
+
                 var confirm = await _dialogService.ShowConfirmAsync("确认完成盘点吗？", okText: "确定", cancelText: "取消");
                 if (confirm)
                 {
-                    if (Bill.Id == 0)
-                    {
-                        this.Alert("操作失败，你需要先保存盘点！");
-                        return;
-                    }
+
                     if (Bill.InventoryPerson == 0) { this.Alert("盘点人未指定！"); return; }
                     if (Bill.WareHouseId == 0) { this.Alert("仓库未指定！"); return; }
-                    if (Bill.Items.Count == 0) { this.Alert("请添加商品项目！"); return; }
-                    var result = await _inventoryService.SetInventoryCompletedAsync(Bill.Id, calToken: cts.Token);
+                    if (Bill.Items?.Count == 0) { this.Alert("请添加商品项目！"); return; }
+                    var result = await _inventoryService.SetInventoryCompletedAsync(Bill.Id, new System.Threading.CancellationToken());
                     if (!result)
                     {
                         this.Alert("抱歉，系统错误，请反馈技术支持！");
@@ -213,6 +226,13 @@ namespace Wesley.Client.ViewModels
              .Where(x => x != null)
              .SubOnMainThread(async item =>
             {
+
+                if (this.Bill.IsSubmitBill)
+                {
+                    _dialogService.ShortAlert("已提交的单据不能编辑");
+                    return;
+                }
+
                 if (item != null)
                 {
                     List<ProductModel> products = null;
@@ -233,52 +253,50 @@ namespace Wesley.Client.ViewModels
                         ("WareHouse", WareHouse),
                         ("Products", products));
                 }
-            });
+            })
+             .DisposeWith(DeactivateWith);
 
             //扫码商品
             this.ScanBarCommand = ReactiveCommand.Create<object>(async e => await this.NavigateAsync("ScanBarcodePage", ("action", "add")));
 
-            //菜单选择
-            this.SetMenus(async (x) =>
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
             {
-                switch (x)
-                {
-                    case Enums.MenuEnum.PRINT: //打印
-                        {
-                            if (!valid_ProductCount.IsValid) { this.Alert(valid_IsVieweBill.Message[0]); return; }
-                            await SelectPrint(this.Bill);
-                        }
-                        break;
-                    case Enums.MenuEnum.ALL: //全部
-                        {
-                            var lists = Bill.Items.ToList();
-                            Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
-                        }
-                        break;
-                    case Enums.MenuEnum.WART: //未盘点
-                        {
-                            var lists = Bill.Items.Where(s => string.IsNullOrEmpty(s.StatusName)).ToList();
-                            Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
-                        }
-                        break;
-                    case Enums.MenuEnum.YPD: //已盘点
-                        {
-                            var lists = Bill.Items.Where(s => !string.IsNullOrEmpty(s.StatusName)).ToList();
-                            Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
-                        }
-                        break;
-                }
-            }, 5, 25, 26, 27);
+                //全部
+                { Enums.MenuEnum.ALL,(m,vm)=> {
+                  var lists = Bill.Items?.ToList();
+                     Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
+                } },
+                //未盘点
+                { MenuEnum.WART,(m,vm)=> {
 
-            //捕获异常
-            this.CancelCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddProductCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.CompletedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.DeleteCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ScanBarCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
+                      var lists = Bill.Items?.Where(s => string.IsNullOrEmpty(s.StatusName)).ToList();
+                     Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
+                } },
+                //已盘点
+                { MenuEnum.YPD,(m,vm)=>{
+
+            var lists = Bill.Items?.Where(s => !string.IsNullOrEmpty(s.StatusName)).ToList();
+                    Bill.Items = new ObservableCollection<InventoryPartTaskItemModel>(lists);
+                } },
+                //整单备注
+                { MenuEnum.REMARK,(m,vm)=>{
+
+                 AllRemak((result) =>
+                     {
+                         Bill.Remark = result;
+                     }, Bill.Remark);
+
+                } },
+                //历史单据
+                { MenuEnum.HISTORY,async (m,vm)=>{
+                        await SelectHistory();
+                } }
+            });
+
+
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
 
 
@@ -293,7 +311,7 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("ProductSeries"))
                 {
                     parameters.TryGetValue("ProductSeries", out List<ProductModel> productSeries);
-                    if (productSeries != null)
+                    if (productSeries != null && productSeries.Count > 0)
                     {
                         this.ProductSeries = new ObservableCollection<ProductModel>(productSeries);
                         productSeries.ForEach(p =>
@@ -332,7 +350,7 @@ namespace Wesley.Client.ViewModels
                             {
                                 ProductId = p.ProductId,
                                 ProductName = p.ProductName,
-
+                                GUID = p.GUID,
                                 CurrentStock = p.StockQty,
                                 BigUnitQuantity = p.BigPriceUnit.Quantity,
                                 AmongUnitQuantity = 0,
@@ -349,7 +367,7 @@ namespace Wesley.Client.ViewModels
                                 StatusName = statusName
                             };
 
-                            Bill.Items.Add(item);
+                            Bill.Items?.Add(item);
                         });
                     }
                 }
@@ -358,10 +376,12 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("Bill"))
                 {
                     parameters.TryGetValue("Bill", out InventoryPartTaskBillModel bill);
+                    parameters.TryGetValue("IsSubmitBill", out bool isSubmitBill);
+                    this.Bill.IsSubmitBill = isSubmitBill;
                     if (bill != null)
                     {
                         Bill = bill;
-                        Bill.Items.ToList().ForEach(p =>
+                        Bill.Items?.ToList().ForEach(p =>
                         {
 
                             int bigQ = 0;
@@ -459,7 +479,7 @@ namespace Wesley.Client.ViewModels
                     {
                         ProductId = p.ProductId,
                         ProductName = p.ProductName,
-
+                        GUID = p.GUID,
                         CurrentStock = p.StockQty,
                         BigUnitQuantity = p.BigUnitQuantity,
                         AmongUnitQuantity = 0,
@@ -485,9 +505,15 @@ namespace Wesley.Client.ViewModels
             }
         }
 
+
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+
+            //控制显示菜单
+            _popupMenu?.Show(25, 26, 27);
+
             if (!loaded)
             {
                 loaded = true;

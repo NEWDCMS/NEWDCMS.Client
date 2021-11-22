@@ -23,7 +23,7 @@
     <key>MinimumOSVersion</key>
     <string>8.0</string>
     <key>CFBundleDisplayName</key>
-    <string>Wesley.Client</string>
+    <string>DCMS.Client</string>
     <key>CFBundleIdentifier</key>
     <string>com.companyname.appname</string>
     <key>CFBundleVersion</key>

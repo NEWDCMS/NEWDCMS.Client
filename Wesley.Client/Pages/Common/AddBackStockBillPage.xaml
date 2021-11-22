@@ -124,7 +124,7 @@
                                        HorizontalOptions="Start"
                                        VerticalOptions="Center"
                                        FontSize="{StaticResource FT14}"></Label>
-                                <Label Text="{Binding ShipmentWareHouseQuantity}"
+                                <Label Text="{Binding ShipmentUsableQuantity}"
                                        HorizontalOptions="Start"
                                        VerticalOptions="Center"
                                        FontSize="{StaticResource FT14}"></Label>
@@ -166,7 +166,7 @@
                                        HorizontalOptions="Start"
                                        VerticalOptions="Center"
                                        FontSize="{StaticResource FT14}"></Label>
-                                <Label Text="{Binding IncomeWareHouseQuantity}"
+                                <Label Text="{Binding IncomeUsableQuantity}"
                                        HorizontalOptions="Start"
                                        VerticalOptions="Center"
                                        FontSize="{StaticResource FT14}"></Label>

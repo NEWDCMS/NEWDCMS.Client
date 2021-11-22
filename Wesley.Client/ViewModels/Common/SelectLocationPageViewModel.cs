@@ -4,7 +4,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Shiny;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,13 +14,12 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-
 namespace Wesley.Client.ViewModels
 {
     public class SelectLocationPageViewModel : ViewModelBaseCutom
     {
 
-        private readonly LocalDatabase _conn;
+        private readonly ILiteDbService<TrackingModel> _conn;
         [Reactive] public TrackingModel Selecter { get; set; }
         public IReactiveCommand ReceiveLocationCommand { get; set; }
 
@@ -31,8 +30,9 @@ namespace Wesley.Client.ViewModels
                IUserService userService,
                IWareHousesService wareHousesService,
                IAccountingService accountingService,
-               LocalDatabase conn,
-               IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+               ILiteDbService<TrackingModel> conn,
+               IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
 
             Title = "选择我的位置";
@@ -48,17 +48,17 @@ namespace Wesley.Client.ViewModels
                     if (!string.IsNullOrEmpty(s))
                         ((ICommand)Load)?.Execute(null);
 
-                }).DisposeWith(DestroyWith);
+                }).DisposeWith(DeactivateWith);
 
 
-            this.Load = GpsEventsLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
                 var gps = new List<TrackingModel>();
 
                 try
                 {
-                    gps = await _conn.LocationSyncEvents.ToListAsync();
-                    gps = gps?.Where(s => !string.IsNullOrEmpty(s.Address)).ToList();
+                    var data = await _conn.Table.FindAllAsync();
+                    gps = data?.Where(s => !string.IsNullOrEmpty(s.Address)).ToList();
 
                     if (!string.IsNullOrEmpty(Filter.SerchKey))
                         gps = gps?.Where(s => s.Address.Contains(Filter.SerchKey)).ToList();
@@ -68,22 +68,15 @@ namespace Wesley.Client.ViewModels
                     .ThenByDescending(s => s.Id).ToList();
 
                     if (gps != null && gps.Any())
-                        this.GpsEvents = new ObservableRangeCollection<TrackingModel>(gps);
+                        this.GpsEvents = new  ObservableCollection<TrackingModel>(gps);
                 }
                 catch (Exception ex)
                 {
 
                     Crashes.TrackError(ex);
                 }
-
-                return await Task.FromResult(gps);
             });
 
-            //重新定位
-            this.ReceiveLocationCommand = ReactiveCommand.Create<string>(e =>
-           {
-
-           });
 
             this.WhenAnyValue(x => x.Selecter)
                 .Throttle(TimeSpan.FromMilliseconds(500))
@@ -93,10 +86,10 @@ namespace Wesley.Client.ViewModels
                 {
                     await _navigationService.GoBackAsync(("AddGpsEvent", item));
                     this.Selecter = null;
-                });
+                })
+                .DisposeWith(DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
 
         public override void OnAppearing()

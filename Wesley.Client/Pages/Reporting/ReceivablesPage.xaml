@@ -48,7 +48,8 @@
                 </custom:CustomEntry>
                 <Label Style="{StaticResource SearchArrow}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=BindingContext.CustomSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.CustomSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -57,16 +58,19 @@
                      Style="{StaticResource SeparatorGrid}" />
             <StackLayout Orientation="Horizontal"
                          Grid.Row="2">
-                <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+                <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                              Command="{Binding RefreshCommand}"
                              RefreshColor="{StaticResource PrimaryDarkColor}">
-                    <ScrollView>
+           
                         <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
-                                               ViewModelLoader="{Binding AmountReceivableGroupsLoader}">
+                                               ViewModelLoader="{Binding AmountReceivableGroupsLoader}" >
                             <CollectionView ItemsSource="{Binding BillItems,Mode=TwoWay}"
                                             x:Name="BillItems"
                                             SelectionMode="Single"
-                                            SelectedItem="{Binding Selecter, Mode=TwoWay}">
+                                            RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                                            RemainingItemsThreshold="{Binding ItemTreshold}"
+                                            SelectedItem="{Binding Selecter, Mode=TwoWay}" 
+                                            VerticalScrollBarVisibility="Always">
                                 <CollectionView.Header>
                                     <custom:HeaderView ControlTemplate="{StaticResource Receivables_Template}" />
                                 </CollectionView.Header>
@@ -76,7 +80,7 @@
                                               VerticalOptions="CenterAndExpand"
                                               HorizontalOptions="FillAndExpand">
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="40" />
+                                                <RowDefinition Height="50" />
                                                 <RowDefinition Height=".7" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
@@ -90,11 +94,11 @@
                                                    Grid.Column="0"
                                                    Text="{Binding CustomerPointCode}"
                                                    FontSize="{StaticResource FT14}"
-                                                   LineBreakMode="TailTruncation"
+                                                   LineBreakMode="WordWrap"
                                                    HorizontalOptions="Start"
                                                    TextColor="{StaticResource PrimaryTextColor}"
                                                    VerticalOptions="CenterAndExpand"
-                                                   Margin="{StaticResource ML10}"></Label>
+                                                   Margin="10,0,10,0" />
                                             <!--客户名称-->
                                             <Label Grid.Row="0"
                                                    Grid.Column="1"
@@ -133,7 +137,7 @@
                                 </CollectionView.EmptyView>
                             </CollectionView>
                         </custom:TaskLoaderView>
-                    </ScrollView>
+
                 </RefreshView>
             </StackLayout>
         </Grid>

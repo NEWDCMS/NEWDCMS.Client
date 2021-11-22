@@ -6,13 +6,13 @@ using Prism.Commands;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Wesley.Client.ViewModels
 {
-
     public class AboutPageViewModel : ViewModelBase
     {
         private readonly IOperatingSystemVersionProvider _operatingSystemVersionProvider;
@@ -25,7 +25,8 @@ namespace Wesley.Client.ViewModels
             IOperatingSystemVersionProvider operatingSystemVersionProvider,
             IUpdateService updateService,
             ICacheManager cacheManager,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _operatingSystemVersionProvider = operatingSystemVersionProvider;
             _updateService = updateService;
@@ -44,7 +45,7 @@ namespace Wesley.Client.ViewModels
                 }
             }));
             BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
 
@@ -73,6 +74,12 @@ namespace Wesley.Client.ViewModels
                                         await this.NavigateAsync(r.ToString(), null);
                                         break;
                                     }
+                                case "JobsPage":
+                                    {
+                                        //更新
+                                        await this.NavigateAsync(r.ToString(), null);
+                                        break;
+                                    }
                                 case "ClearCache":
                                     {
 
@@ -84,9 +91,7 @@ namespace Wesley.Client.ViewModels
                                             {
                                                 try
                                                 {
-                                                    var _conn = App.Resolve<LocalDatabase>();
-                                                    await _conn?.ResetLocationSyncEvents();
-                                                    await _conn?.ResetVisitStores();
+
                                                     _cacheManager?.ClearCache(true, true);
                                                 }
                                                 catch (Exception ex)
@@ -124,11 +129,15 @@ namespace Wesley.Client.ViewModels
                                         await this.NavigateAsync("FeedbackPage", null);
                                         break;
                                     }
+                                case "AdvancedPage":
+                                    {
+                                        await this.NavigateAsync("AdvancedPage", null);
+                                        break;
+                                    }
                             }
                         }
                         catch (Exception ex)
                         {
-                            //Debug(ex.Message);
                             Crashes.TrackError(ex);
                         }
                     });

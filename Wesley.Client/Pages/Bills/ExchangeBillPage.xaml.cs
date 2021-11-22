@@ -8,30 +8,23 @@ namespace Wesley.Client.Pages.Bills
 
     public partial class ExchangeBillPage : BaseContentPage<ExchangeBillPageViewModel>
     {
-        #region Overrides
-        protected override void OnAppearing()
+        public ExchangeBillPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                try
+                InitializeComponent();
+               
+                //存储记录
+
+                ToolbarItems?.Clear();
+                string btnIco = "保存";
+                foreach (var toolBarItem in this.GetToolBarItems(ViewModel, true, btnIco).ToList())
                 {
-                    InitializeComponent();
-                    //存储记录
-                    NeedOverrideSoftBackButton = true;
-                    ToolbarItems.Clear();
-                    string btnIco = "\uf0c7";
-                    foreach (var toolBarItem in this.GetToolBarItems(ViewModel, true, btnIco).ToList())
-                    {
-                        ToolbarItems.Add(toolBarItem);
-                    }
+                    ToolbarItems.Add(toolBarItem);
                 }
-                catch (Exception ex) { Crashes.TrackError(ex); }
-                return;
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
+
         }
-
-        #endregion
-
     }
 }

@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Wesley.Mvvm;
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-
-using Wesley.Mvvm;
 
 namespace Wesley.Infrastructure.Tasks
 {

@@ -11,40 +11,64 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Xamarin.Forms;
 
 namespace Wesley.Client.ViewModels
 {
     public class SelectProductPageViewModel : ViewModelBase
     {
         private readonly IProductService _productService;
-
+        [Reactive] public bool DataVewEnable { get; set; }
+        [Reactive] public bool NullViewEnable { get; set; } = true;
+        [Reactive] public bool UsableQuantity { get; set; } = true;
         [Reactive] public bool ShowStockQty { get; set; } = true;
         [Reactive] public bool ShowGift { get; set; } = true;
 
         public EntityBase Bill { get; set; }
         public IReactiveCommand InitCatagory { get; }
         public IReactiveCommand SelectGiftsCommand { get; }
-        [Reactive] public ProductModel Selecter { get; set; }
+
+        [Reactive] public bool UsableFavorite { get; set; } = false;
+        public ReactiveCommand<ProductModel, Unit> FavoriteCommand { get; }
+
+        [Reactive] public CategoryModel Selecter { get; set; }
+
         public SelectProductPageViewModel(INavigationService navigationService,
             IProductService productService,
-
-
             IDialogService dialogService) : base(navigationService, dialogService)
         {
             Title = "选择商品";
+
             _navigationService = navigationService;
             _dialogService = dialogService;
             _productService = productService;
+
+            //只显库存商品
+            this.WhenAnyValue(x => x.UsableQuantity)
+               .Skip(1)
+               .Subscribe(s =>
+               {
+                   ((ICommand)Load)?.Execute(null);
+                   this.ForceRefresh = true;
+               }).DisposeWith(DeactivateWith);
+
+            //我的收藏
+            this.WhenAnyValue(x => x.UsableFavorite)
+               .Skip(1)
+               .Subscribe(s =>
+               {
+                   ((ICommand)Load)?.Execute(null);
+                   this.ForceRefresh = true;
+               }).DisposeWith(DeactivateWith);
 
             //搜索
             this.WhenAnyValue(x => x.Filter.SerchKey)
@@ -54,7 +78,8 @@ namespace Wesley.Client.ViewModels
                 .Subscribe(s =>
                 {
                     ((ICommand)SerchCommand)?.Execute(s);
-                }).DisposeWith(DestroyWith);
+                }).DisposeWith(DeactivateWith);
+
             this.SerchCommand = ReactiveCommand.Create<string>(e =>
             {
                 if (string.IsNullOrEmpty(Filter.SerchKey))
@@ -66,36 +91,19 @@ namespace Wesley.Client.ViewModels
             });
 
             //Load
-            this.Load = ProductSeriesLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
-                //重载时排它
-                ItemTreshold = 1;
-
-                var items = await GetProductsPage(0, PageSize);
-
-                //清除列表
-                ProductSeries.Clear();
-                foreach (var item in items)
+                try
                 {
-                    if (ProductSeries.Count(s => s.ProductId == item.ProductId) == 0)
-                    {
-                        ProductSeries.Add(item);
-                    }
-                }
+                    ItemTreshold = 1;
+                    DataVewEnable = false;
+                    NullViewEnable = true;
 
-                return this.ProductSeries;
-            });
-
-            //以增量方式加载数据
-            this.ItemTresholdReachedCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                using (var dig = UserDialogs.Instance.Loading("加载中..."))
-                {
-                    try
+                    var items = await GetProductsPage(0, 50);
+                    if (items != null && items.Any())
                     {
-                        int pageIdex = ProductSeries.Count / (PageSize == 0 ? 1 : PageSize);
-                        var items = await GetProductsPage(pageIdex, PageSize);
-                        var previousLastItem = ProductSeries.Last();
+                        //清除列表
+                        ProductSeries?.Clear();
                         foreach (var item in items)
                         {
                             if (ProductSeries.Count(s => s.ProductId == item.ProductId) == 0)
@@ -103,63 +111,113 @@ namespace Wesley.Client.ViewModels
                                 ProductSeries.Add(item);
                             }
                         }
+                    }
+                }
+                catch (Exception ex) { Crashes.TrackError(ex); }
+                finally
+                {
+                    DataVewEnable = true;
+                    NullViewEnable = false;
+                }
+            });
 
-                        if (items.Count() == 0 || items.Count() == ProductSeries.Count)
+            //以增量方式加载数据
+            this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
+            {
+                using (var dig = UserDialogs.Instance.Loading("加载中..."))
+                {
+                    try
+                    {
+                        int pageIdex = ProductSeries.Count / 50;
+                        var items = await GetProductsPage(pageIdex, PageSize);
+                        var previousLastItem = ProductSeries.Last();
+                        if (items != null)
                         {
-                            ItemTreshold = -1;
-                            return this.ProductSeries;
-                        }
+                            foreach (var item in items)
+                            {
+                                if (ProductSeries.Count(s => s.ProductId == item.ProductId) == 0)
+                                {
+                                    ProductSeries.Add(item);
+                                }
+                            }
 
+                            if (items.Count() == 0 || items.Count() == ProductSeries.Count)
+                            {
+                                ItemTreshold = -1;
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
                         Crashes.TrackError(ex);
                         ItemTreshold = -1;
                     }
-
-                    return this.ProductSeries;
                 }
-
             }, this.WhenAny(x => x.ProductSeries, x => x.GetValue().Count > 0));
 
-            //初始类别
-            this.InitCatagory = ReactiveCommand.Create(() =>
-            {
-                Sync.Run(async () =>
-                {
-                    var result = await _productService.GetAllCategoriesAsync(this.ForceRefresh, calToken: cts.Token);
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        if (result != null)
-                        {
-                            BindCategories = new ObservableCollection<CategoryModel>(result.ToList());
-                        }
-                    });
-                }, (ex) => { Crashes.TrackError(ex); });
-            },
-            this.WhenAny(x => x.BindCategories, x => x.GetValue().Count == 0));
 
-            //菜单选择
-            subProductCatagoryBus = MessageBus.Current.Listen<List<CategoryModel>>(string.Format(Constants.PRODUCT_MENU_KEY, this.GetType().FullName))
-                .Subscribe(x =>
+            //初始类别
+            this.InitCatagory = ReactiveCommand.CreateFromTask(async () =>
+            {
+                try
                 {
-                    Filter.CatagoryIds = x.Select(s => s.Id).ToArray();
+                    var result = await _productService.GetAllCategoriesAsync(true, new System.Threading.CancellationToken());
+                    if (result != null && result.Any())
+                    {
+                        var categories = result.ToList();
+                        if (categories != null && categories.Any())
+                        {
+                            foreach (var op in categories)
+                            {
+                                op.SelectedCommand = ReactiveCommand.Create<int>(r =>
+                                {
+                                    op.Selected = !op.Selected;
+                                });
+                            }
+                            this.BindCategories = new ObservableCollection<CategoryModel>(categories);
+                        }
+                    }
+                }
+                catch (Exception ex) { Crashes.TrackError(ex); }
+            });
+            //选择类别
+            this.WhenAnyValue(x => x.Selecter).Throttle(TimeSpan.FromMilliseconds(500))
+             .Skip(1)
+             .Where(x => x != null)
+             .SubOnMainThread(x =>
+             {
+                 if (x != null)
+                 {
+                     Filter.CatagoryIds = new int[] { x.Id };
+                     this.ForceRefresh = true;
+
+                     foreach (var op in this.BindCategories)
+                     {
+                         op.Selected = false;
+                     }
+
+                     x.Selected = !x.Selected;
+
                     ((ICommand)Load)?.Execute(null);
-                });
+                 }
+                 Selecter = null;
+             })
+             .DisposeWith(DeactivateWith);
+
 
             this.WhenAnyValue(x => x.ReferencePage)
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Subscribe(x =>
             {
                 this.ShowStockQty = !(x.Equals("InventoryOPBillPage") || x.Equals("InventoryBillPage"));
-            });
+
+            }).DisposeWith(DeactivateWith);
 
             //选择礼品
             this.SelectGiftsCommand = ReactiveCommand.Create(async () =>
             {
                 await this.NavigateAsync("SelectGiftsPage", ("WareHouse", WareHouse), ("Terminaler", this.Terminal));
             });
-
             //保存选择商品
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object>(async e =>
             {
@@ -185,8 +243,15 @@ namespace Wesley.Client.ViewModels
                 }
                 else if (ReferencePage == nameof(AllocationBillPage))
                 {
+                    if (this.Bill == null)
+                    {
+                        this.Alert("单据不能关联，请确保参数");
+                        return;
+                    }
+
                     //添加调拨商品
                     await this.NavigateAsync(nameof(AddAllocationProductPage),
+                        ("Bill", Bill),
                         ("Reference", ReferencePage),
                         ("Products", products));
                 }
@@ -269,45 +334,65 @@ namespace Wesley.Client.ViewModels
                 }
 
             });
-
-            //选择商品
-            this.WhenAnyValue(x => x.Selecter).Throttle(TimeSpan.FromMilliseconds(500))
-             .Skip(1)
-             .Where(x => x != null)
-             .SubOnMainThread(item =>
+            //收藏
+            this.FavoriteCommand = ReactiveCommand.Create<ProductModel>(p =>
             {
-                if (!ReferencePage.Equals("PurchaseOrderBillPage")
-                  && !ReferencePage.Equals("FilterPage")
-                  && !ReferencePage.Equals(nameof(CostContractBillPage))
-                  && !ReferencePage.Equals("InventoryOPBillPage"))
+                try
                 {
-                    if (!item.StockQty.HasValue || item.StockQty.Value == 0)
+                    var ps = Settings.FavoriteProducts;
+                    this.Filter.SerchKey = "";
+                    if (!p.Favorited)
                     {
-                        this.Alert("零库存商品无效！");
-                        item.Selected = false;
-                        return;
+                        if (!ps.Select(s => s.ProductId).Contains(p.ProductId))
+                        {
+                            p.Favorited = true;
+                            ps.Add(p);
+                            Settings.FavoriteProducts = ps;
+                            _dialogService.ShortAlert("收藏成功！");
+                        }
+                    }
+                    else
+                    {
+                        var cur = ps.Where(s => s.ProductId == p.ProductId).FirstOrDefault();
+                        if (cur != null)
+                        {
+                            cur.Favorited = false;
+                            p.Favorited = false;
+                            ps.Remove(cur);
+                            Settings.FavoriteProducts = ps;
+                            _dialogService.ShortAlert("收藏已移除！");
+                        }
                     }
 
-                    item.Selected = !item.Selected;
+                    if (UsableFavorite)
+                    {
+                        if (ProductSeries != null && ProductSeries.Any())
+                        {
+                            var reload = ProductSeries.Where(s => s.Favorited == true).ToList();
+                            if (reload != null && reload.Any())
+                                this.ProductSeries = new ObservableCollection<ProductModel>(reload);
+                            else
+                            {
+                                this.UsableFavorite = false;
+                            }
+                        }
+                    }
                 }
-                else if (ReferencePage.Equals("InventoryReportPage"))
+                catch (Exception ex)
                 {
-                    item.Selected = !item.Selected;
+                    Crashes.TrackError(ex);
                 }
-                else
-                {
-                    item.Selected = !item.Selected;
-                }
-
-                Selecter = null;
             });
 
-            this.InitCatagory.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.Load.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
+            this.Load.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.InitCatagory.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SelectGiftsCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SubmitDataCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.FavoriteCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+
         }
 
         /// <summary>
@@ -318,98 +403,151 @@ namespace Wesley.Client.ViewModels
         /// <returns></returns>
         public async Task<IList<ProductModel>> GetProductsPage(int pageNumber, int pageSize)
         {
-            string key = string.IsNullOrEmpty(Filter.SerchKey) ? "" : Filter.SerchKey;
-            var catagoryids = Filter.CatagoryIds ?? null;
-
-            bool usablequantity = true;
-
-            //是否包含库存量商品 
-            if (ReferencePage.Equals("PurchaseOrderBillPage")
-                || ReferencePage.Equals("CostContractBillPage")
-                || ReferencePage.Equals("InventoryBillPage")
-                || ReferencePage.Equals("InventoryOPBillPage")
-                || ReferencePage.Equals("InventoryBillPage"))
+            var lists = new List<ProductModel>();
+            try
             {
-                usablequantity = false;
-            }
+                Filter ??= new FilterModel();
+                string key = string.IsNullOrEmpty(Filter.SerchKey) ? "" : Filter.SerchKey;
+                var catagoryids = Filter.CatagoryIds ?? null;
+                //bool usablequantity = true;
 
-            if (!string.IsNullOrEmpty(key))
-                if (Settings.WareHouseId != Filter.WareHouseId)
+                //是否包含库存量商品  
+                if (ReferencePage.Equals("PurchaseOrderBillPage")
+                    || ReferencePage.Equals("CostContractBillPage")
+                    || ReferencePage.Equals("ReturnBillPage")
+                    || ReferencePage.Equals("ReturnOrderBillPage")
+                    || ReferencePage.Equals("InventoryBillPage")
+                    || ReferencePage.Equals("InventoryOPBillPage")
+                    || ReferencePage.Equals("InventoryBillPage"))
                 {
-                    Settings.WareHouseId = Filter.WareHouseId;
+                    this.UsableQuantity = false;
                 }
 
-            //检索商品
-            var results = await _productService.GetProductsAsync(catagoryids,
-                key,
-                null,
-                Filter.WareHouseId,
-                pageNumber,
-                pageSize,
-                usablequantity, this.ForceRefresh, calToken: cts.Token);
+                if (Settings.WareHouseId != Filter.WareHouseId)
+                    Settings.WareHouseId = Filter.WareHouseId;
 
-            if (results != null && (results?.Data.Any() ?? false))
-            {
-                foreach (var p in results?.Data)
+                if (ReferencePage.Equals("ReturnBillPage") || ReferencePage.Equals("ReturnOrderBillPage"))
                 {
-                    p.BigUnitId = p.BigProductPrices.UnitId;
-                    p.BigPriceUnit = new PriceUnit()
-                    {
-                        UnitId = p.bigOption.Id,
-                        Amount = 0,
-                        //默认绑定批发价
-                        Price = p.BigProductPrices.TradePrice ?? 0,
-                        Quantity = 0,
-                        Remark = "",
-                        UnitName = p.bigOption.Name
-                    };
+                    Filter.WareHouseId = 0;
+                    this.ForceRefresh = true;
+                }
+                //检索商品
+                var results = await _productService.GetProductsAsync(catagoryids,
+                    key,
+                    Terminal.Id,
+                    Filter.WareHouseId,
+                    pageNumber,
+                    pageSize,
+                    this.UsableQuantity,
+                    this.ForceRefresh,
+                    new System.Threading.CancellationToken());
 
-                    p.SmallUnitId = p.SmallProductPrices.UnitId;
-                    p.SmallPriceUnit = new PriceUnit()
+                if (results != null && (results?.Data.Any() ?? false))
+                {
+                    foreach (var p in results?.Data)
                     {
-                        UnitId = p.smallOption.Id,
-                        Amount = 0,
-                        //默认绑定批发价
-                        Price = p.SmallProductPrices.TradePrice ?? 0,
-                        Quantity = 0,
-                        Remark = "",
-                        UnitName = p.smallOption.Name
-                    };
+                        p.BigUnitId = p.BigProductPrices.UnitId;
+                        p.BigPriceUnit = new PriceUnit()
+                        {
+                            UnitId = p.bigOption.Id,
+                            Amount = 0,
+                            //默认绑定批发价
+                            Price = p.BigProductPrices.TradePrice ?? 0,
+                            Quantity = 0,
+                            Remark = "",
+                            UnitName = p.bigOption.Name
+                        };
 
-                    var currentStock = p.StockQuantities.Where(w => w.WareHouseId == Filter.WareHouseId).FirstOrDefault();
-                    p.StockQty = currentStock != null ? currentStock.UsableQuantity : p.StockQty;
-                    if (p.StockQty == 0)
-                    {
-                        p.StockQty = p.StockQuantities?.Sum(s => s.UsableQuantity);
+                        p.SmallUnitId = p.SmallProductPrices.UnitId;
+                        p.SmallPriceUnit = new PriceUnit()
+                        {
+                            UnitId = p.smallOption.Id,
+                            Amount = 0,
+                            //默认绑定批发价
+                            Price = p.SmallProductPrices.TradePrice ?? 0,
+                            Quantity = 0,
+                            Remark = "",
+                            UnitName = p.smallOption.Name
+                        };
+
+                        var currentStock = p.StockQuantities.Where(w => w.WareHouseId == Filter.WareHouseId).FirstOrDefault();
+                        p.StockQty = currentStock != null ? currentStock.UsableQuantity : p.StockQty;
+                        if (p.StockQty == 0)
+                        {
+                            p.StockQty = p.StockQuantities?.Sum(s => s.UsableQuantity);
+                        }
+
+                        //当前仓库名称
+                        p.CurWareHouseName = Filter.WareHouseName;
+                        p.ShowCurWareHouseName = Filter.WareHouseId > 0;
+
+                        //库存量转化
+                        p.UsableQuantityConversion = p.FormatQuantity(p.UsableQuantity ?? 0);
+                        p.CurrentQuantityConversion = p.FormatQuantity(p.CurrentQuantity ?? 0);
+                        p.OrderQuantityConversion = p.FormatQuantity(p.OrderQuantity ?? 0);
+                        p.LockQuantityConversion = p.FormatQuantity(p.LockQuantity ?? 0);
+
+
+                        p.IsShowStock = ShowStockQty;
+                        p.IsShowGiveEnabled = !ReferencePage.Equals("PurchaseOrderBillPage");
+
+                        //选择命令
+                        p.SelectCommand = ReactiveCommand.Create<ProductModel>(e =>
+                        {
+                            if (e == null)
+                                return;
+
+                            if ((!e.StockQty.HasValue || e.StockQty.Value == 0) && !ReferencePage.Equals("InventoryOPBillPage"))
+                            {
+                                this.Alert("零库存商品无效！");
+                                e.Selected = false;
+                                return;
+                            }
+                            else
+                            {
+                                e.Selected = !e.Selected;
+                            }
+                        });
+
                     }
 
-                    p.CurWareHouseName = Filter.WareHouseName;
+                    lists = results?.Data?.OrderBy(s => s.StockQty).ToList();
 
-                    p.IsShowStock = ShowStockQty;
-                    p.IsShowGiveEnabled = !ReferencePage.Equals("PurchaseOrderBillPage");
-
-                    //选择命令
-                    p.SelectCommand = ReactiveCommand.Create<ProductModel>(e =>
+                    if (this.UsableQuantity)
                     {
-                        if (e == null)
-                            return;
+                        lists = results?.Data?.Where(s => s.UsableQuantity > 0)
+                            .OrderBy(s => s.StockQty)
+                            .ToList();
+                    }
+                    else
+                    {
+                        lists = results?.Data?.OrderBy(s => s.StockQty)
+                                .ToList();
+                    }
 
-                        if ((!e.StockQty.HasValue || e.StockQty.Value == 0) && !ReferencePage.Equals("InventoryOPBillPage"))
-                        {
-                            this.Alert("零库存商品无效！");
-                            e.Selected = false;
-                            return;
-                        }
-                        else
-                        {
-                            e.Selected = !e.Selected;
-                        }
+                    var ps = Settings.FavoriteProducts;
+
+                    //标记收藏状态
+                    lists.ForEach(p =>
+                    {
+                        var f = ps.Select(s => s.Id).Contains(p.Id);
+                        p.Favorited = f;
                     });
 
+                    //过滤
+                    if (this.UsableFavorite)
+                    {
+                        lists = lists.Where(s => s.Favorited == true).ToList();
+                    }
                 }
+
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
             }
 
-            return results?.Data?.OrderBy(s => s.StockQty).ToList();
+            return lists;
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
@@ -422,7 +560,10 @@ namespace Wesley.Client.ViewModels
                 {
                     if (ReferencePage.Equals("AllocationBillPage"))
                     {
-                        parameters.TryGetValue("Bill", out AllocationBillModel Bill);
+                        this.ShowGift = false;
+                        parameters.TryGetValue("Bill", out AllocationBillModel bill);
+                        if (bill != null)
+                            this.Bill = bill;
                     }
                 }
 
@@ -446,13 +587,6 @@ namespace Wesley.Client.ViewModels
                         TempProductSeries.Add(p);
                     });
                 }
-
-                //载入商品
-                if (this.ProductSeries?.Count == 0 || ReferencePage == "InventoryOPBillPage")
-                    ((ICommand)Load)?.Execute(null);
-
-                //载入类别
-                ((ICommand)InitCatagory)?.Execute(null);
             }
             catch (Exception ex)
             {
@@ -463,6 +597,13 @@ namespace Wesley.Client.ViewModels
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            //载入类别
+            ((ICommand)InitCatagory)?.Execute(null);
+
+            //载入商品
+            if (this.ProductSeries?.Count == 0 || ReferencePage == "InventoryOPBillPage")
+                ((ICommand)Load)?.Execute(null);
         }
     }
 }

@@ -1,31 +1,21 @@
 ﻿using Wesley.Client.ViewModels;
 using Microsoft.AppCenter.Crashes;
 using System;
-using Xamarin.Forms;
 
 namespace Wesley.Client.Pages.Common
 {
 
     public partial class SelectCustomerPage : BaseContentPage<SelectCustomerPageViewModel>
     {
-        protected override void OnAppearing()
+        public SelectCustomerPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
-                        ToolbarItems.Clear();
-                        ToolbarItems.Add(PageExtensions.GetRefreshItem(ViewModel));
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                InitializeComponent();
+                ToolbarItems?.Clear();
+                ToolbarItems.Add(PageExtensions.GetRefreshItem(ViewModel));
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
 
 

@@ -1,11 +1,10 @@
-﻿using Shiny.Net;
+﻿//using Shiny.Net;
 
-namespace Wesley.Client
+namespace DCMS.Client
 {
     public class ShinyConnectivityHandler : IConnectivityHandler
     {
         private readonly IConnectivity _shinyConnectivity;
-
         public ShinyConnectivityHandler(IConnectivity shinyConnectivity)
         {
             _shinyConnectivity = shinyConnectivity;

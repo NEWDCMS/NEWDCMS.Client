@@ -1,24 +1,46 @@
 ﻿using Microsoft.AppCenter.Crashes;
 using System;
 using Xamarin.Forms;
-namespace Wesley.Client.CustomViews.Views
+namespace Wesley.Client.CustomViews
 {
 
 
     public partial class PopInputView : ContentView
     {
-
         public PopInputView(string title, string message, Keyboard keyboard = null, string defaultValue = "", string placeHolder = "请输入值...")
         {
-            try { InitializeComponent(); } catch (Exception ex) { Crashes.TrackError(ex); }
-            BindingContext = new
+            try
             {
-                Title = title,
-                Message = message,
-                DefaultValue = defaultValue,
-                PlaceHolder = placeHolder
-            };
-            txtInput.Keyboard = keyboard;
+                InitializeComponent();
+
+                BindingContext = new
+                {
+                    Title = title,
+                    Message = message,
+                    DefaultValue = defaultValue,
+                    PlaceHolder = string.IsNullOrEmpty(placeHolder) ? "请输入值..." : placeHolder
+                };
+
+                txtInput.Keyboard = keyboard;
+                if (keyboard == Keyboard.Numeric)
+                {
+                    Add.IsVisible = true;
+                    Remove.IsVisible = true;
+                    slContent.ColumnDefinitions[0].Width = new GridLength(30);
+                    slContent.ColumnDefinitions[1].Width = GridLength.Star;
+                    slContent.ColumnDefinitions[2].Width = new GridLength(30);
+                }
+                else
+                {
+                    Add.IsVisible = false;
+                    Remove.IsVisible = false;
+                    slContent.ColumnDefinitions[0].Width = new GridLength(0);
+                    slContent.ColumnDefinitions[1].Width = GridLength.Star;
+                    slContent.ColumnDefinitions[2].Width = new GridLength(0);
+                }
+
+            }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
 
         /// <summary>
@@ -60,6 +82,20 @@ namespace Wesley.Client.CustomViews.Views
         private void TxtInput_Focused(object sender, FocusEventArgs e)
         {
             txtInput.Focus();
+        }
+
+        private void Add_Clicked(object sender, EventArgs e)
+        {
+            int.TryParse(txtInput.Text, out int num);
+            num++;
+            txtInput.Text = num.ToString();
+        }
+
+        private void Remove_Clicked(object sender, EventArgs e)
+        {
+            int.TryParse(txtInput.Text, out int num);
+            num--;
+            txtInput.Text = num.ToString();
         }
     }
 }

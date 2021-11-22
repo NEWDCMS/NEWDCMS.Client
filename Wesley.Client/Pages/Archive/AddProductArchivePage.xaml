@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-                                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                                 xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-                                 xmlns:pages="clr-namespace:Wesley.Client.Pages"
-                                 xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
-                                 xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
-                                 prism:ViewModelLocator.AutowireViewModel="True"
-                                 x:Class="Wesley.Client.Pages.Common.AddProductArchivePage"
-                                 x:Name="CurrentContentView"
-                                 Title="{Binding Title}"
-                                 xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
-                                 x:TypeArguments="vms:AddProductArchivePageViewModel">
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.AddProductArchivePage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       x:TypeArguments="vms:AddProductArchivePageViewModel">
     <ScrollView>
         <Grid VerticalOptions="Start"
               Style="{StaticResource GGrid}">
@@ -132,7 +132,8 @@
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding CatagorySelected}"
-                                              CommandParameter="{Binding Product.Id}" />
+                                              CommandParameter="{Binding Product.Id}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -163,7 +164,8 @@
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding BrandSelected}"
-                                              CommandParameter="{Binding Product.Id}" />
+                                              CommandParameter="{Binding Product.Id}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -211,7 +213,8 @@
                        Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding Path=BindingContext.SmallUnitSelected,Source={x:Reference CurrentContentView}}"
-                                              CommandParameter="{Binding Id}" />
+                                              CommandParameter="{Binding Id}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
                 <custom:CustomEntry Grid.Row="0"
@@ -276,7 +279,8 @@
                            FontSize="16">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Path=BindingContext.ScanCode,Source={x:Reference CurrentContentView}}"
-                                                  CommandParameter="{Binding Id}" />
+                                                  CommandParameter="{Binding Id}"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                 </StackLayout>
@@ -324,7 +328,8 @@
                        Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding Path=BindingContext.StrokeUnitSelected,Source={x:Reference CurrentContentView}}"
-                                              CommandParameter="{Binding Id}" />
+                                              CommandParameter="{Binding Id}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
                 <Label Grid.Row="0"
@@ -408,7 +413,8 @@
                            FontSize="16">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Path=BindingContext.ScanCode,Source={x:Reference CurrentContentView}}"
-                                                  CommandParameter="{Binding Id}" />
+                                                  CommandParameter="{Binding Id}"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                 </StackLayout>
@@ -456,7 +462,8 @@
                        Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding Path=BindingContext.BigUnitSelected,Source={x:Reference CurrentContentView}}"
-                                              CommandParameter="{Binding Id}" />
+                                              CommandParameter="{Binding Id}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
                 <Label Grid.Row="0"

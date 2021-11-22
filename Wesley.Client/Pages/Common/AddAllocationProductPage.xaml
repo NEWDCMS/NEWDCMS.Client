@@ -87,11 +87,16 @@
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height=".7" />
                                 <RowDefinition Height="40" />
+                                <RowDefinition Height=".7" />
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height=".7" />
+                                <RowDefinition Height="40" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
+
                             <!--//////////大单位价格///////////-->
                             <StackLayout Grid.Row="0"
                                          Grid.Column="0"
@@ -110,30 +115,25 @@
                                                     VerticalOptions="CenterAndExpand"
                                                     Style="{StaticResource FormEntry}" />
                             </StackLayout>
-                            <StackLayout Grid.Row="0"
-                                         Grid.Column="1"
-                                         Padding="0,0,10,0"
-                                         Spacing="0"
-                                         Orientation="Horizontal">
-                                <Label Text="{Binding BigPriceUnit.UnitName}"
-                                       HorizontalOptions="Start"
-                                       FontSize="{StaticResource FT14}"
-                                       VerticalOptions="Center"
-                                       Margin="0,0,10,0" />
-                                <Label Text="(出)主仓库存："
-                                       HorizontalOptions="Start"
-                                       VerticalOptions="Center"
-                                       FontSize="{StaticResource FT14}"></Label>
-                                <Label Text="{Binding ShipmentWareHouseQuantity}"
-                                       HorizontalOptions="Start"
-                                       VerticalOptions="Center"
-                                       FontSize="{StaticResource FT14}"></Label>
-                            </StackLayout>
+                            <Label  Grid.Row="0"
+                                    Grid.Column="1"
+                                    HorizontalOptions="End"
+                                    FontSize="{StaticResource FT14}"
+                                    VerticalOptions="Center"
+                                    Margin="0,0,10,0">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="/"></Span>
+                                        <Span Text="{Binding BigPriceUnit.UnitName}"></Span>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
                             <BoxView  Grid.Row="1"
                                       VerticalOptions="Start"
                                       Grid.ColumnSpan="2"
                                       Style="{StaticResource SeparatorGrid}"
                                       Margin="0" />
+
                             <!--//////////小单位价格///////////-->
                             <StackLayout Grid.Row="2"
                                          Grid.Column="0"
@@ -152,31 +152,98 @@
                                                     VerticalOptions="CenterAndExpand"
                                                     Style="{StaticResource FormEntry}" />
                             </StackLayout>
-                            <StackLayout Grid.Row="2"
-                                         Grid.Column="1"
-                                         Padding="0,0,10,0"
-                                         Spacing="0"
-                                         Orientation="Horizontal">
-                                <Label  Text="{Binding SmallPriceUnit.UnitName}"
-                                        HorizontalOptions="Start"
-                                        VerticalOptions="Center"
-                                        FontSize="{StaticResource FT14}"
-                                        Margin="0,0,10,0" />
-                                <Label Text="(入)主仓库存："
-                                       HorizontalOptions="Start"
-                                       VerticalOptions="Center"
-                                       FontSize="{StaticResource FT14}"></Label>
-                                <Label Text="{Binding IncomeWareHouseQuantity}"
-                                       HorizontalOptions="Start"
-                                       VerticalOptions="Center"
-                                       FontSize="{StaticResource FT14}"></Label>
-                            </StackLayout>
+                            <Label Grid.Row="2"
+                                   Grid.Column="1"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}"
+                                   Margin="0,0,10,0">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="/"></Span>
+                                        <Span Text="{Binding SmallPriceUnit.UnitName}"></Span>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
                             <BoxView   Grid.Row="3"
                                        VerticalOptions="Start"
                                        Grid.ColumnSpan="2"
                                        Style="{StaticResource SeparatorGrid}"
                                        Margin="0" />
-                            <StackLayout Grid.Row="4"
+
+                            <!--//////////库存量///////////-->
+                            <Label Grid.Row="4"
+                                   Grid.Column="0"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="(出)"></Span>
+                                        <Span Text="{Binding ShipmentWareHouseName}"></Span>
+                                        <Span Text="可用库存："></Span>
+                                        <Span Text="{Binding ShipmentUsableQuantity}"></Span>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Grid.Row="4"
+                                   Grid.Column="1"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="(出)"></Span>
+                                        <Span Text="{Binding ShipmentWareHouseName}"></Span>
+                                        <Span Text="现货库存："></Span>
+                                        <Span Text="{Binding ShipmentCurrentQuantity}"></Span>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <BoxView Grid.Row="5"
+                                       VerticalOptions="Start"
+                                       Grid.ColumnSpan="2"
+                                       Style="{StaticResource SeparatorGrid}"
+                                       Margin="0" />
+
+                            <!--//////////库存量///////////-->
+                            <Label Grid.Row="6"
+                                   Grid.Column="0"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="(入)"></Span>
+                                        <Span Text="{Binding IncomeWareHouseName}"></Span>
+                                        <Span Text="可用库存："></Span>
+                                        <Span Text="{Binding IncomeUsableQuantity}"></Span>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Grid.Row="6"
+                                   Grid.Column="1"
+                                   Text="{Binding IncomeUsableQuantity}"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="(入)"></Span>
+                                        <Span Text="{Binding IncomeWareHouseName}"></Span>
+                                        <Span Text="现货库存："></Span>
+                                        <Span Text="{Binding IncomeCurrentQuantity}"></Span>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            
+                            <BoxView   Grid.Row="7"
+                                       VerticalOptions="Start"
+                                       Grid.ColumnSpan="2"
+                                       Style="{StaticResource SeparatorGrid}"
+                                       Margin="0" />
+
+                            <StackLayout Grid.Row="8"
                                          Grid.Column="0"
                                          Spacing="0"
                                          Grid.ColumnSpan="2"
@@ -204,7 +271,7 @@
         </CollectionView>
         <!--footer-->
         <Grid Margin="0"
-              HeightRequest="45"
+              HeightRequest="50"
               Style="{StaticResource GGrid}"
               HorizontalOptions="FillAndExpand"
               VerticalOptions="End"
@@ -213,7 +280,7 @@
               BackgroundColor="White">
             <Grid.RowDefinitions>
                 <RowDefinition Height=".7" />
-                <RowDefinition Height="45" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />

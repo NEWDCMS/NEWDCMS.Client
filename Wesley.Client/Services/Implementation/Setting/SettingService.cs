@@ -23,7 +23,7 @@ namespace Wesley.Client.Services
         /// 获取公司配置
         /// </summary>
         /// <returns></returns>
-        public async Task<CompanySettingModel> GetCompanySettingAsync(CancellationToken calToken = default)
+        public void GetCompanySettingAsync(CancellationToken calToken = default)
         {
             var model = new CompanySettingModel();
             try
@@ -32,24 +32,24 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
 
                 var api = RefitServiceBuilder.Build<ISettingApi>(URL);
-                var results = await _makeRequest.Start(api.GetCompanySettingAsync(storeId, calToken), calToken);
-                if (results != null && results?.Code >= 0)
-                {
-                    model = results?.Data;
-                    if (model != null)
+                var cacheKey = RefitServiceBuilder.Cacher("GetCompanySettingAsync", storeId, userId);
+                _makeRequest.StartUseCache_Rx(api.GetCompanySettingAsync(storeId, calToken), cacheKey, calToken)?.Subscribe((results) =>
                     {
-                        Settings.CompanySetting = JsonConvert.SerializeObject(model);
-                        if (string.IsNullOrEmpty(Settings.DefaultPricePlan) || Settings.DefaultPricePlan == "0_0")
-                            Settings.DefaultPricePlan = model.DefaultPricePlan;
-                    }
-                }
-                return model;
+                        if (results != null && results?.Code >= 0)
+                        {
+                            model = results?.Data;
+                            if (model != null)
+                            {
+                                Settings.CompanySetting = JsonConvert.SerializeObject(model);
+                                if (string.IsNullOrEmpty(Settings.DefaultPricePlan) || Settings.DefaultPricePlan == "0_0")
+                                    Settings.DefaultPricePlan = model.DefaultPricePlan;
+                            }
+                        }
+                    });
             }
             catch (Exception e)
             {
-
                 e.HandleException();
-                return null;
             }
         }
 
@@ -66,7 +66,6 @@ namespace Wesley.Client.Services
             {
                 int storeId = Settings.StoreId;
                 int userId = Settings.UserId;
-
                 var api = RefitServiceBuilder.Build<ISettingApi>(URL);
                 var results = await _makeRequest.Start(api.GetRemarkConfigListSetting(storeId, calToken), calToken);
                 if (results != null && results?.Code >= 0)

@@ -34,7 +34,8 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IProductApi>(URL);
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetProductsAsync", storeId, key, categoryIds, terminalid, wareHouseId, pageIndex, pageSize, usablequantity);
-                var results = await _makeRequest.StartUseCache(api.GetProductsAsync(storeId, key, categoryIds, terminalid, wareHouseId, pageIndex, pageSize, usablequantity, calToken), cacheKey, force, calToken);
+                var results = await _makeRequest.StartUseCache(api.GetProductsAsync(storeId,null, key, categoryIds, terminalid, wareHouseId, pageIndex, pageSize, usablequantity, calToken), cacheKey, force, calToken);
+
                 return results?.Data;
             }
             catch (Exception e)
@@ -45,6 +46,40 @@ namespace Wesley.Client.Services
         }
 
 
+        public async Task<ProductModel> GetProductByIdAsync(int productId, CancellationToken calToken = default)
+        {
+            try
+            {
+                int storeId = Settings.StoreId;
+                int userId = Settings.UserId;
+                var api = RefitServiceBuilder.Build<IProductApi>(URL);
+                var results = await _makeRequest.Start(api.GetProductByIdAsync(storeId, productId, calToken));
+                return results?.Data;
+            }
+            catch (Exception e)
+            {
+                e.HandleException();
+                return null;
+            }
+        }
+
+
+        public async Task<IList<ProductModel>> GetProductByIdsAsync(int wareHouseId, int[] productIds, CancellationToken calToken = default)
+        {
+            try
+            {
+                int storeId = Settings.StoreId;
+                int userId = Settings.UserId;
+                var api = RefitServiceBuilder.Build<IProductApi>(URL);
+                var results = await _makeRequest.Start(api.GetProductByIdsAsync(storeId, productIds, wareHouseId, calToken));
+                return results?.Data;
+            }
+            catch (Exception e)
+            {
+                e.HandleException();
+                return null;
+            }
+        }
 
         /// <summary>
         /// 获取商品类别
@@ -57,9 +92,15 @@ namespace Wesley.Client.Services
             {
                 int storeId = Settings.StoreId;
                 int userId = Settings.UserId;
+
                 var api = RefitServiceBuilder.Build<IProductApi>(URL);
                 var cacheKey = RefitServiceBuilder.Cacher("GetAllCategoriesAsync", storeId, userId);
-                var results = await _makeRequest.StartUseCache(api.GetAllCategoriesAsync(storeId, calToken), cacheKey, force, calToken);
+
+                var results = await _makeRequest.StartUseCache(api.GetAllCategoriesAsync(storeId, calToken),
+                  cacheKey,
+                  force,
+                  calToken);
+
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
                 else
@@ -67,7 +108,6 @@ namespace Wesley.Client.Services
             }
             catch (Exception e)
             {
-
                 e.HandleException();
                 return null;
             }

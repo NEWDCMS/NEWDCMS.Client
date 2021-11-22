@@ -10,14 +10,12 @@ namespace Wesley.Client.BaiduMaps
         Standard,
         Satellite
     }
-
     public enum UserTrackingMode
     {
         None,
         Follow,
         FollowWithCompass
     }
-
 
     public class Map : View
     {
@@ -177,6 +175,7 @@ namespace Wesley.Client.BaiduMaps
             set { SetValue(CenterProperty, value); }
         }
 
+
         /// <summary>
         /// 显示缩放工具条
         /// </summary>
@@ -224,11 +223,10 @@ namespace Wesley.Client.BaiduMaps
         }
 
 
-        public IBaiduLocationService LocationService { get; set; }
-
+        // public IBaiduLocationService LocationService { get; set; }
         public IProjection Projection { get; set; }
-
         public IList<Pin> Pins => pins;
+
         private readonly ObservableCollection<Pin> pins = new ObservableCollection<Pin>();
 
         public IList<Polyline> Polylines => polylines;
@@ -270,12 +268,31 @@ namespace Wesley.Client.BaiduMaps
             Loaded?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler<EventArgs> StatusChanged;
-        public void SendStatusChanged()
+        public event EventHandler<StatusChangedEventArgs> StatusChanged;
+        public void SendStatusChanged(double latitude, double longitude)
         {
-            StatusChanged?.Invoke(this, EventArgs.Empty);
+            StatusChanged?.Invoke(this, new StatusChangedEventArgs(latitude, longitude));
         }
+    }
 
+
+    public class StatusChangedEventArgs : EventArgs
+    {
+        private double latitude;
+        private double longitude;
+        public StatusChangedEventArgs(double latitude,double longitude)
+        {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+        public double Latitude
+        {
+            get { return latitude; }
+        }
+        public double Longitude
+        {
+            get { return longitude; }
+        }
     }
 }
 

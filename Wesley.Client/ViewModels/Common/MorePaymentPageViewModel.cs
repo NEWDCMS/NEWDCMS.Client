@@ -3,17 +3,19 @@ using Wesley.Client.Enums;
 using Wesley.Client.Models;
 using Wesley.Client.Models.Settings;
 using Wesley.Client.Services;
-
 using Prism.Commands;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
     public class MorePaymentPageViewModel : ViewModelBase
@@ -26,7 +28,8 @@ namespace Wesley.Client.ViewModels
 
         public MorePaymentPageViewModel(INavigationService navigationService,
             IAccountingService accountingService,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "选择支付方式";
             _navigationService = navigationService;
@@ -286,7 +289,7 @@ namespace Wesley.Client.ViewModels
 
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()

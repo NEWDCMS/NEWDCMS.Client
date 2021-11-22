@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseTabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+                      xmlns:prism="http://prismlibrary.com"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                      xmlns:pages="clr-namespace:DCMS.Client.Pages"
+                      prism:ViewModelLocator.AutowireViewModel="True"
+                      UnselectedTabColor="#78919f"
+                      BackgroundColor="White"
+                      BarBackgroundColor="White"
+                      BarTextColor="#53a245"
+                      x:Class="DCMS.Client.Pages.JobsPage"
+                      Title="任务管理">
+    <pages:BaseTabbedPage.Children>
+        <pages:ListPage Title="任务" />
+        <pages:LogPage Title="日志" />
+    </pages:BaseTabbedPage.Children>
+</pages:BaseTabbedPage>

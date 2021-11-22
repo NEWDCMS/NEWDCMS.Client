@@ -156,12 +156,16 @@ namespace Wesley.Client.CustomViews
             emptyStateImage.Source = (string)newvalue;
         }
 
+
         private static void ViewModelLoaderChanged(BindableObject bindable, object oldvalue, object newvalue)
         {
             var taskLoader = (TaskLoaderView)bindable;
             taskLoader.SetBindings();
         }
 
+        /// <summary>
+        /// 绑定
+        /// </summary>
         private void SetBindings()
         {
             if (ViewModelLoader != null)

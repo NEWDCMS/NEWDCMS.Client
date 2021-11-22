@@ -1,10 +1,11 @@
-﻿using Wesley.Client.Models.Census;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Census;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
     public class CustomerVisitRankPageViewModel : ViewModelBaseChart<BusinessVisitRank>
@@ -29,7 +32,8 @@ namespace Wesley.Client.ViewModels
         IReportingService reportingService,
         ITerminalService terminalService,
         IUserService userService,
-          IDialogService dialogService) : base(navigationService,
+          IDialogService dialogService
+            ) : base(navigationService,
             productService,
             reportingService,
             dialogService)
@@ -41,72 +45,17 @@ namespace Wesley.Client.ViewModels
             _terminalService = terminalService;
             _userService = userService;
 
-            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DestroyWith);
+            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DeactivateWith);
             this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
                 try
                 {
-                    var result = await _terminalService.GetBusinessVisitRankingAsync(Filter.BusinessUserId, Filter.StartTime, Filter.EndTime, this.ForceRefresh, calToken: cts.Token);
+                    var result = await _terminalService.GetBusinessVisitRankingAsync(Filter.BusinessUserId, Filter.StartTime, Filter.EndTime, this.ForceRefresh, new System.Threading.CancellationToken());
 
                     if (result != null)
                     {
                         RefreshData(result.ToList());
                     }
-
-#if DEBUG
-                    //模拟
-                    var random = new Random();
-                    var series = new List<BusinessVisitRank>();
-
-                    series.Add(new BusinessVisitRank
-                    {
-                        BusinessUserId = random.Next(10, 1000),
-                        BusinessUserName = "刘冬冬" + random.Next(1, 10),
-                        VisitedCount = random.Next(0, 100),
-                        CustomerCount = random.Next(10, 100),
-                        NoVisitedCount = random.Next(20, 100),
-                        ExceptVisitCount = random.Next(0, 100)
-                    });
-                    series.Add(new BusinessVisitRank
-                    {
-                        BusinessUserId = random.Next(10, 1000),
-                        BusinessUserName = "刘冬冬" + random.Next(1, 10),
-                        VisitedCount = random.Next(0, 100),
-                        CustomerCount = random.Next(10, 100),
-                        NoVisitedCount = random.Next(20, 100),
-                        ExceptVisitCount = random.Next(0, 100)
-                    });
-                    series.Add(new BusinessVisitRank
-                    {
-                        BusinessUserId = random.Next(10, 1000),
-                        BusinessUserName = "刘冬冬" + random.Next(1, 10),
-                        VisitedCount = random.Next(0, 100),
-                        CustomerCount = random.Next(10, 100),
-                        NoVisitedCount = random.Next(20, 100),
-                        ExceptVisitCount = random.Next(0, 100)
-                    });
-                    series.Add(new BusinessVisitRank
-                    {
-                        BusinessUserId = random.Next(10, 1000),
-                        BusinessUserName = "刘冬冬" + random.Next(1, 10),
-                        VisitedCount = random.Next(0, 100),
-                        CustomerCount = random.Next(10, 100),
-                        NoVisitedCount = random.Next(20, 100),
-                        ExceptVisitCount = random.Next(0, 100)
-                    });
-                    series.Add(new BusinessVisitRank
-                    {
-                        BusinessUserId = random.Next(10, 1000),
-                        BusinessUserName = "刘冬冬" + random.Next(1, 10),
-                        VisitedCount = random.Next(0, 100),
-                        CustomerCount = random.Next(10, 100),
-                        NoVisitedCount = random.Next(20, 100),
-                        ExceptVisitCount = random.Next(0, 100)
-                    });
-
-                    RefreshData(series);
-#endif
-
                 }
                 catch (Exception ex)
                 {
@@ -115,51 +64,51 @@ namespace Wesley.Client.ViewModels
 
             }));
 
-            //菜单选择
-            this.SetMenus((x) =>
-            {
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
-            }, 8, 9, 10, 13, 14);
+            //绑定页面菜单
+            BindFilterDateMenus(true);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
-        }
 
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
         }
 
 
-        private void RefreshData(List<BusinessVisitRank> series)
+        private void RefreshData(List<BusinessVisitRank> analysis)
         {
-            if (series == null)
+            if (analysis == null)
             {
                 return;
             }
 
-            RankSeries = new ObservableCollection<BusinessVisitRank>(series);
-            SubTotal = series.Select(s => s.VisitedCount).Sum();
-            Total = series.Select(s => s.CustomerCount).Sum();
+            RankSeries = new ObservableCollection<BusinessVisitRank>(analysis);
+            SubTotal = analysis.Select(s => s.VisitedCount).Sum();
+            Total = analysis.Select(s => s.CustomerCount).Sum();
 
-            var entries = new List<ChartEntry>();
-            int i = 0;
-            foreach (var t in RankSeries.Take(10))
+            var ranks = analysis.ToList();
+            if (ranks.Count > 10)
             {
-                entries.Add(new ChartEntry(t?.VisitedCount ?? 0)
-                {
-                    Label = t.BusinessUserName,
-                    ValueLabel = (t?.VisitedCount ?? 0).ToString(),
-                    Color = ChartDataProvider.Colors[i]
-                });
-                i++;
+                ranks = ranks.Take(10).ToList();
             }
-            ChartData = ChartDataProvider.CreateHorizontalBarChart(entries);
+
+            var data = new ChartViewConfig()
+            {
+                BackgroundColor = Color.White,
+                ChartConfig = new ChartConfig
+                {
+                    type = Wesley.ChartJS.ChartTypes.Bar,
+                    data = ChartDataProvider.GetCustomerVisitRank(ranks)
+                }
+            };
+            ChartConfig = data;
         }
+
+
 
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            _popupMenu?.Show(8, 10, 13, 14);
+
             ((ICommand)Load)?.Execute(null);
         }
     }

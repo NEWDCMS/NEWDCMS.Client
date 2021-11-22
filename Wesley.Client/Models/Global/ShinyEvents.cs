@@ -1,13 +1,12 @@
-﻿using ReactiveUI;
-using SQLite;
+﻿using LiteDB;
 using System;
 
 namespace Wesley.Client.Models
 {
     public class GpsEvent
     {
-        [PrimaryKey]
-        [AutoIncrement]
+        [BsonId]
+
         public int Id { get; set; }
 
         public double Latitude { get; set; }
@@ -23,8 +22,8 @@ namespace Wesley.Client.Models
 
     public class GeofenceEvent
     {
-        [PrimaryKey]
-        [AutoIncrement]
+        [BsonId]
+
         public int Id { get; set; }
 
         public bool Entered { get; set; }

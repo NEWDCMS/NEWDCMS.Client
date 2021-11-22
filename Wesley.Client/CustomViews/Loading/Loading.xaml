@@ -1,35 +1,27 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              mc:Ignorable="d"
-             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-             x:Class="Wesley.Client.CustomViews.Views.Loading">
-  <ContentView.Content>
+             x:Class="Wesley.Client.CustomViews.Loading">
+    <ContentView.Content>
         <StackLayout VerticalOptions="CenterAndExpand"
                      HorizontalOptions="CenterAndExpand">
             <!--样式1-->
-            <!--<ActivityIndicator IsRunning="True" HorizontalOptions="Center"/>-->
+            <ActivityIndicator IsRunning="true"
+                               HorizontalOptions="Center"
+                               IsVisible="{Binding IsBusy}"/>
             <!--样式2-->
-            <ffimageloading:CachedImage x:Name="loadingImage" HorizontalOptions="Center"
-                                            VerticalOptions="Center"
-                                            WidthRequest="100"
-                                            HeightRequest="100"
-                                            DownsampleToViewSize="true"
+            <!--<ffimageloading:CachedImage x:Name="loadingImage"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        WidthRequest="100"
+                                        HeightRequest="100"
+                                        DownsampleToViewSize="true"
                                         Source="loading.gif"
-                                        IsVisible="{Binding IsNull}"/>
-            <!--样式3-->
-            <!--<lottie:AnimationView HorizontalOptions="Center"
-                                  VerticalOptions="Center"
-                                  Loop="True"
-                                  AutoPlay="True"
-                                  Animation="typing.json"
-                                  HeightRequest="50"
-                                  WidthRequest="70"
-                                  BackgroundColor="Transparent" />-->
-            <Label Text="努力加载中..."
-                   FontSize="{StaticResource FT14}"
+                                        IsVisible="{Binding IsBusy}" />-->
+            <Label FontSize="{StaticResource FT14}"
                    TextColor="{StaticResource SecondaryAccentColor}"
                    HorizontalOptions="Center">
                 <Label.Triggers>
@@ -37,13 +29,7 @@
                                  Binding="{Binding IsNull}"
                                  Value="False">
                         <Setter Property="Text"
-                                Value="前不见古人，后不见来者！" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding IsNull}"
-                                 Value="True">
-                        <Setter Property="Text"
-                                Value="努力加载中..." />
+                                Value="空空如也，刷新试试~" />
                     </DataTrigger>
                 </Label.Triggers>
             </Label>

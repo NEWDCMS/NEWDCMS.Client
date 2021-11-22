@@ -1,27 +1,25 @@
-﻿using DCMS.Client.Services;
+﻿using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using Shiny;
-using DCMS.Logger;
+//using Shiny;
 using System;
-
 
 namespace DCMS.Client
 {
-    //public class GlobalExceptionHandler : IObserver<Exception>, IShinyStartupTask
-    //{
-    //    readonly IDialogService dialogs;
-    //    public GlobalExceptionHandler(IDialogService dialogs) => this.dialogs = dialogs;
+    public class GlobalExceptionHandler : IObserver<Exception>, IShinyStartupTask
+    {
+        private readonly ILogger logger;
+        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+        {
+            this.logger = logger;
+        }
 
+        public void Start() => RxApp.DefaultExceptionHandler = this;
+        public void OnCompleted() { }
+        public void OnError(Exception error) { }
 
-    //    public void Start() => RxApp.DefaultExceptionHandler = this;
-    //    public void OnCompleted() { }
-    //    public void OnError(Exception error) { }
-
-
-    //    public async void OnNext(Exception value)
-    //    {
-    //        CrossLogger.Instance.Error("Exception", value);
-    //        await this.dialogs.DisplayAlertAsync("ERROR", value.ToString(), "取消");
-    //    }
-    //}
+        public void OnNext(Exception value)
+        {
+            this.logger.LogError(value, "Error in view caught");
+        }
+    }
 }

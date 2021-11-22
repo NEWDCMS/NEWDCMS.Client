@@ -9,7 +9,7 @@ namespace Wesley.Client.Droid
     /// </summary>
     internal class OfflineMapImpl : Java.Lang.Object, IOfflineMap, IMKOfflineMapListener
     {
-        private MKOfflineMap native;
+        private readonly MKOfflineMap native;
         public OfflineMapImpl()
         {
             native = new MKOfflineMap();
@@ -128,7 +128,7 @@ namespace Wesley.Client.Droid
             {
                 ID = record.CityID,
                 Name = record.CityName,
-                Size = record.Size,
+                //Size = record.Size,
                 Children = new List<OfflinePackage>(),
                 Type = (0 == record.CityType) ? OfflinePackageType.China
                      : (1 == record.CityType ? OfflinePackageType.Province

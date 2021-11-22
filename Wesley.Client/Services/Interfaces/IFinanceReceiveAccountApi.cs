@@ -9,10 +9,9 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/sales/financereceiveaccount", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IFinanceReceiveAccountApi
     {
-
         [Get("/getfinancereceiveaccounts/{storeId}/{businessUserId}")]
         Task<APIResult<IList<FinanceReceiveAccountBillModel>>> GetFinanceReceiveAccounts(int storeId, DateTime? start, DateTime? end, int? businessUserId, int? payeer, int? accountingOptionId, string billNumber = "", int pageIndex = 0, int pageSize = 20, CancellationToken calToken = default);
 

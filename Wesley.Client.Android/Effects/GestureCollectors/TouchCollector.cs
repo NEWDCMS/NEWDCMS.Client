@@ -1,25 +1,34 @@
-﻿using System.Collections.Generic;
-using Android.Views;
+﻿using Android.Views;
 using System;
+using System.Collections.Generic;
 
-namespace Wesley.Effects.Droid.GestureCollectors {
-    internal static class TouchCollector {
-        static Dictionary<View, List<Action<View.TouchEventArgs>>> Collection { get; } =
+namespace Wesley.Client.Droid.Effects.GestureCollectors
+{
+    /// <summary>
+    /// 触摸采集器
+    /// </summary>
+    internal static class TouchCollector
+    {
+        private static Dictionary<View, List<Action<View.TouchEventArgs>>> Collection { get; } =
             new Dictionary<View, List<Action<View.TouchEventArgs>>>();
 
-        static View _activeView;
+        private static View _activeView;
 
-        public static void Add(View view, Action<View.TouchEventArgs> action) {
-            if (Collection.ContainsKey(view)) {
+        public static void Add(View view, Action<View.TouchEventArgs> action)
+        {
+            if (Collection.ContainsKey(view))
+            {
                 Collection[view].Add(action);
             }
-            else {
+            else
+            {
                 view.Touch += ActionActivator;
                 Collection.Add(view, new List<Action<View.TouchEventArgs>> { action });
             }
         }
 
-        public static void Delete(View view, Action<View.TouchEventArgs> action) {
+        public static void Delete(View view, Action<View.TouchEventArgs> action)
+        {
             if (!Collection.ContainsKey(view)) return;
 
             var actions = Collection[view];
@@ -30,11 +39,13 @@ namespace Wesley.Effects.Droid.GestureCollectors {
             Collection.Remove(view);
         }
 
-        static void ActionActivator(object sender, View.TouchEventArgs e) {
+        private static void ActionActivator(object sender, View.TouchEventArgs e)
+        {
             var view = (View)sender;
             if (!Collection.ContainsKey(view) || (_activeView != null && _activeView != view)) return;
 
-            switch (e.Event.Action) {
+            switch (e.Event.Action)
+            {
                 case MotionEventActions.Down:
                     _activeView = view;
                     view.PlaySoundEffect(SoundEffects.Click);
@@ -48,7 +59,8 @@ namespace Wesley.Effects.Droid.GestureCollectors {
             }
 
             var actions = Collection[view].ToArray();
-            foreach (var valueAction in actions) {
+            foreach (var valueAction in actions)
+            {
                 valueAction?.Invoke(e);
             }
         }

@@ -3,16 +3,16 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
-                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
-                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        xmlns:ffimageLoader="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
                        xmlns:ffimageTransform="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.Archive.ProductArchivesPage"
                        x:Name="CurrentContentView"
                        Title="{Binding Title}"
-                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:ProductArchivesPageViewModel">
     <!--header-->
     <Grid Style="{StaticResource GGrid}"
@@ -45,7 +45,8 @@
             <Label Style="{StaticResource SearchArrow}">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding Path=SerchCommand}"
-                                          CommandParameter="{Binding Text,Source={x:Reference SearchBar}}" />
+                                          CommandParameter="{Binding Text,Source={x:Reference SearchBar}}"
+                                          NumberOfTapsRequired="1" />
                 </Label.GestureRecognizers>
             </Label>
         </StackLayout>
@@ -77,7 +78,8 @@
             <Label Style="{StaticResource DownArrow}"
                    Margin="{StaticResource MR10}">
                 <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding Path=BrandSelected}"></TapGestureRecognizer>
+                    <TapGestureRecognizer Command="{Binding Path=BrandSelected}"
+                                          NumberOfTapsRequired="1" />
                 </Label.GestureRecognizers>
             </Label>
         </StackLayout>
@@ -86,15 +88,12 @@
                  Grid.Row="1"
                  Grid.ColumnSpan="2" />
         <!--row 2-->
-        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+        <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                      Command="{Binding RefreshCommand}"
                      RefreshColor="{StaticResource PrimaryDarkColor}"
                      Grid.Row="2"
                      Grid.ColumnSpan="2">
-            <ScrollView HorizontalOptions="FillAndExpand"
-                        VerticalOptions="FillAndExpand"
-                        VerticalScrollBarVisibility="Always"
-                        BackgroundColor="White">
+
                 <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
                                        ViewModelLoader="{Binding ProductSeriesLoader}">
                     <CollectionView ItemsSource="{Binding ProductSeries}"
@@ -104,7 +103,8 @@
                                     SelectedItem="{Binding Selecter, Mode=TwoWay}"
                                     RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
                                     RemainingItemsThreshold="{Binding ItemTreshold}"
-                                    SelectionMode="Single">
+                                SelectionMode="Single"
+                                VerticalScrollBarVisibility="Always">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Style="{StaticResource GGrid}"
@@ -130,9 +130,9 @@
                                                            BackgroundColor="#eeeeee">
                                             <ffimageLoader:CachedImage HorizontalOptions="Center"
                                                                        VerticalOptions="Start"
-                                                                       HeightRequest="{OnPlatform Android=60, iOS=50}"
-                                                                       WidthRequest="{OnPlatform Android=60, iOS=50}"
-                                                                       Source="nophoto.png"
+                                                                       HeightRequest="60"
+                                                                   WidthRequest="60"
+                                                                   Source="PhotoIcon.png"
                                                                        Aspect="AspectFill">
                                                 <ffimageLoader:CachedImage.Transformations>
                                                     <ffimageTransform:CircleTransformation />
@@ -206,7 +206,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </custom:TaskLoaderView>
-            </ScrollView>
+
         </RefreshView>
     </Grid>
 </pages:BaseContentPage>

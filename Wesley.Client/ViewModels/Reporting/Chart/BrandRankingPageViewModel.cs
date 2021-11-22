@@ -1,10 +1,11 @@
-﻿using Wesley.Client.Models.Report;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Report;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
     public class BrandRankingPageViewModel : ViewModelBaseChart<BrandRanking>
@@ -23,7 +26,8 @@ namespace Wesley.Client.ViewModels
         public BrandRankingPageViewModel(INavigationService navigationService,
             IProductService productService,
             IReportingService reportingService,
-              IDialogService dialogService) : base(navigationService,
+              IDialogService dialogService
+            ) : base(navigationService,
                 productService,
                 reportingService,
                 dialogService)
@@ -32,7 +36,7 @@ namespace Wesley.Client.ViewModels
 
             this.PageType = Enums.ChartPageEnum.BrandRanking_Template;
 
-            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DestroyWith);
+            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DeactivateWith);
             this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
                 try
@@ -43,119 +47,11 @@ namespace Wesley.Client.ViewModels
                     DateTime? endTime = Filter.EndTime;
 
                     //初始化 
-                    var result = await _reportingService.GetBrandRankingAsync(brandIds, businessUserId, startTime, endTime, this.ForceRefresh, calToken: cts.Token);
+                    var result = await _reportingService.GetBrandRankingAsync(brandIds, businessUserId, startTime, endTime, this.ForceRefresh, new System.Threading.CancellationToken());
                     if (result != null)
                     {
                         Refresh(result.ToList());
                     }
-
-#if DEBUG
-                    //模拟
-                    var random = new Random();
-                    var series = new List<BrandRanking>();
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-                    series.Add(new BrandRanking
-                    {
-                        BrandId = random.Next(10, 100),
-                        BrandName = "雪花啤酒" + random.Next(1, 10),
-                        Profit = random.Next(20, 100),
-                        SaleAmount = random.Next(100, 1000),
-                        SaleReturnAmount = random.Next(100, 10000),
-                        NetAmount = random.Next(100, 10000),
-                        Percentage = random.Next(0, 100)
-                    });
-
-                    Refresh(series);
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -163,61 +59,57 @@ namespace Wesley.Client.ViewModels
                 }
             }));
 
-            //菜单选择
-            this.SetMenus((x) =>
-            {
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
-            }, 8, 10, 14);
+            //绑定页面菜单
+            BindFilterDateMenus(true);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
 
-
-        public void Refresh(List<BrandRanking> brands)
+        public void Refresh(List<BrandRanking> analysis)
         {
-            if (brands == null || brands.Count == 0)
+            if (analysis == null || analysis.Count == 0)
             {
                 return;
             }
 
-            brands.ForEach(b =>
+            analysis.ForEach(b =>
             {
                 b.Percentage *= 100;
             });
 
-            RankSeries = new ObservableCollection<BrandRanking>(brands.OrderByDescending(b => b.Percentage));
+            RankSeries = new ObservableCollection<BrandRanking>(analysis.OrderByDescending(b => b.Percentage));
+            TotalAmount = analysis.Select(s => s.NetAmount ?? 0).Sum();
+            TotalPercentage = analysis.Select(s => s.Percentage ?? 0).Sum();
 
-            TotalAmount = brands.Select(s => s.NetAmount ?? 0).Sum();
-            TotalPercentage = brands.Select(s => s.Percentage ?? 0).Sum();
-
-            var entries = new List<ChartEntry>();
-            int i = 0;
-            foreach (var t in brands.Take(10))
+            var ranks = analysis.ToList();
+            if (ranks.Count > 10)
             {
-                entries.Add(new ChartEntry((float)(t?.NetAmount ?? 0))
-                {
-                    Label = t.BrandName,
-                    ValueLabel = (t?.NetAmount ?? 0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[i]
-                });
-                i++;
+                ranks = ranks.Take(10).ToList();
             }
-            ChartData = ChartDataProvider.CreateBarChart(entries);
+
+            var data = new ChartViewConfig()
+            {
+                BackgroundColor = Color.White,
+                ChartConfig = new ChartConfig
+                {
+                    type = Wesley.ChartJS.ChartTypes.Bar,
+                    data = ChartDataProvider.GetBrandRanking(ranks)
+                }
+            };
+            ChartConfig = data;
         }
 
 
 
-
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
-        }
 
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            _popupMenu?.Show(8, 10, 13, 14);
+
             ((ICommand)Load)?.Execute(null);
         }
     }

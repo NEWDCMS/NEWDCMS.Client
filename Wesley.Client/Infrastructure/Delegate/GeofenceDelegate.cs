@@ -1,18 +1,15 @@
 ﻿//using System;
 //using System.Threading.Tasks;
-//using Wesley.Client.Models;
+//using DCMS.Client.Models;
 //using Shiny;
 //using Shiny.Locations;
 
-
-//namespace Wesley.Client
+//namespace DCMS.Client
 //{
 //    public class GeofenceDelegate : IGeofenceDelegate, IShinyStartupTask
 //    {
 //        readonly CoreDelegateServices services;
 //        public GeofenceDelegate(CoreDelegateServices services) => this.services = services;
-
-
 //        public async Task OnStatusChanged(GeofenceState newStatus, GeofenceRegion region)
 //        {
 //            await this.services.Connection.InsertAsync(new GeofenceEvent
@@ -28,8 +25,6 @@
 //                $"{region.Identifier} was {newStatus}"
 //            );
 //        }
-
-
 //        public void Start()
 //            => this.services.Notifications.Register(this.GetType(), true, "Geofences");
 //    }

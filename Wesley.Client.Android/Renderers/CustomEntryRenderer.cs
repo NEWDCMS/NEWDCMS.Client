@@ -1,15 +1,14 @@
-﻿using Android.Graphics;
-using Wesley.Client.CustomViews;
-using Wesley.Client.Droid.Renderers;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.Android;
-using Android.Content;
+﻿using Android.Content;
 using Android.Text;
 using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
-using System;
+using Wesley.Client.CustomViews;
+using Wesley.Client.Droid.Renderers;
 using Wesley.Client.Services;
+using System;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
 
 [assembly: ExportRenderer(typeof(CustomEntry), typeof(CustomEntryRenderer))]
 namespace Wesley.Client.Droid.Renderers
@@ -19,7 +18,6 @@ namespace Wesley.Client.Droid.Renderers
     /// </summary>
     public class CustomEntryRenderer : EntryRenderer, IVirtualKeyboard
     {
-        //public CustomEntryRenderer(Context context) : base(MainActivity.ApplicationContext)
         public CustomEntryRenderer(Context context) : base(context)
         {
         }
@@ -39,6 +37,7 @@ namespace Wesley.Client.Droid.Renderers
                 EditText edittext = (EditText)Control;
 
                 edittext.Background = null;
+
                 edittext.SetPadding(10, 0, 0, 0);
                 edittext.SetPadding((int)customEntry.Padding.Left, (int)customEntry.Padding.Top, (int)customEntry.Padding.Right, (int)customEntry.Padding.Bottom);
 
@@ -61,18 +60,31 @@ namespace Wesley.Client.Droid.Renderers
 
         public void ShowKeyboard()
         {
-            Control.RequestFocus();
-
-            InputMethodManager inputMethodManager = Control.Context.GetSystemService(Context.InputMethodService) as InputMethodManager;
-            inputMethodManager.ShowSoftInput(Control, ShowFlags.Forced);
-            inputMethodManager.ToggleSoftInput(ShowFlags.Forced, HideSoftInputFlags.ImplicitOnly);
+            try
+            {
+                if (Control != null)
+                {
+                    Control.RequestFocus();
+                    InputMethodManager inputMethodManager = Control.Context.GetSystemService(Context.InputMethodService) as InputMethodManager;
+                    inputMethodManager.ShowSoftInput(Control, ShowFlags.Forced);
+                    inputMethodManager.ToggleSoftInput(ShowFlags.Forced, HideSoftInputFlags.ImplicitOnly);
+                }
+            }
+            catch (Exception) { }
         }
 
         public void HideKeyboard()
         {
-            Control.RequestFocus();
-            InputMethodManager inputMethodManager = Control.Context.GetSystemService(Context.InputMethodService) as InputMethodManager;
-            inputMethodManager.HideSoftInputFromWindow(this.Control.WindowToken, HideSoftInputFlags.None); // this probably needs to be set to ToogleSoftInput, forced.
+            try
+            {
+                if (Control != null)
+                {
+                    Control.RequestFocus();
+                    InputMethodManager inputMethodManager = Control.Context.GetSystemService(Context.InputMethodService) as InputMethodManager;
+                    inputMethodManager.HideSoftInputFromWindow(this.Control.WindowToken, HideSoftInputFlags.None);
+                }
+            }
+            catch (Exception) { }
         }
 
 
@@ -81,54 +93,61 @@ namespace Wesley.Client.Droid.Renderers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void HandleTouch(object sender, global::Android.Views.View.TouchEventArgs e)
+        private void HandleTouch(object sender, global::Android.Views.View.TouchEventArgs e)
         {
-            var element = this.Element as CustomEntry;
-            switch (e.Event.Action)
+            try
             {
-                case MotionEventActions.Down:
-                    _downX = e.Event.GetX();
-                    _downY = e.Event.GetY();
-                    return;
-                case MotionEventActions.Up:
-                case MotionEventActions.Cancel:
-                case MotionEventActions.Move:
-                    _upX = e.Event.GetX();
-                    _upY = e.Event.GetY();
-
-                    float deltaX = _downX - _upX;
-                    float deltaY = _downY - _upY;
-
-                    // swipe horizontal?
-                    if (Math.Abs(deltaX) > Math.Abs(deltaY))
+                if (Control != null)
+                {
+                    var element = this.Element as CustomEntry;
+                    switch (e.Event.Action)
                     {
-                        if (Math.Abs(deltaX) > MIN_DISTANCE)
-                        {
-                            // left or right
-                            if (deltaX < 0) { element.OnRightSwipe(this, EventArgs.Empty); return; }
-                            if (deltaX > 0) { element.OnLeftSwipe(this, EventArgs.Empty); return; }
-                        }
-                        else
-                        {
-                            global::Android.Util.Log.Info("ExtendedEntry", "Horizontal Swipe was only " + Math.Abs(deltaX) + " long, need at least " + MIN_DISTANCE);
-                            return; 
-                        }
-                    }
-                    //                    else 
-                    //                    {
-                    //                        if(Math.abs(deltaY) > MIN_DISTANCE){
-                    //                            // top or down
-                    //                            if(deltaY < 0) { this.onDownSwipe(); return true; }
-                    //                            if(deltaY > 0) { this.onUpSwipe(); return true; }
-                    //                        }
-                    //                        else {
-                    //                            Log.i(logTag, "Vertical Swipe was only " + Math.abs(deltaX) + " long, need at least " + MIN_DISTANCE);
-                    //                            return false; // We don't consume the event
-                    //                        }
-                    //                    }
+                        case MotionEventActions.Down:
+                            _downX = e.Event.GetX();
+                            _downY = e.Event.GetY();
+                            return;
+                        case MotionEventActions.Up:
+                        case MotionEventActions.Cancel:
+                        case MotionEventActions.Move:
+                            _upX = e.Event.GetX();
+                            _upY = e.Event.GetY();
 
-                    return;
+                            float deltaX = _downX - _upX;
+                            float deltaY = _downY - _upY;
+
+                            // swipe horizontal?
+                            if (Math.Abs(deltaX) > Math.Abs(deltaY))
+                            {
+                                if (Math.Abs(deltaX) > MIN_DISTANCE)
+                                {
+                                    // left or right
+                                    if (deltaX < 0) { element.OnRightSwipe(this, EventArgs.Empty); return; }
+                                    if (deltaX > 0) { element.OnLeftSwipe(this, EventArgs.Empty); return; }
+                                }
+                                else
+                                {
+                                    global::Android.Util.Log.Info("ExtendedEntry", "Horizontal Swipe was only " + Math.Abs(deltaX) + " long, need at least " + MIN_DISTANCE);
+                                    return;
+                                }
+                            }
+                            //                    else 
+                            //                    {
+                            //                        if(Math.abs(deltaY) > MIN_DISTANCE){
+                            //                            // top or down
+                            //                            if(deltaY < 0) { this.onDownSwipe(); return true; }
+                            //                            if(deltaY > 0) { this.onUpSwipe(); return true; }
+                            //                        }
+                            //                        else {
+                            //                            Log.i(logTag, "Vertical Swipe was only " + Math.abs(deltaX) + " long, need at least " + MIN_DISTANCE);
+                            //                            return false; // We don't consume the event
+                            //                        }
+                            //                    }
+
+                            return;
+                    }
+                }
             }
+            catch (Exception) { }
         }
 
         protected override void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -151,8 +170,6 @@ namespace Wesley.Client.Droid.Renderers
                 SetMaxLength(view);
         }
 
-
-
         private void SetTextAlignment(CustomEntry view)
         {
             switch (view.XAlign)
@@ -171,7 +188,7 @@ namespace Wesley.Client.Droid.Renderers
 
         private void SetFont(CustomEntry view)
         {
-            if (view.Font != Font.Default)
+            if (view.Font != Font.Default && Control != null)
             {
                 Control.TextSize = view.Font.ToScaledPixel();
                 Control.Typeface = view.Font.ToTypeface();
@@ -181,20 +198,21 @@ namespace Wesley.Client.Droid.Renderers
 
         private void SetPlaceholderTextColor(CustomEntry view)
         {
-            if (view.PlaceholderTextColor != Xamarin.Forms.Color.Default)
+            if (view.PlaceholderTextColor != Xamarin.Forms.Color.Default && Control != null)
                 Control.SetHintTextColor(view.PlaceholderTextColor.ToAndroid());
         }
 
 
         private void SetTextColor(CustomEntry view)
         {
-            if (view.TextColor != Xamarin.Forms.Color.Default)
+            if (view.TextColor != Xamarin.Forms.Color.Default && Control != null)
                 Control.SetTextColor(view.TextColor.ToAndroid());
         }
 
         private void SetMaxLength(CustomEntry view)
         {
-            Control.SetFilters(new IInputFilter[] { new global::Android.Text.InputFilterLengthFilter(view.MaxLength) });
+            if (Control != null)
+                Control.SetFilters(new IInputFilter[] { new global::Android.Text.InputFilterLengthFilter(view.MaxLength) });
         }
     }
 

@@ -1,9 +1,10 @@
-﻿using Wesley.Client.Models.Report;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Report;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,8 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
     public class CustomerActivityPageViewModel : ViewModelBaseChart<CustomerActivityRanking>
@@ -21,9 +24,8 @@ namespace Wesley.Client.ViewModels
            IProductService productService,
            ITerminalService terminalService,
            IReportingService reportingService,
-
-
-           IDialogService dialogService) : base(navigationService,
+           IDialogService dialogService
+            ) : base(navigationService,
                productService,
                reportingService,
                dialogService)
@@ -34,84 +36,16 @@ namespace Wesley.Client.ViewModels
 
             _terminalService = terminalService;
 
-            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DestroyWith);
+            this.WhenAnyValue(x => x.RankSeries).Subscribe(x => { this.IsNull = x.Count == 0; }).DisposeWith(DeactivateWith);
             this.Load = ReactiveCommand.CreateFromTask(async () =>
             {
                 try
                 {
-                    var result = await _terminalService.GetCustomerActivityRankingAsync(Settings.UserId, Filter.TerminalId, this.ForceRefresh, calToken: cts.Token);
+                    var result = await _terminalService.GetCustomerActivityRankingAsync(Settings.UserId, Filter.TerminalId, this.ForceRefresh, new System.Threading.CancellationToken());
                     if (result != null)
                     {
                         Refresh(result.ToList());
                     }
-
-#if DEBUG
-                    //模拟
-                    var random = new Random();
-                    var series = new List<CustomerActivityRanking>();
-
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    series.Add(new CustomerActivityRanking
-                    {
-                        TerminalId = random.Next(10, 1000),
-                        TerminalName = "小郡肝串串" + random.Next(1, 10),
-                        VisitDaySum = random.Next(0, 100)
-                    });
-                    Refresh(series);
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -121,34 +55,30 @@ namespace Wesley.Client.ViewModels
             });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
 
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
-        }
-
-
-        public void Refresh(List<CustomerActivityRanking> series)
+        public void Refresh(List<CustomerActivityRanking> analysis)
         {
 
-            RankSeries = new ObservableCollection<CustomerActivityRanking>(series);
+            RankSeries = new ObservableCollection<CustomerActivityRanking>(analysis);
 
-            var entries = new List<ChartEntry>();
-            int i = 0;
-            foreach (var t in RankSeries.Take(10))
+            var ranks = analysis.ToList();
+            if (ranks.Count > 10)
             {
-                entries.Add(new ChartEntry(t?.VisitDaySum ?? 0)
-                {
-                    Label = t.TerminalName,
-                    ValueLabel = (t?.VisitDaySum ?? 0).ToString(),
-                    Color = ChartDataProvider.Colors[i]
-                });
-                i++;
+                ranks = ranks.Take(10).ToList();
             }
-            ChartData = ChartDataProvider.CreateHorizontalBarChart(entries);
+            var data = new ChartViewConfig()
+            {
+                BackgroundColor = Color.White,
+                ChartConfig = new ChartConfig
+                {
+                    type = Wesley.ChartJS.ChartTypes.Line,
+                    data = ChartDataProvider.GetCustomerActivity(ranks),
+                }
+            };
+            ChartConfig = data;
         }
+
 
 
         public override void OnAppearing()

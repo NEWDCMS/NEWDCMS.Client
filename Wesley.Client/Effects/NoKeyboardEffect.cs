@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public class NoKeyboardEffect : RoutingEffect
     {
-        public NoKeyboardEffect() : base(nameof(NoKeyboardEffect))
+        public NoKeyboardEffect() : base($"Wesley.Client.{nameof(NoKeyboardEffect)}")
         {
         }
     }

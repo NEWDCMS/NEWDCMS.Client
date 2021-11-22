@@ -71,7 +71,7 @@
                                                                       Factor=1,
                                                                       Constant=0}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
+                <RowDefinition Height="45" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -79,38 +79,36 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <!--清除-->
-            <StackLayout Grid.Row="0"
-                         Grid.Column="0"
-                         Spacing="0"
-                         HorizontalOptions="FillAndExpand"
-                         VerticalOptions="Center"
-                         Padding="5">
-                <Button Text="清除"
-                        Style="{StaticResource CustomIconButtonStyle}"
-                        Command="{Binding Path=DeleteCommand}" />
-            </StackLayout>
+            <Button Grid.Row="0"
+                    Grid.Column="0"
+                    Text="清除"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    HeightRequest="45"
+                    TextColor="#53a245"
+                    BackgroundColor="#eee"
+                    Margin="0"
+                    CornerRadius="0"
+                    Command="{Binding Path=DeleteCommand}" />
             <!--取消-->
-            <StackLayout Grid.Row="0"
-                         Grid.Column="1"
-                         Spacing="0"
-                         HorizontalOptions="FillAndExpand"
-                         VerticalOptions="Center"
-                         Padding="5">
-                <Button Text="取消"
-                        Style="{StaticResource CustomIconButtonStyle}"
-                        Command="{Binding Path=CancelCommand}" />
-            </StackLayout>
+            <Button  Grid.Row="0"
+                     Grid.Column="1"
+                     Text="取消"
+                     Style="{StaticResource CustomIconButtonStyle}"
+                     HeightRequest="45"
+                     Margin="0"
+                     CornerRadius="0"
+                     Command="{Binding Path=CancelCommand}" />
             <!--确定-->
-            <StackLayout Grid.Row="0"
-                         Grid.Column="2"
-                         Spacing="0"
-                         HorizontalOptions="FillAndExpand"
-                         VerticalOptions="Center"
-                         Padding="5">
-                <Button Text="确定"
-                        Style="{StaticResource CustomIconButtonStyle}"
-                        Command="{Binding Path=CheckCommand}" />
-            </StackLayout>
+            <Button Grid.Row="0"
+                    Grid.Column="2"
+                    Text="确定"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    TextColor="White"
+                    BackgroundColor="#3B5998"
+                    HeightRequest="45"
+                    Margin="0"
+                    CornerRadius="0"
+                    Command="{Binding Path=CheckCommand}" />
         </Grid>
     </RelativeLayout>
 </pages:BaseContentPage>

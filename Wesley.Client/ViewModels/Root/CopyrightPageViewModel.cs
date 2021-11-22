@@ -1,9 +1,9 @@
 ﻿using Wesley.Client.Models;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -15,7 +15,8 @@ namespace Wesley.Client.ViewModels
     {
         [Reactive] public IList<Copyright> CopyrightSeries { get; set; } = new ObservableCollection<Copyright>();
         public CopyrightPageViewModel(INavigationService navigationService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
 
             Title = "版权信息";
@@ -57,7 +58,7 @@ namespace Wesley.Client.ViewModels
                 CopyrightSeries = new ObservableCollection<Copyright>(lists);
             });
             BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()

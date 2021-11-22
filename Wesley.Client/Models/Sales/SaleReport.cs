@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Wesley.Client.Models.Sales
 {
-
     #region 销售明细表
     /// <summary>
     /// 销售明细表
@@ -2595,10 +2594,46 @@ namespace Wesley.Client.Models.Sales
     }
     #endregion
 
+    #region 业务员综合分析
 
-    /// <summary>
-    /// 统计类别
-    /// </summary>
+    public class BusinessAnalysis
+    {
+        public List<string> UserNames { get; set; } = new List<string>();
+        /// <summary>
+        /// 拜访数
+        /// </summary>
+        public List<int> VistCounts { get; set; } = new List<int>();
+        /// <summary>
+        /// 销单数
+        /// </summary>
+        public List<int> SaleCounts { get; set; } = new List<int>();
+        /// <summary>
+        /// 订单数
+        /// </summary>
+        public List<int> OrderCounts { get; set; } = new List<int>();
+    }
+
+    public class BusinessAnalysisQuery
+    {
+        public string UserName { get; set; }
+        /// <summary>
+        /// 拜访数
+        /// </summary>
+        public int VistCount { get; set; }
+        /// <summary>
+        /// 销单数
+        /// </summary>
+        public int SaleCount { get; set; }
+        /// <summary>
+        /// 订单数
+        /// </summary>
+        public int OrderCount { get; set; }
+    }
+
+    #endregion
+
+    #region 统计类别
+
     public class SaleReportStatisticalType
     {
         /// <summary>
@@ -2633,5 +2668,5 @@ namespace Wesley.Client.Models.Sales
 
     }
 
-
+    #endregion
 }

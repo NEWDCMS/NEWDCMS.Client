@@ -2,11 +2,8 @@
 <pages:BaseTabbedPage  xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
-                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-                       xmlns:vews="clr-namespace:Wesley.Client.Pages.Order;assembly=Wesley.Client"
-                       xmlns:loading="clr-namespace:Wesley.Client.CustomViews.Views;assembly=Wesley.Client"
                        xmlns:order="clr-namespace:Wesley.Client.Pages.Order;assembly=Wesley.Client"
-                       xmlns:lazyView="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Name="BillSummaryTabPage"
@@ -15,42 +12,18 @@
                        BarBackgroundColor="White"
                        SelectedTabIndex="{Binding SelectedTab}"
                        BarTextColor="#53a245"
-                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:BillSummaryPageViewModel">
-    
     <pages:BaseTabbedPage.Children>
-        <lazyView:LazyContentPage  Title="{Binding Title}"
-                                   x:TypeArguments="loading:LoadingContentView,order:SaleOrderSummeryView"
-                                   x:Name="SaleOrderSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:SaleSummeryView"
-                                  x:Name="SaleSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:ReturnOrderSummeryView"
-                                  x:Name="ReturnOrderSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:ReturnSummeryView"
-                                  x:Name="ReturnSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:AllocationSummeryView"
-                                  x:Name="AllocationSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:CashReceiptSummeryView"
-                                  x:Name="CashReceiptSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:CostExpenditureSummeryView"
-                                  x:Name="CostExpenditureSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:AdvanceReceiptSummeryView"
-                                  x:Name="AdvanceReceiptSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:CostContractSummeryView"
-                                  x:Name="CostContractSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:PurchaseSummeryView"
-                                  x:Name="PurchaseSummeryPage" />
-        <lazyView:LazyContentPage Title="{Binding Title}"
-                                  x:TypeArguments="loading:LoadingContentView,order:InventorySummeryView"
-                                  x:Name="InventorySummeryPage" />
+        <order:SaleOrderSummeryPage Title="{Binding Title}" />
+        <order:SaleSummeryPage Title="{Binding Title}" />
+        <order:ReturnOrderSummeryPage Title="{Binding Title}" />
+        <order:ReturnSummeryPage Title="{Binding Title}" />
+        <order:AllocationSummeryPage Title="{Binding Title}" />
+        <order:AdvanceReceiptSummeryPage Title="{Binding Title}" />
+        <order:CashReceiptSummeryPage Title="{Binding Title}" />
+        <order:CostExpenditureSummeryPage Title="{Binding Title}" />
+        <order:CostContractSummeryPage Title="{Binding Title}" />
+        <order:PurchaseSummeryPage Title="{Binding Title}" />
+        <order:InventorySummeryPage Title="{Binding Title}" />
     </pages:BaseTabbedPage.Children>
 </pages:BaseTabbedPage>

@@ -1,7 +1,6 @@
 ﻿using Wesley.Client.Enums;
-using ReactiveUI;
+using LiteDB;
 using ReactiveUI.Fody.Helpers;
-using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -62,12 +61,8 @@ namespace Wesley.Client.Models
     /// <summary>
     /// 消息/通知结构
     /// </summary>
-    public class MessageInfo : ReactiveObject
+    public class MessageInfo : EntityBase
     {
-
-        [PrimaryKey, AutoIncrement]
-        [DataMember]
-        public int Id { get; set; }
 
         [DataMember]
         public int Index { get; set; }
@@ -84,7 +79,7 @@ namespace Wesley.Client.Models
         [DataMember]
         public int MTypeId { get; set; }
 
-        [Ignore]
+        [BsonIgnore]
         [DataMember]
         public MTypeEnum MType
         {
@@ -112,7 +107,7 @@ namespace Wesley.Client.Models
         public bool IsRead { get; set; }
 
         public int BillTypeId { get; set; }
-        [Ignore]
+        [BsonIgnore]
         [DataMember]
         public BillTypeEnum BillType
         {
@@ -123,6 +118,9 @@ namespace Wesley.Client.Models
         public string BillNumber { get; set; }
         [DataMember]
         public int BillId { get; set; }
+
+        [DataMember]
+        public int MessageId { get; set; }
 
     }
 

@@ -1,89 +1,92 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:chart="clr-namespace:Wesley.ChartJS;assembly=Wesley.ChartJS"
                        xmlns:converters="clr-namespace:Wesley.Client.Converters;assembly=Wesley.Client"
-                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-                       xmlns:chart="clr-namespace:Wesley.Easycharts.Forms;assembly=Wesley.Easycharts.Forms"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.Archive.CustomerActivityPage"
                        x:Name="CurrentContentView"
                        Title="{Binding Title}"
-                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:CustomerActivityPageViewModel">
     <ContentPage.Resources>
         <converters:StringArrayConverter x:Key="stringArrayConverter" />
-        
-        
     </ContentPage.Resources>
-    <StackLayout Orientation="Vertical"
-                 HorizontalOptions="FillAndExpand"
-                 Spacing="0">
-        <!--统计图-->
-        <custom:ChartBar BindingContext="{Binding}" />
-        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
-                     Command="{Binding RefreshCommand}"
-                     RefreshColor="{StaticResource PrimaryDarkColor}">
+
+    <Grid BackgroundColor="White"
+          RowDefinitions="250,*"
+          ColumnDefinitions="*"
+          VerticalOptions="FillAndExpand"
+          RowSpacing="0"
+          ColumnSpacing="0">
+
+        <!--图表-->
+        <chart:ChartView Grid.Row="0"
+                         Grid.Column="0"
+                         Config="{Binding ChartConfig}"
+                         HeightRequest="250" />
+
+        <StackLayout Grid.Row="0"
+                     Grid.Column="0"
+                     HeightRequest="250"
+                     IsVisible="{Binding IsBusy}">
+            <ActivityIndicator IsRunning="True"
+                               HorizontalOptions="Center"
+                               VerticalOptions="CenterAndExpand" />
+        </StackLayout>
+
+        <StackLayout Spacing="0"
+                     Grid.Row="1"
+                     Grid.Column="0">
+            <custom:HeaderView ControlTemplate="{StaticResource CustomerActivity_Template}" />
             <ScrollView>
-                <!--<CollectionView ItemsSource="{Binding RankSeries,Mode=TwoWay}" SelectionMode="None">
-                    <CollectionView.Header>
-                        <custom:HeaderView ControlTemplate="{StaticResource CustomerActivity_Template}" />
-                    </CollectionView.Header>
-                    <CollectionView.ItemTemplate>
+                <StackLayout BindableLayout.ItemsSource="{Binding RankSeries,Mode=TwoWay}"
+                             Spacing="0"
+                             VerticalOptions="CenterAndExpand">
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                          
+                            <Grid Style="{StaticResource GGrid}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <!--客户名称-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding TerminalName}"
+                                       FontSize="{StaticResource FT14}"
+                                       HorizontalOptions="FillAndExpand"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="{StaticResource ML10}"></Label>
+                                <!--拜访数-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding VisitDaySum}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="{StaticResource MR10}" />
+                                <BoxView Grid.Row="1"
+                                         Grid.ColumnSpan="2"
+                                         Style="{StaticResource SeparatorGrid}" />
+                            </Grid>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                    <CollectionView.EmptyView>
+                    </BindableLayout.ItemTemplate>
+                    <BindableLayout.EmptyView>
                         <custom:NullView />
-                    </CollectionView.EmptyView>
-                </CollectionView>-->
-                <StackLayout Spacing="0">
-                    <custom:HeaderView ControlTemplate="{StaticResource CustomerActivity_Template}" />
-                    <StackLayout BindableLayout.ItemsSource="{Binding RankSeries,Mode=TwoWay}"
-                                 Spacing="0">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Style="{StaticResource GGrid}">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="40" />
-                                        <RowDefinition Height=".7" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <!--客户名称-->
-                                    <Label Grid.Row="0"
-                                           Grid.Column="0"
-                                           Text="{Binding TerminalName}"
-                                           FontSize="{StaticResource FT14}"
-                                           HorizontalOptions="FillAndExpand"
-                                           TextColor="{StaticResource PrimaryTextColor}"
-                                           VerticalOptions="CenterAndExpand"
-                                           Margin="{StaticResource ML10}"></Label>
-                                    <!--拜访数-->
-                                    <Label Grid.Row="0"
-                                           Grid.Column="1"
-                                           Text="{Binding VisitDaySum}"
-                                           HorizontalOptions="End"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource PrimaryTextColor}"
-                                           VerticalOptions="CenterAndExpand"
-                                           Margin="{StaticResource MR10}" />
-                                    <BoxView Grid.Row="1"
-                                             Grid.ColumnSpan="2"
-                                             Style="{StaticResource SeparatorGrid}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                        <BindableLayout.EmptyView>
-                            <custom:NullView />
-                        </BindableLayout.EmptyView>
-                    </StackLayout>
+                    </BindableLayout.EmptyView>
                 </StackLayout>
             </ScrollView>
-        </RefreshView>
-    </StackLayout>
+        </StackLayout>
+
+    </Grid>
 </pages:BaseContentPage>

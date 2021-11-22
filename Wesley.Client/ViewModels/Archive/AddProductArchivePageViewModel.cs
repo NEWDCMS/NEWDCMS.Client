@@ -5,11 +5,11 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
-
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
-using System.Reactive.Linq;
+using System.Reactive.Disposables;
 
 namespace Wesley.Client.ViewModels
 {
@@ -31,13 +31,10 @@ namespace Wesley.Client.ViewModels
             IUserService userService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-             IDialogService dialogService) : base(navigationService,
-                productService, terminalService, userService, wareHousesService,
-                accountingService, dialogService)
+             IDialogService dialogService) : base(navigationService,productService, terminalService, userService, wareHousesService,accountingService, dialogService)
         {
 
             Title = "添加商品档案";
-
 
             //验证
             var valid_TerminalId = this.ValidationRule(x => x.Product.Name, _isDefined, "商品名称未指定");
@@ -48,50 +45,50 @@ namespace Wesley.Client.ViewModels
 
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.ProductArchivesSave);
-
-                var product = new ProductModel
+                return await this.Access(AccessGranularityEnum.ProductArchivesSave, async () =>
                 {
-                    Id = Product.Id,
-                    ProductId = Product.ProductId,
+                    var product = new ProductModel
+                    {
+                        Id = Product.Id,
+                        ProductId = Product.ProductId,
 
-                    StoreId = Settings.StoreId,
-                    //商品名称
-                    ProductName = Product.Name,
-                    Name = Product.Name,
-                    //助记码
-                    //product.MnemonicCode = CommonHelper.GenerateStrchar(5);
-                    //商品编号
-                    ProductCode = Product.ProductCode,
-                    //商品类别
-                    CategoryId = Product.CategoryId,
-                    CategoryName = Product.CategoryName,
-                    //商品品牌
-                    BrandId = Product.BrandId,
-                    BrandName = Product.BrandName,
-                    //大单位换算数
-                    BigQuantity = Product.BigQuantity,
-                    //中单位换算数
-                    StrokeQuantity = Product.StrokeQuantity,
+                        StoreId = Settings.StoreId,
+                        //商品名称
+                        ProductName = Product.Name,
+                        Name = Product.Name,
+                        //助记码
+                        //product.MnemonicCode = CommonHelper.GenerateStrchar(5);
+                        //商品编号
+                        ProductCode = Product.ProductCode,
+                        //商品类别
+                        CategoryId = Product.CategoryId,
+                        CategoryName = Product.CategoryName,
+                        //商品品牌
+                        BrandId = Product.BrandId,
+                        BrandName = Product.BrandName,
+                        //大单位换算数
+                        BigQuantity = Product.BigQuantity,
+                        //中单位换算数
+                        StrokeQuantity = Product.StrokeQuantity,
 
-                    //小单位
-                    SmallUnitId = Product.SmallProductPrices.UnitId,
-                    //中单位
-                    StrokeUnitId = Product.StrokeProductPrices.UnitId,
-                    //大单位
-                    BigUnitId = Product.BigProductPrices.UnitId,
+                        //小单位
+                        SmallUnitId = Product.SmallProductPrices.UnitId,
+                        //中单位
+                        StrokeUnitId = Product.StrokeProductPrices.UnitId,
+                        //大单位
+                        BigUnitId = Product.BigProductPrices.UnitId,
 
-                    //小单位条码
-                    SmallBarCode = Product.SmallBarCode,
-                    //中单位条码
-                    StrokeBarCode = Product.StrokeBarCode,
-                    //大单位条码
-                    BigBarCode = Product.BigBarCode,
-                    //状态
-                    Status = true
-                };
-                //档案价格
-                var unitPrices = new Dictionary<string, string>
+                        //小单位条码
+                        SmallBarCode = Product.SmallBarCode,
+                        //中单位条码
+                        StrokeBarCode = Product.StrokeBarCode,
+                        //大单位条码
+                        BigBarCode = Product.BigBarCode,
+                        //状态
+                        Status = true
+                    };
+                    //档案价格
+                    var unitPrices = new Dictionary<string, string>
                             {
                                 //小单位
                                 { "Small_UnitId", Product.SmallProductPrices.UnitId.ToString() },
@@ -126,16 +123,13 @@ namespace Wesley.Client.ViewModels
                                 { "Big_SALE2", (Product.BigProductPrices.SALE2 ?? 0).ToString() },
                                 { "Big_SALE3", (Product.BigProductPrices.SALE3 ?? 0).ToString() }
                             };
-                product.UnitPriceDicts = unitPrices;
-
-                return await SubmitAsync(product, 0, _productService.CreateOrUpdateProductAsync, (result) =>
-               {
-                   Product = new ProductModel();
-               }, token: cts.Token);
-
-            },
-            this.IsValid());
-
+                    product.UnitPriceDicts = unitPrices;
+                    return await SubmitAsync(product, 0, _productService.CreateOrUpdateProductAsync, (result) =>
+                    {
+                        Product = new ProductModel();
+                    }, token: new System.Threading.CancellationToken());
+                });
+            }, this.IsValid());
             this.TextChangedCommend = ReactiveCommand.Create<object>(e =>
             {
                 //计算中单位单价
@@ -210,15 +204,15 @@ namespace Wesley.Client.ViewModels
             });
             this.ScanCode = ReactiveCommand.Create<object>(async e => await this.NavigateAsync("ScanBarcodePage"));
 
-            this.TextChangedCommend.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.CatagorySelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.BrandSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.BigUnitSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ScanCode.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.StrokeUnitSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SmallUnitSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
 
-            this.ExceptionsSubscribe();
+            this.SubmitDataCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.TextChangedCommend.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CatagorySelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.BrandSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.BigUnitSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.StrokeUnitSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SmallUnitSelected.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.ScanCode.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
         }
 
 

@@ -2,35 +2,32 @@
 using Microsoft.AppCenter.Crashes;
 using System;
 using System.Linq;
-using Xamarin.Forms;
 
 namespace Wesley.Client.Pages.Reporting
 {
 
     public partial class ReconciliationDetailPage : BaseContentPage<ReconciliationDetailPageViewModel>
     {
-        protected override void OnAppearing()
+        public ReconciliationDetailPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
+                InitializeComponent();
+                ToolbarItems?.Clear();
+                foreach (var toolBarItem in this.GetPrintToolBarItems(ViewModel, true).ToList())
                 {
-                    try
-                    {
-                        InitializeComponent();
-                        ToolbarItems.Clear();
-                        foreach (var toolBarItem in this.GetPrintToolBarItems(ViewModel, true).ToList())
-                        {
-                            ToolbarItems.Add(toolBarItem);
-                        }
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                    ToolbarItems.Add(toolBarItem);
+                }
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
+        }
 
+        private void CheckBox_CheckedChanged(object sender, Xamarin.Forms.CheckedChangedEventArgs e)
+        {
+            if (ViewModel != null)
+            {
+                ViewModel.CheckChanged();
+            }
         }
     }
 }

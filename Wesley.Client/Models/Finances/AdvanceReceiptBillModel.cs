@@ -24,7 +24,6 @@ namespace Wesley.Client.Models.Finances
         [Reactive] public int CustomerId { get; set; }
         [Reactive] public string CustomerName { get; set; }
 
-        public int? PrintNum { get; set; }
         public bool? HandInStatus { get; set; }
         public DateTime? HandInDate { get; set; }
         [Reactive] public ObservableCollection<AccountMaping> Items { get; set; } = new ObservableCollection<AccountMaping>();
@@ -34,6 +33,7 @@ namespace Wesley.Client.Models.Finances
 
     public class AdvanceReceiptUpdateModel : Base
     {
+        public string BillNumber { get; set; }
         public int CustomerId { get; set; } = 0;
         public int? Payeer { get; set; } = 0;
         public decimal? AdvanceAmount { get; set; } = 0;

@@ -1,29 +1,20 @@
 ﻿using Wesley.Client.ViewModels;
 using Microsoft.AppCenter.Crashes;
 using System;
-using Xamarin.Forms;
 namespace Wesley.Client.Pages.Order
 {
 
     public partial class SaleOrderSummeryPage : BaseContentPage<SaleOrderSummeryPageViewModel>
     {
-        protected override void OnAppearing()
+        public SaleOrderSummeryPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
+                InitializeComponent();
 
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
+
     }
 }

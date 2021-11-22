@@ -1,7 +1,6 @@
 ﻿using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     /// <summary>
     /// Enable Keyboard Effect
@@ -9,7 +8,7 @@ namespace Wesley.Effects
     public class KeyboardEnableEffect : RoutingEffect
     {
         /// <inheritdoc />
-        public KeyboardEnableEffect() : base(nameof(KeyboardEnableEffect))
+        public KeyboardEnableEffect() : base($"Wesley.Client.{nameof(KeyboardEnableEffect)}")
         {
         }
     }

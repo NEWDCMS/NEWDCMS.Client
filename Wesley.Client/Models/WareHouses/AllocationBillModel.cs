@@ -35,9 +35,6 @@ namespace Wesley.Client.Models.WareHouses
         //("审核时间（显示）", "审核时间（显示）
         public string AuditedDateName { get; set; }
 
-        //("打印数", "打印数
-        public int? PrintNum { get; set; }
-
         //("加载类型", "加载类型
         public int ModelLoadType { get; set; }
 
@@ -100,6 +97,7 @@ namespace Wesley.Client.Models.WareHouses
     /// </summary>
     public class AllocationUpdateModel : EntityBase
     {
+        public string BillNumber { get; set; }
         //("出货仓库", "出货仓库
         public int ShipmentWareHouseId { get; set; }
 

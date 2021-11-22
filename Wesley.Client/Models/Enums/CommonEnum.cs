@@ -156,6 +156,7 @@ namespace Wesley.Client.Enums
         /// 配送时间
         /// </summary>
         DELIVERYTIME = 37,
+        FILITER = 88,
     }
 
     /// <summary>
@@ -523,6 +524,18 @@ namespace Wesley.Client.Enums
         RecordingVoucher = 56,
 
         /// <summary>
+        /// 借货单
+        /// </summary>
+        [Description("借货单")]
+        LoanGoodsBill = 77,
+
+        /// <summary>
+        /// 还货单（整仓）
+        /// </summary>
+        [Description("还货单")]
+        ReturnGoodsBill = 78,
+
+        /// <summary>
         /// 其他类型单据
         /// </summary>
         [Description("其他类型单据,QT")]
@@ -827,9 +840,15 @@ namespace Wesley.Client.Enums
     #region 拜访
     public enum SignEnum
     {
+        /// <summary>
+        /// 已签到
+        /// </summary>
         [Description("已签到")]
         CheckIn = 1,
 
+        /// <summary>
+        /// 已签退
+        /// </summary>
         [Description("已签退")]
         Signed = 2,
     }
@@ -3016,4 +3035,5 @@ namespace Wesley.Client.Enums
         //仓储管理员
         Storekeeper
     }
+
 }

@@ -1,7 +1,6 @@
 ﻿using Foundation;
 using Prism;
 using Prism.Ioc;
-using Shiny;
 using System;
 using UIKit;
 
@@ -23,7 +22,7 @@ namespace Wesley.Client.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
-            this.ShinyFinishedLaunching(new Startup());
+            //this.ShinyFinishedLaunching(new Startup());
 
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App(new iOSInitializer()));
@@ -31,11 +30,11 @@ namespace Wesley.Client.iOS
             return base.FinishedLaunching(app, options);
         }
 
-        public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
-         => this.ShinyPerformFetch(completionHandler);
+        //public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
+        // => this.ShinyPerformFetch(completionHandler);
 
-        public override void HandleEventsForBackgroundUrl(UIApplication application, string sessionIdentifier, Action completionHandler)
-            => this.ShinyHandleEventsForBackgroundUrl(sessionIdentifier, completionHandler);
+        //public override void HandleEventsForBackgroundUrl(UIApplication application, string sessionIdentifier, Action completionHandler)
+        //    => this.ShinyHandleEventsForBackgroundUrl(sessionIdentifier, completionHandler);
 
         ////iOS: Different than Android. Must be in FinishedLaunching, not in Main.
         //// In AppDelegate
@@ -82,7 +81,4 @@ namespace Wesley.Client.iOS
             //注册任何特定于平台的实现
         }
     }
-
-
-
 }

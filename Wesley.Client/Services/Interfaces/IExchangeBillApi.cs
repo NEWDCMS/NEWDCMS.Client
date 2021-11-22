@@ -9,7 +9,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/sales/exchangeBill", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IExchangeBillApi
     {
 
@@ -26,7 +26,7 @@ namespace Wesley.Client.Services
         Task<APIResult<ExchangeBillModel>> GetBillAsync(int storeId, int userId, int billId, CancellationToken calToken = default);
 
         [Get("/reverse/{storeId}/{userId}/{billId}")]
-        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId = 0, CancellationToken calToken = default);
+        Task<APIResult<dynamic>> ReverseAsync(int storeId, int userId, int billId = 0, string remark = "", CancellationToken calToken = default);
 
         /// <summary>
         /// 用于收货签收确认

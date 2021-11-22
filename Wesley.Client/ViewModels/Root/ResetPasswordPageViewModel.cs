@@ -1,9 +1,9 @@
 ﻿using Acr.UserDialogs;
 using Wesley.Client.Services;
-
 using Prism.Commands;
 using Prism.Navigation;
 using ReactiveUI.Fody.Helpers;
+
 namespace Wesley.Client.ViewModels
 {
 
@@ -11,10 +11,6 @@ namespace Wesley.Client.ViewModels
     {
 
         #region 属性
-
-
-
-
 
         [Reactive]
         public string OldPassword
@@ -88,7 +84,8 @@ namespace Wesley.Client.ViewModels
 
 
         public ResetPasswordPageViewModel(INavigationService navigationService,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _navigationService = navigationService;
             _dialogService = dialogService;

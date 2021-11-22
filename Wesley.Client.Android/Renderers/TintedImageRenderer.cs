@@ -35,7 +35,7 @@ namespace Wesley.Client.Droid.Renderers
                 SetTint();
         }
 
-        void SetTint()
+        private void SetTint()
         {
             if (Control == null || Element == null)
                 return;

@@ -1,25 +1,22 @@
-﻿using System;
-using System.Linq;
-using Android.Animation;
+﻿using Android.Animation;
 using Android.Content.Res;
-using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Wesley.Effects.Droid;
-using Wesley.Effects;
+using Wesley.Client.Droid.Effects;
+using Wesley.Client.Effects;
+using System;
+using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Color = Xamarin.Forms.Color;
 using View = Android.Views.View;
 
 [assembly: ExportEffect(typeof(ViewStyleDroidEffect), nameof(ViewStyleEffect))]
-
-namespace Wesley.Effects.Droid
+namespace Wesley.Client.Droid.Effects
 {
-    [Preserve]
+    [Android.Runtime.Preserve(AllMembers = true)]
     public class ViewStyleDroidEffect : PlatformEffect
     {
         private DateTime _tapTime;
@@ -109,13 +106,13 @@ namespace Wesley.Effects.Droid
             {
                 UpdateEffectColor();
             }
-        }        
+        }
 
         private void UpdateStyle()
         {
             var view = Control ?? Container;
             var context = view.Context;
-            
+
             var bgColor = (Element as VisualElement)?.BackgroundColor ?? Color.Transparent;
 
             PaintDrawable paint = new PaintDrawable(bgColor.ToAndroid());
@@ -145,7 +142,7 @@ namespace Wesley.Effects.Droid
 
             view.SetBackground(layer);
         }
-        
+
         private void OnTouch(object sender, View.TouchEventArgs args)
         {
             switch (args.Event.Action)
@@ -182,7 +179,7 @@ namespace Wesley.Effects.Droid
                     TapAnimation(250, 80);
                     break;
             }
-        }        
+        }
 
         private void UpdateEffectColor()
         {
@@ -244,7 +241,7 @@ namespace Wesley.Effects.Droid
 
             if (back is RippleDrawable)
             {
-                _ripple = (RippleDrawable) back.GetConstantState().NewDrawable();
+                _ripple = (RippleDrawable)back.GetConstantState().NewDrawable();
                 _ripple.SetColor(GetPressedColorSelector(color));
 
                 return _ripple;
@@ -282,7 +279,7 @@ namespace Wesley.Effects.Droid
 
         private void AnimationOnAnimationEnd(object sender, EventArgs eventArgs)
         {
-            var anim = ((ObjectAnimator) sender);
+            var anim = ((ObjectAnimator)sender);
             anim.AnimationEnd -= AnimationOnAnimationEnd;
             anim.Dispose();
         }

@@ -26,7 +26,8 @@ namespace Wesley.Client.ViewModels
         public IReactiveCommand AddCommend { get; }
 
         public AddReportProductPageViewModel(INavigationService navigationService,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加上报商品";
 
@@ -76,12 +77,6 @@ namespace Wesley.Client.ViewModels
                    await _navigationService.GoBackAsync(("ProductSelect", StoreReporting));
                }
            });
-
-            this.RemoveCommend.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SaveCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddCommend.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-            this.ExceptionsSubscribe();
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)

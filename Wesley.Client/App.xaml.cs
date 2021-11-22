@@ -1,5 +1,6 @@
 ﻿using Wesley.Client.CustomViews;
-using Wesley.Client.CustomViews.Views;
+using Wesley.Client.Models;
+using Wesley.Client.Models.Census;
 using Wesley.Client.Pages;
 using Wesley.Client.Pages.Archive;
 using Wesley.Client.Pages.Bills;
@@ -15,40 +16,45 @@ using Wesley.Client.ViewModels;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-
-using Prism.Plugin.Popups;
-using Prism.Services;
-using System;
-using System.Reflection;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-using Shiny;
+using Prism;
 using Prism.Ioc;
 using Prism.Mvvm;
-using Prism.DryIoc;
-using DryIoc;
-using Prism;
+using Prism.Plugin.Popups;
+using Prism.Unity;
+using System;
+using System.Reflection;
+using Unity;
+using Unity.Microsoft.Logging;
+using Xamarin.Essentials.Implementation;
+using Xamarin.Essentials.Interfaces;
+using Xamarin.Forms;
+using Wesley.Client.Models.Products;
+using Wesley.Client.Models.Terminals;
 
-[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 [assembly: ExportFont("fa-solid-900.otf", Alias = "FAS")]
-[assembly: ExportFont("fa-regular-400.ttf", Alias = "FAR")]
-[assembly: ExportFont("fa-brands-400.ttf", Alias = "FAB")]
 namespace Wesley.Client
 {
-
+    /// <summary>
+    /// 使用PrismApplication接替，默认关闭自动导航注册 
+    /// </summary>
     public partial class App : PrismApplication
     {
-        public static IContainer AppContainer { get; set; }
+        public static readonly int MIN_CLICK_DELAY_TIME = 2000;
+        public static readonly int MIN_LOAD_DELAY_TIME = 10000;
+        public static double ScreenWidth;
+        public static double ScreenHeight;
+        public static long LastClickTime { get; set; }
+        public static long LastLoadTime { get; set; }
+        public static string BtAddress { get; set; } = "";
+        public static string BtName { get; set; } = "";
 
-        public static bool IsInBackgrounded { get; private set; }
+        private static IUnityContainer _appContainer;
 
-        public App(IPlatformInitializer initializer) : base(initializer)
-        {
-
-        }
+        public App(IPlatformInitializer initializer) : base(initializer) {}
 
         #region override
+
+
 
         protected async override void OnInitialized()
         {
@@ -59,10 +65,11 @@ namespace Wesley.Client
 
                 InitializeComponent();
 
-                if (!string.IsNullOrEmpty(Settings.AccessToken))
-                    await this.NavigationService.NavigateAsync($"NavigationPage/{nameof(MainLayoutPage)}");
+                if (Settings.IsAuthenticated)
+                    await NavigationService.NavigateAsync($"NavigationPage/{nameof(MainLayoutPage)}");
                 else
-                    await this.NavigationService.NavigateAsync($"NavigationPage/{nameof(LoginPage)}");
+                    await NavigationService.NavigateAsync($"NavigationPage/{nameof(LoginPage)}");
+
             }
             catch (Exception ex)
             {
@@ -70,25 +77,13 @@ namespace Wesley.Client
             }
         }
 
-
+        /// <summary>
+        /// 应用程序启动时调用
+        /// </summary>
         protected override void OnStart()
         {
-            base.OnStart();
             GlobalSettings.IsSleeping = false;
             AppCenter.Start("android=03804b2b-3759-4bab-9286-ae78dcd60abe;", typeof(Analytics), typeof(Crashes));
-        }
-
-        protected override void OnResume()
-        {
-            base.OnResume();
-            App.IsInBackgrounded = false;
-        }
-        protected override void OnSleep()
-        {
-            // Handle when your app sleeps
-            base.OnSleep();
-            GlobalSettings.IsSleeping = true;
-            App.IsInBackgrounded = true;
         }
 
         protected override void ConfigureViewModelLocator()
@@ -99,7 +94,6 @@ namespace Wesley.Client
             {
                 if (string.IsNullOrWhiteSpace(viewType.FullName))
                     return null;
-
                 var viewModelAssemblyName = typeof(ViewModelBase).GetTypeInfo().Assembly.FullName;
                 var viewModelNamespace = typeof(ViewModelBase).Namespace;
                 var viewModelTypeName = viewType.Name.Replace("View", "PageViewModel").Replace("Page", "PageViewModel");
@@ -109,86 +103,169 @@ namespace Wesley.Client
             });
         }
 
+        /*
+        private void CreateJob()
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var _jobManager = Resolve<IJobManager>();
+                    var jobs = await _jobManager.GetJobs();
+                    if (jobs != null)
+                    {
+                        var jobRuns = jobs.Select(s => s.Identifier.ToUpper()).ToArray();
+
+                        #region //数据同步Job
+
+                        if (!jobRuns.Contains("DATASYNCJOB"))
+                        {
+                            await _jobManager.Register(new JobInfo(typeof(DataSyncJob), "DataSyncJob")
+                            {
+                                Repeat = true,
+                                //指定设备电池电量低于阀值时是否启动任务
+                                BatteryNotLow = true,
+                                //充电时是否启动任务
+                                DeviceCharging = true,
+                                //是否运行在前台
+                                RunOnForeground = true,
+                                //是否要求网路连接
+                                RequiredInternetAccess = InternetAccess.Any,
+                                //每30秒运行次 SetParameter
+                                Parameters = new Dictionary<string, object> { { "SecondsToRun", 30 } }
+                            });
+                        }
+
+                        #endregion
+
+                        #region //MQ消息订阅Job
+
+                        //if (!jobRuns.Contains("MQSUBSRIBEJOB"))
+                        //{
+                        //    await _jobManager.Register(new JobInfo(typeof(MQSubsribeJob), "MQSubsribeJob")
+                        //    {
+                        //        Repeat = true,
+                        //        //指定设备电池电量低于阀值时是否启动任务
+                        //        BatteryNotLow = true,
+                        //        //充电时是否启动任务
+                        //        DeviceCharging = true,
+                        //        //是否运行在前台
+                        //        RunOnForeground = true,
+                        //        //是否要求网路连接
+                        //        RequiredInternetAccess = InternetAccess.Any,
+                        //        //每10秒运行次 SetParameter
+                        //        Parameters = new Dictionary<string, object> { { "SecondsToRun", 10 } }
+                        //    });
+                        //}
+
+                        #endregion
+
+                        #region //位置上报Job
+
+                        if (!jobRuns.Contains("TRACKINGJOB"))
+                        {
+                            await _jobManager.Register(new JobInfo(typeof(TrackingJob), "TrackingJob")
+                            {
+                                Repeat = true,
+                                //指定设备电池电量低于阀值时是否启动任务
+                                BatteryNotLow = true,
+                                //充电时是否启动任务
+                                DeviceCharging = true,
+                                //是否运行在前台
+                                RunOnForeground = true,
+                                //是否要求网路连接
+                                RequiredInternetAccess = InternetAccess.Any,
+                                //每10秒运行次 SetParameter
+                                Parameters = new Dictionary<string, object> { { "SecondsToRun", 5 } }
+                            });
+                        }
+
+                        #endregion
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Crashes.TrackError(ex);
+                }
+            });
+        }
+        */
+
+
+        /// <summary>
+        /// 在应用程序恢复后被发送到后台时调用
+        /// </summary>
+        protected override void OnResume()
+        {
+            base.OnResume();
+        }
+
+        /// <summary>
+        ///  每次应用程序进入后台调用
+        /// </summary>
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+            GlobalSettings.IsSleeping = true;
+        }
+
+
         /// <summary>
         /// 注册依赖容器
         /// </summary>
-        /// <param name="ctr"></param>
+        /// <param name="ctReg"></param>
         protected override void RegisterTypes(IContainerRegistry ctReg)
         {
-            #region  //注册导航
-
+            ctReg.RegisterSingleton<IAppInfo, AppInfoImplementation>();
             ctReg.RegisterForNavigation<NavigationPage>();
-            ctReg.RegisterForNavigation<MainLayoutPage, MainLayoutPageViewModel>();
-            ctReg.RegisterForNavigation<BillSummaryPage>();
-            ctReg.RegisterForNavigation<LoginPage>();
-            ctReg.RegisterForNavigation<SelectCustomerPage>();
-            ctReg.RegisterForNavigation<DeliveryReceiptPage>();
-            ctReg.RegisterForNavigation<NewsPage>();
-            ctReg.RegisterForNavigation<ViewSubscribePage>();
 
-            //注册对话框 
-            ctReg.RegisterPopupNavigationService();
+
+            #region //注册弹出窗
+
             ctReg.RegisterPopupDialogService();
-            ctReg.RegisterForNavigation<PopCheckBoxView, PopCheckBoxViewModel>();
-            ctReg.RegisterForNavigation<PopRadioButtonView, PopRadioButtonViewModel>();
+            ctReg.RegisterPopupNavigationService();
 
+            ctReg.RegisterForNavigation<PopupMenu, PopupMenuViewModel>();
+            ctReg.RegisterForNavigation<GoReceiptPage, GoReceiptPageViewModel>();
+            ctReg.RegisterForNavigation<ChangeMenuPage, ChangeMenuPageViewModel>();
+            ctReg.RegisterForNavigation<PopCheckBoxPage, PopCheckBoxPageViewModel>();
+            ctReg.RegisterForNavigation<PopRadioButtonPage, PopRadioButtonPageViewModel>();
+            ctReg.RegisterForNavigation<ProductCategoryPage, ProductCategoryPageViewModel>();
             #endregion
 
-            #region //注册Page
-
-            ctReg.Register<Toolbar>();
-            ctReg.Register<MainLayoutPage>();
-            ctReg.Register<AddAppPage>();
-            ctReg.Register<SaleOrderBillPage>();
-            ctReg.Register<ReturnOrderBillPage>();
-            ctReg.Register<ReturnBillPage>();
-            ctReg.Register<StockQueryPage>();
-            ctReg.Register<AllocationBillPage>();
-            ctReg.Register<TrackAllocationBillPage>();
-            ctReg.Register<AddBackStockBillPage>();
-            ctReg.Register<PurchaseOrderBillPage>();
-
-            #endregion
-
-            #region //注册主框架布局
+            #region //注册TabbedPage布局
 
             ctReg.Register<IMyTabbedPageSelectedTab, TopTabMessagesPageViewModel>();
-
-   
-            //ctReg.RegisterForNavigation<MainLayoutPage, HomePageViewModel>();
-            //ctReg.RegisterForNavigation<MainLayoutPage, AllfunPageViewModel>();
-            //ctReg.RegisterForNavigation<MainLayoutPage, NotificationsPageViewModel>();
-            //ctReg.RegisterForNavigation<MainLayoutPage, ProfilePageViewModel>();
-            //ctReg.RegisterForNavigation<MainLayoutPage, MessagesPageViewModel>();
-
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, HomeView>, HomePageViewModel>(nameof(HomeView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, MessagesView>, MessagesPageViewModel>(nameof(MessagesView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, AllfunView>, AllfunPageViewModel>(nameof(AllfunView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, NotificationsView>, NotificationsPageViewModel>(nameof(NotificationsView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, ProfileView>, ProfilePageViewModel>(nameof(ProfileView));
-          
-
-            //ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, ContentView>, MessagesPageViewModel>(nameof(ContentView));
+            ctReg.RegisterForNavigation<MainLayoutPage, MainLayoutPageViewModel>();
+            ctReg.RegisterForNavigation<HomePage, HomePageViewModel>();
+            ctReg.RegisterForNavigation<MessagesPage, MessagesPageViewModel>();
+            ctReg.RegisterForNavigation<AllfunPage, AllfunPageViewModel>();
+            ctReg.RegisterForNavigation<NotificationsPage, NotificationsPageViewModel>();
             ctReg.RegisterForNavigation<NewsPage, NewsPageViewModel>();
-
+            ctReg.RegisterForNavigation<ProfilePage, ProfilePageViewModel>();
 
             #endregion
 
             #region //注册签收布局
 
+            ctReg.Register<DeliveriedPage>();
+            ctReg.Register<UnOrderPage>();
+            ctReg.Register<UnCostExpenditurePage>();
+            ctReg.Register<UnSalePage>();
+            
+            ctReg.RegisterForNavigation<CameraViewPage, CameraPageViewModel>();
             ctReg.RegisterForNavigation<DeliveryReceiptPage, DeliveryReceiptPageViewModel>();
-            //已签收
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, DeliveriedView>, DeliveriedPageViewModel>(nameof(DeliveriedView));
-            //未签收
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, UnOrderView>, UnOrderPageViewModel>(nameof(UnOrderView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, UnCostExpenditureView>, UnCostExpenditurePageViewModel>(nameof(UnCostExpenditureView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, UnSaleView>, UnSalePageViewModel>(nameof(UnSaleView));
+            ctReg.RegisterForNavigation<DeliveriedPage, DeliveriedPageViewModel>();
+            ctReg.RegisterForNavigation<UnOrderPage, UnOrderPageViewModel>();
+            ctReg.RegisterForNavigation<UnCostExpenditurePage, UnCostExpenditurePageViewModel>();
+            ctReg.RegisterForNavigation<UnSalePage, UnSalePageViewModel>();
 
             #endregion
 
             #region //查看单据
 
-            //查看单据 Master
+            //查看单据
             ctReg.RegisterForNavigation<ViewBillPage, ViewBillPageViewModel>();
             ctReg.RegisterForNavigation<AllocationPage, AllocationPageViewModel>();
             ctReg.RegisterForNavigation<SalePage, SalePageViewModel>();
@@ -203,25 +280,11 @@ namespace Wesley.Client
             ctReg.RegisterForNavigation<ReturnOrderPage, ReturnOrderPageViewModel>();
             ctReg.RegisterForNavigation<ReturnPage, ReturnPageViewModel>();
 
-            //查看单据（异步视图）
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, SaleView>, SalePageViewModel>(nameof(SaleView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, SaleOrderView>, SaleOrderPageViewModel>(nameof(SaleOrderView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, AdvanceReceiptView>, AdvanceReceiptPageViewModel>(nameof(AdvanceReceiptView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, AllocationView>, AllocationPageViewModel>(nameof(AllocationView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, CostContractView>, CostContractPageViewModel>(nameof(CostContractView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, CashReceiptView>, CashReceiptPageViewModel>(nameof(CashReceiptView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, InventoryView>, InventoryPageViewModel>(nameof(InventoryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, InventoryReportView>, InventoryReportViewPageViewModel>(nameof(InventoryReportView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, PurchaseView>, PurchasePageViewModel>(nameof(PurchaseView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, ReturnOrderView>, ReturnOrderPageViewModel>(nameof(ReturnOrderView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, ReturnView>, ReturnPageViewModel>(nameof(ReturnView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, CostExpenditureView>, CostExpenditurePageViewModel>(nameof(CostExpenditureView));
-
             #endregion
 
             #region //汇总单据
 
-            //单据汇总 Master
+            //单据汇总
             ctReg.RegisterForNavigation<BillSummaryPage, BillSummaryPageViewModel>();
             ctReg.RegisterForNavigation<AllocationSummeryPage, AllocationSummeryPageViewModel>();
             ctReg.RegisterForNavigation<SaleSummeryPage, SaleSummeryPageViewModel>();
@@ -234,19 +297,6 @@ namespace Wesley.Client
             ctReg.RegisterForNavigation<PurchaseSummeryPage, PurchaseSummeryPageViewModel>();
             ctReg.RegisterForNavigation<ReturnOrderSummeryPage, ReturnOrderSummeryPageViewModel>();
             ctReg.RegisterForNavigation<ReturnSummeryPage, ReturnSummeryPageViewModel>();
-
-            //汇总单据（异步视图）
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, SaleSummeryView>, SaleSummeryPageViewModel>(nameof(SaleSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, SaleOrderSummeryView>, SaleOrderSummeryPageViewModel>(nameof(SaleOrderSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, AdvanceReceiptSummeryView>, AdvanceReceiptSummeryPageViewModel>(nameof(AdvanceReceiptSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, AllocationSummeryView>, AllocationSummeryPageViewModel>(nameof(AllocationSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, CostContractSummeryView>, CostContractSummeryPageViewModel>(nameof(CostContractSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, CashReceiptSummeryView>, CashReceiptSummeryPageViewModel>(nameof(CashReceiptSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, InventorySummeryView>, InventorySummeryPageViewModel>(nameof(InventorySummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, PurchaseSummeryView>, PurchaseSummeryPageViewModel>(nameof(PurchaseSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, ReturnOrderSummeryView>, ReturnOrderSummeryPageViewModel>(nameof(ReturnOrderSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, ReturnSummeryView>, ReturnSummeryPageViewModel>(nameof(ReturnSummeryView));
-            ctReg.RegisterForNavigation<LazyContentPage<LoadingContentView, CostExpenditureSummeryView>, CostExpenditureSummeryPageViewModel>(nameof(CostExpenditureSummeryView));
 
             #endregion
 
@@ -275,8 +325,10 @@ namespace Wesley.Client
 
             #region //注册ViewModel 
 
+            ctReg.RegisterForNavigation<AdvancedPage, AdvancedPageViewModel>();
             ctReg.RegisterForNavigation<SystemSettingPage, SystemSettingPageViewModel>();
             ctReg.RegisterForNavigation<FeedbackPage, FeedbackPageViewModel>();
+            ctReg.RegisterForNavigation<MarketFeedbackPage, MarketFeedbackPageViewModel>();
             ctReg.RegisterForNavigation<ConversationsPage, ConversationsPageViewModel>();
             ctReg.RegisterForNavigation<MessagerPage, MessagerPageViewModel>();
             ctReg.RegisterForNavigation<ImageViewerPage, ImageViewerPageViewModel>();
@@ -301,6 +353,10 @@ namespace Wesley.Client
             ctReg.RegisterForNavigation<NewOrderPage, NewOrderPageViewModel>();
             ctReg.RegisterForNavigation<CustomerArchivesPage, CustomerArchivesPageViewModel>();
             ctReg.RegisterForNavigation<VisitStorePage, VisitStorePageViewModel>();
+            ctReg.RegisterForNavigation<RedeemPage, RedeemPageViewModel>();
+            ctReg.RegisterForNavigation<RedeemedPage, RedeemedPageViewModel>();
+            ctReg.RegisterForNavigation<ViewRedeemPage, ViewRedeemPageViewModel>();
+
 
             ctReg.RegisterForNavigation<CustomerRankingPage, CustomerRankingPageViewModel>();
             ctReg.RegisterForNavigation<SalesRankingPage, SalesRankingPageViewModel>();
@@ -321,11 +377,15 @@ namespace Wesley.Client
             ctReg.RegisterForNavigation<OrderQuantityAnalysisPage, OrderQuantityAnalysisPageViewModel>();
             ctReg.RegisterForNavigation<MyReportingPage, MyReportingPageViewModel>();
             ctReg.RegisterForNavigation<AddReportPage, AddReportPageViewModel>();
+            ctReg.RegisterForNavigation<VisitReportPage, VisitReportPageViewModel>();
+
+
             //对账
             ctReg.RegisterForNavigation<ReconciliationProductsPage, ReconciliationProductsPageViewModel>();
             ctReg.RegisterForNavigation<ReconciliationDetailPage, ReconciliationDetailPageViewModel>();
             ctReg.RegisterForNavigation<ReconciliationHistoryPage, ReconciliationHistoryPageViewModel>();
             ctReg.RegisterForNavigation<ReconciliationORreceivablesPage, ReconciliationORreceivablesPageViewModel>();
+
             //ctReg.RegisterForNavigation<FieldTrackPage, FieldTrackPageViewModel>();
             ctReg.RegisterForNavigation<VisitRecordsPage, VisitRecordsPageViewModel>();
             ctReg.RegisterForNavigation<ProductArchivesPage, ProductArchivesPageViewModel>();
@@ -360,6 +420,8 @@ namespace Wesley.Client
             ctReg.RegisterForNavigation<NewsViewerPage, NewsViewerPageViewModel>();
             ctReg.RegisterForNavigation<SelectManufacturerPage, SelectManufacturerPageViewModel>();
 
+            //商品销售明细
+            ctReg.RegisterForNavigation<SaleDetailPage, SaleDetailPageViewModel>();
 
             #endregion
 
@@ -370,7 +432,8 @@ namespace Wesley.Client
             ctReg.Register<ICrashlyticsService, CrashlyticsService>();
 
             //Common
-            ctReg.RegisterSingleton<IPageDialogService, PageDialogService>();
+            //ctReg.RegisterSingleton<IPagedialogService PageDialogService>();
+            ctReg.RegisterSingleton<IDialogKit, DialogKit>();
             ctReg.RegisterSingleton<IAuthenticationService, AuthenticationService>();
             ctReg.RegisterSingleton<IGlobalService, GlobalService>();
 
@@ -379,8 +442,8 @@ namespace Wesley.Client
             ctReg.RegisterSingleton<IUserDataStores, UserDataStores>();
             ctReg.RegisterSingleton<IMessagesDataStore, MessagesDataStore>();
             ctReg.RegisterSingleton<IFeedbackService, FeedbackService>();
-
-
+            ctReg.RegisterSingleton<IQueuedMessageService, QueuedMessageService>();
+            
             //Setting
             ctReg.RegisterSingleton<IAccountingService, AccountingService>();
             ctReg.RegisterSingleton<ISettingService, SettingService>();
@@ -413,35 +476,50 @@ namespace Wesley.Client
 
             #endregion
 
-            AppContainer = ctReg.GetContainer();
-
+            _appContainer = ctReg.GetContainer();
         }
+
 
         #endregion
 
         protected override IContainerExtension CreateContainerExtension()
         {
-            var container = new Container(this.CreateContainerRules());
-            ShinyHost.Populate((serviceType, func, lifetime) =>
-                container.RegisterDelegate(
-                    serviceType,
-                    _ => func(),
-                    Reuse.Singleton
-                )
-            );
-            return new DryIocContainerExtension(container);
+            var container = new UnityContainer();
+
+            //注册ILogger<T>
+            container.AddExtension(new LoggingExtension());
+
+
+            //本地存储服务
+            //注意：（ LiteDbAsyncService 必须注册单例）
+            container.RegisterSingleton<ILiteDbAsyncService, LiteDbAsyncService>();
+            container.RegisterType(typeof(ILiteDbService<TrackingModel>), typeof(LiteDbService<TrackingModel>));
+            container.RegisterType(typeof(ILiteDbService<VisitStore>), typeof(LiteDbService<VisitStore>));
+            container.RegisterType(typeof(ILiteDbService<NotificationEvent>), typeof(LiteDbService<NotificationEvent>));
+            container.RegisterType(typeof(ILiteDbService<MessageInfo>), typeof(LiteDbService<MessageInfo>));
+            container.RegisterType(typeof(ILiteDbService<CacheBillData>), typeof(LiteDbService<CacheBillData>));
+            container.RegisterType(typeof(ILiteDbService<CachePaymentMethod>), typeof(LiteDbService<CachePaymentMethod>));
+            container.RegisterType(typeof(ILiteDbService<PushEvent>), typeof(LiteDbService<PushEvent>));
+            container.RegisterType(typeof(ILiteDbService<ProductModel>), typeof(LiteDbService<ProductModel>));
+            container.RegisterType(typeof(ILiteDbService<TerminalModel>), typeof(LiteDbService<TerminalModel>));
+
+            return new UnityContainerExtension(container);
         }
 
+
+        /// <summary>
+        /// 解析服务，你可以直接使用App.Resolve<T>
+        /// </summary>
+        /// <typeparam name="T">interface</typeparam>
+        /// <returns></returns>
         public static T Resolve<T>()
         {
             try
             {
                 T t = default;
 
-                if (AppContainer != null)
-                    t = AppContainer.Resolve<T>();
-                else
-                    t = ShinyHost.Resolve<T>() ?? default;
+                if (_appContainer != null)
+                    t = _appContainer.Resolve<T>();
 
                 return t;
             }
@@ -450,5 +528,6 @@ namespace Wesley.Client
                 return default;
             }
         }
+
     }
 }

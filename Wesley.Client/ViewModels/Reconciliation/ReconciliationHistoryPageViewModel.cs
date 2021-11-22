@@ -1,12 +1,13 @@
 ﻿using Wesley.Client.Services;
-
 using Prism.Navigation;
+
 
 namespace Wesley.Client.ViewModels
 {
     public class ReconciliationHistoryPageViewModel : ViewModelBase
     {
-        public ReconciliationHistoryPageViewModel(INavigationService navigationService, IDialogService dialogService) : base(navigationService, dialogService)
+        public ReconciliationHistoryPageViewModel(INavigationService navigationService, IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "收款上交记录";
 

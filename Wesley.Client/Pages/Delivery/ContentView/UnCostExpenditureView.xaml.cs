@@ -1,7 +1,7 @@
 ﻿using Microsoft.AppCenter.Crashes;
 using System;
 using Xamarin.Forms;
-namespace Wesley.Client.Pages.Market
+namespace DCMS.Client.Pages.Market
 {
 
     public partial class UnCostExpenditureView : ContentView

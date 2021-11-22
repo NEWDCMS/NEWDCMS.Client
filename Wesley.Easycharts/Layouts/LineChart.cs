@@ -1,4 +1,4 @@
-﻿namespace Wesley.Easycharts
+﻿namespace DCMS.Easycharts
 {
     using System.Linq;
     using SkiaSharp;

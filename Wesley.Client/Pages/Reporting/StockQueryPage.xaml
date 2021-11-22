@@ -50,7 +50,8 @@
                            Margin="{StaticResource MR10}">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Path=SerchCommand}"
-                                                  CommandParameter="{Binding Text,Source={x:Reference SerchKey}}" />
+                                                  CommandParameter="{Binding Text,Source={x:Reference SerchKey}}"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                 </StackLayout>
@@ -75,15 +76,16 @@
                     <Label Style="{StaticResource DownArrow}"
                            Margin="{StaticResource MR10}">
                         <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Path=StockSelected}"></TapGestureRecognizer>
+                            <TapGestureRecognizer Command="{Binding Path=StockSelected}"
+                                                  NumberOfTapsRequired="1" />
                         </Label.GestureRecognizers>
                     </Label>
                 </StackLayout>
             </Grid>
-            <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+            <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                          Command="{Binding RefreshCommand}"
                          RefreshColor="{StaticResource PrimaryDarkColor}">
-                <ScrollView>
+ 
                     <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
                                            ViewModelLoader="{Binding StockSeriesLoader}">
                         <CollectionView ItemsSource="{Binding StockSeries,Mode=TwoWay}"
@@ -91,7 +93,8 @@
                                         RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
                                         RemainingItemsThreshold="{Binding ItemTreshold}"
                                         SelectionMode="Single"
-                                        IsGrouped="True">
+                                        IsGrouped="True"
+                                        VerticalScrollBarVisibility="Always">
                             <CollectionView.GroupHeaderTemplate>
                                 <DataTemplate>
                                     <Grid Style="{StaticResource GGrid}"
@@ -126,7 +129,7 @@
                                           VerticalOptions="CenterAndExpand"
                                           HorizontalOptions="FillAndExpand">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="*" />
                                             <RowDefinition Height="30" />
                                             <RowDefinition Height="30" />
                                             <RowDefinition Height="30" />
@@ -141,7 +144,6 @@
                                                Grid.Column="0"
                                                Grid.ColumnSpan="2"
                                                Text="{Binding ProductName}"
-                                               
                                                LineBreakMode="WordWrap"
                                                FontSize="{StaticResource FT14}"
                                                HorizontalOptions="FillAndExpand"
@@ -243,7 +245,7 @@
                             </CollectionView.EmptyView>
                         </CollectionView>
                     </custom:TaskLoaderView>
-                </ScrollView>
+     
             </RefreshView>
         </StackLayout>
         <!--footer-->

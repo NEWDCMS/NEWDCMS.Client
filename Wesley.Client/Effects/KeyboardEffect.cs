@@ -1,8 +1,7 @@
 ﻿using System.Linq;
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     /// <summary>
     /// Set up Bindable Properties for KeyboardEnableEffect

@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<pages:BasePopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                     xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
+                     xmlns:pages="clr-namespace:Wesley.Client.Pages;assembly=Wesley.Client"
+                     xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                     xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                     
+                     xmlns:vm="clr-namespace:Wesley.Client.ViewModels"
+                     x:TypeArguments="vm:ProductCategoryPageViewModel" 
+                     HasSystemPadding="False"
+                     x:Name="PopProductCategoryPage"
+                     x:Class="Wesley.Client.Pages.ProductCategoryPage">
+    <pages:BasePopupPage.Animation>
+        <animations:ScaleAnimation DurationIn="400"
+                                   DurationOut="300"
+                                   EasingIn="SinOut"
+                                   EasingOut="SinIn"
+                                   HasBackgroundAnimation="True"
+                                   PositionIn="Top"
+                                   PositionOut="Top"
+                                   ScaleIn="1.2"
+                                   ScaleOut="0.8" />
+    </pages:BasePopupPage.Animation>
+    <ContentPage.Content>
+        <yummy:PancakeView Padding="0"
+                           Margin="0,0,0,200"
+                           CornerRadius="0,0,25,25"
+                           BackgroundColor="White"
+                           VerticalOptions="Start">
+            <AbsoluteLayout HorizontalOptions="FillAndExpand"
+                            VerticalOptions="FillAndExpand">
+   
+                    <CollectionView ItemsSource="{Binding BindingContext.BindCategories, Source={x:Reference PopProductCategoryPage}}"
+                                    Margin="0,0,0,0"
+                                    x:Name="RepeaterOptions"
+                                    ItemSizingStrategy="MeasureAllItems"
+                                    SelectionMode="Single"
+                                    
+                                    VerticalScrollBarVisibility="Always"
+                                    AbsoluteLayout.LayoutFlags="All"
+                                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="40" />
+                                        <RowDefinition Height=".7" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectedCommand}"
+                                                              CommandParameter="{Binding Id}"
+                                                              NumberOfTapsRequired="1" />
+                                    </Grid.GestureRecognizers>
+                                    <CheckBox Grid.Row="0"
+                                              Grid.Column="0"
+                                              Margin="10,0,10,0"
+                                              HorizontalOptions="Start"
+                                              VerticalOptions="CenterAndExpand"
+                                              IsChecked="{Binding Selected,Mode=TwoWay}" />
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Margin="10,0,10,0"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="CenterAndExpand"
+                                           Text="{Binding Name}" />
+                                    <BoxView Grid.Row="1"
+                                             Grid.ColumnSpan="2"
+                                             Style="{StaticResource SeparatorGrid}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <custom:NullView />
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+
+ 
+                <Button AbsoluteLayout.LayoutFlags="PositionProportional,WidthProportional"
+                        AbsoluteLayout.LayoutBounds="0, 1, 1, 45"
+                        Margin="5,0,5,5"
+                        Text="check-circle 确定选择"
+                        FontFamily="FAS"
+                        Style="{StaticResource CustomIconButtonStyle}"
+                        Command="{Binding ComplatedCommand}" 
+                        CornerRadius="25" />
+            </AbsoluteLayout>
+            
+        </yummy:PancakeView>
+    </ContentPage.Content>
+</pages:BasePopupPage>

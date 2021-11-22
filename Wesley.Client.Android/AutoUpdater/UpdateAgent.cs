@@ -1,13 +1,6 @@
-﻿using Android.App;
-using Android.Content;
-using Android.Widget;
-using System;
-using AEnvironment = Android.OS.Environment;
-using AUri = Android.Net.Uri;
-using JFile = Java.IO.File;
-
-namespace Wesley.Client.Droid.AutoUpdater
+﻿namespace Wesley.Client.Droid.AutoUpdater
 {
+    /*
     public class UpdateAgent
     {
         //单例实现
@@ -259,4 +252,6 @@ namespace Wesley.Client.Droid.AutoUpdater
         /// </summary>
         Always
     }
+
+    */
 }

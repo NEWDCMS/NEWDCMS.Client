@@ -1,4 +1,4 @@
-﻿namespace Wesley.Easycharts
+﻿namespace DCMS.Easycharts
 {
 	using SkiaSharp;
 	using System;
@@ -13,7 +13,7 @@
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="T:Wesley.Easycharts.Entry"/> class.
+		/// Initializes a new instance of the <see cref="T:DCMS.Easycharts.Entry"/> class.
 		/// </summary>
 		/// <param name="value">The entry value.</param>
 		public Entry(float value)

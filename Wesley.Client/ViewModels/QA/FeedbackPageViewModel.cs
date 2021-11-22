@@ -6,12 +6,12 @@ using Wesley.Client.Models.Media;
 using Wesley.Client.Services;
 using Wesley.Client.Services.QA;
 using Wesley.Infrastructure.Helpers;
-
 using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
+
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -20,7 +20,6 @@ using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-
 namespace Wesley.Client.ViewModels
 {
     public class FeedbackPageViewModel : ViewModelBase
@@ -48,7 +47,8 @@ namespace Wesley.Client.ViewModels
 
             IDialogService dialogService,
             IFeedbackService feedbackService,
-            IMediaPickerService mediaPickerService) : base(navigationService, dialogService)
+            IMediaPickerService mediaPickerService
+            ) : base(navigationService, dialogService)
         {
             _feedbackService = feedbackService;
             _mediaPickerService = mediaPickerService;
@@ -67,7 +67,7 @@ namespace Wesley.Client.ViewModels
                     return $"{x.Length}/500";
                 else
                     return $"0/500";
-            }).Subscribe(x => { this.TextCounterTxt = x; }).DisposeWith(DestroyWith);
+            }).Subscribe(x => { this.TextCounterTxt = x; }).DisposeWith(DeactivateWith);
 
 
             this.TextChangedCommand = ReactiveCommand.Create<string>((e) =>
@@ -158,73 +158,73 @@ namespace Wesley.Client.ViewModels
             {
                 try
                 {
-                    var resultMedia = await CrossDiaglogKit.Current.GetMediaResultAsync("请选择", "");
+                    //var resultMedia = await CrossDiaglogKit.Current.GetMediaResultAsync("请选择", "");
 
-                    if (resultMedia != null)
-                    {
-                        //上传图片
-                        using (UserDialogs.Instance.Loading("上传中..."))
-                        {
-                            byte[] base64Stream = Convert.FromBase64String(resultMedia.ToString());
+                    //if (resultMedia != null)
+                    //{
+                    //    //上传图片
+                    //    using (UserDialogs.Instance.Loading("上传中..."))
+                    //    {
+                    //        byte[] base64Stream = Convert.FromBase64String(resultMedia.ToString());
 
-                            Stream resultStream = null;
+                    //        Stream resultStream = null;
 
-                            //裁切图片481X480
-                            using (var imageEditor = await _mediaPickerService.CreateImageAsync(base64Stream))
-                            {
-                                imageEditor.Resize(480, 480);
-                                resultStream = CommonHelper.BytesToStream(imageEditor.ToJpeg());
-                            }
+                    //        //裁切图片481X480
+                    //        using (var imageEditor = await _mediaPickerService.CreateImageAsync(base64Stream))
+                    //        {
+                    //            imageEditor.Resize(480, 480);
+                    //            resultStream = CommonHelper.BytesToStream(imageEditor.ToJpeg());
+                    //        }
 
-                            if (resultStream == null)
-                            {
-                                return;
-                            }
+                    //        if (resultStream == null)
+                    //        {
+                    //            return;
+                    //        }
 
-                            var content = new MultipartFormDataContent
-                                    {
-                                         { new StreamContent(resultStream), "\"file\"", $"\"{Settings.UserId}_feedBack.jpg\"" }
-                                    };
+                    //        var content = new MultipartFormDataContent
+                    //                {
+                    //                     { new StreamContent(resultStream), "\"file\"", $"\"{Settings.UserId}_feedBack.jpg\"" }
+                    //                };
 
-                            using (var httpClient = new HttpClient())
-                            {
-                                var uploadServiceBaseAddress = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
-                                var httpResponseMessage = await httpClient.PostAsync(uploadServiceBaseAddress, content);
-                                var result = await httpResponseMessage.Content.ReadAsStringAsync();
-                                var uploadResult = new UploadResult();
+                    //        using (var httpClient = new HttpClient())
+                    //        {
+                    //            var uploadServiceBaseAddress = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
+                    //            var httpResponseMessage = await httpClient.PostAsync(uploadServiceBaseAddress, content);
+                    //            var result = await httpResponseMessage.Content.ReadAsStringAsync();
+                    //            var uploadResult = new UploadResult();
 
-                                try
-                                {
-                                    if (!string.IsNullOrEmpty(result))
-                                    {
-                                        uploadResult = JsonConvert.DeserializeObject<UploadResult>(result);
-                                    }
-                                }
-                                catch (Exception)
-                                {
-                                    uploadResult = null;
-                                }
-                                finally
-                                {
-                                    if (httpResponseMessage != null)
-                                        httpResponseMessage.Dispose();
-                                }
+                    //            try
+                    //            {
+                    //                if (!string.IsNullOrEmpty(result))
+                    //                {
+                    //                    uploadResult = JsonConvert.DeserializeObject<UploadResult>(result);
+                    //                }
+                    //            }
+                    //            catch (Exception)
+                    //            {
+                    //                uploadResult = null;
+                    //            }
+                    //            finally
+                    //            {
+                    //                if (httpResponseMessage != null)
+                    //                    httpResponseMessage.Dispose();
+                    //            }
 
-                                if (uploadResult != null)
-                                {
-                                    var displayPhoto = new DisplayPhoto
-                                    {
-                                        DisplayPath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + uploadResult.Id + ""
-                                    };
+                    //            if (uploadResult != null)
+                    //            {
+                    //                var displayPhoto = new DisplayPhoto
+                    //                {
+                    //                    DisplayPath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + uploadResult.Id + ""
+                    //                };
 
-                                    DisplayPhotos.Add(displayPhoto);
-                                }
-                            }
+                    //                DisplayPhotos.Add(displayPhoto);
+                    //            }
+                    //        }
 
-                            if (resultStream != null)
-                                resultStream.Dispose();
-                        };
-                    }
+                    //        if (resultStream != null)
+                    //            resultStream.Dispose();
+                    //    };
+                    //}
                 }
                 catch (Exception)
                 {
@@ -244,7 +244,7 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()

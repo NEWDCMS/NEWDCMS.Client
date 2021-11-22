@@ -1,10 +1,9 @@
-﻿using Wesley.Easycharts;
+﻿using Wesley.ChartJS.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
-
 
 namespace Wesley.Client.Models
 {
@@ -83,7 +82,7 @@ namespace Wesley.Client.Models
         /// 搜索关键字
         /// </summary>
         [Reactive] public string SerchKey { get; set; }
-
+        [Reactive] public bool SerchKeyEnable { get; set; }
 
         /// <summary>
         /// 供应商
@@ -217,13 +216,13 @@ namespace Wesley.Client.Models
         [Reactive] public int AccountOptionId { get; set; }
         [Reactive] public string AccountOptionName { get; set; }
 
-        [Reactive] public int DistanceOrderBy { get; set; }
+        [Reactive] public int DistanceOrderBy { get; set; } = 1;
 
     }
 
     public class MyReportingModel
     {
         public string Title { get; set; }
-        public Chart ChartData { get; set; }
+        public ChartViewConfig ChartConfig { get; set; }
     }
 }

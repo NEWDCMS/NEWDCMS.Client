@@ -1,4 +1,6 @@
-﻿using Xamarin.Essentials;
+﻿using Microsoft.AppCenter.Crashes;
+using System;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
@@ -12,24 +14,20 @@ namespace Wesley.Client.Pages
             try
             {
                 InitializeComponent();
-
                 DeviceDisplay.KeepScreenOn = true;
-
-                On<Android>().SetToolbarPlacement(value: ToolbarPlacement.Bottom);
-                //设置该元素是否有导航栏
+                this.On<Android>().DisableSwipePaging();
+                this.On<Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
                 NavigationPage.SetHasNavigationBar(this, false);
-                //设置该元素是否有返回键
                 NavigationPage.SetHasBackButton(this, false);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                DisplayAlert("MainLayoutPage", ex.Message, "ok");
-            }
-        }
+                Crashes.TrackError(ex);
 
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
+                /*
+                 
+                 */
+            }
         }
     }
 }

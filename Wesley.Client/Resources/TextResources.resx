@@ -127,7 +127,7 @@
     <value>Chat</value>
   </data>
   <data name="EmptyText" xml:space="preserve">
-    <value>前不见古人，后不见来者....</value>
+    <value>空空如也，刷新试试....</value>
   </data>
   <data name="EnableMicrophone" xml:space="preserve">
     <value>启用麦克风</value>

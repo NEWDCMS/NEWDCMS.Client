@@ -1,5 +1,4 @@
-﻿using Microsoft.AppCenter.Crashes;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -18,7 +17,7 @@ namespace Wesley.Client.Services
         [JsonProperty("code")]
         public int Code { get; set; }
 
-        [JsonProperty("return")]
+        [JsonProperty("Return")]
         public int Return { get; set; } = 0;
 
         private TResult _data;
@@ -38,6 +37,22 @@ namespace Wesley.Client.Services
 
         [JsonProperty("message")]
         public string Message { get; set; }
+
+
+        [JsonProperty("rows")]
+        public int Rows { get; set; }
+
+
+        [JsonProperty("pages")]
+        public int Pages { get; set; }
+
+    }
+    public class ResultData
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public int Code { get; set; }
+        public int Return { get; set; }
     }
 
     public class HttpClientHelper
@@ -55,16 +70,31 @@ namespace Wesley.Client.Services
                     RequestUri = new Uri(GlobalSettings.FileCenterEndpoint + "/")
                 });//.Result.EnsureSuccessStatusCode();
             }
+            catch (System.Net.Http.HttpRequestException)
+            {
+                //Crashes.TrackError(ex);
+            }
             catch (Exception ex)
             {
-                Crashes.TrackError(ex);
+                //Crashes.TrackError(ex);
             }
         }
 
         public async Task<string> PostAsync(string url, MultipartFormDataContent content)
         {
-            var response = await _httpClient.PostAsync(url, content);
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+                var response = await _httpClient.PostAsync(url, content);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (System.Net.Http.HttpRequestException)
+            {
+                return string.Empty;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
     }
 

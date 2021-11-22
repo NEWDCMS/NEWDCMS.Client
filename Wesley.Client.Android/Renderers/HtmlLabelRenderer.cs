@@ -28,8 +28,7 @@ namespace Wesley.Client.Droid.Renderers
     {
         public HtmlLabelRenderer(Android.Content.Context context) : base(context)
         {
-            //string dd = "dfd";
-            //dd.ToCharArray().Contains()
+
         }
 
         public static void Initialize()
@@ -49,8 +48,7 @@ namespace Wesley.Client.Droid.Renderers
             UpdateUi(Element as HtmlLabel, Control);
         }
 
-
-        void UpdateUi(HtmlLabel view, TextView control)
+        private void UpdateUi(HtmlLabel view, TextView control)
         {
             if (!string.IsNullOrEmpty(view.FontName))
             {
@@ -117,9 +115,7 @@ namespace Wesley.Client.Droid.Renderers
 
             // Gets the complete HTML string
             var customHtml = new LabelRendererHelper(Element, Control.Text).ToString();
-            // Android's TextView doesn't handle <ul>s, <ol>s and <li>s 
-            // so it replaces them with <ulc>, <olc> and <lic> respectively.
-            // Those tags will be handles by a custom TagHandler
+
             customHtml = customHtml.Replace("ul>", "ulc>").Replace("ol>", "olc>").Replace("li>", "lic>");
 
             Control.SetIncludeFontPadding(false);
@@ -144,7 +140,6 @@ namespace Wesley.Client.Droid.Renderers
             foreach (var span in urls)
                 MakeLinkClickable(strBuilder, (URLSpan)span);
 
-            // Android adds an unnecessary "\n" that must be removed
             var value = RemoveLastChar(strBuilder);
 
             // Finally sets the value of the TextView 
@@ -180,8 +175,9 @@ namespace Wesley.Client.Droid.Renderers
 
                 if (args.Cancel)
                     return;
-                // Use Launcher.OpenUri (or CanOpen, or TryOpen) from Xamarin.Essentials"
+
                 Launcher.TryOpenAsync(new Uri(_span.URL));
+
                 _label.SendNavigated(args);
             }
         }
@@ -189,7 +185,10 @@ namespace Wesley.Client.Droid.Renderers
         private static ISpanned RemoveLastChar(ICharSequence text)
         {
             var builder = new SpannableStringBuilder(text);
-            builder.Delete(text.Length() - 1, text.Length());
+            if (text.Length() > 1)
+            {
+                builder.Delete(text.Length() - 1, text.Length());
+            }
             return builder;
         }
     }

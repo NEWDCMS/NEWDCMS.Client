@@ -3,17 +3,16 @@ using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Commands;
 using Prism.Navigation;
+
 using System;
 using System.Collections.Generic;
-
 namespace Wesley.Client.ViewModels
 {
     public class AddCostContractProductPageViewModel : ViewModelBase
     {
         public AddCostContractProductPageViewModel(INavigationService navigationService,
-
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加费用合同商品";
             _navigationService = navigationService;

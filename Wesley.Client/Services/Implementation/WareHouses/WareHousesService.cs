@@ -1,9 +1,11 @@
-﻿using Wesley.Client.Models.WareHouses;
+﻿using Wesley.Client.Enums;
+using Wesley.Client.Models.WareHouses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 
 namespace Wesley.Client.Services
 {
@@ -21,7 +23,7 @@ namespace Wesley.Client.Services
         /// 获取库存
         /// </summary>
         /// <returns></returns>
-        public async Task<IList<WareHouseModel>> GetWareHousesAsync(int type, string searchStr = "", int pageIndex = 0, int pageSize = 50, bool force = false, CancellationToken calToken = default)
+        public async Task<IList<WareHouseModel>> GetWareHousesAsync(BillTypeEnum btype, string searchStr = "", int pageIndex = 0, int pageSize = 50, bool force = false, CancellationToken calToken = default)
         {
             try
             {
@@ -32,17 +34,24 @@ namespace Wesley.Client.Services
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetWareHousesAsync",
                     storeId,
-                    type,
+                    userId,
+                    (int)btype,
                     searchStr,
+                    true,
                     pageIndex,
                     pageSize);
 
                 var results = await _makeRequest.StartUseCache(api.GetWareHousesAsync(storeId,
-                    type,
+                    userId,
+                    (int)btype,
                     searchStr,
                     pageIndex,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize,
+                    calToken),
+                    cacheKey,
+                    true,
+                    calToken,
+                    TimeSpan.FromSeconds(5));
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data?.ToList();
@@ -151,7 +160,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> AuditingAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<ResultData> AuditingAsync(int billId = 0, CancellationToken calToken = default)
         {
             try
             {
@@ -160,13 +169,20 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<IWareHousesApi>(URL);
                 var results = await _makeRequest.Start(api.AuditingAsync(storeId, userId, billId, calToken), calToken);
-                return (bool)(results?.Success);
+
+                return new ResultData
+                {
+                    Success = (bool)(results?.Success),
+                    Message = results?.Message
+                };
             }
             catch (Exception e)
             {
-
-                e.HandleException();
-                return false;
+                return new ResultData
+                {
+                    Success = false,
+                    Message = e.Message
+                };
             }
         }
     }

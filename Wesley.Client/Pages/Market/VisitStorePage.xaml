@@ -4,6 +4,7 @@
                        xmlns:maps="clr-namespace:Wesley.Client.BaiduMaps;assembly=Wesley.Client"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
                        xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
                        xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
@@ -14,7 +15,6 @@
                        x:Name="CurrentContentView"
                        Title="{Binding Title}"
                        BackgroundColor="White"
-                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:VisitStorePageViewModel">
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -45,409 +45,687 @@
     </ContentPage.Resources>
     <RelativeLayout>
         <!--body-->
-        <StackLayout Spacing="0"
-                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+        <ScrollView RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
                                                                        Property=Height,
                                                                        Factor=1,
                                                                        Constant=0}"
-                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+                    RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
                                                                       Property=Width,
                                                                       Factor=1,
                                                                       Constant=0}">
-            <Grid Style="{StaticResource GGrid}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="45" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions >
-                <StackLayout Grid.Row="0"
-                             Grid.Column="0"
-                             Grid.ColumnSpan="2"
-                             BackgroundColor="#eeeeee"
-                             Orientation="Horizontal">
-                    <Label Text="终端客户"
-                           FontSize="{StaticResource FT14}"
-                           FontAttributes="Bold"
-                           VerticalOptions="Center"
-                           HorizontalOptions="Start"
-                           Margin="{StaticResource ML10}" />
-                    <Label Text="{Binding Bill.TerminalName}"
-                           FontSize="{StaticResource FT14}"
-                           FontAttributes="Bold"
-                           VerticalOptions="Center"
-                           HorizontalOptions="EndAndExpand"
-                           Margin="{StaticResource MR10}" />
-                </StackLayout>
-                <StackLayout Grid.Row="1"
-                             Grid.Column="0"
-                             Padding="10">
-                    <Button HorizontalOptions="Start"
-                            VerticalOptions="CenterAndExpand"
-                            Text="去签到"
-                            HeightRequest="40"
-                            android:Button.UseDefaultShadow="True"
-                            Style="{StaticResource ShadowButtonStyle}"
-                            Command="{Binding OpenSignInCommend}"
-                            IsEnabled="{Binding SignInEnabled}">
-                        <Button.Triggers>
-                            <DataTrigger Binding="{Binding SignInEnabled}"
-                                         TargetType="Button"
-                                         Value="True">
-                                <Setter Property="Text"
-                                        Value="去签到" />
-                                <Setter Property="TextColor"
-                                        Value="#53a245" />
-                                <Setter Property="IsEnabled"
-                                        Value="True" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding SignInEnabled}"
-                                         TargetType="Button"
-                                         Value="False">
-                                <Setter Property="Text"
-                                        Value="已签到" />
-                                <Setter Property="TextColor"
-                                        Value="#eeeeee" />
-                                <Setter Property="IsEnabled"
-                                        Value="False" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
-                </StackLayout>
-                <StackLayout Grid.Row="1"
-                             Grid.Column="1"
-                             Orientation="Vertical"
-                             Padding="0,10,10,10">
-                    <Label Text="{Binding Bill.SigninDateTime,StringFormat='签到时间：{0}'}"
-                           IsVisible="{Binding Bill.SigninDateTimeEnable}"
-                           FontSize="10"
-                           HorizontalOptions="End"
-                           VerticalOptions="CenterAndExpand" />
-                    <Label Text="{Binding Bill.LastSigninDateTimeName,StringFormat='上次拜访：{0} 前'}"
-                           FontSize="10"
-                           HorizontalOptions="End"
-                           VerticalOptions="CenterAndExpand" />
-                    <Label Text="{Binding Bill.LastPurchaseDateTimeName,StringFormat='上次采购：{0} 前'}"
-                           FontSize="10"
-                           HorizontalOptions="End"
-                           VerticalOptions="CenterAndExpand" />
-                </StackLayout>
-            </Grid>
-            <Grid Style="{StaticResource GGrid}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="45" />
-                    <RowDefinition Height="100" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackLayout Spacing="0"
-                             Grid.Row="0"
-                             Grid.Column="0"
-                             BackgroundColor="#eeeeee">
-                    <Label Text="门头照片"
-                           FontSize="{StaticResource FT14}"
-                           FontAttributes="Bold"
-                           VerticalOptions="CenterAndExpand"
-                           Margin="{StaticResource ML10}" />
-                </StackLayout>
-                <StackLayout Grid.Row="1"
-                             Grid.Column="0"
-                             Spacing="0"
-                             Padding="0"
-                             Orientation="Horizontal">
-                    <CollectionView Margin="0"
-                                    HorizontalOptions="StartAndExpand"
-                                    ItemsSource="{Binding Bill.DoorheadPhotos}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="0" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="10,20,0,0" Margin="0" ColumnSpacing="0" RowSpacing="0" >
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <ffimageloading:CachedImage Grid.Row="0"
-                                                                Grid.Column="0"
-                                                                WidthRequest="50"
-                                                                HeightRequest="{StaticResource RH45}"
-                                                                VerticalOptions="Start"
-                                                                HorizontalOptions="Start"
-                                                                DownsampleToViewSize="true"
-                                                                Source="{Binding StoragePath,Mode=OneWay}">
-                                        <ffimageloading:CachedImage.Transformations>
-                                            <fftransformations:RoundedTransformation BorderSize="4"
-                                                                                     BorderHexColor="#ffffff" />
-                                        </ffimageloading:CachedImage.Transformations>
-                                    </ffimageloading:CachedImage>
-                                    <Button Grid.Row="0"
-                                            Grid.Column="0"
-                                            Text="&#xf057;"
-                                            FontFamily="FAS"
-                                            VerticalOptions="Start"
-                                            HorizontalOptions="End"
-                                            BackgroundColor="Transparent"
-                                            TextColor="{StaticResource PrimaryDarkColor}"
-                                            FontSize="20"
-                                            Margin="10,-20,0,0"
-                                            Command="{Binding Path=BindingContext.RemoveStoragePathCommand,Source={x:Reference CurrentContentView}}"
-                                            CommandParameter="{Binding StoragePath}"></Button>
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                    <Button Text="&#xf067;"
-                            TextColor="White"
-                            CornerRadius="10"
-                            FontSize="25"
-                            HorizontalOptions="Center"
-                            BackgroundColor="#eeeeee"
-                            FontFamily="FAS"
-                            WidthRequest="50"
-                            HeightRequest="45"
-                            Margin="0,25,25,25"
-                            Command="{Binding CameraPhotoCmd}"
-                            CommandParameter="DoorheadPhotos" />
-                </StackLayout>
-            </Grid>
-            <Grid Style="{StaticResource GGrid}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="45" />
-                    <RowDefinition Height="100" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackLayout Spacing="0"
-                             Grid.Row="0"
-                             Grid.Column="0"
-                             BackgroundColor="#eeeeee">
-                    <Label Text="陈列拍照"
-                           FontSize="{StaticResource FT14}"
-                           FontAttributes="Bold"
-                           VerticalOptions="CenterAndExpand"
-                           Margin="{StaticResource ML10}" />
-                </StackLayout>
-                <StackLayout Grid.Row="1"
-                             Grid.Column="0"
-                             Spacing="0"
-                             Padding="0"
-                             Orientation="Horizontal">
-                    <CollectionView Margin="0"
-                                    HorizontalOptions="Start"
-                                    ItemsSource="{Binding Bill.DisplayPhotos}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="0"/>
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
+            <StackLayout Spacing="0"
+                         BackgroundColor="#eeeeee">
+                <Grid Style="{StaticResource GGrid}"
+                      BackgroundColor="White" Margin="0,0,0,15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45" />
+                        <RowDefinition Height="140" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions >
+                    <StackLayout Grid.Row="0"
+                                 Grid.Column="0"
+                                 Grid.ColumnSpan="2"
+                                 BackgroundColor="#eeeeee"
+                                 Orientation="Horizontal">
+                        <Label Text="{Binding Terminal.Name}"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               HorizontalOptions="StartAndExpand"
+                               Margin="10,0,0,0" />
+                        <Label Text="{Binding TBalance.TotalOweCash,Mode=OneWay,StringFormat='欠款：{0:F2}'}"
+                               TextColor="{StaticResource PrimaryDarkColor}"
+                               Margin="0,0,10,0" />
+                    </StackLayout>
 
-                                <Grid Padding="10,20,0,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <ffimageloading:CachedImage Grid.Row="0"
-                                                                Grid.Column="0"
-                                                                WidthRequest="50"
-                                                                HeightRequest="{StaticResource RH45}"
-                                                                VerticalOptions="Start"
-                                                                HorizontalOptions="Start"
-                                                                DownsampleToViewSize="true"
-                                                                Source="{Binding DisplayPath,Mode=OneWay}">
-                                        <ffimageloading:CachedImage.Transformations>
-                                            <fftransformations:RoundedTransformation BorderSize="4"
-                                                                                     BorderHexColor="#ffffff" />
-                                        </ffimageloading:CachedImage.Transformations>
-                                    </ffimageloading:CachedImage>
-                                    <Button Grid.Row="0"
-                                            Grid.Column="0"
-                                            Text="&#xf057;"
-                                            FontFamily="FAS"
-                                            VerticalOptions="Start"
-                                            HorizontalOptions="End"
-                                            BackgroundColor="Transparent"
-                                            TextColor="{StaticResource PrimaryDarkColor}"
-                                            FontSize="20"
-                                            Margin="10,-20,0,0"
-                                            Command="{Binding Path=BindingContext.RemoveDisplayPathCommand,Source={x:Reference CurrentContentView}}"
-                                            CommandParameter="{Binding DisplayPath}"></Button>
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                    <Grid Grid.Row="1"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="2"
+                          RowDefinitions="140" 
+                          ColumnDefinitions="100,*"
+                          Margin="15"
+                          RowSpacing="0" 
+                          ColumnSpacing="0">
 
-                    <Button Text="&#xf067;"
-                            TextColor="White"
-                            CornerRadius="10"
-                            FontSize="25"
-                            HorizontalOptions="Center"
-                            BackgroundColor="#eeeeee"
-                            FontFamily="FAS"
-                            WidthRequest="50"
-                            HeightRequest="45"
-                            Margin="25"
-                            Command="{Binding CameraPhotoCmd}"
-                            CommandParameter="DisplayPhotos" />
-                </StackLayout>
-            </Grid>
-            <BoxView Style="{StaticResource SeparatorGrid}" />
-            <Grid Style="{StaticResource GGrid}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="45" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Button Grid.Row="0"
-                        Grid.Column="0"
-                        HeightRequest="30"
-                        HorizontalOptions="CenterAndExpand"
-                        VerticalOptions="CenterAndExpand"
-                        Text="销售"
-                        android:Button.UseDefaultShadow="True"
-                        Style="{StaticResource ShadowButtonStyle}"
-                        Margin="{StaticResource ML105}"
-                        Command="{Binding InvokeAppCommand}"
-                        CommandParameter="SaleBillPage" />
-                <Button Grid.Row="0"
-                        Grid.Column="1"
-                        HeightRequest="30"
-                        HorizontalOptions="CenterAndExpand"
-                        VerticalOptions="CenterAndExpand"
-                        Text="退货"
-                        android:Button.UseDefaultShadow="True"
-                        Style="{StaticResource ShadowButtonStyle}"
-                        Margin="5,0,5,0"
-                        Command="{Binding InvokeAppCommand}"
-                        CommandParameter="ReturnBillPage" />
-                <Button Grid.Row="0"
-                        Grid.Column="2"
-                        HeightRequest="30"
-                        HorizontalOptions="CenterAndExpand"
-                        VerticalOptions="CenterAndExpand"
-                        Text="销订"
-                        android:Button.UseDefaultShadow="True"
-                        Style="{StaticResource ShadowButtonStyle}"
-                        Margin="5,0,5,0"
-                        Command="{Binding InvokeAppCommand}"
-                        CommandParameter="SaleOrderBillPage" />
-                <Button Grid.Row="0"
-                        Grid.Column="3"
-                        HeightRequest="30"
-                        HorizontalOptions="CenterAndExpand"
-                        VerticalOptions="CenterAndExpand"
-                        Text="退订"
-                        android:Button.UseDefaultShadow="True"
-                        Style="{StaticResource ShadowButtonStyle}"
-                        Margin="5,0,10,0"
-                        Command="{Binding InvokeAppCommand}"
-                        CommandParameter="ReturnOrderBillPage" />
-            </Grid>
-            <StackLayout>
-                <BoxView Style="{StaticResource SeparatorGrid}" />
-                <StackLayout Orientation="Horizontal"
-                             Padding="10">
-                    <Label Text="备注:"
-                           FontSize="{StaticResource FT14}"
-                           VerticalOptions="CenterAndExpand" />
-                    <custom:CustomEntry Margin="{StaticResource ML10}"
-                                        Placeholder="在这里填写备注..."
-                                        Keyboard="Text"
-                                        Text="{Binding Bill.Remark,Mode=TwoWay}"
-                                        HorizontalOptions="FillAndExpand"
-                                        VerticalOptions="CenterAndExpand"
-                                        Style="{StaticResource DefaultEntry}" />
-                </StackLayout>
-                <BoxView Style="{StaticResource SeparatorGrid}" />
-                <StackLayout Orientation="Horizontal"
-                             Padding="10">
-                    <Label Text="预计下次订货时间天数:"
-                           FontSize="{StaticResource FT14}"
-                           VerticalOptions="CenterAndExpand" />
-                    <custom:CustomEntry Margin="{StaticResource ML10}"
-                                        Placeholder="天数..."
-                                        Keyboard="Numeric"
-                                        Text="{Binding Bill.NextOrderDays, Mode=TwoWay}"
-                                        HorizontalOptions="FillAndExpand"
-                                        VerticalOptions="CenterAndExpand"
-                                        Style="{StaticResource DefaultEntry}" />
-                </StackLayout>
-                <BoxView Style="{StaticResource SeparatorGrid}" />
-            </StackLayout>
-        </StackLayout>
-        <!--footer-->
-        <Grid Style="{StaticResource GGrid}"
-              HorizontalOptions="FillAndExpand"
-              VerticalOptions="EndAndExpand"
-              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
-                                                                       Property=Height,
-                                                                       Factor=1,
-                                                                       Constant=0}"
-              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
-                                                                      Property=Width,
-                                                                      Factor=1,
-                                                                      Constant=0}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="50" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <BoxView Grid.Row="0"
-                     Style="{StaticResource SeparatorGrid}" />
-            <!--签退-->
-            <StackLayout Grid.Row="1"
+                        <StackLayout Grid.Row="0"
+                                     Grid.Column="0"
+                                     Spacing="0">
+                            <ffimageloading:CachedImage 
+                                                        WidthRequest="100"
+                                                        HeightRequest="100"
+                                                        DownsampleToViewSize="true"
+                                                        ErrorPlaceholder="Picnic.png"
+                                                        LoadingPlaceholder="Picnic.png"
+                                                        Source="{Binding Terminal.DoorwayPhoto,Mode=OneWay}">
+                                <ffimageloading:CachedImage.Transformations>
+                                    <fftransformations:RoundedTransformation BorderSize="0"
+                                                                             BorderHexColor="#ffffff" />
+                                </ffimageloading:CachedImage.Transformations>
+                            </ffimageloading:CachedImage>
+                        </StackLayout>
+
+                        <StackLayout Grid.Row="0"
+                                     Grid.Column="1"
+                                     Padding="10,0,0,0">
+
+                            <Label FontSize="12">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span  Text="联系电话：" />
+                                        <Span  Text="{Binding Terminal.BossCall}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label IsVisible="{Binding Bill.SigninDateTimeEnable}"
+                                   FontSize="12">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span  Text="签到时间：" />
+                                        <Span  Text="{Binding Bill.SigninDateTime}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label FontSize="12">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span  Text="上次拜访：" />
+                                        <Span  Text="{Binding Bill.LastSigninDateTimeName}" />
+                                        <Span  Text="前" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label FontSize="12">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span  Text="上次采购：" />
+                                        <Span  Text="{Binding Bill.LastPurchaseDateTimeName}" />
+                                        <Span  Text="前" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label FontSize="12"
+                                   TextColor="#ddd">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="门店地址：" />
+                                        <Span Text="{Binding Terminal.Address}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </StackLayout>
+                    </Grid>
+                </Grid>
+          <!--签到-->
+            <Grid RowDefinitions="50,*"
+                  ColumnDefinitions="40, *"
+                  RowSpacing="0">
+                <BoxView Grid.Row="0"
                          Grid.Column="0"
-                         HorizontalOptions="FillAndExpand"
-                         VerticalOptions="Center"
-                         Padding="5">
-                <Button Text="离店签退"
-                        HeightRequest="40"
-                        HorizontalOptions="FillAndExpand"
-                        Style="{StaticResource ShadowButtonStyle}"
-                        Command="{Binding SignOutCommend}"
-                        IsEnabled="{Binding SignOutEnabled}">
-                    <Button.Triggers>
-                        <DataTrigger Binding="{Binding SignOutEnabled}"
-                                     TargetType="Button"
-                                     Value="True">
-                            <Setter Property="Text"
-                                    Value="离店签退" />
-                            <Setter Property="BackgroundColor"
-                                    Value="#53a245" />
-                            <Setter Property="TextColor"
-                                    Value="#ffffff" />
-                            <Setter Property="IsEnabled"
-                                    Value="True" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding SignOutEnabled}"
-                                     TargetType="Button"
-                                     Value="False">
-                            <Setter Property="Text"
-                                    Value="离店签退" />
-                            <Setter Property="BackgroundColor"
-                                    Value="#eeeeee" />
-                            <Setter Property="IsEnabled"
-                                    Value="False" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-            </StackLayout>
-        </Grid>
-        <!--mask-->
+                         Grid.RowSpan="2"
+                         WidthRequest=".5"
+                         Color="#3B5998"
+                             Margin="19.75,0,19.75,0"  
+                         BackgroundColor="Transparent"/>
+                <BoxView  Grid.Row="0"
+                          Grid.Column="0"
+                          WidthRequest="20"
+                          HeightRequest="20"
+                          CornerRadius="50"
+                              Margin="10,0,10,30"
+                              BackgroundColor="#3B5998"/>
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       FontSize="10"
+                       Text="1"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Start"
+                           Margin="10,3,10,30" />
+                <!-- Card -->
+                <yummy:PancakeView Grid.Row="0"
+                                   Grid.RowSpan="2"
+                                   Grid.Column="1"
+                                   CornerRadius="5"
+                                   Margin="0,0,10,10"
+                                   BackgroundColor="White"
+                                   Padding="10">
+                    <StackLayout Spacing="0" Orientation="Horizontal">
+                        <Label Text="到店签到"
+                               HorizontalOptions="StartAndExpand"
+                               VerticalOptions="Center"
+                               FontAttributes="Bold"
+                               TextColor="#535257"
+                               FontSize="14"
+                               Margin="10,0,0,0" />
+
+                        <Button HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                Text="签到"
+                                HeightRequest="40"
+                                android:Button.UseDefaultShadow="True"
+                                Style="{StaticResource ShadowButtonStyle}"
+                                Command="{Binding OpenSignInCommend}"
+                                IsEnabled="{Binding SignInEnabled}">
+                            <Button.Triggers>
+                                <DataTrigger Binding="{Binding SignInEnabled}"
+                                             TargetType="Button"
+                                             Value="True">
+                                    <Setter Property="Text"
+                                            Value="签到" />
+                                    <Setter Property="TextColor"
+                                            Value="White" />
+                                        <Setter Property="BackgroundColor"
+                                                Value="#53a245" />
+                                        <Setter Property="IsEnabled"
+                                            Value="True" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SignInEnabled}"
+                                             TargetType="Button"
+                                             Value="False">
+                                    <Setter Property="Text"
+                                            Value="已签到" />
+                                    <Setter Property="TextColor"
+                                            Value="#000" />
+                                    <Setter Property="BackgroundColor"
+                                            Value="#ddd" />
+                                    <Setter Property="IsEnabled"
+                                            Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </StackLayout>
+                </yummy:PancakeView>
+            </Grid>
+            <!--门头-->
+            <Grid RowDefinitions="50,*"
+                  ColumnDefinitions="40, *"
+                  RowSpacing="0">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         Grid.RowSpan="2"
+                         WidthRequest=".5"
+                         Color="#3B5998"
+                         Margin="19.75,0,19.75,0"
+                         BackgroundColor="Transparent" />
+                    <BoxView  Grid.Row="0"
+                              Grid.Column="0"
+                              WidthRequest="20"
+                              HeightRequest="20"
+                              CornerRadius="50"
+                              Margin="10,0,10,30"
+                              BackgroundColor="#3B5998" />
+                    <Label Grid.Row="0"
+                       Grid.Column="0"
+                       FontSize="10"
+                       Text="2"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Start"
+                           Margin="10,3,10,30" />
+                <!-- Card -->
+                <yummy:PancakeView Grid.Row="0"
+                                   Grid.RowSpan="2"
+                                   Grid.Column="1"
+                                   CornerRadius="5"
+                                   Margin="0,0,10,10"
+                                       BackgroundColor="White"
+                                   Padding="10">
+                    <Grid Style="{StaticResource GGrid}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="70" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Spacing="0"
+                                     Grid.Row="0"
+                                     Grid.Column="0">
+                            <Label Text="门头照片"
+                                   FontSize="{StaticResource FT14}"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="10,0,0,10" />
+                        </StackLayout>
+                        <yummy:PancakeView  CornerRadius="10"
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            BackgroundColor="#fff">
+                            <StackLayout Spacing="0"
+                                         Padding="10"
+                                         Orientation="Horizontal">
+                                <CollectionView Margin="0"
+                                                HorizontalOptions="StartAndExpand"
+                                                SelectedItem="{Binding DoorheadPhotoSelecter, Mode=TwoWay}"
+                                                SelectionMode="Single"
+                                                ItemsSource="{Binding Bill.DoorheadPhotos}">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Horizontal"
+                                                           ItemSpacing="5" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="5"
+                                                  Margin="0"
+                                                  ColumnSpacing="0"
+                                                  RowSpacing="0"
+                                                  WidthRequest="60"
+                                                  HeightRequest="60">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <ffimageloading:CachedImage Grid.Row="0"
+                                                                            Grid.Column="0"
+                                                                            WidthRequest="50"
+                                                                            HeightRequest="{StaticResource RH45}"
+                                                                            VerticalOptions="Start"
+                                                                            HorizontalOptions="Start"
+                                                                            DownsampleToViewSize="true"
+                                                                            Source="{Binding StoragePath,Mode=OneWay}">
+                                                    <ffimageloading:CachedImage.Transformations>
+                                                        <fftransformations:RoundedTransformation BorderSize="0"
+                                                                                                 BorderHexColor="#ffffff" />
+                                                    </ffimageloading:CachedImage.Transformations>
+                                                </ffimageloading:CachedImage>
+                                                <Label Grid.Row="0"
+                                                       Grid.Column="0"
+                                                       Text="&#xf057;"
+                                                       FontFamily="FAS"
+                                                       VerticalOptions="Start"
+                                                       HorizontalOptions="End"
+                                                       BackgroundColor="Transparent"
+                                                       TextColor="{StaticResource PrimaryDarkColor}"
+                                                       FontSize="20"
+                                                       Margin="0,-5,0,0">
+                                                    <Label.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding Path=BindingContext.RemoveStoragePathCommand,Source={x:Reference CurrentContentView}}"
+                                                                              CommandParameter="{Binding StoragePath}"
+                                                                              NumberOfTapsRequired="1" />
+                                                    </Label.GestureRecognizers>
+                                                </Label>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <Button Text="&#xf067;"
+                                        TextColor="White"
+                                        CornerRadius="10"
+                                        FontSize="25"
+                                        HorizontalOptions="Center"
+                                        BackgroundColor="#eee"
+                                        FontFamily="FAS"
+                                        WidthRequest="50"
+                                        HeightRequest="45"
+                                        Margin="0,0,0,0"
+                                        Command="{Binding CameraPhotoCmd}"
+                                        CommandParameter="DoorheadPhotos" />
+                            </StackLayout>
+                        </yummy:PancakeView>
+                    </Grid>
+                </yummy:PancakeView>
+            </Grid>
+            <!--陈列-->
+            <Grid RowDefinitions="50,*"
+                      ColumnDefinitions="40, *"
+                  RowSpacing="0">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         Grid.RowSpan="2"
+                         WidthRequest=".5"
+                             Color="#3B5998"
+                         Margin="19.75,0,19.75,0"
+                         BackgroundColor="Transparent" />
+                <BoxView  Grid.Row="0"
+                          Grid.Column="0"
+                              WidthRequest="20"
+                              HeightRequest="20"
+                              CornerRadius="50"
+                              Margin="10,0,10,30"
+                              BackgroundColor="#3B5998" /> 
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       FontSize="10"
+                       Text="3"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Start"
+                           Margin="10,3,10,30" />
+                <!-- Card -->
+                <yummy:PancakeView Grid.Row="0"
+                                   Grid.RowSpan="2"
+                                   Grid.Column="1"
+                                   CornerRadius="5"
+                                   Margin="0,0,10,10"
+                                       BackgroundColor="White"
+                                   Padding="10">
+                    <Grid Style="{StaticResource GGrid}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="70" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Spacing="0"
+                                     Grid.Row="0"
+                                     Grid.Column="0"
+                                         BackgroundColor="White">
+                            <Label Text="陈列拍照"
+                                   FontSize="{StaticResource FT14}"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="10,0,0,10" />
+                        </StackLayout>
+                        <yummy:PancakeView  CornerRadius="10"
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            BackgroundColor="#fff">
+                            <StackLayout Spacing="0"
+                                         Padding="10"
+                                         Orientation="Horizontal">
+                                <CollectionView Margin="0"
+                                                HorizontalOptions="Start"
+                                                SelectedItem="{Binding DisplayPhotoSelecter, Mode=TwoWay}"
+                                                SelectionMode="Single"
+                                                ItemsSource="{Binding Bill.DisplayPhotos}">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Horizontal"
+                                                           ItemSpacing="5" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="5"
+                                                  Margin="0"
+                                                  ColumnSpacing="0"
+                                                  RowSpacing="0"
+                                                  WidthRequest="60"
+                                                  HeightRequest="60">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <ffimageloading:CachedImage Grid.Row="0"
+                                                                            Grid.Column="0"
+                                                                            WidthRequest="50"
+                                                                            HeightRequest="{StaticResource RH45}"
+                                                                            VerticalOptions="Start"
+                                                                            HorizontalOptions="Start"
+                                                                            DownsampleToViewSize="true"
+                                                                            Source="{Binding DisplayPath,Mode=OneWay}">
+                                                    <ffimageloading:CachedImage.Transformations>
+                                                        <fftransformations:RoundedTransformation BorderSize="4"
+                                                                                                 BorderHexColor="#ffffff" />
+                                                    </ffimageloading:CachedImage.Transformations>
+                                                </ffimageloading:CachedImage>
+                                                <Label Grid.Row="0"
+                                                       Grid.Column="0"
+                                                       Text="&#xf057;"
+                                                       FontFamily="FAS"
+                                                       VerticalOptions="Start"
+                                                       HorizontalOptions="End"
+                                                       BackgroundColor="Transparent"
+                                                       TextColor="{StaticResource PrimaryDarkColor}"
+                                                       FontSize="20"
+                                                       Margin="0,-5,0,0">
+                                                    <Label.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding Path=BindingContext.RemoveDisplayPathCommand,Source={x:Reference CurrentContentView}}"
+                                                                              CommandParameter="{Binding DisplayPath}"
+                                                                              NumberOfTapsRequired="1" />
+                                                    </Label.GestureRecognizers>
+                                                </Label>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                                <Button Text="&#xf067;"
+                                        TextColor="White"
+                                        CornerRadius="10"
+                                        FontSize="25"
+                                        HorizontalOptions="Center"
+                                        BackgroundColor="#eee"
+                                        FontFamily="FAS"
+                                        WidthRequest="50"
+                                        HeightRequest="45"
+                                        Margin="0,0,0,0"
+                                        Command="{Binding CameraPhotoCmd}"
+                                        CommandParameter="DisplayPhotos" />
+                            </StackLayout>
+                        </yummy:PancakeView>
+                    </Grid>
+                </yummy:PancakeView>
+            </Grid>
+            <!--任务-->
+            <Grid RowDefinitions="50,*"
+                      ColumnDefinitions="40, *"
+                  RowSpacing="0">
+                <BoxView Grid.Row="0"
+                         Grid.Column="0"
+                         Grid.RowSpan="2"
+                         WidthRequest="1.5"
+                             Color="#3B5998"
+                         Margin="19.75,0,19.75,0"
+                         BackgroundColor="Transparent" />
+                <BoxView  Grid.Row="0"
+                          Grid.Column="0"
+                              WidthRequest="20"
+                              HeightRequest="20"
+                              CornerRadius="50"
+                              Margin="10,0,10,30"
+                              BackgroundColor="#3B5998" /> 
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       FontSize="10"
+                       Text="4"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Start"
+                           Margin="10,3,10,30" />
+                <!-- Card -->
+                <yummy:PancakeView Grid.Row="0"
+                                   Grid.RowSpan="2"
+                                   Grid.Column="1"
+                                   CornerRadius="5"
+                                   Margin="0,0,10,10"
+                                       BackgroundColor="White"
+                                   Padding="10">
+                    <StackLayout Spacing="0">
+                        <Label Text="执行任务"
+                               HorizontalOptions="StartAndExpand"
+                               VerticalOptions="Center"
+                               FontAttributes="Bold"
+                               TextColor="#535257"
+                               FontSize="14"
+                               Margin="10,0,0,10" />
+
+                        <Grid Style="{StaticResource GGrid}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Row="0"
+                                    Grid.Column="0"
+                                    HeightRequest="40"
+                                    HorizontalOptions="CenterAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Text="销售"
+                                    android:Button.UseDefaultShadow="True"
+                                    Style="{StaticResource ShadowButtonStyle}"
+                                    Margin="{StaticResource ML105}"
+                                    Command="{Binding InvokeAppCommand}"
+                                    CommandParameter="SaleBillPage" />
+                            <Button Grid.Row="0"
+                                    Grid.Column="1"
+                                    HeightRequest="40"
+                                    HorizontalOptions="CenterAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Text="退货"
+                                    android:Button.UseDefaultShadow="True"
+                                    Style="{StaticResource ShadowButtonStyle}"
+                                    Margin="5,0,5,0"
+                                    Command="{Binding InvokeAppCommand}"
+                                    CommandParameter="ReturnBillPage" />
+                            <Button Grid.Row="0"
+                                    Grid.Column="2"
+                                    HeightRequest="40"
+                                    HorizontalOptions="CenterAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Text="销订"
+                                    android:Button.UseDefaultShadow="True"
+                                    Style="{StaticResource ShadowButtonStyle}"
+                                    Margin="5,0,5,0"
+                                    Command="{Binding InvokeAppCommand}"
+                                    CommandParameter="SaleOrderBillPage" />
+                            <Button Grid.Row="0"
+                                    Grid.Column="3"
+                                    HeightRequest="40"
+                                    HorizontalOptions="CenterAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Text="退订"
+                                    android:Button.UseDefaultShadow="True"
+                                    Style="{StaticResource ShadowButtonStyle}"
+                                    Margin="5,0,10,0"
+                                    Command="{Binding InvokeAppCommand}"
+                                    CommandParameter="ReturnOrderBillPage" />
+                            <Button IsVisible="false"
+                                    HeightRequest="40"
+                                    HorizontalOptions="CenterAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Text="兑奖"
+                                    android:Button.UseDefaultShadow="True"
+                                    Style="{StaticResource ShadowButtonStyle}"
+                                    Margin="5,0,10,0"
+                                    Command="{Binding InvokeAppCommand}"
+                                    CommandParameter="ViewRedeemPage" />
+                        </Grid>
+
+                        <StackLayout Padding="5"
+                                     Orientation="Horizontal"
+                                     HeightRequest="30">
+                            <Label Text="备注:"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="CenterAndExpand" />
+                            <custom:CustomEntry Margin="{StaticResource ML10}"
+                                                Placeholder="在这里填写备注..."
+                                                Keyboard="Text"
+                                                Text="{Binding Bill.Remark,Mode=TwoWay}"
+                                                HorizontalOptions="FillAndExpand"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}" />
+                        </StackLayout>
+                            <BoxView  Color="#eee"
+                                  HeightRequest=".7"
+                                  Margin="5" />
+                        <StackLayout Orientation="Horizontal"
+                                     HeightRequest="30"
+                                     Padding="5">
+                            <Label Text="预计下次订货时间天数:"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="CenterAndExpand" />
+                            <custom:CustomEntry Margin="{StaticResource ML10}"
+                                                Placeholder="天数..."
+                                                Keyboard="Numeric"
+                                                Text="{Binding Bill.NextOrderDays, Mode=TwoWay}"
+                                                HorizontalOptions="FillAndExpand"
+                                                VerticalOptions="CenterAndExpand"
+                                                Style="{StaticResource DefaultEntry}" />
+                        </StackLayout>
+
+                    </StackLayout>
+                </yummy:PancakeView>
+            </Grid>
+            <!--离店签退-->
+            <Grid RowDefinitions="50,*"
+                      ColumnDefinitions="40, *"
+                  RowSpacing="0">
+                <StackLayout Grid.Row="0"
+                             Grid.Column="0">
+                    <BoxView WidthRequest=".5"
+                             Color="#3B5998"
+                             Margin="19.75,-20,19.75,0" />
+                </StackLayout>
+                <BoxView  Grid.Row="0"
+                          Grid.Column="0"
+                              WidthRequest="20"
+                              HeightRequest="20"
+                              CornerRadius="50"
+                              Margin="10,0,10,30"
+                              BackgroundColor="#3B5998" />
+                    <Label Grid.Row="0"
+                       Grid.Column="0"
+                       FontSize="10"
+                       Text="5"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Start"
+                           Margin="10,3,10,30" />
+                <!-- Card -->
+                <yummy:PancakeView Grid.Row="0"
+                                   Grid.RowSpan="2"
+                                   Grid.Column="1"
+                                   CornerRadius="5"
+                                   Margin="0,0,10,10"
+                                       BackgroundColor="White"
+                                   Padding="10">
+                    <StackLayout Spacing="0"
+                                 Orientation="Horizontal">
+                        <Label Text="离店签退"
+                               FontAttributes="Bold"
+                               TextColor="#535257"
+                               FontSize="14"
+                               Margin="10,0,0,0"
+                               HorizontalOptions="StartAndExpand" />
+
+                        <Button Text="签退"
+                                HeightRequest="40"
+                                HorizontalOptions="End"
+                                Style="{StaticResource ShadowButtonStyle}"
+                                Command="{Binding SignOutCommend}"
+                                IsEnabled="{Binding SignOutEnabled}">
+                            <Button.Triggers>
+                                <DataTrigger Binding="{Binding SignOutEnabled}"
+                                             TargetType="Button"
+                                             Value="True">
+                                    <Setter Property="Text"
+                                            Value="签退" />
+                                    <Setter Property="BackgroundColor"
+                                            Value="#53a245" />
+                                    <Setter Property="TextColor"
+                                            Value="#ffffff" />
+                                    <Setter Property="IsEnabled"
+                                            Value="True" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SignOutEnabled}"
+                                             TargetType="Button"
+                                             Value="False">
+                                    <Setter Property="Text"
+                                            Value="签退" />
+                                    <Setter Property="BackgroundColor"
+                                            Value="#eeeeee" />
+                                    <Setter Property="IsEnabled"
+                                            Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </StackLayout>
+                </yummy:PancakeView>
+            </Grid>
+
+        </StackLayout>
+        </ScrollView>
+
+            <!--mask-->
         <ContentView BackgroundColor="#222222"
                      IsVisible="{Binding IsExpanded}"
                      Opacity="0.5"
@@ -460,7 +738,8 @@
                                                                       Factor=1,
                                                                       Constant=0}">
             <ContentView.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding OpenSignInCommend}" />
+                <TapGestureRecognizer Command="{Binding OpenSignInCommend}"
+                                      NumberOfTapsRequired="1" />
             </ContentView.GestureRecognizers>
         </ContentView>
         <!--drawer-->

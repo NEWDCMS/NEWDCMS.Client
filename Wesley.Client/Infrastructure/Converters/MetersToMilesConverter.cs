@@ -11,14 +11,21 @@ namespace Wesley.Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is double))
+            try
             {
-                throw new InvalidOperationException("The target must be a int");
+                if (!(value is double))
+                {
+                    value = (double)0;
+                }
+
+                double meters = (double)value;
+
+                return (meters / 1000);
             }
-
-            double meters = (double)value;
-
-            return (meters / 1000);
+            catch (Exception)
+            {
+                return 0;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

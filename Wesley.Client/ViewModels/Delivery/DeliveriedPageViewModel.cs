@@ -2,10 +2,11 @@
 using Wesley.Client.Enums;
 using Wesley.Client.Models.Sales;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -27,7 +28,8 @@ namespace Wesley.Client.ViewModels
 
         public DeliveriedPageViewModel(INavigationService navigationService,
             ISaleBillService saleBillService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "已签收(0)";
 
@@ -37,35 +39,42 @@ namespace Wesley.Client.ViewModels
             {
                 var pending = new List<DeliverySignModel>();
 
-                var result = await _saleBillService.GetDeliveriedSignsAsync(Settings.UserId,
-                    Filter.StartTime,
-                    Filter.EndTime,
-                    Filter.BusinessUserId,
-                    Filter.TerminalId, force: this.ForceRefresh, calToken: cts.Token);
-
-                if (result != null)
+                try
                 {
-                    pending = result.ToList();
+                    var result = await _saleBillService.GetDeliveriedSignsAsync(Settings.UserId,
+                        Filter.StartTime,
+                        Filter.EndTime,
+                        Filter.BusinessUserId,
+                        Filter.TerminalId,
+                        force: this.ForceRefresh,
+                         calToken: new System.Threading.CancellationToken());
 
-                    this.Bills?.Clear();
-                    var gDeliveries = pending.GroupBy(s => s.TerminalName).ToList();
-                    foreach (var group in gDeliveries)
+                    if (result != null)
                     {
-                        var gs = group.Select(s =>
+                        pending = result.ToList();
+
+                        this.Bills?.Clear();
+                        var gDeliveries = pending.GroupBy(s => s.TerminalName).ToList();
+                        foreach (var group in gDeliveries)
                         {
-                            var vs = s;
-                            vs.IsLast = !(group.LastOrDefault()?.BillNumber == s.BillNumber);
-                            return vs;
-                        }).ToList();
+                            var gs = group.Select(s =>
+                            {
+                                var vs = s;
+                                vs.IsLast = !(group.LastOrDefault()?.BillNumber == s.BillNumber);
+                                return vs;
+                            }).ToList();
 
-                        var first = group.FirstOrDefault();
-                        if (first != null)
-                            Bills.Add(new DeliverySignGroup(first.TerminalName, first.Address, first.BossCall, first.Distance, gs));
+                            var first = group.FirstOrDefault();
+                            if (first != null)
+                                Bills.Add(new DeliverySignGroup(first.TerminalName, first.Address, first.BossCall, first.Distance, gs));
+                        }
+
+                        TotalAmount = pending.Select(b => b.SumAmount).Sum();
+                        Title = $"已签收({pending.Count})";
                     }
-
-                    TotalAmount = pending.Select(b => b.SumAmount).Sum();
-                    Title = $"已签收({pending.Count})";
                 }
+                catch (System.Exception) { }
+
                 return pending;
             });
 
@@ -105,16 +114,40 @@ namespace Wesley.Client.ViewModels
             });
 
             //菜单选择
-            this.SetMenus((x) =>
+            this.SubscribeMenus((x) =>
             {
-                string key = string.Format("Wesley.CLIENT.PAGES.MARKET.{0}_SELECTEDTAB_{1}", this.PageViewName.ToUpper(), 1);
-                this.MenuBusKey = string.Format(Constants.MENU_KEY, key);
-                this.HitFilterDate(x, () => { ((ICommand)Load)?.Execute(null); });
+                //获取当前UTC时间
+                DateTime dtime = DateTime.Now;
 
-            }, 8, 9, 14);
+                switch (x)
+                {
+                    case MenuEnum.TODAY:
+                        {
+                            Filter.StartTime = DateTime.Parse(dtime.ToString("yyyy-MM-dd 00:00:00"));
+                            Filter.EndTime = dtime;
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                    case MenuEnum.YESTDAY:
+                        {
+                            Filter.StartTime = dtime.AddDays(-1);
+                            Filter.EndTime = dtime;
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                    case MenuEnum.OTHER:
+                        {
+                            SelectDateRang();
+                            ((ICommand)Load)?.Execute(null);
+                        }
+                        break;
+                }
+
+            }, string.Format(Constants.MENU_DEV_KEY, 3));
+
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()
@@ -123,9 +156,5 @@ namespace Wesley.Client.ViewModels
             ((ICommand)Load)?.Execute(null);
         }
 
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
-        }
     }
 }

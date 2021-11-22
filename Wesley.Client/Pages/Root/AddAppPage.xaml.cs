@@ -18,19 +18,5 @@ namespace Wesley.Client.Pages
             }
             catch (Exception ex) { Crashes.TrackError(ex); }
         }
-
-        //private void Switch_Toggled(object sender, ToggledEventArgs e)
-        //{
-        //    try
-        //    {
-        //        //var control = (Switch)sender;
-        //        //var apps = ViewModel?.AppList?.Select(a => a).Where(a => a.Selected == true).ToList();
-        //        //Settings.CommonFunctions = JsonConvert.SerializeObject(apps);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //         Crashes.TrackError(ex);
-        //    }
-        //}
     }
 }

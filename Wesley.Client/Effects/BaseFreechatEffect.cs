@@ -1,11 +1,10 @@
-﻿using System;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public class BaseFreechatEffect : RoutingEffect
     {
-        public BaseFreechatEffect(string name) :base(nameof(BaseFreechatEffect))
+        public BaseFreechatEffect(string name) : base($"Wesley.Client.{nameof(BaseFreechatEffect)}")
         {
         }
     }

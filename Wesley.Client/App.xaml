@@ -71,6 +71,7 @@
             <x:Double x:Key="FT12">12</x:Double>
             <x:Double x:Key="FT14">14</x:Double>
             <x:Double x:Key="FT16">16</x:Double>
+            <x:Double x:Key="FT18">18</x:Double>
             <x:Double x:Key="PM5">5</x:Double>
             <x:Double x:Key="PM8">8</x:Double>
             <x:Double x:Key="PM10">10</x:Double>
@@ -93,5 +94,5 @@
             <Thickness x:Key="MR5" Bottom="0" Left="0" Right="5" Top="0" />
             <Thickness x:Key="MR10" Bottom="0" Left="0" Right="10" Top="0" />
         </ResourceDictionary>
- </Application.Resources>
+    </Application.Resources>
 </prism:PrismApplication>

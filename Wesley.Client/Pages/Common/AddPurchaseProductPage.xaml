@@ -42,10 +42,11 @@
         </ResourceDictionary>
     </ContentPage.Resources>
     <AbsoluteLayout>
-        <ScrollView VerticalScrollBarVisibility="Always"
-                    AbsoluteLayout.LayoutBounds="0,0,1,1"
-                    AbsoluteLayout.LayoutFlags="All">
+
             <CollectionView x:Name="ProductRepeater"
+                            VerticalScrollBarVisibility="Always"
+                            AbsoluteLayout.LayoutBounds="0,0,1,1"
+                            AbsoluteLayout.LayoutFlags="All"
                             ItemsSource="{Binding ProductSeries,Mode=TwoWay}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
@@ -185,7 +186,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-        </ScrollView>
+
         <!--footer-->
         <Grid Margin="0"
               HeightRequest="45"

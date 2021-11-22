@@ -34,12 +34,12 @@
                    FontSize="100"
                    TextColor="{StaticResource DividerColor}"
                    HorizontalOptions="Center"
-                   Style="{StaticResource H4-Regular}" />
+                    />
             <Label Grid.Column="0"
                    Grid.Row="1"
                    TextColor="{StaticResource PrimaryTextColor}"
                    HorizontalOptions="Center"
-                   Style="{StaticResource H4-Regular}">
+                   >
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="Wesley账号 [" />
@@ -53,7 +53,7 @@
                    Text="请确认是本人操作，并确保二维码来源安全"
                    TextColor="{StaticResource DividerColor}"
                    HorizontalOptions="Center"
-                   Style="{StaticResource H4-Regular}" />
+                    />
 
         </Grid>
         <StackLayout VerticalOptions="End"

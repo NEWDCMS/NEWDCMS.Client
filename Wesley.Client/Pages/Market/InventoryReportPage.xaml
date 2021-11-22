@@ -87,7 +87,8 @@
                 <Label Style="{StaticResource SearchArrow}"
                        Margin="{StaticResource MR10}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=CustomSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding Path=CustomSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -136,7 +137,7 @@
                     <DataTemplate>
                         <Grid Style="{StaticResource GGrid}">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -148,7 +149,7 @@
                                    Grid.Column="0"
                                    Text="{Binding ProductName}"
                                    HorizontalOptions="FillAndExpand"
-                                   LineBreakMode="TailTruncation"
+                                   LineBreakMode="WordWrap"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
                                    Margin="10,5,5,5"></Label>

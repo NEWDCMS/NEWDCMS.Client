@@ -1,6 +1,6 @@
 ﻿using Wesley.Client.Enums;
+using LiteDB;
 using ReactiveUI.Fody.Helpers;
-using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -105,7 +105,7 @@ namespace Wesley.Client.Models.Census
         /// 在店时间 （秒）
         /// </summary>
         public int? OnStoreStopSeconds { get; set; }
-
+        public string OnStoreStopSecondsFMT { get; set; }
 
         /// <summary>
         /// 线路
@@ -168,14 +168,14 @@ namespace Wesley.Client.Models.Census
         /// <summary>
         /// 门头照片
         /// </summary>
-        [Ignore]
+        [BsonIgnore]
         [Reactive] public ObservableCollection<DoorheadPhoto> DoorheadPhotos { get; set; } = new ObservableCollection<DoorheadPhoto>();
         [Reactive] public string DoorheadPhoto { get; set; }
 
         /// <summary>
         /// 陈列照片
         /// </summary>
-        [Ignore]
+        [BsonIgnore]
         [Reactive] public ObservableCollection<DisplayPhoto> DisplayPhotos { get; set; } = new ObservableCollection<DisplayPhoto>();
 
         public double? Distance { get; set; }

@@ -1,37 +1,34 @@
-﻿using System;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Shiny;
-using Shiny.Notifications;
-
-namespace Wesley.Client
+﻿namespace Wesley.Client
 {
-    /// <summary>
-    /// 表示委托核心服务
-    /// </summary>
-    public class CoreDelegateServices
-    {
-        public LocalDatabase Connection { get; }
-        public AppNotifications Notifications { get; }
-        public IAppSettings AppSettings { get; }
+    //public class CoreDelegateServices
+    //{
+    //    public CoreDelegateServices(LocalDatabase conn, AppNotifications notifications)
+    //    {
+    //        this.Connection = conn;
+    //        this.Notifications = notifications;
+    //    }
+    //    public LocalDatabase Connection { get; }
+    //    public AppNotifications Notifications { get; }
+    //}
 
-        public CoreDelegateServices(AppNotifications notifications,
-                                    IAppSettings appSettings)
-        {
-            this.Notifications = notifications;
-            this.AppSettings = appSettings;
-        }
+    //public class CoreDelegateServices
+    //{
+    //    public CoreDelegateServices(AppNotifications notifications, IAppSettings appSettings)
+    //    {
+    //        this.Notifications = notifications;
+    //        this.AppSettings = appSettings;
+    //    }
 
-        public async Task SendNotification(string title, string message, Expression<Func<IAppSettings, bool>>? expression = null)
-        {
-            await this.Notifications.Send(
-                this.GetType(),
-                true,
-                title,
-                message
-            );
-        }
-
-
-    }
+    //    public AppNotifications Notifications { get; }
+    //    public IAppSettings AppSettings { get; }
+    //    public async Task SendNotification(string title, string message, Expression<Func<IAppSettings, bool>>? expression = null)
+    //    {
+    //        await this.Notifications.Send(
+    //            this.GetType(),
+    //            true,
+    //            title,
+    //            message
+    //        );
+    //    }
+    //}
 }

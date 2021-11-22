@@ -9,34 +9,33 @@ using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
 using Newtonsoft.Json;
-using Plugin.Media;
-using Plugin.Media.Abstractions;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using PLU = Plugin.Media.Abstractions;
+using System.Threading;
 
 namespace Wesley.Client.ViewModels
 {
     public class VisitStorePageViewModel : ViewModelBaseCutom
     {
         private readonly IMediaPickerService _mediaPickerService;
-        private readonly LocalDatabase _conn;
+        private readonly ILiteDbService<TrackingModel> _conn;
+        private readonly ILiteDbService<VisitStore> _vsdb;
         private readonly IPermissionsService _permissionsService;
         [Reactive] public VisitStore Bill { get; set; } = new VisitStore();
-
         [Reactive] public bool SignInEnabled { get; set; } = true;
         [Reactive] public bool SignOutEnabled { get; set; } = false;
         [Reactive] public string DistanceFormat { get; set; }
@@ -51,7 +50,10 @@ namespace Wesley.Client.ViewModels
         public IReactiveCommand CorrectPositionCommend { get; set; }
 
         public ReactiveCommand<string, Unit> InvokeAppCommand { get; }
-        public ReactiveCommand<string, Unit> OpenViewCommend { get; set; }
+
+        [Reactive] public DoorheadPhoto DoorheadPhotoSelecter { get; set; }
+        [Reactive] public DisplayPhoto DisplayPhotoSelecter { get; set; }
+
         public ReactiveCommand<string, Unit> RemoveDisplayPathCommand { get; set; }
         public ReactiveCommand<string, Unit> RemoveStoragePathCommand { get; set; }
 
@@ -65,13 +67,22 @@ namespace Wesley.Client.ViewModels
            IWareHousesService wareHousesService,
            IAccountingService accountingService,
            IMediaPickerService mediaPickerService,
-           LocalDatabase conn,
+           ILiteDbService<TrackingModel> conn,
+           ILiteDbService<VisitStore> vsdb,
            IPermissionsService permissionsService,
-           IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+           IDialogService dialogService) : base(navigationService, 
+               productService, 
+               terminalService, 
+               userService, 
+               wareHousesService, 
+               accountingService, 
+               dialogService)
         {
             _permissionsService = permissionsService;
             _mediaPickerService = mediaPickerService;
+
             _conn = conn;
+            _vsdb = vsdb;
 
             Title = "拜访门店";
 
@@ -79,7 +90,7 @@ namespace Wesley.Client.ViewModels
 
             this.SubmitText = "\uf017";
 
-            this.Load = ReactiveCommand.CreateFromTask(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
                 try
                 {
@@ -89,29 +100,29 @@ namespace Wesley.Client.ViewModels
                     if (!string.IsNullOrWhiteSpace(Settings.DisplayPhotos))
                     {
                         var displayPhotos = JsonConvert.DeserializeObject<List<DisplayPhoto>>(Settings.DisplayPhotos);
-                        this.Bill.DisplayPhotos = new ObservableCollection<DisplayPhoto>(displayPhotos);
+                        if (displayPhotos != null)
+                            this.Bill.DisplayPhotos = new ObservableCollection<DisplayPhoto>(displayPhotos);
                     }
 
                     if (!string.IsNullOrWhiteSpace(Settings.DoorheadPhotos))
                     {
                         var doorheadPhotos = JsonConvert.DeserializeObject<List<DoorheadPhoto>>(Settings.DoorheadPhotos);
-                        this.Bill.DoorheadPhotos = new ObservableCollection<DoorheadPhoto>(doorheadPhotos);
+                        if (doorheadPhotos != null)
+                            this.Bill.DoorheadPhotos = new ObservableCollection<DoorheadPhoto>(doorheadPhotos);
                     }
 
                     //重新获取客户信息
-                    if (this.Terminal.Location_Lat == 0 && this.Terminal.Location_Lat == 0)
+                    if (Settings.LastSigninCoustmerId > 0)
                     {
-                        //获取客户
-                        if (Settings.LastSigninCoustmerId > 0)
+                        var tt = await _terminalService.GetTerminalAsync(Settings.LastSigninCoustmerId);
+                        if (tt != null)
                         {
-                            var tt = await _terminalService.GetTerminalAsync(Settings.LastSigninCoustmerId);
-                            if (tt != null)
-                            {
-                                this.Terminal = tt;
-                                this.Terminal.Distance = MapHelper.CalculateDistance(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0, tt.Location_Lat ?? 0, tt.Location_Lng ?? 0);
-                            }
+                            this.Terminal = tt;
+                            Bill.TerminalId = tt.Id;
+                            Bill.TerminalName = tt.Name;
                         }
                     }
+
 
                     //有没签退信息时
                     if (this.OutVisitStore != null)
@@ -124,20 +135,35 @@ namespace Wesley.Client.ViewModels
                     var terminalId = Settings.LastSigninCoustmerId > 0 ? Settings.LastSigninCoustmerId : Bill.TerminalId;
                     if (terminalId > 0)
                     {
-                        var result = await _terminalService.GetLastVisitStoreAsync(terminalId, Settings.UserId);
+
+                        //获取终端余额
+                        _terminalService.Rx_GetTerminalBalance(terminalId, new CancellationToken())?.Subscribe((balance) =>
+                        {
+                            if (balance != null)
+                                this.TBalance = balance;
+
+                        }).DisposeWith(DeactivateWith);
+
+
+                        //获取上次拜访信息
+                        _terminalService.Rx_GetLastVisitStoreAsync(terminalId, Settings.UserId, new CancellationToken())?.Subscribe((result) =>
+                    {
                         if (result != null && result.Id > 0)
                         {
                             try
                             {
-                                if (result.SigninDateTime != null)
+                                    //上次签到时间
+                                    if (result.SigninDateTime != null)
                                 {
                                     var seconds = (int)DateTime.Now.Subtract(result.SigninDateTime).TotalSeconds;
                                     var coms = CommonHelper.ConvetToSeconds(seconds);
+
                                     if (!string.IsNullOrEmpty(coms))
                                         this.Bill.LastSigninDateTimeName = coms;
                                 }
 
-                                if (result.LastPurchaseDate != null)
+                                    //上次采购时间
+                                    if (result.LastPurchaseDate != null)
                                 {
                                     var seconds = (int)DateTime.Now.Subtract(result.LastPurchaseDate).TotalSeconds;
                                     var coms = CommonHelper.ConvetToSeconds(seconds);
@@ -145,11 +171,15 @@ namespace Wesley.Client.ViewModels
                                         this.Bill.LastPurchaseDateTimeName = coms;
                                 }
 
-                                if (result.SigninDateTime != null)
+                                if (this.OutVisitStore == null && result.SigninDateTime != null)
                                     this.Bill.SigninDateTime = result.SigninDateTime;
+
+
                             }
                             catch (Exception) { }
                         }
+                    }).DisposeWith(DeactivateWith);
+
                     }
                 }
                 catch (Exception ex)
@@ -218,11 +248,11 @@ namespace Wesley.Client.ViewModels
                         return Unit.Default;
 
                     bool continueTodo = true;
-                    if ((Terminal.Distance ?? 0) > 50)
+                    if (Terminal.CalcDistance() > 50)
                     {
-                        continueTodo = await UserDialogs.Instance.ConfirmAsync($"你确定要在{Terminal.Distance.Value:#.00}米外签到吗？", "警告", cancelText: "不签到", okText: "继续签到");
+                        continueTodo = await UserDialogs.Instance.ConfirmAsync($"你确定要在{Terminal.Distance:#.00}米外签到吗？", "警告", cancelText: "不签到", okText: "继续签到");
                         Bill.Abnormal = true;
-                        Bill.Distance = Math.Round(Terminal.Distance.Value, 2);
+                        Bill.Distance = Math.Round(Terminal.Distance, 2);
                     }
 
 
@@ -236,6 +266,7 @@ namespace Wesley.Client.ViewModels
                     }
 
                     //签到
+                    Bill.Id = 0;
                     Bill.StoreId = Settings.StoreId;
                     Bill.BusinessUserId = Settings.UserId;
                     Bill.BusinessUserName = Settings.UserRealName;
@@ -253,7 +284,7 @@ namespace Wesley.Client.ViewModels
                     Bill.Latitude = lat;
                     Bill.Longitude = lan;
 
-                    return await SubmitAsync(Bill, _terminalService.SignInVisitStoreAsync, (result) =>
+                    return await SubmitAsync(Bill, _terminalService.SignInVisitStoreAsync, async (result) =>
                     {
                         if (!result.Success)
                         {
@@ -281,6 +312,16 @@ namespace Wesley.Client.ViewModels
 
                                 this.Bill.LastSigninDateTime = data.LastSigninDateTime;
                                 this.Bill.LastPurchaseDateTime = data.LastPurchaseDateTime;
+
+                                //添加签到记录
+                                try
+                                {
+                                    Terminal.Id = Bill.TerminalId;
+                                    Terminal.LastSigninDateTimeName = data.SigninDateTime.ToString();
+                                    Terminal.SigninDateTime = data.SigninDateTime;
+                                    await _terminalService.AddTerminal(Terminal);
+                                }
+                                catch (Exception) { }
                             }
                         }
 
@@ -328,13 +369,12 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
-
             //离店签退
             this.SignOutCommend = ReactiveCommand.CreateFromTask(async () =>
             {
                 try
                 {
-                    int onStoreStopSeconds = 3;
+                    int onStoreStopSeconds = 0;
                     double subtract = DateTime.Now.Subtract(Bill?.SigninDateTime ?? DateTime.Now).TotalMinutes;
                     if (!string.IsNullOrEmpty(Settings.CompanySetting))
                     {
@@ -345,6 +385,17 @@ namespace Wesley.Client.ViewModels
                         }
                     }
 
+                    if (!SignOutEnabled)
+                    {
+                        this.Alert("还没签到哦！");
+                        return Unit.Default;
+                    }
+
+                    if (onStoreStopSeconds > 0 && subtract < onStoreStopSeconds)
+                    {
+                        this.Alert($"签退无效,拜访在店时间必须大于{onStoreStopSeconds}分钟");
+                        return Unit.Default;
+                    }
 
                     if (Settings.LastSigninId == 0)
                     {
@@ -398,36 +449,39 @@ namespace Wesley.Client.ViewModels
                     Bill.SignOutDateTime = DateTime.Now;
                     Bill.SignTypeId = 2;
 
-                    await SubmitAsync(Bill, _terminalService.SignOutVisitStoreAsync, (result) =>
+                    await SubmitAsync(Bill, _terminalService.SignOutVisitStoreAsync,  async (result) =>
                     {
                         if (result.Success)
                         {
                             this.SignOutEnabled = false;
                             this.Bill.SigninDateTimeEnable = false;
                             this.OutVisitStore = null;
+
                             Settings.LastSigninId = 0;
                             Settings.LastSigninCoustmerId = 0;
                             Settings.LastSigninCoustmerName = "";
-                            //添加记录
-                            _conn.InsertAsync(this.Bill);
 
+                            Settings.DisplayPhotos = "";
+                            Settings.DoorheadPhotos = "";
+
+                            //更新签到记录
+                            try
+                            {
+                                Terminal.Id = Bill.TerminalId;
+                                Terminal.SignOutDateTime = Bill.SignOutDateTime;
+                                await _terminalService.UpdateTerminal(Terminal);
+                            }catch (Exception ) { }
                         }
                     });
 
                     await _navigationService.GoBackAsync();
 
                     return Unit.Default;
-
                 }
                 catch (Exception)
                 {
                     await ShowAlert(false, $"出错啦,内部异常！");
                     return Unit.Default;
-                }
-                finally
-                {
-                    Settings.DisplayPhotos = "";
-                    Settings.DoorheadPhotos = "";
                 }
             });
 
@@ -440,7 +494,8 @@ namespace Wesley.Client.ViewModels
                     {
                         await this.NavigateAsync(r.ToString(),
                             ("TerminalId", Bill.TerminalId),
-                            ("TerminalName", Bill.TerminalName));
+                            ("TerminalName", Bill.TerminalName),
+                            ("Reference", this.PageName));
                     }
                     else
                     {
@@ -455,82 +510,22 @@ namespace Wesley.Client.ViewModels
             });
 
             //拍照选择
-            this.CameraPhotoCmd = ReactiveCommand.Create<string>((r) =>
+            this.CameraPhotoCmd = ReactiveCommand.CreateFromTask<string>(async (r) =>
             {
                 if (!IsFastClick())
                     return;
 
-                RapidTapPreventor(async () =>
+                if (this.SignInEnabled)
                 {
-                    await CrossMedia.Current.Initialize();
-
-                    if (!CrossMedia.Current.IsTakePhotoSupported || !CrossMedia.Current.IsCameraAvailable)
-                    {
-                        await _dialogService.ShowAlertAsync("抱歉,没有检测到相机...", "提示", "取消");
-                        return;
-                    }
-                    else
-                    {
-                        if (GlobalSettings.IsNotConnected)
-                        {
-                            _dialogService.LongAlert("操作失败，没有检测到网络！");
-                            return;
-                        }
-
-                        switch (r)
-                        {
-                            case "DoorheadPhotos":
-                                await TakePhotograph((u, m) =>
-                                {
-                                    var photo = new DoorheadPhoto
-                                    {
-                                        StoragePath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + "",
-                                        ThumbnailPhoto = Xamarin.Forms.ImageSource.FromStream(() =>
-                                        {
-                                            var stream = m?.GetStream();
-                                            return stream;
-                                        })
-                                    };
-                                    this.Bill.DoorheadPhotos.Add(photo);
-                                    Settings.DoorheadPhotos = JsonConvert.SerializeObject(this.Bill.DoorheadPhotos);
-                                });
-                                break;
-                            case "DisplayPhotos":
-                                await TakePhotograph((u, m) =>
-                                {
-                                    var photo = new DisplayPhoto
-                                    {
-                                        DisplayPath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + "",
-                                        ThumbnailPhoto = Xamarin.Forms.ImageSource.FromStream(() =>
-                                        {
-                                            var stream = m?.GetStream();
-                                            return stream;
-                                        })
-                                    };
-                                    this.Bill.DisplayPhotos.Add(photo);
-                                    Settings.DisplayPhotos = JsonConvert.SerializeObject(this.Bill.DisplayPhotos);
-                                });
-                                break;
-                        }
-                    }
-                });
-            });
-
-
-            //删除照片
-            this.RemoveDisplayPathCommand = ReactiveCommand.Create<string>(async x =>
-            {
-                var ok = await _dialogService.ShowConfirmAsync("是否要删除该图片?", okText: "确定", cancelText: "取消");
-                if (ok)
+                    this.Alert("还没有签到哦！");
+                }
+                else 
                 {
-                    var temp = this.Bill.DisplayPhotos.FirstOrDefault(s => s.DisplayPath == x);
-                    if (temp != null)
-                    {
-                        this.Bill.DisplayPhotos.Remove(temp);
-                        Settings.DisplayPhotos = JsonConvert.SerializeObject(this.Bill.DisplayPhotos);
-                    }
+                    await this.NavigateAsync("CameraViewPage", ("TakeType", r));
                 }
             });
+
+            //删除门头照片
             this.RemoveStoragePathCommand = ReactiveCommand.Create<string>(async x =>
             {
                 var ok = await _dialogService.ShowConfirmAsync("是否要删除该图片?", okText: "确定", cancelText: "取消");
@@ -545,6 +540,21 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
+            //删除陈列照片
+            this.RemoveDisplayPathCommand = ReactiveCommand.Create<string>(async x =>
+            {
+                var ok = await _dialogService.ShowConfirmAsync("是否要删除该图片?", okText: "确定", cancelText: "取消");
+                if (ok)
+                {
+                    var temp = this.Bill.DisplayPhotos.FirstOrDefault(s => s.DisplayPath == x);
+                    if (temp != null)
+                    {
+                        this.Bill.DisplayPhotos.Remove(temp);
+                        Settings.DisplayPhotos = JsonConvert.SerializeObject(this.Bill.DisplayPhotos);
+                    }
+                }
+            });
+
             //定位
             this.OrientationCmd = ReactiveCommand.Create(() =>
            {
@@ -554,105 +564,133 @@ namespace Wesley.Client.ViewModels
                });
            });
 
-
             //预览照片
-            this.OpenViewCommend = ReactiveCommand.Create<string>(async (r) =>
-           {
-               try
-               {
-                   if (string.IsNullOrEmpty(r))
-                   {
-                       await this.ShowAlert(true, "无效图片链接！");
-                       return;
-                   }
+            this.WhenAnyValue(x => x.DoorheadPhotoSelecter)
+                .Throttle(TimeSpan.FromMilliseconds(200))
+                .Skip(1)
+                .Where(x => x != null)
+                .SubOnMainThread(async item =>
+                {
+                    var images = new List<string> { item.StoragePath };
+                    await this.NavigateAsync("ImageViewerPage", ("ImageInfos", images));
+                    DoorheadPhotoSelecter = null;
+                }).DisposeWith(DeactivateWith);
 
-                   var images = new List<DisplayPhoto>
-                   {
-                        new DisplayPhoto() { DisplayPath = r }
-                   };
-                   await this.NavigateAsync("ImageViewerPage", ("ImageInfos", images));
-               }
-               catch (Exception ex)
-               {
-                   Crashes.TrackError(ex);
-               }
-           });
+            this.WhenAnyValue(x => x.DisplayPhotoSelecter)
+                .Throttle(TimeSpan.FromMilliseconds(200))
+                .Skip(1)
+                .Where(x => x != null)
+                .SubOnMainThread(async item =>
+                {
+                    var images = new List<string> { item.DisplayPath };
+                    await this.NavigateAsync("ImageViewerPage", ("ImageInfos", images));
+                    DisplayPhotoSelecter = null;
+                }).DisposeWith(DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
+
+            //拍照上传
+            MessageBus
+                .Current
+                .Listen<byte[]?>(string.Format(Constants.CAMERA_KEY, "DoorheadPhotos"))
+                .Subscribe(bit =>
+                {
+                    if (bit != null && bit.Length > 0)
+                    {
+                        UploadPhotograph((u) =>
+                        {
+                            var photo = new DoorheadPhoto
+                            {
+                                StoragePath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + ""
+                            };
+                            this.Bill.DoorheadPhotos.Add(photo);
+                            Settings.DoorheadPhotos = JsonConvert.SerializeObject(this.Bill.DoorheadPhotos);
+                        }, new MemoryStream(bit));
+                    }
+                }).DisposeWith(DeactivateWith);
+
+
+            MessageBus
+               .Current
+               .Listen<byte[]?>(string.Format(Constants.CAMERA_KEY, "DisplayPhotos"))
+               .Subscribe(bit =>
+               {
+                   if (bit != null && bit.Length > 0)
+                   {
+                       UploadPhotograph((u) =>
+                       { 
+                           var photo = new DisplayPhoto
+                           {
+                               DisplayPath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + ""
+                           };
+                           this.Bill.DisplayPhotos.Add(photo);
+                           Settings.DisplayPhotos = JsonConvert.SerializeObject(this.Bill.DisplayPhotos);
+                       }, new MemoryStream(bit));
+                   }
+               }).DisposeWith(DeactivateWith);
+
+            this.Load.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.HistoryCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.OpenSignInCommend.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CancelSignIn.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SignInCommend.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CorrectPositionCommend.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.SignOutCommend.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.InvokeAppCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.CameraPhotoCmd.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.RemoveStoragePathCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.RemoveDisplayPathCommand.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
+            this.OrientationCmd.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
         }
 
-        /// <summary>
-        /// 陈列/门头拍照
-        /// </summary>
-        /// <returns></returns>
-        private async Task TakePhotograph(Action<UploadResult, MediaFile> action)
+        private async void UploadPhotograph(Action<UploadResult> action, MemoryStream stream)
         {
-            try
+            //上传图片
+            using (UserDialogs.Instance.Loading("上传中..."))
             {
-                var mediaFile = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+                try
                 {
-                    SaveToAlbum = true,
-                    CompressionQuality = 60,
-                    PhotoSize = PhotoSize.Medium,
-                    Location = new PLU.Location
+                    if (stream != null)
                     {
-                        Latitude = GlobalSettings.Latitude ?? 0,
-                        Longitude = GlobalSettings.Longitude ?? 0
-                    }
-                });
-
-                if (mediaFile == null)
-                {
-                    return;
-                }
-
-                Stream convertStream = mediaFile.GetStream();
-
-                //上传图片
-                using (UserDialogs.Instance.Loading("上传中..."))
-                {
-                    try
-                    {
-                        var content = new MultipartFormDataContent
-                        {
-                                { new StreamContent(convertStream),
-                                "\"file\"", $"\"{mediaFile?.Path}\"" }
-                            };
-
+                        var scb = new StreamContent(stream);
+                        var content = new MultipartFormDataContent { { scb, "\"file\"", $"\"takephotograph.jpg\"" } };
                         var url = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
                         var result = await httpClientHelper.PostAsync(url, content);
-                        await Task.Delay(1000);
 
                         var uploadResult = new UploadResult();
+
                         if (!string.IsNullOrEmpty(result))
                         {
                             uploadResult = JsonConvert.DeserializeObject<UploadResult>(result);
                         }
+
                         if (uploadResult != null)
                         {
-                            action.Invoke(uploadResult, mediaFile);
+                            action.Invoke(uploadResult);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Crashes.TrackError(ex);
-                    }
-                    finally
-                    {
-                        if (mediaFile != null)
-                            mediaFile.Dispose();
 
-                        if (convertStream != null)
-                            convertStream.Dispose();
+
+                        if (content != null)
+                            content.Dispose();
+
+                        if (scb != null)
+                            scb.Dispose();
                     }
-                };
-            }
-            catch (Exception ex)
-            {
-                _dialogService.LongAlert(ex.Message);
-            }
+                }
+                catch (Exception ex)
+                {
+                    Debug.Print(ex.StackTrace);
+                    _dialogService.LongAlert("服务器错误，上传失败！");
+                }
+                finally 
+                {
+                    if (stream != null)
+                        stream.Dispose();
+                }
+            };
         }
+
 
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
@@ -667,25 +705,23 @@ namespace Wesley.Client.ViewModels
                         this.Terminal = tt;
                         this.Terminal.Id = tt.Id;
                         this.Bill.SigninDateTimeEnable = false;
-                        this.Bill.TerminalId = Terminal.Id;
-                        this.Bill.TerminalName = Terminal.Name;
+                        this.Bill.TerminalId = tt.Id;
+                        this.Bill.TerminalName = tt.Name;
                     }
                 }
 
                 if (parameters.ContainsKey("BillTypeId") && parameters.ContainsKey("BillId") && parameters.ContainsKey("Amount")) //拜访开单
                 {
                     parameters.TryGetValue<int>("BillId", out int billId);
-                    parameters.TryGetValue<BillTypeEnum>("BillTypeId", out BillTypeEnum billTypeId);
+                    parameters.TryGetValue("BillTypeId", out BillTypeEnum billTypeId);
                     parameters.TryGetValue<decimal>("Amount", out decimal amount);
+
                     BillType = billTypeId;
                     BillId = billId;
                     Amount = amount;
                 }
 
-                if (this.Terminal != null)
-                {
-                    ((ICommand)Load)?.Execute(null);
-                }
+    
             }
             catch (Exception ex)
             {
@@ -697,7 +733,8 @@ namespace Wesley.Client.ViewModels
         {
             try
             {
-                var gps = await _conn.LocationSyncEvents.OrderByDescending(s => s.Id)?.FirstOrDefaultAsync();
+                var data = await _conn.Table.FindAllAsync();
+                var gps = data.OrderByDescending(s => s.Id)?.FirstOrDefault();
                 if (gps != null)
                 {
                     var distance = MapHelper.CalculateDistance(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0, this.Terminal?.Location_Lat ?? 0, this.Terminal?.Location_Lng ?? 0);
@@ -714,7 +751,7 @@ namespace Wesley.Client.ViewModels
         public void Refresh(VisitStore result)
         {
             //是否有最近签到
-            if (result.Id != 0)
+            if (result != null && result.Id != 0)
             {
                 Settings.LastSigninId = result.Id;
                 this.Bill.TerminalId = result.TerminalId;
@@ -725,6 +762,8 @@ namespace Wesley.Client.ViewModels
                 {
                     this.SignInEnabled = false;
                     this.SignOutEnabled = true;
+                    this.Bill.SignType = SignEnum.CheckIn;
+
                     //显示签到时间
                     this.Bill.SigninDateTimeEnable = true;
                 }
@@ -733,12 +772,12 @@ namespace Wesley.Client.ViewModels
                 {
                     this.SignInEnabled = true;
                     this.SignOutEnabled = false;
+                    this.Bill.SignType = SignEnum.Signed;
                 }
 
                 if (result.SigninDateTime != null)
                 {
                     var name = CommonHelper.ConvetToSeconds((int)DateTime.Now.Subtract(result.SigninDateTime).TotalSeconds);
-
                     if (!string.IsNullOrEmpty(name))
                         this.Bill.LastSigninDateTimeName = name;
                 }
@@ -750,6 +789,7 @@ namespace Wesley.Client.ViewModels
                     if (!string.IsNullOrEmpty(name))
                         this.Bill.LastPurchaseDateTimeName = name;
                 }
+
                 this.Bill.SigninDateTime = result.SigninDateTime;
             }
             else
@@ -766,7 +806,10 @@ namespace Wesley.Client.ViewModels
             {
                 base.OnAppearing();
                 _permissionsService?.RequestLocationAndCameraPermission();
-
+                if (this.Terminal != null)
+                {
+                    ((ICommand)Load)?.Execute(null);
+                }
             }
             catch (Exception ex)
             {

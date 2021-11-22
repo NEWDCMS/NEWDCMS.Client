@@ -5,6 +5,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Commands;
 using Prism.Navigation;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +19,8 @@ namespace Wesley.Client.ViewModels
         public AllocationBillModel Bill { get; set; }
 
 
-        public AddBackStockBillPageViewModel(INavigationService navigationService, IDialogService dialogService) : base(navigationService, dialogService)
+        public AddBackStockBillPageViewModel(INavigationService navigationService, IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加回库调拨单商品";
 
@@ -210,8 +212,9 @@ namespace Wesley.Client.ViewModels
                             {
                                 var outs = p.StockQuantities.Where(q => q.WareHouseId == Bill.ShipmentWareHouseId).FirstOrDefault();
                                 var ins = p.StockQuantities.Where(q => q.WareHouseId == Bill.IncomeWareHouseId).FirstOrDefault();
-                                p.ShipmentWareHouseQuantity = outs != null ? outs.StockQuantity : 0;
-                                p.IncomeWareHouseQuantity = ins != null ? ins.StockQuantity : 0;
+
+                                p.ShipmentUsableQuantity = outs != null ? outs.UsableQuantity : 0;
+                                p.IncomeUsableQuantity = ins != null ? ins.UsableQuantity : 0;
                             }
                         }
                     }

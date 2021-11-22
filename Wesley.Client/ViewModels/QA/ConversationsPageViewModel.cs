@@ -1,9 +1,9 @@
 ﻿using Wesley.Client.Models.QA;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,10 +32,9 @@ namespace Wesley.Client.ViewModels
         private IEnumerable<Conversation> ConversationOnline = new List<Conversation>();
 
         public ConversationsPageViewModel(INavigationService navigationService,
-
-
             IConversationsDataStore conversationsDataStore,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "帮助中心";
             _conversationsDataStore = conversationsDataStore;
@@ -48,7 +47,7 @@ namespace Wesley.Client.ViewModels
                 .Subscribe(s =>
                 {
                     ((ICommand)SerchCommand)?.Execute(s);
-                }).DisposeWith(DestroyWith);
+                }).DisposeWith(DeactivateWith);
             this.SerchCommand = ReactiveCommand.Create<string>(e =>
             {
                 if (!IsBusy)
@@ -76,7 +75,7 @@ namespace Wesley.Client.ViewModels
            });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         /// <summary>

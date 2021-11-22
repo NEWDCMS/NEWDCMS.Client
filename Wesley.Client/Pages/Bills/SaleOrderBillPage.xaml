@@ -14,27 +14,13 @@
                        x:TypeArguments="vms:SaleOrderBillPageViewModel">
     <ContentPage.Resources>
         <converters:StringArrayConverter x:Key="stringArrayConverter" />
-       
     </ContentPage.Resources>
     <RelativeLayout>
         <Grid Style="{StaticResource GGrid}"
-              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
-              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=0.88,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+              RowDefinitions="40,.7,40,.7,40,.7,40,.7,*"
+              ColumnDefinitions="180,*">
             <!--0-->
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
@@ -94,7 +80,9 @@
                 </custom:CustomEntry>
                 <Label Style="{StaticResource SearchArrow}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=BindingContext.CustomSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer
+                                Command="{Binding Path=BindingContext.CustomSelected,Source={x:Reference CurrentContentView}}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -125,8 +113,10 @@
                 </custom:CustomEntry>
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding StockSelected}"
-                                              CommandParameter="0"></TapGestureRecognizer>
+                        <TapGestureRecognizer
+                                Command="{Binding Path=BindingContext.StockSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="0"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -161,8 +151,10 @@
                 </custom:CustomEntry>
                 <Label Style="{StaticResource DownArrow}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding DeliverSelected}"
-                                              CommandParameter="0"></TapGestureRecognizer>
+                        <TapGestureRecognizer
+                                Command="{Binding Path=BindingContext.DeliverSelected,Source={x:Reference CurrentContentView}}"
+                                              CommandParameter="0"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -206,7 +198,7 @@
                             ItemsSource="{Binding Bill.Items,Mode=TwoWay}"
                             x:Name="BillItems"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Selecter, Mode=TwoWay}">
+                            SelectedItem="{Binding Selecter, Mode=TwoWay}" VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
                     <custom:HeaderView ControlTemplate="{StaticResource SaleOrderBillPage_Template}" />
                 </CollectionView.Header>
@@ -215,7 +207,7 @@
                         <Grid Style="{StaticResource GGrid}"
                               HorizontalOptions="FillAndExpand">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -226,7 +218,7 @@
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0"
                                    Text="{Binding ProductName}"
-                                   LineBreakMode="TailTruncation"
+                                   LineBreakMode="WordWrap"
                                    HorizontalOptions="FillAndExpand"
                                    FontSize="{StaticResource FT14}"
                                    VerticalOptions="CenterAndExpand"
@@ -240,17 +232,17 @@
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label"
                                                  Binding="{Binding IsGifts}"
-                                                 Value="True">
-                                        <Setter Property="Text"
-                                                Value="赠品" />
-                                        <Setter Property="TextColor"
-                                                Value="{StaticResource PrimaryDarkColor}" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Label"
-                                                 Binding="{Binding IsGifts}"
                                                  Value="False">
                                         <Setter Property="Text"
                                                 Value="{Binding Price,StringFormat='{0:F2}'}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsGifts}"
+                                                 Value="True">
+                                        <Setter Property="Text"
+                                                Value="{Binding Remark}" />
+                                        <Setter Property="TextColor"
+                                                Value="{StaticResource PrimaryDarkColor}" />
                                     </DataTrigger>
                                 </Label.Triggers>
                             </Label>
@@ -285,12 +277,18 @@
                 </CollectionView.EmptyView>
             </CollectionView>
         </Grid>
-        <!--红冲/审核水印-->
+        <!--审核水印 -->
         <Image Source="have_black.png"
                IsVisible="{Binding Bill.AuditedStatus}"
                WidthRequest="100"
                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
-               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}"></Image>
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--红冲水印-->
+        <Image Source="have_gray.png"
+               IsVisible="{Binding Bill.ReversedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
         <!--footer-->
         <Grid HeightRequest="90"
               Style="{StaticResource GGrid}"
@@ -391,7 +389,9 @@
                      RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,Property=Height,Factor=1,Constant=0}"
                      RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,Property=Width, Factor=1, Constant=0}">
             <ContentView.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding SpeechCommand}" />
+                <TapGestureRecognizer
+                        Command="{Binding Path=BindingContext.SpeechCommand,Source={x:Reference CurrentContentView}}"
+                                      NumberOfTapsRequired="1" />
             </ContentView.GestureRecognizers>
         </ContentView>
         <!--语音搜索-->
@@ -448,8 +448,9 @@
                                             <RowDefinition Height=".7" />
                                         </Grid.RowDefinitions>
                                         <Grid.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding SelectedCommand}"
-                                                                  CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Path=SelectedCommand}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  NumberOfTapsRequired="1" />
                                         </Grid.GestureRecognizers>
                                         <Label Text="{Binding Wname}"
                                                Grid.Row="0"

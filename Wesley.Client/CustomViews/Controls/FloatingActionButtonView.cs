@@ -49,7 +49,7 @@ namespace Wesley.Client.CustomViews
             set { SetValue(CommandProperty, value); }
         }
 
-        // Experimental - Hiding and showing the FAB correctly is dependent on the objects in the list being unique
+
         public static readonly BindableProperty ParentListProperty =
             BindableProperty.Create(nameof(ParentList), typeof(ListView), typeof(FloatingActionButtonView), null, BindingMode.TwoWay);
 

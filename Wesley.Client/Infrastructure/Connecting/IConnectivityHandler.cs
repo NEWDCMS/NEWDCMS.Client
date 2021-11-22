@@ -1,11 +1,7 @@
-﻿namespace Wesley.Client
+﻿namespace DCMS.Client
 {
     public interface IConnectivityHandler
     {
-        /// <summary>
-        /// Map Apizr connectivity check to your connectivity handler
-        /// </summary>
-        /// <returns></returns>
         bool IsConnected();
     }
 }

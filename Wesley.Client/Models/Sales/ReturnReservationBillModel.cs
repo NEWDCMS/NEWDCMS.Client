@@ -43,7 +43,6 @@ namespace Wesley.Client.Models.Sales
         public decimal CollectionAmount { get; set; }
         public string AuditedUserName { get; set; }
 
-        public int PrintNum { get; set; }
         [Reactive] public ObservableCollection<ReturnReservationItemModel> Items { get; set; } = new ObservableCollection<ReturnReservationItemModel>();
         [Reactive] public ObservableCollection<AccountMaping> ReturnReservationBillAccountings { get; set; } = new ObservableCollection<AccountMaping>();
         [Reactive] public string[] Accountings { get; set; } = new string[] { };
@@ -97,6 +96,7 @@ namespace Wesley.Client.Models.Sales
     /// </summary>
     public class ReturnReservationBillUpdateModel : Base
     {
+        public string BillNumber { get; set; }
         [Reactive] public int TerminalId { get; set; }
         [Reactive] public int BusinessUserId { get; set; }
         [Reactive] public int WareHouseId { get; set; }

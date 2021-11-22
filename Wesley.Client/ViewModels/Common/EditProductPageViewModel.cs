@@ -1,11 +1,18 @@
 ﻿using Wesley.Client.CustomViews;
 using Wesley.Client.Enums;
 using Wesley.Client.Models;
+using Wesley.Client.Models.Configuration;
 using Wesley.Client.Models.Products;
+using Wesley.Client.Models.Purchases;
+using Wesley.Client.Models.Sales;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
+using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,12 +34,18 @@ namespace Wesley.Client.ViewModels
         public ReactiveCommand<int, Unit> PriceSelected { get; set; }
 
         public ReactiveCommand<string, Unit> EntryUnfocused { get; }
+        [Reactive] public bool IsEditPrduceDate { get; set; } = false;
 
-        public EditProductPageViewModel(INavigationService navigationService, IDialogService dialogService) : base(navigationService, dialogService)
+        private CompanySettingModel CompanySetting;
+
+        public EditProductPageViewModel(INavigationService navigationService, IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "修改商品信息";
             _navigationService = navigationService;
             _dialogService = dialogService;
+
+            CompanySetting = JsonConvert.DeserializeObject<CompanySettingModel>(Settings.CompanySetting);
 
             //保存
             this.SaveCommand = ReactiveCommand.CreateFromTask(async () =>
@@ -65,15 +78,19 @@ namespace Wesley.Client.ViewModels
                 {
                     int porductId = r;
                     var product = this.Product;
+                    var tempUnitAlisa = product.UnitAlias = "";
                     var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("单位选择", "", (() =>
                     {
                         var popDatas = new List<PopData>();
                         if (product.Units != null)
                         {
                             var unt = product.Units.ToList();
-
                             if (unt[0].Key != "SMALL")
                             {
+                                if (unt[0].Value == product.UnitId)
+                                {
+                                    tempUnitAlisa = product.UnitAlias = "SMALL";
+                                }
                                 popDatas.Add(new PopData()
                                 {
                                     Id = unt[0].Value,
@@ -87,6 +104,10 @@ namespace Wesley.Client.ViewModels
 
                             if (unt[1].Key != "STROK")
                             {
+                                if (unt[1].Value == product.UnitId)
+                                {
+                                    tempUnitAlisa = product.UnitAlias = "STROK";
+                                }
                                 popDatas.Add(new PopData()
                                 {
                                     Id = unt[1].Value,
@@ -100,6 +121,10 @@ namespace Wesley.Client.ViewModels
 
                             if (unt[2].Key != "BIG")
                             {
+                                if (unt[2].Value == product.UnitId)
+                                {
+                                    tempUnitAlisa = product.UnitAlias = "BIG";
+                                }
                                 popDatas.Add(new PopData()
                                 {
                                     Id = unt[2].Value,
@@ -117,12 +142,12 @@ namespace Wesley.Client.ViewModels
 
                     if (result != null)
                     {
-                        Product.UnitId = result.Data;
+                        Product.UnitId = (int)result.Data;
                         Product.UnitName = result.Column;
                         product.UnitAlias = result.Column1;
 
                         //重算
-                        CalcPrice();
+                        CalcPrice(tempUnitAlisa);
                     }
                 }
                 catch (Exception ex)
@@ -508,7 +533,7 @@ namespace Wesley.Client.ViewModels
 
                     if (result != null)
                     {
-                        Product.Price = result.Data;
+                        Product.Price = (decimal)result.Data;
                         Product.IsShowGiveEnabled = true;
                         //重算
                         CalcPrice();
@@ -525,21 +550,44 @@ namespace Wesley.Client.ViewModels
         /// <summary>
         /// 动态计算
         /// </summary>
-        private void CalcPrice()
+        private void CalcPrice(string oldUnitAlias = "")
         {
-
             if (Product.UnitAlias == "BIG")
             {
-                var amount = Product.Price * Product.Quantity * Product.BigQuantity;
+                if ("STROK".Equals(oldUnitAlias))
+                {
+                    Product.Price = Product.Price * Product.BigQuantity / Product.StrokeQuantity;
+                }
+                else if ("SMALL".Equals(oldUnitAlias))
+                {
+                    Product.Price = Product.Price * Product.BigQuantity;
+                }
+                var amount = Product.Price * Product.Quantity;
                 Product.Amount = amount != 0 ? amount : 0;
             }
             else if (Product.UnitAlias == "STROK")
             {
-                var amount = Product.Price * Product.Quantity * Product.StrokeQuantity;
+                if ("BIG".Equals(oldUnitAlias))
+                {
+                    Product.Price = Product.Price * Product.StrokeQuantity / Product.BigQuantity;
+                }
+                else if ("SMALL".Equals(oldUnitAlias))
+                {
+                    Product.Price = Product.Price * Product.StrokeQuantity;
+                }
+                var amount = Product.Price * Product.Quantity;
                 Product.Amount = amount != 0 ? amount : 0;
             }
             else
             {
+                if ("BIG".Equals(oldUnitAlias))
+                {
+                    Product.Price = Product.Price / Product.BigQuantity;
+                }
+                else if ("STROK".Equals(oldUnitAlias))
+                {
+                    Product.Price = Product.Price / Product.StrokeQuantity;
+                }
                 var amount = Product.Price * Product.Quantity;
                 Product.Amount = amount != 0 ? amount : 0;
             }
@@ -551,18 +599,28 @@ namespace Wesley.Client.ViewModels
             base.OnNavigatedTo(parameters);
             try
             {
+                if (CompanySetting != null && CompanySetting.OpenBillMakeDate == 2 && (ReferencePage.Equals("SaleBillPage") || ReferencePage.Equals("SaleOrderBillPage")))
+                {
+                    IsEditPrduceDate = true;
+                }
+                else
+                {
+                    IsEditPrduceDate = false;
+                }
+
                 //编辑商品回传
                 if (parameters.ContainsKey("Product"))
                 {
-                    parameters.TryGetValue("Product", out ProductModel product);
-                    if (product != null)
+                    //商品
+                    parameters.TryGetValue("Product", out ProductModel p);
+                    if (p != null)
                     {
-                        product.RemarkSelected2 = ReactiveCommand.Create<ProductModel>(async e =>
+                        p.RemarkSelected2 = ReactiveCommand.Create<ProductModel>(async e =>
                         {
-                            var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择备注", "", async () =>
+                            var _dialogView = new PopRadioButtonPage("选择备注", "", async () =>
                             {
                                 var _settingService = App.Resolve<ISettingService>();
-                                var result = await _settingService?.GetRemarkConfigListSetting();
+                                var result = await _settingService.GetRemarkConfigListSetting();
                                 var popDatas = result?.Select(s =>
                                 {
                                     return new PopData
@@ -574,21 +632,87 @@ namespace Wesley.Client.ViewModels
                                 })?.ToList();
                                 return popDatas;
                             });
-
-                            if (result != null)
+                            _dialogView.Completed += (sender, result) =>
                             {
-                                //RemarkConfig.Id = result.Id;
-                                product.Remark = result.Column;
-                            }
+                                try { 
+                                if (result != null)
+                                {
+                                    p.Remark = result.Column;
+                                }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Crashes.TrackError(ex);
+                                }
+                            };
+                            await PopupNavigation.Instance.PushAsync(_dialogView);
                         });
-                        Product = product;
-                        this.OldProductQuantity = product.Quantity;
+
+                        //当前仓库名称
+                        p.CurWareHouseName = WareHouse.Name;
+                        //库存量转化
+                        p.UsableQuantityConversion = p.FormatQuantity(p.UsableQuantity ?? 0);
+                        p.CurrentQuantityConversion = p.FormatQuantity(p.CurrentQuantity ?? 0);
+                        p.OrderQuantityConversion = p.FormatQuantity(p.OrderQuantity ?? 0);
+                        p.LockQuantityConversion = p.FormatQuantity(p.LockQuantity ?? 0);
+
+                        Product = p;
+                        this.OldProductQuantity = p.Quantity;
+                    }
+
+                    //项目
+                    if (ReferencePage.Equals("SaleOrderBillPage"))
+                    {
+                        parameters.TryGetValue("Item", out SaleReservationItemModel item);
+                        if (item != null)
+                        {
+                            //
+                        }
+                    }
+                    else if (ReferencePage.Equals("ExchangeBillPage"))
+                    {
+                        parameters.TryGetValue("Item", out ExchangeItemModel item);
+                        if (item != null)
+                        {
+                            //
+                        }
+                    }
+                    else if (ReferencePage.Equals("PurchaseOrderBillPage"))
+                    {
+                        parameters.TryGetValue("Item", out PurchaseItemModel item);
+                        if (item != null)
+                        {
+                            //
+                        }
+                    }
+                    else if (ReferencePage.Equals("ReturnBillPage"))
+                    {
+                        parameters.TryGetValue("Item", out ReturnItemModel item);
+                        if (item != null)
+                        {
+                            //
+                        }
+                    }
+                    else if (ReferencePage.Equals("ReturnOrderBillPage"))
+                    {
+                        parameters.TryGetValue("Item", out ReturnReservationItemModel item);
+                        if (item != null)
+                        {
+                            //
+                        }
+                    }
+                    else if (ReferencePage.Equals("SaleOrderBillPage"))
+                    {
+                        parameters.TryGetValue("Item", out SaleReservationItemModel item);
+                        if (item != null)
+                        {
+                            //
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-
                 Crashes.TrackError(ex);
             }
         }

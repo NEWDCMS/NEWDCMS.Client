@@ -4,10 +4,9 @@ using Android.Widget;
 using Wesley.Client.Services;
 using Prism.Services;
 using System.Threading.Tasks;
+using Xamarin.Forms;
+using Java.Lang;
 
-
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(DialogService))]
 namespace Wesley.Client.Droid.Services
 {
     /// <summary>
@@ -16,6 +15,7 @@ namespace Wesley.Client.Droid.Services
     public class DialogService : IDialogService
     {
         private readonly IPageDialogService _pageDialogService;
+
         public DialogService(IPageDialogService pageDialogService)
         {
             _pageDialogService = pageDialogService;
@@ -28,16 +28,30 @@ namespace Wesley.Client.Droid.Services
 
         public void LongAlert(string message)
         {
-            var toast = Toast.MakeText(Android.App.Application.Context, message, ToastLength.Long);
-            toast.SetGravity(GravityFlags.Center, 0, 0);
-            toast.Show();
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    var toast = Toast.MakeText(Android.App.Application.Context, message, ToastLength.Long);
+                    toast.SetGravity(GravityFlags.Center, 0, 0);
+                    toast.Show();
+                }
+                catch (Exception e) { }
+            });
         }
 
         public void ShortAlert(string message)
         {
-            var toast = Toast.MakeText(Android.App.Application.Context, message, ToastLength.Short);
-            toast.SetGravity(GravityFlags.Center, 0, 0);
-            toast.Show();
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                try
+                { 
+                var toast = Toast.MakeText(Android.App.Application.Context, message, ToastLength.Short);
+                toast.SetGravity(GravityFlags.Center, 0, 0);
+                toast.Show();
+                }
+                catch (Exception e) { }
+            });
         }
 
         public async Task<bool> ShowConfirmAsync(string message, string title = null, string okText = null, string cancelText = null)

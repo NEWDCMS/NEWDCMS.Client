@@ -47,6 +47,29 @@ namespace Wesley.Client.Services
         }
 
 
+        public IObservable<APIResult<ReturnBillModel>> Rx_GetInitDataAsync( CancellationToken calToken = default)
+        {
+            try
+            {
+                int storeId = Settings.StoreId;
+                int userId = Settings.UserId;
+                var api = RefitServiceBuilder.Build<IReturnBillApi>(URL);
+                var cacheKey = RefitServiceBuilder.Cacher("ReturnBillService.GetInitDataAsync", storeId, userId);
+                var results = _makeRequest.StartUseCache_Rx(api.GetInitDataAsync(storeId, userId, calToken), cacheKey, calToken);
+                return results;
+            }
+            catch (System.ObjectDisposedException e)
+            {
+                e.HandleException();
+                return null;
+            }
+            catch (Exception e)
+            {
+                e.HandleException();
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// 提交单据
@@ -78,7 +101,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> AuditingAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<ResultData> AuditingAsync(int billId = 0, CancellationToken calToken = default)
         {
             try
             {
@@ -86,13 +109,19 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
                 var api = RefitServiceBuilder.Build<IReturnBillApi>(URL);
                 var results = await _makeRequest.Start(api.AuditingAsync(storeId, userId, billId, calToken), calToken);
-                return (bool)(results?.Success);
+                return new ResultData
+                {
+                    Success = (bool)(results?.Success),
+                    Message = results?.Message
+                };
             }
             catch (Exception e)
             {
-
-                e.HandleException();
-                return false;
+                return new ResultData
+                {
+                    Success = false,
+                    Message = e.Message
+                };
             }
         }
 
@@ -103,7 +132,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> ReverseAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<bool> ReverseAsync(int billId = 0, string remark = "", CancellationToken calToken = default)
         {
             try
             {
@@ -111,7 +140,7 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
                 var api = RefitServiceBuilder.Build<IReturnBillApi>(URL);
 
-                var results = await _makeRequest.Start(api.ReverseAsync(storeId, userId, billId, calToken), calToken);
+                var results = await _makeRequest.Start(api.ReverseAsync(storeId, userId, billId, remark, calToken), calToken);
                 return (bool)(results?.Success);
             }
             catch (Exception e)
@@ -154,7 +183,7 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
                 var api = RefitServiceBuilder.Build<IReturnBillApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetReturnBillsAsync", storeId,
+                var results = await _makeRequest.Start(api.GetReturnBillsAsync(storeId,
                     makeuserId,
                     terminalId,
                     terminalName,
@@ -174,29 +203,7 @@ namespace Wesley.Client.Services
                     billSourceType,
                     handleStatus,
                     pagenumber,
-                    pageSize);
-
-                var results = await _makeRequest.StartUseCache(api.GetReturnBillsAsync(storeId,
-                    makeuserId,
-                    terminalId,
-                    terminalName,
-                    businessUserId,
-                    deliveryUserId,
-                    wareHouseId,
-                    districtId,
-                    remark,
-                    billNumber,
-                    startTime,
-                    endTime,
-                    auditedStatus,
-                    sortByAuditedTime,
-                    showReverse,
-                    showReturn,
-                    paymentMethodType,
-                    billSourceType,
-                    handleStatus,
-                    pagenumber,
-                    pageSize, calToken), cacheKey, force, calToken);
+                    pageSize, calToken), calToken);
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();

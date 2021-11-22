@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using SkiaSharp;
 
-namespace Wesley.Easycharts
+namespace DCMS.Easycharts
 {
 
     /// <summary>

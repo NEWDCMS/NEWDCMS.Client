@@ -3,11 +3,11 @@ using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Commands;
 using Prism.Navigation;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-
 namespace Wesley.Client.ViewModels
 {
     public class AddInventoryProductPageViewModel : ViewModelBase
@@ -15,9 +15,8 @@ namespace Wesley.Client.ViewModels
         public int ItemId { get; set; }
 
         public AddInventoryProductPageViewModel(INavigationService navigationService,
-
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加盘点商品";
 

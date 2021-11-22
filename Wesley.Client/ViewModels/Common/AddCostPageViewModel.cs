@@ -30,9 +30,8 @@ namespace Wesley.Client.ViewModels
             ITerminalService terminalService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-
-
-            IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "添加费用";
 
@@ -77,14 +76,16 @@ namespace Wesley.Client.ViewModels
            });
 
             //合同余额
-            this.WhenAnyValue(x => x.Model.Balance).Subscribe(s =>
+            this.WhenAnyValue(x => x.Model.Balance)
+                .Subscribe(s =>
             {
                 this.Model.ShowBalance = s.HasValue && s.Value > 0;
+            }).DisposeWith(DeactivateWith);
 
-            }).DisposeWith(this.DeactivateWith);
 
-
-            this.WhenAnyValue(x => x.Model.AccountingOptionId).Subscribe(s => { IsRemoveing = s > 0; }).DisposeWith(this.DeactivateWith);
+            this.WhenAnyValue(x => x.Model.AccountingOptionId)
+                .Subscribe(s => { IsRemoveing = s > 0; })
+                .DisposeWith(this.DeactivateWith);
 
 
             //保存
@@ -108,11 +109,6 @@ namespace Wesley.Client.ViewModels
                 var selecter = e as AddCostPageViewModel;
                 await _navigationService.GoBackAsync(("RemoveCostExpenditure", selecter.Model));
             });
-
-            this.ContractSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AccountingSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-            this.ExceptionsSubscribe();
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)

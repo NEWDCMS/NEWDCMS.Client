@@ -8,25 +8,17 @@ namespace Wesley.Client.Pages.Common
 
     public partial class SelectManufacturerPage : BaseContentPage<SelectManufacturerPageViewModel>
     {
-        protected override void OnAppearing()
+        public SelectManufacturerPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
-                        ToolbarItems.Clear();
-                        ToolbarItems.Add(PageExtensions.GetRefreshItem(ViewModel));
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                InitializeComponent();
+                ToolbarItems?.Clear();
+                ToolbarItems.Add(PageExtensions.GetRefreshItem(ViewModel));
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
+
 
         /// <summary>
         /// 搜索客户输入更改

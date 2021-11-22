@@ -17,35 +17,35 @@ namespace Wesley.Client.Pages
                 {
                     Ypoi += 2;
                     AbsoluteLayout.SetLayoutBounds(redline, new Rectangle(1, Ypoi, 1, 1));
-                    if (Ypoi > 200)
+                    if (Ypoi > 160)
                     {
-                        Ypoi = -150;
+                        Ypoi = -130;
                     }
                 });
                 return true;
             });
         }
 
-        private void MyZXingOverlay_FlashButtonClicked(Button sender, EventArgs e)
-        {
-            try
-            {
-                sender.BackgroundColor = Color.FromHex("7fadf7");
-                if (!zxing.IsTorchOn)
-                {
-                    sender.Text = "关灯";
-                    zxing.IsTorchOn = true;
-                }
-                else
-                {
-                    sender.Text = "开灯";
-                    zxing.IsTorchOn = false;
-                }
-            }
-            catch (Exception)
-            {
+        //private void MyZXingOverlay_FlashButtonClicked(Button sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        sender.BackgroundColor = Color.FromHex("7fadf7");
+        //        if (!zxing.IsTorchOn)
+        //        {
+        //            sender.Text = "关灯";
+        //            zxing.IsTorchOn = true;
+        //        }
+        //        else
+        //        {
+        //            sender.Text = "开灯";
+        //            zxing.IsTorchOn = false;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
 
-            }
-        }
+        //    }
+        //}
     }
 }

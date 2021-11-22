@@ -4,49 +4,55 @@ using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
-using Wesley.Effects;
-using Wesley.Effects.Droid;
-using Wesley.Effects.Droid.GestureCollectors;
+using Wesley.Client.Droid.Effects;
+using Wesley.Client.Droid.Effects.GestureCollectors;
+using Wesley.Client.Effects;
 using System;
 using System.ComponentModel;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 using Color = Android.Graphics.Color;
 using ListView = Android.Widget.ListView;
 using ScrollView = Android.Widget.ScrollView;
 using View = Android.Views.View;
 
+
 [assembly: ExportEffect(typeof(TouchEffectPlatform), nameof(TouchEffect))]
-namespace Wesley.Effects.Droid
+//[assembly: ResolutionGroupName("Wesley.Client.V4")]
+namespace Wesley.Client.Droid.Effects
 {
-    public class TouchEffectPlatform : PlatformEffect {
+    [Preserve]
+    public class TouchEffectPlatform : PlatformEffect
+    {
         public bool EnableRipple => Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop;
         public bool IsDisposed => (Container as IVisualElementRenderer)?.Element == null;
         public View View => Control ?? Container;
 
-        Color _color;
-        byte _alpha;
-        RippleDrawable _ripple;
-        FrameLayout _viewOverlay;
-        ObjectAnimator _animator;
+        private Color _color;
+        private byte _alpha;
+        private RippleDrawable _ripple;
+        private FrameLayout _viewOverlay;
+        private ObjectAnimator _animator;
 
-        public static void Init() {
-        }
-
-        protected override void OnAttached() {
-            if (Control is ListView || Control is ScrollView) {
+        protected override void OnAttached()
+        {
+            if (Control is ListView || Control is ScrollView)
+            {
                 return;
             }
 
             View.Clickable = true;
             View.LongClickable = true;
-            _viewOverlay = new FrameLayout(Container.Context) {
+            _viewOverlay = new FrameLayout(Container.Context)
+            {
                 LayoutParameters = new ViewGroup.LayoutParams(-1, -1),
                 Clickable = false,
                 Focusable = false,
             };
             Container.LayoutChange += ViewOnLayoutChange;
 
+            //是否启用涟漪效果
             if (EnableRipple)
                 _viewOverlay.Background = CreateRipple(_color);
 
@@ -57,7 +63,8 @@ namespace Wesley.Effects.Droid
             _viewOverlay.BringToFront();
         }
 
-        protected override void OnDetached() {
+        protected override void OnDetached()
+        {
             if (IsDisposed) return;
 
             Container.RemoveView(_viewOverlay);
@@ -72,30 +79,37 @@ namespace Wesley.Effects.Droid
             TouchCollector.Delete(View, OnTouch);
         }
 
-        protected override void OnElementPropertyChanged(PropertyChangedEventArgs e) {
+        protected override void OnElementPropertyChanged(PropertyChangedEventArgs e)
+        {
             base.OnElementPropertyChanged(e);
 
-            if (e.PropertyName == TouchEffect.ColorProperty.PropertyName) {
+            if (e.PropertyName == TouchEffect.ColorProperty.PropertyName)
+            {
                 SetEffectColor();
             }
         }
 
-        void SetEffectColor() {
+        private void SetEffectColor()
+        {
             var color = TouchEffect.GetColor(Element);
-            if (color == Xamarin.Forms.Color.Default) {
+            if (color == Xamarin.Forms.Color.Default)
+            {
                 return;
             }
 
             _color = color.ToAndroid();
             _alpha = _color.A == 255 ? (byte)80 : _color.A;
 
-            if (EnableRipple) {
+            if (EnableRipple)
+            {
                 _ripple.SetColor(GetPressedColorSelector(_color));
             }
         }
 
-        void OnTouch(View.TouchEventArgs args) {
-            switch (args.Event.Action) {
+        private void OnTouch(View.TouchEventArgs args)
+        {
+            switch (args.Event.Action)
+            {
                 case MotionEventActions.Down:
                     if (EnableRipple)
                         ForceStartRipple(args.Event.GetX(), args.Event.GetY());
@@ -117,28 +131,33 @@ namespace Wesley.Effects.Droid
             }
         }
 
-        void ViewOnLayoutChange(object sender, View.LayoutChangeEventArgs layoutChangeEventArgs) {
+        private void ViewOnLayoutChange(object sender, View.LayoutChangeEventArgs layoutChangeEventArgs)
+        {
             var group = (ViewGroup)sender;
             if (group == null || IsDisposed) return;
             _viewOverlay.Right = group.Width;
             _viewOverlay.Bottom = group.Height;
         }
 
-        #region Ripple
+        #region 涟漪效果
 
-        RippleDrawable CreateRipple(Color color) {
-            if (Element is Layout) {
+        private RippleDrawable CreateRipple(Color color)
+        {
+            if (Element is Layout)
+            {
                 var mask = new ColorDrawable(Color.White);
                 return _ripple = new RippleDrawable(GetPressedColorSelector(color), null, mask);
             }
 
             var back = View.Background;
-            if (back == null) {
+            if (back == null)
+            {
                 var mask = new ColorDrawable(Color.White);
                 return _ripple = new RippleDrawable(GetPressedColorSelector(color), null, mask);
             }
 
-            if (back is RippleDrawable) {
+            if (back is RippleDrawable)
+            {
                 _ripple = (RippleDrawable)back.GetConstantState().NewDrawable();
                 _ripple.SetColor(GetPressedColorSelector(color));
 
@@ -148,13 +167,15 @@ namespace Wesley.Effects.Droid
             return _ripple = new RippleDrawable(GetPressedColorSelector(color), back, null);
         }
 
-        static ColorStateList GetPressedColorSelector(int pressedColor) {
+        private static ColorStateList GetPressedColorSelector(int pressedColor)
+        {
             return new ColorStateList(
                 new[] { new int[] { } },
                 new[] { pressedColor, });
         }
 
-        void ForceStartRipple(float x, float y) {
+        private void ForceStartRipple(float x, float y)
+        {
             if (IsDisposed || !(_viewOverlay.Background is RippleDrawable bc)) return;
 
             _viewOverlay.BringToFront();
@@ -162,7 +183,8 @@ namespace Wesley.Effects.Droid
             _viewOverlay.Pressed = true;
         }
 
-        void ForceEndRipple() {
+        private void ForceEndRipple()
+        {
             if (IsDisposed) return;
 
             _viewOverlay.Pressed = false;
@@ -172,7 +194,8 @@ namespace Wesley.Effects.Droid
 
         #region Overlay
 
-        void BringLayer() {
+        private void BringLayer()
+        {
             if (IsDisposed)
                 return;
 
@@ -184,7 +207,8 @@ namespace Wesley.Effects.Droid
             _viewOverlay.SetBackgroundColor(color);
         }
 
-        void TapAnimation(long duration, byte startAlpha, byte endAlpha) {
+        private void TapAnimation(long duration, byte startAlpha, byte endAlpha)
+        {
             if (IsDisposed)
                 return;
 
@@ -208,13 +232,15 @@ namespace Wesley.Effects.Droid
             _animator.AnimationEnd += AnimationOnAnimationEnd;
         }
 
-        void AnimationOnAnimationEnd(object sender, EventArgs eventArgs) {
+        private void AnimationOnAnimationEnd(object sender, EventArgs eventArgs)
+        {
             if (IsDisposed) return;
 
             ClearAnimation();
         }
 
-        void ClearAnimation() {
+        private void ClearAnimation()
+        {
             if (_animator == null) return;
             _animator.AnimationEnd -= AnimationOnAnimationEnd;
             _animator.Cancel();

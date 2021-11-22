@@ -82,8 +82,13 @@ namespace Wesley.Client.Droid.Renderers
 
         private void UpdateAspect()
         {
-            using ImageView.ScaleType scaleType = ToScaleType(Element.Aspect);
-            Control.SetScaleType(scaleType);
+            try
+            {
+                using ImageView.ScaleType scaleType = ToScaleType(Element.Aspect);
+                if (Control != null)
+                    Control.SetScaleType(scaleType);
+            }
+            catch (Exception) { }
         }
 
         private static ImageView.ScaleType ToScaleType(Aspect aspect)
@@ -104,40 +109,44 @@ namespace Wesley.Client.Droid.Renderers
             if (previous == null || !object.Equals(previous.Source, Element.Source))
             {
                 SetIsLoading(true);
-                ((BlurredImageView)base.Control).SkipInvalidate();
 
-                // I'm not sure where this comes from.
-                Control.SetImageResource(17170445);
-                if (source != null)
+                if (Control != null)
                 {
-                    try
+                    ((BlurredImageView)base.Control).SkipInvalidate();
+
+                    Control.SetImageResource(17170445);
+
+                    if (source != null)
                     {
-                        bitmap = await GetImageFromImageSource(source, Context);
-                    }
-                    catch (TaskCanceledException)
-                    {
-                    }
-                    catch (IOException)
-                    {
-                    }
-                    catch (NotImplementedException)
-                    {
-                    }
-                }
-                if (Element != null && object.Equals(Element.Source, source))
-                {
-                    if (!_isDisposed)
-                    {
-                     
-                        if (bitmap != null)
+                        try
                         {
-                            Control.SetImageBitmap(bitmap);
-
-                            bitmap.Dispose();
+                            bitmap = await GetImageFromImageSource(source, Context);
                         }
+                        catch (TaskCanceledException)
+                        {
+                        }
+                        catch (IOException)
+                        {
+                        }
+                        catch (NotImplementedException)
+                        {
+                        }
+                    }
 
-                        SetIsLoading(false);
-                        ((IVisualElementController)base.Element).NativeSizeChanged();
+                    if (Element != null && object.Equals(Element.Source, source))
+                    {
+                        if (!_isDisposed)
+                        {
+                            if (bitmap != null)
+                            {
+                                Control.SetImageBitmap(bitmap);
+                                bitmap.Dispose();
+                            }
+
+                            SetIsLoading(false);
+
+                            ((IVisualElementController)base.Element).NativeSizeChanged();
+                        }
                     }
                 }
             }
@@ -203,6 +212,7 @@ namespace Wesley.Client.Droid.Renderers
 
         private Bitmap CreateResizedImage(Bitmap originalBitmap)
         {
+
             int width = Convert.ToInt32(Math.Round(originalBitmap.Width * BITMAP_SCALE));
             int height = Convert.ToInt32(Math.Round(originalBitmap.Height * BITMAP_SCALE));
 

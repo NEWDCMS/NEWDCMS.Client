@@ -1,8 +1,8 @@
 ﻿using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -13,8 +13,8 @@ namespace Wesley.Client.ViewModels
     {
         [Reactive] public string AgreementText { get; internal set; }
         public AgreementPageViewModel(INavigationService navigationService,
-
-             IDialogService dialogService) : base(navigationService, dialogService)
+             IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
 
             Title = "声明";
@@ -23,7 +23,7 @@ namespace Wesley.Client.ViewModels
                AgreementText = GlobalSettings.AgreementText;
            }));
             BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         public override void OnAppearing()

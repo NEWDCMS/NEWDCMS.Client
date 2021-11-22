@@ -13,8 +13,6 @@ using System.Threading.Tasks;
 using Xamarin.Essentials;
 
 
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(PermissionsService))]
 namespace Wesley.Client.Droid.Services
 {
     public class PermissionsService : IPermissionsService
@@ -51,7 +49,7 @@ namespace Wesley.Client.Droid.Services
             {
                 GoSamsungSetting();
             }
-            else 
+            else
             {
                 ToastUtils.ShowSingleToast("没有检测到机型！");
             }
@@ -62,15 +60,19 @@ namespace Wesley.Client.Droid.Services
         /// </summary>
         public void BatteryOptimizationSetting()
         {
-            var isIgnoring = IsIgnoringBatteryOptimizations();
-            if (!isIgnoring)
-            {
-                EnableBackgroundServicesDialogue();
-            }
-            else 
-            {
-                ToastUtils.ShowSingleToast("已经加入到白名单！");
-            }
+            //var isIgnoring = IsIgnoringBatteryOptimizations();
+            //if (!isIgnoring)
+            //{
+            //    EnableBackgroundServicesDialogue();
+            //}
+            //else 
+            //{
+            //    ToastUtils.ShowSingleToast("已经加入到白名单！");
+            //}
+
+            //加入到白名单
+            IntentWrapper.WhiteListMatters(MainActivity.Instance, "Wesley持续运行");
+
         }
         public Task<bool> GetPermissionsAsync()
         {
@@ -122,7 +124,7 @@ namespace Wesley.Client.Droid.Services
         /// 判断应用是否在白名单中
         /// </summary>
         /// <returns></returns>
-        [TargetApi(Value = 23)]
+        [RequiresApi(Value = 23)]
         private bool IsIgnoringBatteryOptimizations()
         {
             bool isIgnoring = false;
@@ -142,7 +144,7 @@ namespace Wesley.Client.Droid.Services
         /// <summary>
         /// 申请加入白名单
         /// </summary>
-        [TargetApi(Value = 23)]
+        [RequiresApi(Value = 23)]
         private void RequestIgnoreBatteryOptimizations()
         {
             try
@@ -214,7 +216,7 @@ namespace Wesley.Client.Droid.Services
             }
         }
 
-        [TargetApi(Value = 23)]
+        [RequiresApi(Value = 23)]
         [SuppressLint(Value = new string[] { "BatteryLife", "InlinedApi" })]
         [RequiresPermission(Value = Manifest.Permission.RequestIgnoreBatteryOptimizations)]
         public Intent PrepareIntentForWhiteListingOfBatteryOptimization(string packageName, bool alsoWhenWhiteListed = false)
@@ -459,5 +461,7 @@ namespace Wesley.Client.Droid.Services
         {
             return await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
         }
+
+
     }
 }

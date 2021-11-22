@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<pages:BasePopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:pages="clr-namespace:Wesley.Client.Pages;assembly=Wesley.Client"
+                     xmlns:vm="clr-namespace:Wesley.Client.ViewModels"
+                     x:TypeArguments="vm:PopupMenuViewModel"
+                     HasSystemPadding="False"
+                     x:Class="Wesley.Client.Pages.PopupMenu"
+                     BackgroundColor="Transparent"
+                     x:Name="PopupMaster">
+    <AbsoluteLayout Margin="0,80,0,0"
+                    x:Name="MainLayout"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start">
+        <Frame x:Name="FrameContainer"
+               Margin="0,10,10,0"
+               CornerRadius="5"
+               HorizontalOptions="Center"
+               BorderColor="Transparent"
+               BackgroundColor="#3B5998">
+            <ListView x:Name="SecondaryToolbarListView"
+                      VerticalOptions="Start"
+                      HorizontalOptions="Start"
+                      WidthRequest="100"
+                      HasUnevenRows="True"
+                      BackgroundColor="#3B5998"
+                      SeparatorColor="White"
+                      SelectionMode="Single"
+                      ItemTapped="SecondaryToolbarListView_ItemTapped"
+                      ItemsSource="{Binding BindingContext.MenuItems, Source={x:Reference PopupMaster}}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand"
+                                         Margin="0"
+                                         Spacing="0"
+                                         HeightRequest="37"
+                                         Padding="5,0,0,0">
+                                <Label x:Name="menuText"
+                                       FontFamily="FAS"
+                                       Text="{Binding Text}"
+                                       TextColor="White"
+                                       FontSize="15"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="Start" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Frame>
+        <ContentView AbsoluteLayout.LayoutFlags="XProportional"
+                     AbsoluteLayout.LayoutBounds=".8,5, 15, 15">
+            <BoxView HeightRequest="15"
+                     WidthRequest="15"
+                     Rotation="45"
+                     BackgroundColor="#3B5998" />
+        </ContentView>
+    </AbsoluteLayout>
+</pages:BasePopupPage>

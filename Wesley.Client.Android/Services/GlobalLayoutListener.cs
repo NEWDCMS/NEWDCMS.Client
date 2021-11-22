@@ -8,15 +8,14 @@ using Android.Widget;
 using Wesley.Client.Services;
 using System;
 
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(GlobalLayoutListener))]
+
 namespace Wesley.Client.Droid.Services
 {
     internal class GlobalLayoutListener : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
     {
         private static InputMethodManager _inputManager;
         private static Activity _activity;
-        private SoftwareKeyboardService _softwarekeyboardservice;
+        private readonly SoftwareKeyboardService _softwarekeyboardservice;
         private static Android.Views.View _childOfContent;
         private static float _displayDensity;
         private static int _displayheight;
@@ -42,7 +41,7 @@ namespace Wesley.Client.Droid.Services
             _childOfContent = content.GetChildAt(0);
 
             DisplayMetrics metrics = new DisplayMetrics();
-            _activity.WindowManager.DefaultDisplay.GetMetrics(metrics);
+            //_activity.WindowManager.DefaultDisplay.GetMetrics(metrics);
             _displayDensity = metrics.Density;
 
             CalculateDisplayHeight();

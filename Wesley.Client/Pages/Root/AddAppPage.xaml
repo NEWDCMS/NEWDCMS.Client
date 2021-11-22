@@ -3,6 +3,7 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:loading="clr-namespace:Wesley.Client.CustomViews"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.AddAppPage"
@@ -68,13 +69,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
-                <ContentView>
-                    <StackLayout VerticalOptions="CenterAndExpand">
-                        <Label Text="努力加载中...."
-                               FontSize="{StaticResource FT14}"
-                               HorizontalOptions="CenterAndExpand" />
-                    </StackLayout>
-                </ContentView>
+                <loading:LoadingContentView />
             </CollectionView.EmptyView>
         </CollectionView>
     </pages:BaseContentPage.Content>

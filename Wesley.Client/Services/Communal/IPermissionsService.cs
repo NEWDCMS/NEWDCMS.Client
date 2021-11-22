@@ -24,7 +24,6 @@ namespace Wesley.Client.Services
         /// <param name="isGranted"></param>
         void OnRequestPermissionsResult(bool isGranted);
         void RequestLocationAndCameraPermission();
-
         Task<PermissionStatus> GetLocationConsent();
     }
 }

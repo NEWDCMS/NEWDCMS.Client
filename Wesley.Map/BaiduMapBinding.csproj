@@ -26,7 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
-    <NoWarn>0109;1006;0051;</NoWarn>
+    <NoWarn>CS0108;IDE1006;IDE0066;</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -46,18 +46,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Additions\AboutAdditions.txt" />
-    <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libcrypto.so" />
+    <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libBaiduMapSDK_base_v7_3_0.so" />
+    <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libBaiduMapSDK_map_v7_3_0.so" />
     <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libgnustl_shared.so" />
     <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\liblocSDK8a.so" />
-    <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libssl.so" />
-    <EmbeddedNativeLibrary Include="Jars\x86\libcrypto.so" />
+    <EmbeddedNativeLibrary Include="Jars\x86\libBaiduMapSDK_base_v7_3_0.so" />
+    <EmbeddedNativeLibrary Include="Jars\x86\libBaiduMapSDK_map_v7_3_0.so" />
     <EmbeddedNativeLibrary Include="Jars\x86\libgnustl_shared.so" />
     <EmbeddedNativeLibrary Include="Jars\x86\liblocSDK8a.so" />
-    <EmbeddedNativeLibrary Include="Jars\x86\libssl.so" />
-    <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libBaiduMapSDK_base_v7_1_0.so" />
-    <EmbeddedNativeLibrary Include="Jars\armeabi-v7a\libBaiduMapSDK_map_v7_1_0.so" />
-    <EmbeddedNativeLibrary Include="Jars\x86\libBaiduMapSDK_base_v7_1_0.so" />
-    <EmbeddedNativeLibrary Include="Jars\x86\libBaiduMapSDK_map_v7_1_0.so" />
   </ItemGroup>
   <ItemGroup>
     <TransformFile Include="Transforms\Metadata.xml" />

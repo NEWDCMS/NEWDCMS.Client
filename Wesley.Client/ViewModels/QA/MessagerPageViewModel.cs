@@ -1,10 +1,10 @@
 ﻿using Wesley.Client.Models.QA;
 using Wesley.Client.Resources;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,11 +35,10 @@ namespace Wesley.Client.ViewModels
         [Reactive] public string ConversationId { get; set; }
 
         public MessagerPageViewModel(INavigationService navigationService,
-
-
             IConversationsDataStore conversationsDataStore,
             IMessagesDataStore messagesDataStore,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "帮助中心";
 
@@ -142,7 +141,7 @@ namespace Wesley.Client.ViewModels
 
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
         private void ScrollToMessage(Message message)

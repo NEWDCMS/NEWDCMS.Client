@@ -88,8 +88,6 @@ namespace Wesley.Client.Models.WareHouses
 
         public IEnumerable<SelectListItem> InventoryStatuss { get; set; }
 
-        //("打印数", "打印数
-        public int? PrintNum { get; set; }
 
         //合计
         [Reactive] public int SumCount { get; set; }
@@ -204,7 +202,7 @@ namespace Wesley.Client.Models.WareHouses
     /// </summary>
     public class InventoryPartTaskUpdateModel : Base
     {
-
+        public string BillNumber { get; set; }
 
         //("盘点人", "盘点人
         [Reactive] public int InventoryPerson { get; set; }

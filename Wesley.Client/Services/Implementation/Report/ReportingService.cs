@@ -1,4 +1,5 @@
 ﻿using Wesley.Client.Models.Report;
+using Wesley.Client.Models.Sales;
 using Wesley.Client.Models.WareHouses;
 using System;
 using System.Collections.Generic;
@@ -18,29 +19,27 @@ namespace Wesley.Client.Services
             _makeRequest = makeRequest;
         }
 
-        public async Task<DashboardReport> GetDashboardReportAsync(bool force = false, CancellationToken calToken = default)
+        public IObservable<APIResult<DashboardReport>> Rx_GetDashboardReportAsync(CancellationToken calToken = default)
         {
             try
             {
                 int storeId = Settings.StoreId;
-                //int userId = Settings.UserId;
                 var businessUserIds = new int[] { Settings.UserId };
-                var api = RefitServiceBuilder.Build<IReportingApi>(URL);
                 var cacheKey = RefitServiceBuilder.Cacher("GetDashboardReportAsync", storeId, businessUserIds);
-                var results = await _makeRequest.StartUseCache(api.GetDashboardReportAsync(storeId, businessUserIds, calToken), cacheKey, force, calToken);
-                if (results != null && results?.Code >= 0)
-                    return results?.Data;
-                else
-                    return null;
+                var results = _makeRequest.StartUseCache_Rx(RefitServiceBuilder.Build<IReportingApi>(URL).GetDashboardReportAsync(storeId, businessUserIds, calToken), cacheKey, calToken);
+                return results;
+            }
+            catch (System.ObjectDisposedException e)
+            {
+                e.HandleException();
+                return null;
             }
             catch (Exception e)
             {
-
                 e.HandleException();
                 return null;
             }
         }
-
 
 
         /// <summary>
@@ -87,12 +86,10 @@ namespace Wesley.Client.Services
             }
             catch (Exception e)
             {
-
                 e.HandleException();
                 return null;
             }
         }
-
 
 
         /// <summary>
@@ -109,21 +106,109 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<IReportingApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetHotSaleRankingAsync", storeId, terminalId, businessUserId, brandId, categoryId, startTime, endTime);
-                var results = await _makeRequest.StartUseCache(api.GetHotSaleRankingAsync(storeId, terminalId, businessUserId, brandId, categoryId, startTime, endTime, calToken), cacheKey, force, calToken);
+                var cacheKey = RefitServiceBuilder.Cacher("GetHotSaleRankingAsync",
+                    storeId,
+                    terminalId,
+                    businessUserId,
+                    brandId,
+                    categoryId,
+                    force,
+                    startTime,
+                    endTime);
+
+                var results = await _makeRequest.StartUseCache(api.GetHotSaleRankingAsync(storeId,
+                    terminalId,
+                    businessUserId,
+                    brandId,
+                    categoryId,
+                    startTime,
+                    endTime,
+                    calToken),
+                    cacheKey,
+                    force,
+                    calToken);
+
                 if (results != null && results?.Code >= 0)
                     return results?.Data;
                 else
                     return null;
+
             }
             catch (Exception e)
             {
-
                 e.HandleException();
                 return null;
             }
         }
 
+        public IObservable<APIResult<IList<HotSaleRanking>>> Rx_GetHotSaleRankingAsync(int? terminalId = null, int? businessUserId = null, int? brandId = null, int? categoryId = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken calToken = default)
+        {
+            try
+            {
+                int storeId = Settings.StoreId;
+                int userId = Settings.UserId;
+
+                var api = RefitServiceBuilder.Build<IReportingApi>(URL);
+
+                var cacheKey = RefitServiceBuilder.Cacher("Rx_GetHotSaleRankingAsync",
+                    storeId,
+                    terminalId,
+                    businessUserId,
+                    brandId,
+                    categoryId,
+                    startTime?.ToString("yyy-MM-dd"),
+                    endTime?.ToString("yyy-MM-dd"));
+
+                var results = _makeRequest.StartUseCache_Rx(api.GetHotSaleRankingAsync(storeId,
+                    terminalId,
+                    businessUserId,
+                    brandId,
+                    categoryId,
+                    startTime,
+                    endTime,
+                    calToken),
+                    cacheKey,
+                    calToken);
+
+                return results;
+            }
+            catch (Exception e)
+            {
+                e.HandleException();
+                return null;
+            }
+        }
+
+
+        public async Task<IList<SaleReportItem>> GetHotSaleReportItemAsync(int? productId = null, int? businessUserId = null, DateTime? startTime = null, DateTime? endTime = null, bool force = false, int pagenumber = 0, CancellationToken calToken = default)
+        {
+            try
+            {
+                int storeId = Settings.StoreId;
+                int userId = Settings.UserId;
+
+                var api = RefitServiceBuilder.Build<IReportingApi>(URL);
+
+                var results = await api.GetHotSaleReportItemAsync(storeId,
+                    productId: productId,
+                    businessUserId: businessUserId,
+                    startTime: startTime,
+                    endTime: endTime,
+                    pagenumber: pagenumber,
+                    calToken: calToken);
+
+                if (results != null && results?.Code >= 0)
+                    return results?.Data;
+                else
+                    return null;
+
+            }
+            catch (Exception e)
+            {
+                e.HandleException();
+                return null;
+            }
+        }
 
 
 
@@ -495,5 +580,30 @@ namespace Wesley.Client.Services
                 return null;
             }
         }
+
+
+        /// <summary>
+        /// 业务员综合分析
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public IObservable<APIResult<BusinessAnalysis>> Rx_GetBusinessAnalysis(int? type = null, CancellationToken calToken = default)
+        {
+            try
+            {
+                int storeId = Settings.StoreId;
+                int userId = Settings.UserId;
+                var api = RefitServiceBuilder.Build<IReportingApi>(URL);
+                var cacheKey = RefitServiceBuilder.Cacher("GetBusinessAnalysis", storeId, type);
+                var results = _makeRequest.StartUseCache_Rx(api.GetBusinessAnalysis(storeId, type, true, calToken), cacheKey, calToken);
+                return results;
+            }
+            catch (Exception e)
+            {
+                e.HandleException();
+                return null;
+            }
+        }
+
     }
 }

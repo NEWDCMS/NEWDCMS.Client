@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,16 +14,16 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 
+
 namespace Wesley.Client.ViewModels
 {
     public class AddSubscribePageViewModel : ViewModelBase
     {
-
         [Reactive] public ObservableCollection<MessageInfo> AppList { get; set; } = new ObservableCollection<MessageInfo>();
-
         [Reactive] public bool SelectedALL { get; set; }
 
-        public AddSubscribePageViewModel(INavigationService navigationService, IDialogService dialogService) :
+        public AddSubscribePageViewModel(INavigationService navigationService, IDialogService dialogService
+            ) :
             base(navigationService, dialogService)
         {
             Title = "订阅";
@@ -37,9 +38,7 @@ namespace Wesley.Client.ViewModels
                         this.AppList = new ObservableCollection<MessageInfo>(filters);
                 }
                 catch (Exception) { }
-
             });
-
 
             //全部
             this.WhenAnyValue(x => x.SelectedALL)
@@ -56,9 +55,8 @@ namespace Wesley.Client.ViewModels
                 .DisposeWith(this.DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
-        }
 
+        }
 
         public override void OnAppearing()
         {
@@ -66,12 +64,12 @@ namespace Wesley.Client.ViewModels
             ((ICommand)Load)?.Execute(null);
         }
 
-
-        public override void OnNavigatedFrom(INavigationParameters parameters)
+        //OnNavigatedTo -> OnAppearing-> OnDisappearing-> OnNavigatedFrom
+        public override void OnDisappearing()
         {
+            base.OnDisappearing();
             try
             {
-                base.OnNavigatedFrom(parameters);
                 var apps = this.AppList?.Select(a => a).ToList();
                 if (apps != null)
                     Settings.SubscribeDatas = JsonConvert.SerializeObject(apps ?? new List<MessageInfo>());

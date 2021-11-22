@@ -1,12 +1,15 @@
-﻿using Wesley.Client.CustomViews;
-using Wesley.Client.Enums;
+﻿using Wesley.Client.Enums;
 using Wesley.Client.Models;
+using Wesley.Client.Models.Configuration;
 using Wesley.Client.Models.Products;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
+using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +18,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
+
 namespace Wesley.Client.ViewModels
 {
     public class AddProductPageViewModel : ViewModelBase
@@ -27,14 +31,22 @@ namespace Wesley.Client.ViewModels
         public ReactiveCommand<int, Unit> RemoveCommend { get; set; }
         public ReactiveCommand<int, Unit> CopyCommend { get; set; }
 
+        private CompanySettingModel CompanySetting;
+
+
+        [Reactive] public bool IsEditPrduceDate { get; set; } = false;
 
         [Reactive] public ProductModel SelectedItem { get; set; } = new ProductModel();
         public AddProductPageViewModel(
             INavigationService navigationService,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加商品";
 
+
+            CompanySetting = JsonConvert.DeserializeObject<CompanySettingModel>(Settings.CompanySetting);
+            
             //更改重算
             this.BigEntryUnfocused = ReactiveCommand.Create<ProductModel>((p) =>
            {
@@ -50,6 +62,7 @@ namespace Wesley.Client.ViewModels
             {
                 CalcSmallPrice(pid);
             });
+
             this.BigPriceSelected = ReactiveCommand.Create<int>((pid) =>
             {
                 CalcBigPrice(pid);
@@ -88,7 +101,7 @@ namespace Wesley.Client.ViewModels
                        //大单位
                        ProductSeries.ToList().ForEach(p =>
                       {
-                          vaildBigPrice = (p.BigPriceUnit.Quantity > 0 && (p.BigPriceUnit.Price == null || p.BigPriceUnit.Price < 0));
+                          vaildBigPrice = (p.BigPriceUnit.Quantity > 0 && (p.BigPriceUnit?.Price == null || p.BigPriceUnit?.Price < 0));
                           if (vaildBigPrice)
                               return;
                       });
@@ -103,7 +116,7 @@ namespace Wesley.Client.ViewModels
                        //小单位
                        ProductSeries.ToList().ForEach(p =>
                       {
-                          vaildSmallPrice = (p.SmallPriceUnit.Quantity > 0 && (p.SmallPriceUnit.Price == null || p.SmallPriceUnit.Price < 0));
+                          vaildSmallPrice = (p.SmallPriceUnit.Quantity > 0 && (p.SmallPriceUnit?.Price == null || p.SmallPriceUnit?.Price < 0));
                           if (vaildSmallPrice)
                               return;
                       });
@@ -285,11 +298,11 @@ namespace Wesley.Client.ViewModels
                         if (ReferencePage.Equals("PurchaseOrderBillPage"))
                         {
                             //大单位价格
-                            product.BigPriceUnit.Amount = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price ?? 0;
+                            product.BigPriceUnit.Amount = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price;
 
                             if ((product.BigQuantity ?? 0) == 0) product.BigQuantity = 1;
                             var price = (product.BigQuantity ?? 0) != 0 ? (product.BigPriceUnit.Price / product.BigQuantity == 0 ? 1 : product.BigQuantity) : 0;
-                            var amount = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price ?? 0;
+                            var amount = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price;
 
                             //小单位价格
                             product.SmallPriceUnit.Price = decimal.Round((price ?? 0), 4, MidpointRounding.AwayFromZero);
@@ -298,8 +311,8 @@ namespace Wesley.Client.ViewModels
                         }
                         else
                         {
-                            var ba = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price ?? 0;
-                            var sa = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price ?? 0;
+                            var ba = product.BigPriceUnit.Quantity * product.BigPriceUnit.Price;
+                            var sa = product.SmallPriceUnit.Quantity * product.SmallPriceUnit.Price;
 
                             //大单位价格 
                             product.BigPriceUnit.Amount = decimal.Round((ba != 0 ? ba : 0), 4, MidpointRounding.AwayFromZero);
@@ -319,8 +332,7 @@ namespace Wesley.Client.ViewModels
             try
             {
                 var product = ProductSeries.Where(p => p.Id == porductId).Select(p => p).FirstOrDefault();
-
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择价格", "", (() =>
+                var _dialogView = new PopRadioButtonPage("选择价格", "", () =>
                 {
                     var popDatas = new List<PopData>();
                     if (product != null)
@@ -451,15 +463,27 @@ namespace Wesley.Client.ViewModels
                             #endregion
                         }
                     }
+                    
                     return Task.FromResult(popDatas);
-                }));
+                });
 
-                if (result != null)
+                _dialogView.Completed += (sender, result) =>
                 {
-                    product.BigPriceUnit.Price = ((decimal)(result?.Data ?? 0));
-                    product.BigPriceUnit.Amount = ((decimal)(result?.Data ?? 0) * product?.BigPriceUnit?.Quantity ?? 0);
-                }
+                    try
+                    { 
+                    if (result != null)
+                    {
+                        product.BigPriceUnit.Price = (decimal)(result?.Data ?? decimal.Zero);
+                        product.BigPriceUnit.Amount = (decimal)(result?.Data ?? decimal.Zero) * product?.BigPriceUnit?.Quantity ?? 0;
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Crashes.TrackError(ex);
+                    }
+                };
 
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -471,8 +495,7 @@ namespace Wesley.Client.ViewModels
             try
             {
                 var product = ProductSeries.Where(p => p.Id == porductId).Select(p => p).FirstOrDefault();
-
-                var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择价格", "", (() =>
+                var _dialogView = new PopRadioButtonPage("选择价格", "", () =>
                 {
                     var popDatas = new List<PopData>();
                     if (product != null)
@@ -604,13 +627,17 @@ namespace Wesley.Client.ViewModels
                         }
                     }
                     return Task.FromResult(popDatas);
-                }));
-
-                if (result != null)
+                });
+                _dialogView.Completed += (sender, result) =>
                 {
-                    product.SmallPriceUnit.Price = (decimal)(result?.Data ?? 0);
-                    product.SmallPriceUnit.Amount = (decimal)(result?.Data ?? 0) * product?.SmallPriceUnit?.Quantity ?? 0;
-                }
+                    if (result != null)
+                    {
+                        product.SmallPriceUnit.Price = (decimal)(result?.Data ?? decimal.Zero);
+                        product.SmallPriceUnit.Amount = (decimal)(result?.Data ?? decimal.Zero) * product?.SmallPriceUnit?.Quantity ?? 0;
+                    }
+                };
+
+                await PopupNavigation.Instance.PushAsync(_dialogView);
             }
             catch (Exception ex)
             {
@@ -621,6 +648,15 @@ namespace Wesley.Client.ViewModels
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
+
+            if (CompanySetting!=null&& CompanySetting.OpenBillMakeDate==2 && (ReferencePage.Equals("SaleBillPage")|| ReferencePage.Equals("SaleOrderBillPage")))
+            {
+                IsEditPrduceDate = true;
+            }
+            else
+            {
+                IsEditPrduceDate = false;
+            }
 
             //获取选择的商品回传
             if (parameters.ContainsKey("Products"))
@@ -717,10 +753,10 @@ namespace Wesley.Client.ViewModels
 
                     product.RemarkSelected = ReactiveCommand.Create<UProduct>(async e =>
                      {
-                         var result = await CrossDiaglogKit.Current.GetRadioButtonResultAsync("选择备注", "", async () =>
+                         var _dialogView = new PopRadioButtonPage("选择备注", "", async () =>
                          {
                              var _settingService = App.Resolve<ISettingService>();
-                             var result = await _settingService?.GetRemarkConfigListSetting();
+                             var result = await _settingService.GetRemarkConfigListSetting();
                              var popDatas = result?.Select(s =>
                              {
                                  return new PopData
@@ -732,13 +768,22 @@ namespace Wesley.Client.ViewModels
                              })?.ToList();
                              return popDatas;
                          });
-
-                         if (result != null)
+                         _dialogView.Completed += (sender, result) =>
                          {
-                             RemarkConfig.Id = result.Id;
-                             RemarkConfig.Name = result.Column;
-                             e.Remark = result.Column;
-                         }
+                             try { 
+                             if (result != null)
+                             {
+                                 RemarkConfig.Id = result.Id;
+                                 RemarkConfig.Name = result.Column;
+                                 e.Remark = result.Column;
+                             }
+                             }
+                             catch (Exception ex)
+                             {
+                                 Crashes.TrackError(ex);
+                             }
+                         };
+                         await PopupNavigation.Instance.PushAsync(_dialogView);
                      });
 
                 });
@@ -747,5 +792,20 @@ namespace Wesley.Client.ViewModels
             }
         }
 
-    }
+        public override void OnAppearing()
+        {
+            try
+            {
+                base.OnAppearing();
+
+
+            }
+            catch (Exception ex)
+            {
+
+                Crashes.TrackError(ex);
+            }
+        }
+
+}
 }

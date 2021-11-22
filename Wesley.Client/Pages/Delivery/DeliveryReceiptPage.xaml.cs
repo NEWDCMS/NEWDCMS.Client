@@ -54,10 +54,12 @@ namespace Wesley.Client.Pages.Market
             string currentPage = "";
             try
             {
-                currentPage = this.CurrentPage.GetType().GenericTypeArguments[1].ToString();
+                if (this.CurrentPage.GetType().GenericTypeArguments.Count() > 1)
+                    currentPage = this.CurrentPage.GetType().GenericTypeArguments[1].ToString();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Crashes.TrackError(ex);
             }
 
             //更新
@@ -70,8 +72,8 @@ namespace Wesley.Client.Pages.Market
                         if (ViewModel != null)
                         {
                             string key = string.Format("{0}_SELECTEDTAB_{1}", currentPage.ToUpper(), SelectedTabIndex);
-                            ((RightSideMasterPage)this.SlideMenu).SetBindMenus(ViewModel.BindMenus, key);
-                            this.ShowMenu();
+                            //((RightSideMasterPage)this.SlideMenu).SetBindMenus(ViewModel.BindMenus, key);
+                            //this.ShowMenu();
                         }
                     });
                 }
@@ -102,7 +104,8 @@ namespace Wesley.Client.Pages.Market
             base.OnAppearing();
             if (ViewModel != null)
             {
-                DeliveryReceiptTabPage.CurrentPage = DeliveryReceiptTabPage.Children[ViewModel.SelectedTab];
+                if (CurrentContentView.Children.Any() && CurrentContentView.Children.Count > ViewModel.SelectedTab)
+                    CurrentContentView.CurrentPage = CurrentContentView.Children[ViewModel.SelectedTab];
             }
         }
 

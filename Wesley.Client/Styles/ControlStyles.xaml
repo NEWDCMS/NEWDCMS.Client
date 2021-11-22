@@ -11,6 +11,81 @@
     <ResourceDictionary Source="Fonts.xaml" />
     <ResourceDictionary Source="Colors.xaml" />
     <converters:ExceptionToImageSourceConverter x:Key="ExceptionToImageSourceConverter" />
+
+    <!--home App Button-->
+    <Style x:Key="AppButtonStyle30"
+           TargetType="Button">
+        <Setter Property="FontFamily"
+                Value="FAS" />
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="TextColor"
+                Value="{StaticResource PrimaryDarkColor}" />
+        <Setter Property="FontSize"
+                Value="14" />
+        <Setter Property="BackgroundColor"
+                Value="#ffffff" />
+        <Setter Property="BorderColor"
+                Value="{StaticResource DividerColor}" />
+        <Setter Property="BorderRadius"
+                Value="50" />
+        <Setter Property="CornerRadius"
+                Value="50" />
+        <Setter Property="BorderWidth"
+                Value="0.2" />
+        <Setter Property="HeightRequest"
+                Value="30" />
+        <Setter Property="WidthRequest"
+                Value="30" />
+        <Setter Property="HorizontalOptions"
+                Value="Center" />
+    </Style>
+    <Style x:Key="AppButtonNameLabel10"
+           TargetType="Label">
+        <Setter Property="TextColor"
+                Value="#7D7D7D" />
+        <Setter Property="Margin"
+                Value="0,-2,0,0" />
+        <Setter Property="HorizontalTextAlignment"
+                Value="Center" />
+        <Setter Property="FontSize"
+                Value="14" />
+    </Style>
+    <!--home tool bar button-->
+    <Style x:Key="ToolBarStyle"
+           TargetType="Button">
+        <Setter Property="FontFamily"
+                Value="FAS" />
+        <Setter Property="TextColor"
+                Value="#ffffff" />
+        <Setter Property="FontSize"
+                Value="23" />
+        <Setter Property="WidthRequest"
+                Value="60" />
+        <Setter Property="BackgroundColor"
+                Value="Transparent" />
+        <Setter Property="BorderColor"
+                Value="Transparent" />
+        <Setter Property="HorizontalOptions"
+                Value="End" />
+        <Setter Property="VerticalOptions"
+                Value="End" />
+    </Style>
+    <!--home GGrid-->
+    <Style x:Key="GGrid"
+           TargetType="Grid">
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="Margin"
+                Value="0" />
+        <Setter Property="ColumnSpacing"
+                Value="0" />
+        <Setter Property="RowSpacing"
+                Value="0" />
+        <Setter Property="HorizontalOptions"
+                Value="FillAndExpand" />
+    </Style>
+    
     <!--#分割线-->
     <Style x:Key="SeparatorGrid" TargetType="BoxView">
         <Setter Property="HeightRequest" Value="0.7" />
@@ -31,10 +106,10 @@
         <Setter Property="ErrorImageConverter" Value="{StaticResource ExceptionToImageSourceConverter}" />
     </Style>
     <Style TargetType="Label" x:Key="TabLabelStyle">
-        <Setter Property="FontFamily" Value="FAR" />
+        <Setter Property="FontFamily" Value="FAS" />
         <Setter Property="TextColor" Value="{StaticResource SecondaryAccentColor}" />
         <Setter Property="Scale" Value="0.9" />
-        <Setter Property="FontSize" Value="{OnPlatform Android=25, iOS=25}" />
+        <Setter Property="FontSize" Value="25" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="Margin" Value="0,15,0,0" />
@@ -246,8 +321,8 @@
     <Style x:Key="LabelStyle" TargetType="Label">
         <Setter Property="TextColor" Value="#606a7b" />
         <Setter Property="FontFamily" Value="BSR" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="LineHeight" Value="{OnPlatform Android=1.5, Default=-1}" />
+        <Setter Property="FontSize"
+                Value="14" />
         <Setter Property="HorizontalTextAlignment" Value="Start" />
         <Setter Property="VerticalTextAlignment" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
@@ -256,7 +331,8 @@
     <Style x:Key="IconLabelStyle" TargetType="Label">
         <Setter Property="TextColor" Value="#788396" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontFamily" Value="FAR" />
+        <Setter Property="FontFamily"
+                Value="FAS" />
         <Setter Property="FontSize" Value="18" />
         <Setter Property="HorizontalTextAlignment" Value="Center" />
         <Setter Property="VerticalTextAlignment" Value="Center" />

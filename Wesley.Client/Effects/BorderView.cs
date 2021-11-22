@@ -1,8 +1,9 @@
 using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
-    public class BorderView : ContentView {
+    public class BorderView : ContentView
+    {
         public static readonly BindableProperty CornerRadiusProperty =
             BindableProperty.Create(
                 nameof(CornerRadius),
@@ -10,7 +11,8 @@ namespace Wesley.Effects
                 typeof(BorderView),
                 default(double));
 
-        public double CornerRadius {
+        public double CornerRadius
+        {
             get => (double)GetValue(CornerRadiusProperty);
             set => SetValue(CornerRadiusProperty, value);
         }
@@ -22,7 +24,8 @@ namespace Wesley.Effects
                 typeof(BorderView),
                 default(double));
 
-        public double BorderWidth {
+        public double BorderWidth
+        {
             get => (double)GetValue(BorderWidthProperty);
             set => SetValue(BorderWidthProperty, value);
         }
@@ -34,7 +37,8 @@ namespace Wesley.Effects
                 typeof(BorderView),
                 Color.Default);
 
-        public Color BorderColor {
+        public Color BorderColor
+        {
             get => (Color)GetValue(BorderColorProperty);
             set => SetValue(BorderColorProperty, value);
         }

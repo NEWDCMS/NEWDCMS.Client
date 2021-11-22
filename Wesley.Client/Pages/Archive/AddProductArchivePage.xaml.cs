@@ -7,25 +7,17 @@ namespace Wesley.Client.Pages.Common
 
     public partial class AddProductArchivePage : BaseContentPage<AddProductArchivePageViewModel>
     {
-        protected override void OnAppearing()
+        public AddProductArchivePage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
-                        this.SetToolBarItems(ViewModel);
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-
-                    return false;
-                });
-                return;
+                InitializeComponent();
+                this.SetToolBarItems(ViewModel);
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
+
+
 
 
         /// <summary>

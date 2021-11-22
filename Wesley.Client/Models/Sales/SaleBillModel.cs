@@ -43,8 +43,6 @@ namespace Wesley.Client.Models.Sales
         public string AuditedUserName { get; set; }
 
         public string ReversedUserName { get; set; }
-
-        public int PrintNum { get; set; }
         public bool Receipted { get; set; }
         public bool SignStatus { get; set; }
         public string SignSecretKey { get; set; }
@@ -107,11 +105,12 @@ namespace Wesley.Client.Models.Sales
         #endregion
 
         [Reactive] public decimal Subtotal { get; set; }
-        public bool IsGifts { get; set; } = false;
+        [Reactive] public bool IsGifts { get; set; } = false;
         public int? BigGiftQuantity { get; set; }
         public int? SmallGiftQuantity { get; set; }
         public bool IsManufactureDete { get; set; }
         public DateTime? ManufactureDete { get; set; }
+        public string ManufactureDateStr { get; set; }
         public IList<string> ProductTimes { get; set; } = new List<string>();
 
         #region 赠品信息
@@ -141,6 +140,7 @@ namespace Wesley.Client.Models.Sales
     /// </summary>
     public class SaleBillUpdateModel : BaseBalance
     {
+        public string BillNumber { get; set; }
         [Reactive] public int TerminalId { get; set; }
         [Reactive] public int BusinessUserId { get; set; }
         [Reactive] public int WareHouseId { get; set; }
@@ -287,6 +287,10 @@ namespace Wesley.Client.Models.Sales
         /// 签名
         /// </summary>
         public string Signature { get; set; }
+
+
+        //public SaleBillUpdateModel SBUM { get; set; }
+        //public CostExpenditureUpdateModel CEUM { get; set; }
     }
 
 

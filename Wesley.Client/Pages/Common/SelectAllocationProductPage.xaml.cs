@@ -8,22 +8,14 @@ namespace Wesley.Client.Pages.Common
 
     public partial class SelectAllocationProductPage : BaseContentPage<SelectAllocationProductPageViewModel>
     {
-        protected override void OnAppearing()
+        public SelectAllocationProductPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                InitializeComponent();
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
+
         }
 
         /// <summary>

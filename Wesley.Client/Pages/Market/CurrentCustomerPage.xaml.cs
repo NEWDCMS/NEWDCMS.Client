@@ -1,137 +1,158 @@
 ﻿using Acr.UserDialogs;
 using Wesley.Client.BaiduMaps;
 using Wesley.Client.Models.Terminals;
+using Wesley.Client.Services;
 using Wesley.Client.ViewModels;
+using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
 using ReactiveUI;
-using Shiny;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xamarin.Essentials;
 using Xamarin.Forms;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Wesley.Client.Pages.Market
 {
-
     public partial class CurrentCustomerPage : BaseContentPage<CurrentCustomerPageViewModel>
     {
-        private CancellationTokenSource cts => new CancellationTokenSource();
-        private IDisposable _locationDisposable;
-
-        /// <summary>
-        /// 画圆
-        /// </summary>
+        private readonly IBaiduLocationService _locationService;
         public List<Circle> Circles { get; set; } = new List<Circle>();
-
-        /// <summary>
-        /// 表示当前加载所有标注点
-        /// </summary>
         public List<Coordinate> Points { get; set; } = new List<Coordinate>();
 
+        public CurrentCustomerPage()
+        {
+            try
+            {
+                InitializeComponent();
+
+                _locationService = App.Resolve<IBaiduLocationService>();
+
+                ToolbarItems?.Clear();
+                foreach (var toolBarItem in this.GetToolBarItems5(ViewModel).ToList())
+                {
+                    ToolbarItems.Add(toolBarItem);
+                }
+
+                this.disposer.Add
+                (
+                    MessageBus.Current
+                    .Listen<ObservableCollection<TerminalModel>>(Constants.TRACKTERMINALS_KEY)?.Subscribe(items =>
+                    {
+                        try
+                        {
+                            if (items != null && items.Any())
+                            {
+                                map?.Pins?.Clear();
+                                Points.Clear();
+
+                                foreach (var loc in items)
+                                {
+                                    var coordinate = new Coordinate(loc.Location_Lat ?? 0, loc.Location_Lng ?? 0);
+                                    AddOverlay(coordinate, "water_drop.png", loc);
+                                    Points.Add(new Coordinate()
+                                    {
+                                        Latitude = loc.Location_Lat ?? 0,
+                                        Longitude = loc.Location_Lng ?? 0
+                                    });
+                                }
+
+                                map?.SendStatusChanged(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
+                            }
+                        }
+                        catch (Exception)
+                        { }
+                    })
+                );
+
+            }
+            catch (NullReferenceException) { }
+            catch (RankException ex) { Crashes.TrackError(ex); }
+            catch (Exception ex) { Crashes.TrackError(ex); }
+        }
+
+        private void Map_StatusChanged(object sender, StatusChangedEventArgs e)
+        {
+            try
+            {
+                if (e != null)
+                {
+                    System.Diagnostics.Debug.Print($"位置更新--------1------------>Latitude:{e.Latitude}  Longitude:{e.Longitude}");
+
+                    var eLatitude = e.Latitude;
+                    var eLongitude = e.Longitude;
+
+                    if (null != ViewModel && eLatitude > 0 && eLongitude > 0)
+                    {
+                        // 判断是否超过25米 e.Latitude, e.Longitude
+                        var distance = MapHelper.CalculateDistance(eLatitude, eLongitude, ViewModel.Latitude, ViewModel.Longitude);
+                        if (distance >= 25)
+                        {
+                            if (ViewModel.Terminals.Any())
+                            {
+                                //if (!ViewModel.IsBusy)
+                                //    ViewModel.RefreshTerminals();
+
+                                ViewModel.Latitude = eLatitude;
+                                ViewModel.Longitude = eLongitude;
+
+                                //App.Resolve<IDialogService>()?.ShortAlert($"离上次偏移{distance:#.00}米");
+                            }
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
+            }
+        }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            if (Content == null)
-            {
-                try
-                {
-                    InitializeComponent();
-                    ToolbarItems.Clear();
-                    foreach (var toolBarItem in this.GetToolBarItems5(ViewModel).ToList())
-                    {
-                        ToolbarItems.Add(toolBarItem);
-                    }
-
-                    map.Loaded += MapLoaded;
-
-
-                    _locationDisposable = Observable
-                    .Interval(TimeSpan.FromSeconds(3))
-                    .SubOnMainThread(async _ =>
-                    {
-                        try
-                        {
-                            await UpdateCenter();
-                        }
-                        catch (Exception ex)
-                        {
-                            Crashes.TrackError(ex);
-                        }
-                    });
-
-                    MessageBus.Current
-                         .Listen<ObservableCollection<TerminalModel>>(Constants.TRACKTERMINALS_KEY)
-                         .Subscribe(items =>
-                         {
-                             map?.Pins?.Clear();
-                             Points.Clear();
-
-                             foreach (var loc in items)
-                             {
-                                 //Log.Write("red_location:", $"{loc.Location_Lat} = {loc.Location_Lng}");
-                                 var coordinate = new Coordinate(loc.Location_Lat ?? 0, loc.Location_Lng ?? 0);
-                                 AddOverlay(coordinate, "water_drop.png", loc);
-                                 Points.Add(new Coordinate()
-                                 {
-                                     Latitude = loc.Location_Lat ?? 0,
-                                     Longitude = loc.Location_Lng ?? 0
-                                 });
-                             }
-                             map?.SendStatusChanged();
-                         });
-                }
-                catch (Exception ex)
-                {
-                    Crashes.TrackError(ex);
-                }
-            }
+            map.Loaded += MapLoaded;
+            map.StatusChanged += Map_StatusChanged;
+            Set();
         }
-
 
         /// <summary>
         /// 加载地图
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="x"></param>
-        public async void MapLoaded(object sender, EventArgs x)
+        public void MapLoaded(object sender, EventArgs x)
         {
-            if (map != null)
+            try
             {
-                map.ShowCompass = true;
-                map.ShowUserLocation = true;
-                map.ShowScaleBar = true;
-                map.UserTrackingMode = UserTrackingMode.Follow;
-                map.Center = new Coordinate(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
-                map.ZoomLevel = 19;
-                map?.Pins?.Clear();
-
-                //状态更新时
-                map.StatusChanged += (_, e) =>
+                if (map != null)
                 {
-                    //map.Center = new Coordinate(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
-                };
+                    map.ShowZoomControl = false;
+                    map.ShowCompass = true;
+                    map.ShowUserLocation = true;
+                    map.ShowScaleBar = true;
+                    map.UserTrackingMode = UserTrackingMode.Follow;
+                    map.Center = new Coordinate(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
+                    map.ZoomLevel = 19;
+                    map?.Pins?.Clear();
 
-                var circle = new Circle()
-                {
-                    Color = Color.FromHex("#5A89FF"),
-                    Coordinate = map.Center,
-                    Radius = 100,
-                    Width = 1
-                };
-                map.Circles.Add(circle);
-
-                //开始
-                map.LocationService?.Start();
-
-                //
-                await UpdateCenter();
+                    var circle = new Circle()
+                    {
+                        Color = Color.FromHex("#5A89FF"),
+                        Coordinate = map.Center,
+                        Radius = 100,
+                        Width = 1
+                    };
+                    map.Circles.Add(circle);
+                }
             }
+            catch (Exception ex)
+            { }
         }
 
 
@@ -142,47 +163,44 @@ namespace Wesley.Client.Pages.Market
         /// <param name="image">图像</param>
         private void AddOverlay(Coordinate coord, string image, TerminalModel terminal)
         {
-            if (map != null)
+            try
             {
-                var macker = new Pin
+                if (map != null)
                 {
-                    Title = terminal.Name,
-                    Coordinate = coord,
-                    Animate = true,
-                    Draggable = true,
-                    Enabled3D = true,
-                    Image = XImage.FromResource(image),
-                    Terminal = terminal
-                };
+                    var macker = new Pin
+                    {
+                        Title = terminal.Name,
+                        Coordinate = coord,
+                        Animate = true,
+                        Draggable = true,
+                        Enabled3D = true,
+                        Image = XImage.FromResource(image),
+                        Terminal = terminal
+                    };
 
-                macker.Clicked += async (o, e) =>
-                 {
-                     if (e != null && e.Terminal != null)
+                    macker.Clicked += async (o, e) =>
                      {
-                         await ViewModel?.NavigateAsync("VisitStorePage", ("Terminaler", e?.Terminal));
-                     }
-                 };
-                map.Pins.Add(macker);
+                         if (e != null && e.Terminal != null)
+                         {
+                             await ViewModel?.NavigateAsync("VisitStorePage", ("Terminaler", e?.Terminal));
+                         }
+                     };
+                    map.Pins.Add(macker);
+                }
             }
+            catch (Exception ex)
+            { }
         }
+
 
         protected override void OnDisappearing()
         {
             try
             {
-
-                if (_locationDisposable != null)
-                {
-                    _locationDisposable?.Dispose();
-                    cts.Cancel();
-                }
-
                 if (map != null)
                 {
-                    //停止服务
                     map.Loaded -= MapLoaded;
-                    //停止
-                    map?.LocationService?.Stop();
+                    map.StatusChanged -= Map_StatusChanged;
                 }
 
                 base.OnDisappearing();
@@ -220,53 +238,22 @@ namespace Wesley.Client.Pages.Market
         /// <param name="e"></param>
         private async void FixedPosition_Clicked(object sender, EventArgs e)
         {
-            if (map != null)
-            {
-                using (UserDialogs.Instance.Loading("定位中...", () => { cts.Cancel(); }, cancelText: "取消"))
-                {
-                    map.ZoomLevel = 19;
-                    await UpdateCenter();
-                }
-            }
-        }
-
-        private async Task UpdateCenter()
-        {
             try
             {
-                var request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
-                var location = await Geolocation.GetLocationAsync(request, cts.Token);
-                if (location != null)
+                if (map != null)
                 {
-                    map?.LocationService.Converter(map, location.Latitude, location.Longitude);
+                    using (UserDialogs.Instance.Loading("定位中...", cancelText: "取消"))
+                    {
+                        map.ZoomLevel = 19;
+                        await _locationService?.UpdateCenter(map);
+                    }
                 }
             }
-
-            catch (FeatureNotEnabledException fneEx)
-            {
-                cts.Cancel();
-                Crashes.TrackError(fneEx);
-            }
-            catch (FeatureNotSupportedException fnsEx)
-            {
-                cts.Cancel();
-                Crashes.TrackError(fnsEx);
-            }
-            catch (Xamarin.Essentials.PermissionException pEx)
-            {
-                cts.Cancel();
-                Crashes.TrackError(pEx);
-            }
-            catch (Exception ex)
-            {
-                cts.Cancel();
-                Crashes.TrackError(ex);
-            }
-            finally
-            {
-                map.Center = new Coordinate(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0);
-            }
+            catch (Exception)
+            { }
         }
+
+
 
         /// <summary>
         /// 自动缩放视图
@@ -299,7 +286,7 @@ namespace Wesley.Client.Pages.Market
                         var minLat = Points[0].Latitude;
 
                         Coordinate res;
-                        for (var i = Points.Count - 1; i >= 0; i--)
+                        for (var i = Points.Count - 1; i > 0; i--)
                         {
                             res = Points[i];
                             if (res.Longitude > maxLng) maxLng = res.Longitude;
@@ -368,5 +355,34 @@ namespace Wesley.Client.Pages.Market
         }
 
 
+        public static TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(2);
+        void Set()
+        {
+            this.disposer ??= new CompositeDisposable();
+            this.disposer.Add
+            (
+                Observable
+                    .Interval(Interval)
+                    .Subscribe(_ => this.TryRun())
+            );
+        }
+        void TryRun()
+        {
+            try
+            {
+                Task.Run(async () =>
+                {
+                    if (_locationService != null)
+                    {
+                        if (map != null)
+                            await _locationService.UpdateCenter(map);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.Message);
+            }
+        }
     }
 }

@@ -3,30 +3,31 @@ using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+
 namespace Wesley.Client.ViewModels
 {
 
     public class NewsViewerPageViewModel : ViewModelBase
     {
         private readonly INewsService _newsService;
-        [Reactive] public string Html { get; set; } = "前不见古人，后不见来者！";
+        [Reactive] public string Html { get; set; } = "空空如也，刷新试试~";
 
 
         public NewsViewerPageViewModel(INavigationService navigationService,
-
-
             INewsService newsService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             _navigationService = navigationService;
             _dialogService = dialogService;
             _newsService = newsService;
 
             Title = "资讯预览";
-            NewsLoader = new ViewModelLoader<string>(ApplicationExceptions.ToString, "前不见古人，后不见来者！");
+            NewsLoader = new ViewModelLoader<string>(ApplicationExceptions.ToString, "空空如也，刷新试试~");
 
         }
 
@@ -49,7 +50,7 @@ namespace Wesley.Client.ViewModels
                     return await Task.FromResult(Html);
                 });
                 this.BindBusyCommand(Load);
-                this.ExceptionsSubscribe();
+
                 ((ICommand)Load)?.Execute(null);
             }
             catch (Exception ex)

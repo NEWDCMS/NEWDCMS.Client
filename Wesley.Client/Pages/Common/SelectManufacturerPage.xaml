@@ -51,10 +51,10 @@
                         Margin="{StaticResource MR5}" />
             </StackLayout>
         </Grid>
-        <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
+        <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
                      Command="{Binding RefreshCommand}"
                      RefreshColor="{StaticResource PrimaryDarkColor}">
-            <ScrollView>
+
                 <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
                                        ViewModelLoader="{Binding ManufacturersLoader}">
                     <CollectionView ItemsSource="{Binding Manufacturers}"
@@ -65,7 +65,7 @@
                                     SelectionChangedCommandParameter="{x:Reference manufacturers}"
                                     RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
                                     RemainingItemsThreshold="{Binding ItemTreshold}"
-                                    SelectionMode="Single">
+                                    SelectionMode="Single" VerticalScrollBarVisibility="Always">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Style="{StaticResource GGrid}"
@@ -131,7 +131,7 @@
                         </CollectionView.EmptyView>
                     </CollectionView>
                 </custom:TaskLoaderView>
-            </ScrollView>
+ 
         </RefreshView>
     </StackLayout>
 </pages:BaseContentPage>

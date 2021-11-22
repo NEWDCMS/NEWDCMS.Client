@@ -33,7 +33,7 @@ namespace Wesley.Behaviors
             base.OnDetachingFrom(element);
         }
 
-        void OnIsActiveChanged(object sender, EventArgs e)
+        private void OnIsActiveChanged(object sender, EventArgs e)
         {
             var element = (TVisualElement)sender;
             element.Behaviors.Remove(this);
@@ -42,7 +42,7 @@ namespace Wesley.Behaviors
             {
                 var loadingView = (View)LoadingTemplate.CreateContent();
                 SetContent(element, loadingView);
-                 
+
                 Task.Run(() =>
                 {
                     var contentView = (View)ContentTemplate.CreateContent();

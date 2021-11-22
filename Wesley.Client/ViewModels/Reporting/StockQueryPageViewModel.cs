@@ -1,6 +1,8 @@
 ﻿using Acr.UserDialogs;
 using Wesley.Client.Enums;
+using Wesley.Client.Models;
 using Wesley.Client.Models.WareHouses;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
@@ -38,12 +40,11 @@ namespace Wesley.Client.ViewModels
              IWareHousesService wareHousesService,
              IAccountingService accountingService,
              IReportingService reportingService,
-
-
-             IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+             IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "库存查询";
-
+            this.ForceRefresh = true;
 
             _reportingService = reportingService;
 
@@ -53,7 +54,7 @@ namespace Wesley.Client.ViewModels
                 .Select(s => s)
                 .Throttle(TimeSpan.FromSeconds(2), RxApp.MainThreadScheduler)
                 .Subscribe(s => { ((ICommand)SerchCommand)?.Execute(s); })
-                .DisposeWith(DestroyWith);
+                .DisposeWith(DeactivateWith);
 
             this.SerchCommand = ReactiveCommand.Create<string>(e =>
             {
@@ -72,18 +73,22 @@ namespace Wesley.Client.ViewModels
 
                 try
                 {
-                    this.StockSeries.Clear();
+                    this.StockSeries?.Clear();
+                    var pending = new List<StockCategoryGroup>();
                     var results = await GetStockCategoryGroupPage(0, PageSize);
-                    if (results != null)
+                    if (results != null && results.Any())
                     {
                         foreach (var item in results)
                         {
-                            if (StockSeries.Count(s => s.CategoryName == item.CategoryName) == 0)
+                            if (pending?.Count(s => s.CategoryName == item.CategoryName) == 0)
                             {
-                                this.StockSeries.Add(item);
+                                pending.Add(item);
                             }
                         }
-                        this.TotalAmount = this.StockSeries?.Select(p => p.SubCostAmount).Sum();
+                        this.TotalAmount = pending?.Select(p => p.SubCostAmount).Sum();
+
+                        if (pending.Any())
+                            this.StockSeries = new ObservableRangeCollection<StockCategoryGroup>(pending);
                     }
                 }
                 catch (Exception ex)
@@ -91,9 +96,7 @@ namespace Wesley.Client.ViewModels
                     Crashes.TrackError(ex);
                 }
 
-                this.StockSeries = new ObservableRangeCollection<StockCategoryGroup>(StockSeries);
                 return StockSeries;
-
             });
 
 
@@ -104,12 +107,11 @@ namespace Wesley.Client.ViewModels
                 {
                     try
                     {
-                        int pageIdex = StockSeries.Count / (PageSize == 0 ? 1 : PageSize);
+                        int pageIdex = StockSeries?.Count ?? 0 / (PageSize == 0 ? 1 : PageSize);
                         var results = await GetStockCategoryGroupPage(pageIdex, PageSize);
-                        var previousLastItem = StockSeries.Last();
                         foreach (var item in results)
                         {
-                            if (StockSeries.Count(s => s.CategoryName == item.CategoryName) == 0)
+                            if (StockSeries?.Count(s => s.CategoryName == item.CategoryName) == 0)
                             {
                                 StockSeries.Add(item);
                             }
@@ -136,7 +138,6 @@ namespace Wesley.Client.ViewModels
 
             }, this.WhenAny(x => x.StockSeries, x => x.GetValue().Count > 0));
 
-
             //仓库选择
             this.StockSelected = ReactiveCommand.Create<object>(async e =>
             {
@@ -145,48 +146,31 @@ namespace Wesley.Client.ViewModels
                      Filter.WareHouseId = data.Id;
                      Filter.WareHouseName = data.Name;
                      ((ICommand)Load)?.Execute(null);
-                 }, WareHouseType.CangKu);
+                 }, BillTypeEnum.None);
             });
 
-            StockSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
 
-            //菜单选择
-            this.SetMenus(async (x) =>
-           {
-               switch (x)
-               {
-                   case MenuEnum.ZEROSTOCK:
-                       {
-                           ShowZero = true;
-                           ((ICommand)Load)?.Execute(null);
-                       }
-                       break;
-                   case MenuEnum.DELETEPRODUCT:
-                       {
-                           Disabled = true;
-                           ((ICommand)Load)?.Execute(null);
-                       }
-                       break;
-                   case MenuEnum.SCAN:
-                       {
-                           try
-                           {
-                               await this.NavigateAsync("ScanBarcodePage", ("action", "add"));
-                           }
-                           catch (Exception ex)
-                           {
-                               Crashes.TrackError(ex);
-                           }
-                       }
-                       break;
-               }
-           }, 15, 16, 17);
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
+            {
+                //ZEROSTOCK
+                { MenuEnum.ZEROSTOCK, (m,vm)=>{
+                    ShowZero = true;
+                    ((ICommand)Load)?.Execute(null);
+                } },
+                 //DELETEPRODUCT
+                { MenuEnum.DELETEPRODUCT, (m,vm)=>{
+                    Disabled = true;
+                    ((ICommand)Load)?.Execute(null);
+                } },
+                 //SCAN
+                { MenuEnum.SCAN, async (m,vm)=>{
+                   await this.NavigateAsync("ScanBarcodePage", ("action", "add"));
+                  } }
+            });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
-
-
 
 
         public async Task<IList<StockCategoryGroup>> GetStockCategoryGroupPage(int pageNumber, int pageSize)
@@ -202,8 +186,8 @@ namespace Wesley.Client.ViewModels
             bool? showZeroStack = ShowZero;
             int pagenumber = pageNumber;
 
-            var results = await _reportingService.GetStocksAsync(wareHouseId, categoryId, productId, productName, brandId, status, maxStock, showZeroStack, pagenumber, this.ForceRefresh, calToken: cts.Token);
-            if (results != null)
+            var results = await _reportingService.GetStocksAsync(wareHouseId, categoryId, productId, productName, brandId, status, maxStock, showZeroStack, pagenumber, this.ForceRefresh, new System.Threading.CancellationToken());
+            if (results != null && results.Any())
             {
                 foreach (var group in results.GroupBy(s => s.CategoryId))
                 {
@@ -223,7 +207,12 @@ namespace Wesley.Client.ViewModels
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(15, 16, 17);
+
             ((ICommand)Load)?.Execute(null);
         }
+
     }
 }

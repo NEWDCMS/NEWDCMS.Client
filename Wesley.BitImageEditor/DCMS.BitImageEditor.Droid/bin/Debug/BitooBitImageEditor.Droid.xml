@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DCMS.BitImageEditor.Droid</name>
+    </assembly>
+    <members>
+        <member name="T:DCMS.BitImageEditor.Droid.Platform">
+            <summary> Required to use <see cref="N:DCMS.BitImageEditor"/> on Android</summary>
+        </member>
+        <member name="M:DCMS.BitImageEditor.Droid.Platform.Init(Xamarin.Forms.Platform.Android.FormsAppCompatActivity,Android.OS.Bundle)">
+            <summary>
+            initializes <see cref="N:DCMS.BitImageEditor"/>
+            </summary>
+            <param name="activity">current <see cref="T:Android.App.Activity"/> </param>
+            <param name="bundle">current <see cref="T:Android.OS.Bundle"/> </param>
+        </member>
+        <member name="M:DCMS.BitImageEditor.Droid.Platform.OnActivityResult(System.Int32,Android.App.Result,Android.Content.Intent)">
+            <summary>required to get an image from the gallery</summary>
+        </member>
+    </members>
+</doc>

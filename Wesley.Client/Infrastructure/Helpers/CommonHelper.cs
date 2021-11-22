@@ -1,12 +1,160 @@
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 
 namespace Wesley.Infrastructure.Helpers
 {
+    public class NumberUtils
+    {
+        public static string MoneyToUpper(decimal LowerMoney)
+        {
+            string functionReturnValue = "";
+            bool IsNegative = false;
+            string strLower = Math.Round(LowerMoney, 2).ToString();
+            if (LowerMoney < 0)
+            {
+                strLower = strLower[1..];
+                IsNegative = true;
+            }
+            else if (LowerMoney == 0)
+            {
+                return "零";
+            }
+            string strUpart = null;
+            string strUpper = null;
+            int iTemp = 0;
+            if (strLower.IndexOf(".") > 0)
+            {
+                if (strLower.IndexOf(".") == strLower.Length - 2)
+                {
+                    strLower += "0";
+                }
+            }
+            else
+            {
+                strLower += ".00";
+            }
+            iTemp = 1;
+            strUpper = "";
+            while (iTemp <= strLower.Length)
+            {
+                switch (strLower.Substring(strLower.Length - iTemp, 1))
+                {
+                    case ".":
+                        strUpart = "圆";
+                        break;
+                    case "0":
+                        strUpart = "零";
+                        break;
+                    case "1":
+                        strUpart = "壹";
+                        break;
+                    case "2":
+                        strUpart = "贰";
+                        break;
+                    case "3":
+                        strUpart = "叁";
+                        break;
+                    case "4":
+                        strUpart = "肆";
+                        break;
+                    case "5":
+                        strUpart = "伍";
+                        break;
+                    case "6":
+                        strUpart = "陆";
+                        break;
+                    case "7":
+                        strUpart = "柒";
+                        break;
+                    case "8":
+                        strUpart = "捌";
+                        break;
+                    case "9":
+                        strUpart = "玖";
+                        break;
+                }
+
+                strUpart += iTemp switch
+                {
+                    1 => "分",
+                    2 => "角",
+                    3 => "",
+                    4 => "",
+                    5 => "拾",
+                    6 => "佰",
+                    7 => "仟",
+                    8 => "万",
+                    9 => "拾",
+                    10 => "佰",
+                    11 => "仟",
+                    12 => "亿",
+                    13 => "拾",
+                    14 => "佰",
+                    15 => "仟",
+                    16 => "万",
+                    _ => "",
+                };
+                strUpper = strUpart + strUpper;
+                iTemp = iTemp + 1;
+            }
+
+            strUpper = strUpper.Replace("零拾", "零");
+            strUpper = strUpper.Replace("零佰", "零");
+            strUpper = strUpper.Replace("零仟", "零");
+            strUpper = strUpper.Replace("零零零", "零");
+            strUpper = strUpper.Replace("零零", "零");
+            strUpper = strUpper.Replace("零角零分", "整");
+            strUpper = strUpper.Replace("零分", "整");
+            strUpper = strUpper.Replace("零角", "零");
+            strUpper = strUpper.Replace("零亿零万零圆", "亿圆");
+            strUpper = strUpper.Replace("亿零万零圆", "亿圆");
+            strUpper = strUpper.Replace("零亿零万", "亿");
+            strUpper = strUpper.Replace("零万零圆", "万圆");
+            strUpper = strUpper.Replace("零亿", "亿");
+            strUpper = strUpper.Replace("零万", "万");
+            strUpper = strUpper.Replace("零圆", "圆");
+            strUpper = strUpper.Replace("零零", "零");
+
+            // 对壹圆以下的金额的处理
+            if (strUpper.Substring(0, 1) == "圆")
+            {
+                strUpper = strUpper[1..];
+            }
+            if (strUpper.Substring(0, 1) == "零")
+            {
+                strUpper = strUpper[1..];
+            }
+            if (strUpper.Substring(0, 1) == "角")
+            {
+                strUpper = strUpper[1..];
+            }
+            if (strUpper.Substring(0, 1) == "分")
+            {
+                strUpper = strUpper[1..];
+            }
+            if (strUpper.Substring(0, 1) == "整")
+            {
+                strUpper = "零圆整";
+            }
+            functionReturnValue = strUpper;
+
+            if (IsNegative == true)
+            {
+                return "负" + functionReturnValue;
+            }
+            else
+            {
+                return functionReturnValue;
+            }
+        }
+
+    }
     public class Utils
     {
         // 两次点击按钮之间的点击间隔不能少于1000毫秒
@@ -37,14 +185,28 @@ namespace Wesley.Infrastructure.Helpers
         /// <returns></returns>
         public static string FormatJsonStr(string sourJsonStr)
         {
-            var serializer = new JsonSerializer();
-            using (var tr = new StringReader(sourJsonStr))
+            try
             {
-                using (var jtr = new JsonTextReader(tr))
+                if (!string.IsNullOrEmpty(sourJsonStr))
                 {
-                    object obj = serializer.Deserialize(jtr);
-                    return obj != null ? obj.ToString() : sourJsonStr;
+                    var serializer = new JsonSerializer();
+                    using (var tr = new StringReader(sourJsonStr))
+                    {
+                        using (var jtr = new JsonTextReader(tr))
+                        {
+                            object obj = serializer.Deserialize(jtr);
+                            return obj != null ? obj.ToString() : sourJsonStr;
+                        }
+                    }
                 }
+                else
+                {
+                    return "";
+                }
+            }
+            catch (Exception)
+            {
+                return "";
             }
         }
 
@@ -157,7 +319,7 @@ namespace Wesley.Infrastructure.Helpers
             if (str.Length > 7)
             {
                 var start = int.Parse(str.Substring(0, 7));
-                var end = int.Parse(str.Substring(7, str.Length - 7));
+                var end = int.Parse(str[7..]);
                 storeId = start + end;
             }
             var numArry = GetNumHash(storeId, ref realCount);
@@ -473,6 +635,15 @@ namespace Wesley.Infrastructure.Helpers
             {
                 return false;
             }
+        }
+    }
+
+    public static class DistinctHelper
+    {
+        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            var identifiedKeys = new HashSet<TKey>();
+            return source.Where(element => identifiedKeys.Add(keySelector(element)));
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Wesley.Client.Services
 
         private readonly MakeRequest _makeRequest;
 
-        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/dcms/config/accounting";
+        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/Wesley/config/accounting";
 
         public AccountingService(MakeRequest makeRequest)
         {
@@ -78,7 +78,5 @@ namespace Wesley.Client.Services
                 return null;
             }
         }
-
-
     }
 }

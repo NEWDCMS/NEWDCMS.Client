@@ -1,9 +1,9 @@
 ﻿
-using Wesley.Effects;
+using Wesley.Client.Effects;
 using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace Wesley.Client.CustomViews.Views
+namespace Wesley.Client.CustomViews
 {
 
     public partial class Toolbar : ContentView

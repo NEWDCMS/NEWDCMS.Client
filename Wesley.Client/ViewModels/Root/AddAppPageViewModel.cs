@@ -5,11 +5,12 @@ using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive.Disposables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive.Disposables;
+
 using System.Reactive.Linq;
 using System.Windows.Input;
 
@@ -21,7 +22,8 @@ namespace Wesley.Client.ViewModels
         [Reactive] public bool SelectAll { get; set; }
 
         public AddAppPageViewModel(INavigationService navigationService,
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加桌面快捷方式";
 
@@ -61,11 +63,11 @@ namespace Wesley.Client.ViewModels
             ((ICommand)Load)?.Execute(null);
         }
 
-        public override void OnNavigatedFrom(INavigationParameters parameters)
+        public override void OnDisappearing()
         {
+            base.OnDisappearing();
             try
             {
-                base.OnNavigatedFrom(parameters);
                 var apps = this.AppList?.Select(a => a).ToList();
                 if (apps != null)
                     Settings.AppDatas = JsonConvert.SerializeObject(apps ?? new List<Module>());

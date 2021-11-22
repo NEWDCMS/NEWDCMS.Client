@@ -1,9 +1,11 @@
 ﻿using Wesley.Client.CustomViews;
 using Wesley.Client.ViewModels;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Xamarin.Forms;
+
 namespace Wesley.Client.Pages
 {
     /// <summary>
@@ -47,7 +49,7 @@ namespace Wesley.Client.Pages
         /// <param name="viewModel"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        public static BindableToolbarItem GetSubmitItem<T>(T viewModel, string icon = "\uf0c7") where T : ViewModelBase
+        public static BindableToolbarItem GetSubmitItem<T>(T viewModel, string icon = "保存") where T : ViewModelBase
         {
             var item = BulidButton(icon, () =>
             {
@@ -71,6 +73,8 @@ namespace Wesley.Client.Pages
             item.SetBinding(BindableToolbarItem.IsVisibleProperty, new Binding("ShowSubmitBtn", BindingMode.TwoWay));
             item.SetBinding(BindableToolbarItem.IsEnabledProperty, new Binding("EnabledSubmitBtn", BindingMode.TwoWay));
             item.SetBinding(BindableToolbarItem.TextProperty, new Binding("SubmitText", BindingMode.TwoWay));
+
+
             return item;
         }
 
@@ -139,28 +143,48 @@ namespace Wesley.Client.Pages
         /// <returns></returns>
         public static BindableToolbarItem GetMenusItem<T>(T viewModel, BaseContentPage<T> page) where T : ViewModelBase
         {
-            return GetEllipsisItem(() =>
+            return GetEllipsisItem(async () =>
            {
-               ((RightSideMasterPage)page.SlideMenu).SetBindMenus(viewModel.BindMenus, viewModel.GetType().FullName);
-               page.ShowMenu();
+               try
+               {
+                   if (viewModel != null)
+                   {
+                       if (viewModel._popupMenu != null)
+                       {
+                           if (PopupNavigation.Instance.PopupStack.Count > 0)
+                           {
+                               await PopupNavigation.Instance.PopAllAsync();
+                           }
+
+                           await PopupNavigation.Instance.PushAsync(viewModel._popupMenu);
+                       }
+                   }
+               }
+               catch (Rg.Plugins.Popup.Exceptions.RGPageInvalidException ex)
+               {
+                   System.Diagnostics.Debug.Print(ex.Message);
+               }
            });
         }
 
-        /// <summary>
-        /// 溢出
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="viewModel"></param>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        public static BindableToolbarItem GetMenusItem<T>(T viewModel, BaseTabbedPage<T> page) where T : ViewModelBase
-        {
-            return GetEllipsisItem(() =>
-           {
-               ((RightSideMasterPage)page.SlideMenu).SetBindMenus(viewModel.BindMenus, viewModel.GetType().FullName);
-               page.ShowMenu();
-           });
-        }
+        ///// <summary>
+        ///// 溢出
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="viewModel"></param>
+        ///// <param name="page"></param>
+        ///// <returns></returns>
+        //public static BindableToolbarItem GetMenusItem<T>(T viewModel, BaseTabbedPage<T> page) where T : ViewModelBase
+        //{
+        //    return GetEllipsisItem(() =>
+        //   {
+        //       if (viewModel != null)
+        //       {
+        //           ((RightSideMasterPage)page.SlideMenu).SetBindMenus(viewModel.BindMenus, viewModel.GetType().FullName);
+        //           page.ShowMenu();
+        //       }
+        //   });
+        //}
 
         /// <summary>
         /// 提交单据+溢出菜单
@@ -174,7 +198,7 @@ namespace Wesley.Client.Pages
         {
             var list = new List<BindableToolbarItem>
             {
-                GetSubmitItem(viewModel, "交账"),
+                //GetSubmitItem(viewModel, "交账"),
                 GetPrintItem(viewModel)
             };
             return list;
@@ -188,13 +212,17 @@ namespace Wesley.Client.Pages
         /// <returns></returns>
         public static BindableToolbarItem GetPrintItem<T>(T viewModel) where T : ViewModelBase
         {
-            return BulidButton("\uf02f", () =>
+            //\uf02f
+            var btn = BulidButton("打印", () =>
             {
                 if (viewModel != null)
                 {
                     ((ICommand)viewModel.PrintCommand)?.Execute(null);
                 }
             });
+            btn.OrderIndex = 1;
+            btn.SetBinding(BindableToolbarItem.IsVisibleProperty, new Binding("ShowPrintBtn", BindingMode.TwoWay));
+            return btn;
         }
 
 
@@ -267,7 +295,7 @@ namespace Wesley.Client.Pages
 
         public static void SetToolBarItems<T>(this BaseContentPage<T> page, T viewModel) where T : ViewModelBase
         {
-            page.ToolbarItems.Clear();
+            page.ToolbarItems?.Clear();
 
             var list = new List<BindableToolbarItem>
             {
@@ -281,7 +309,7 @@ namespace Wesley.Client.Pages
 
         public static void SetToolBarItems<T>(this BaseContentPage<T> page, T viewModel, params (string, object)[] parameters) where T : ViewModelBase
         {
-            page.ToolbarItems.Clear();
+            page.ToolbarItems?.Clear();
 
             var list = new List<BindableToolbarItem>
             {
@@ -295,13 +323,22 @@ namespace Wesley.Client.Pages
             }
         }
 
-
+        /// <summary>
+        /// TabbedPage工具栏菜单
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="page"></param>
+        /// <param name="viewModel"></param>
+        /// <param name="constraint"></param>
+        /// <param name="IsFilter"></param>
+        /// <param name="parameters"></param>
         public static void SetTabsToolBarItems<T>(this BaseTabbedPage<T> page, T viewModel, string constraint = "", bool IsFilter = true, params (string, object)[] parameters) where T : ViewModelBase
         {
-            page.ToolbarItems.Clear();
+            page.ToolbarItems?.Clear();
 
             var list = new List<BindableToolbarItem>();
 
+            //筛选
             if (IsFilter)
             {
                 list.Add(BulidButton("\uf0b0", async () =>
@@ -313,13 +350,27 @@ namespace Wesley.Client.Pages
                }));
             };
 
-            list.Add(BulidButton("\uf142", () =>
+            //溢出菜单
+            list.Add(BulidButton("\uf142", async () =>
             {
-                if (viewModel != null)
+                try
                 {
-                    string key = string.Format("{0}_SELECTEDTAB_{1}", constraint.ToUpper(), 0);
-                    ((RightSideMasterPage)page.SlideMenu).SetBindMenus(viewModel.BindMenus, key);
-                    page.ShowMenu();
+                    if (viewModel != null)
+                    {
+                        if (viewModel._popupMenu != null)
+                        {
+                            if (PopupNavigation.Instance.PopupStack.Count > 0)
+                            {
+                                await PopupNavigation.Instance.PopAllAsync();
+                            }
+
+                            await PopupNavigation.Instance.PushAsync(viewModel._popupMenu);
+                        }
+                    }
+                }
+                catch (Rg.Plugins.Popup.Exceptions.RGPageInvalidException)
+                {
+                    //The page has been pushed already. Pop or remove the page before to push it again
                 }
             }));
 
@@ -342,16 +393,25 @@ namespace Wesley.Client.Pages
         {
             return GetToolBarItems(page, viewModel, showSubMit, null);
         }
-        public static IList<BindableToolbarItem> GetToolBarItems<T>(this BaseContentPage<T> page, T viewModel, bool showSubMit = true, string btnText = "\uf0c7") where T : ViewModelBase
+        public static IList<BindableToolbarItem> GetToolBarItems<T>(this BaseContentPage<T> page, T viewModel, bool showSubMit = true, string btnText = "保存", bool showPrint = true) where T : ViewModelBase
         {
-            if (string.IsNullOrEmpty(btnText)) btnText = "\uf0c7";
+            //\uf0c7
+            if (string.IsNullOrEmpty(btnText)) btnText = "保存";
 
             var list = new List<BindableToolbarItem>();
+
             if (showSubMit)
             {
                 list.Add(GetSubmitItem(viewModel, btnText));
             }
+
+            if (showPrint)
+            {
+                list.Add(GetPrintItem(viewModel));
+            }
+
             list.Add(GetMenusItem(viewModel, page));
+
             return list;
         }
 
@@ -364,11 +424,13 @@ namespace Wesley.Client.Pages
                 list.Add(GetSubmitItem(viewModel));
             }
 
-            list.Add(BulidButton("\uf0b0", () =>
-            {
-                ((RightProductCategoryMasterPage)page.SlideMenu).SetBindMenus(viewModel.BindCategories, viewModel.GetType().FullName);
-                page.ShowMenu();
-            }));
+            //4.0取消类别筛选
+            //list.Add(BulidButton("\uf0b0", async () =>
+            //{
+            //    //((RightProductCategoryMasterPage)page.SlideMenu).SetBindMenus(viewModel.BindCategories, viewModel.GetType().FullName);
+            //    //page.ShowMenu();
+            //    await PopupNavigation.Instance.PushAsync(new ProductCategoryPage());
+            //}));
 
             return list;
         }

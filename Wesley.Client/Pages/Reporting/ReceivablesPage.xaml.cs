@@ -1,29 +1,31 @@
 ﻿using Wesley.Client.ViewModels;
 using Microsoft.AppCenter.Crashes;
 using System;
-using Xamarin.Forms;
+using System.Linq;
 namespace Wesley.Client.Pages.Reporting
 {
 
     public partial class ReceivablesPage : BaseContentPage<ReceivablesPageViewModel>
     {
-
-        protected override void OnAppearing()
+        public ReceivablesPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
+                InitializeComponent();
+                ToolbarItems?.Clear();
+                foreach (var toolBarItem in this.GetToolBarItems6(ViewModel, ("Filter", new Models.FilterModel()
                 {
-                    try
-                    {
-                        InitializeComponent();
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                    DistrictEnable = true,
+                    BusinessUserEnable = true,
+                    StartTimeEnable = true,
+                    EndTimeEnable = true
+                })).ToList())
+                {
+                    ToolbarItems.Add(toolBarItem);
+                }
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
+
         }
     }
 }

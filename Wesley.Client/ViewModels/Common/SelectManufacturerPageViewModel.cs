@@ -5,6 +5,7 @@ using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive.Disposables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,9 +24,8 @@ namespace Wesley.Client.ViewModels
 
         public SelectManufacturerPageViewModel(INavigationService navigationService,
             IManufacturerService manufacturerService,
-
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "选择供应商";
 
@@ -44,11 +44,14 @@ namespace Wesley.Client.ViewModels
                     Manufacturers.Clear();
 
                     var items = await GetManufacturersPage(0, PageSize);
-                    foreach (var item in items)
+                    if (items != null)
                     {
-                        if (Manufacturers.Count(s => s.Id == item.Id) == 0)
+                        foreach (var item in items)
                         {
-                            Manufacturers.Add(item);
+                            if (Manufacturers.Count(s => s.Id == item.Id) == 0)
+                            {
+                                Manufacturers.Add(item);
+                            }
                         }
                     }
                 }
@@ -74,18 +77,21 @@ namespace Wesley.Client.ViewModels
                         int pageIdex = Manufacturers.Count / (PageSize == 0 ? 1 : PageSize);
                         var items = await GetManufacturersPage(pageIdex, PageSize);
                         var previousLastItem = Terminals.Last();
-                        foreach (var item in items)
+                        if (items != null)
                         {
-                            if (Manufacturers.Count(s => s.Id == item.Id) == 0)
+                            foreach (var item in items)
                             {
-                                Manufacturers.Add(item);
+                                if (Manufacturers.Count(s => s.Id == item.Id) == 0)
+                                {
+                                    Manufacturers.Add(item);
+                                }
                             }
-                        }
 
-                        if (items.Count() == 0 || items.Count() == Terminals.Count)
-                        {
-                            ItemTreshold = -1;
-                            return Manufacturers.ToList();
+                            if (items.Count() == 0 || items.Count() == Terminals.Count)
+                            {
+                                ItemTreshold = -1;
+                                return Manufacturers.ToList();
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -109,10 +115,10 @@ namespace Wesley.Client.ViewModels
             {
                 await _navigationService.GoBackAsync(("Manufacturer", item));
                 this.Selecter = null;
-            });
+            }).DisposeWith(DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
 
@@ -122,7 +128,7 @@ namespace Wesley.Client.ViewModels
 
             var manufacturers = new List<ManufacturerModel>();
 
-            var result = await _manufacturerService.GetManufacturersAsync(this.ForceRefresh, calToken: cts.Token);
+            var result = await _manufacturerService.GetManufacturersAsync(this.ForceRefresh, new System.Threading.CancellationToken());
 
             if (result != null)
             {

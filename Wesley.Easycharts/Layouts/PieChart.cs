@@ -1,4 +1,4 @@
-﻿namespace Wesley.Easycharts
+﻿namespace DCMS.Easycharts
 {
     /// <summary>
     /// 饼图

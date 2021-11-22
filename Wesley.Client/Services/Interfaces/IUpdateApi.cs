@@ -15,7 +15,7 @@ namespace Wesley.Client.Services
     ////http://api.jsdcms.com:9998/
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms/system/app/android", true, isAutoRegistrable: false), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IMQApi
     {
 

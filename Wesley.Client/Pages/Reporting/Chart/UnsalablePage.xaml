@@ -3,6 +3,7 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:chart="clr-namespace:Wesley.ChartJS;assembly=Wesley.ChartJS"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.Reporting.UnsalablePage"
@@ -11,117 +12,126 @@
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:UnsalablePageViewModel">
 
-    <ContentPage.Resources>
-        
-        
-    </ContentPage.Resources>
-   
-    <AbsoluteLayout>
-        <StackLayout HorizontalOptions="FillAndExpand"
-                     Spacing="0"
-                     AbsoluteLayout.LayoutBounds="0,0,1,1"
-                     AbsoluteLayout.LayoutFlags="All"
-                     Padding="0,0,0,45">
-            <!--统计图-->
-            <custom:ChartBar BindingContext="{Binding}" />
-            <custom:HeaderView ControlTemplate="{StaticResource Unsalable_Template}" />
-            <RefreshView IsRefreshing="{Binding Path=IsBusy, Mode=OneWay}"
-                         Command="{Binding RefreshCommand}"
-                         RefreshColor="{StaticResource PrimaryDarkColor}">
-                <ScrollView>
-                    <StackLayout BindableLayout.ItemsSource="{Binding RankSeries,Mode=TwoWay}"
-                                 Spacing="0">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Style="{StaticResource GGrid}">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="40" />
-                                        <RowDefinition Height="40" />
-                                        <RowDefinition Height="40" />
-                                        <RowDefinition Height=".7" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="200" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <!--商品名称-->
-                                    <Label Grid.Row="0"
-                                           Grid.Column="0"
-                                           Grid.RowSpan="3"
-                                           Text="{Binding ProductName}"
-                                           FontFamily="QSB"
-                                           FontSize="{StaticResource FT14}"
-                                           HorizontalOptions="FillAndExpand"
-                                           TextColor="{StaticResource PrimaryTextColor}"
-                                           VerticalOptions="CenterAndExpand"
-                                           Margin="{StaticResource ML10}"></Label>
-                                    <!--净销量-->
-                                    <Label Grid.Row="0"
-                                           Grid.Column="1"
-                                           Text="{Binding TotalSumNetQuantity}"
-                                           FontFamily="QSB"
-                                           HorizontalOptions="End"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource PrimaryTextColor}"
-                                           VerticalOptions="End"
-                                           Margin="{StaticResource MR10}" />
-                                    <!--销售净额-->
-                                    <Label Grid.Row="0"
-                                           Grid.Column="2"
-                                           Text="{Binding TotalSumNetAmount,StringFormat=' {0:F2}'}"
-                                           FontFamily="QSB"
-                                           HorizontalOptions="End"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource PrimaryTextColor}"
-                                           VerticalOptions="End"
-                                           Margin="{StaticResource MR10}" />
-                                    <!--详细-->
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Text="{Binding TotalSumSaleQuantity,StringFormat='销量：{0}'}"
-                                           HorizontalOptions="End"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource DividerColor}"
-                                           VerticalOptions="Center"
-                                           Margin="{StaticResource MR10}" />
-                                    <Label Grid.Row="1"
-                                           Grid.Column="2"
-                                           Text="{Binding TotalSumReturnQuantity,StringFormat='退量：{0}'}"
-                                           HorizontalOptions="End"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource DividerColor}"
-                                           VerticalOptions="Center"
-                                           Margin="{StaticResource MR10}" />
-                                    <Label Grid.Row="2"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding TotalSumReturnAmount,StringFormat='退额：{0:F2}'}"
-                                           HorizontalOptions="End"
-                                           FontSize="{StaticResource FT14}"
-                                           TextColor="{StaticResource DividerColor}"
-                                           VerticalOptions="Start"
-                                           Margin="{StaticResource MR10}" />
-                                    <BoxView Grid.Row="3"
-                                             Grid.ColumnSpan="3"
-                                             Style="{StaticResource SeparatorGrid}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                        <BindableLayout.EmptyView>
-                            <custom:NullView />
-                        </BindableLayout.EmptyView>
-                    </StackLayout>
-                </ScrollView>
-            </RefreshView>
+    <Grid BackgroundColor="White"
+          VerticalOptions="FillAndExpand"
+          RowDefinitions="250,*,45"
+          ColumnDefinitions="*"
+          RowSpacing="0"
+          ColumnSpacing="0">
+
+        <!--图表-->
+        <chart:ChartView Grid.Row="0"
+                         Grid.Column="0"
+                         Config="{Binding ChartConfig}"
+                         HeightRequest="250" />
+        <StackLayout Grid.Row="0"
+                     Grid.Column="0"
+                     HeightRequest="250"
+                     IsVisible="{Binding IsBusy}">
+            <ActivityIndicator IsRunning="True"
+                               HorizontalOptions="Center"
+                               VerticalOptions="CenterAndExpand" />
         </StackLayout>
+
+        <StackLayout Grid.Row="1"
+                     Grid.Column="0"
+                     HorizontalOptions="FillAndExpand"
+                     Spacing="0"
+                     Padding="0,0,0,0">
+            <custom:HeaderView ControlTemplate="{StaticResource Unsalable_Template}" />
+            <ScrollView>
+                <StackLayout BindableLayout.ItemsSource="{Binding RankSeries,Mode=TwoWay}"
+                             Spacing="0"
+                             VerticalOptions="CenterAndExpand">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <!--商品名称-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Grid.RowSpan="3"
+                                       Text="{Binding ProductName}"
+                                       LineBreakMode="WordWrap"
+                                       FontSize="{StaticResource FT14}"
+                                       HorizontalOptions="FillAndExpand"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="{StaticResource ML10}"></Label>
+                                <!--净销量-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding TotalSumNetQuantity}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="End"
+                                       Margin="{StaticResource MR10}" />
+                                <!--销售净额-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="2"
+                                       Text="{Binding TotalSumNetAmount,StringFormat=' {0:F2}'}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="End"
+                                       Margin="{StaticResource MR10}" />
+                                <!--详细-->
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Text="{Binding TotalSumSaleQuantity,StringFormat='销量：{0}'}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource DividerColor}"
+                                       VerticalOptions="Center"
+                                       Margin="{StaticResource MR10}" />
+                                <Label Grid.Row="1"
+                                       Grid.Column="2"
+                                       Text="{Binding TotalSumReturnQuantity,StringFormat='退量：{0}'}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource DividerColor}"
+                                       VerticalOptions="Center"
+                                       Margin="{StaticResource MR10}" />
+                                <Label Grid.Row="2"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding TotalSumReturnAmount,StringFormat='退额：{0:F2}'}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       TextColor="{StaticResource DividerColor}"
+                                       VerticalOptions="Start"
+                                       Margin="{StaticResource MR10}" />
+                                <BoxView Grid.Row="3"
+                                         Grid.ColumnSpan="3"
+                                         Style="{StaticResource SeparatorGrid}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                    <BindableLayout.EmptyView>
+                        <custom:NullView />
+                    </BindableLayout.EmptyView>
+                </StackLayout>
+            </ScrollView>
+        </StackLayout>
+        
         <!--footer-->
-        <Grid HeightRequest="{StaticResource RH45}"
+        <Grid Grid.Row="2"
+              Grid.Column="0"
+              HeightRequest="{StaticResource RH45}"
               Style="{StaticResource GGrid}"
               HorizontalOptions="FillAndExpand"
               VerticalOptions="End"
-              AbsoluteLayout.LayoutBounds="0,1,1,1"
-              AbsoluteLayout.LayoutFlags="All"
               BackgroundColor="White">
             <Grid.RowDefinitions>
                 <RowDefinition Height=".7" />
@@ -146,7 +156,7 @@
             <Label Grid.Row="1"
                    Grid.Column="1"
                    Text="{Binding TotalSumReturnAmount,StringFormat='退额：{0:F2}'}"
-                   FontFamily="QSB"
+                   
                    HorizontalOptions="EndAndExpand"
                    FontSize="{StaticResource FT14}"
                    TextColor="{StaticResource PrimaryTextColor}"
@@ -155,12 +165,12 @@
             <Label Grid.Row="1"
                    Grid.Column="2"
                    Text="{Binding TotalSumNetAmount,StringFormat='净额：{0:F2}'}"
-                   FontFamily="QSB"
+                   
                    HorizontalOptions="EndAndExpand"
                    FontSize="{StaticResource FT14}"
                    TextColor="{StaticResource PrimaryTextColor}"
                    VerticalOptions="CenterAndExpand"
                    Margin="5,5,10,5" />
         </Grid>
-    </AbsoluteLayout>
+    </Grid>
 </pages:BaseContentPage>

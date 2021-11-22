@@ -8,7 +8,7 @@ namespace Wesley.Client.Pages.Common
         public ImageViewerPage()
         {
             InitializeComponent();
-            NavigationPage.SetHasNavigationBar(this, false);
+            NavigationPage.SetHasNavigationBar(this, true);
         }
     }
 }

@@ -2,35 +2,26 @@
 using Microsoft.AppCenter.Crashes;
 using System;
 using System.Linq;
-using Xamarin.Forms;
 namespace Wesley.Client.Pages.Bills
 {
 
     public partial class CostExpenditureBillPage : BaseContentPage<CostExpenditureBillPageViewModel>
     {
-        protected override void OnAppearing()
+        public CostExpenditureBillPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
+                InitializeComponent();
+               
+                //存储记录
+
+                ToolbarItems?.Clear();
+                foreach (var toolBarItem in this.GetToolBarItems(ViewModel, showSubMit: true, showPrint: false).ToList())
                 {
-                    try
-                    {
-                        InitializeComponent();
-                        //存储记录
-                        NeedOverrideSoftBackButton = true;
-                        ToolbarItems.Clear();
-                        foreach (var toolBarItem in this.GetToolBarItems<CostExpenditureBillPageViewModel>(ViewModel, true).ToList())
-                        {
-                            ToolbarItems.Add(toolBarItem);
-                        }
-                    }
-                    catch (Exception ex) { Crashes.TrackError(ex); }
-                    return false;
-                });
-                return;
+                    ToolbarItems.Add(toolBarItem);
+                }
             }
+            catch (Exception ex) { Crashes.TrackError(ex); }
         }
     }
 }

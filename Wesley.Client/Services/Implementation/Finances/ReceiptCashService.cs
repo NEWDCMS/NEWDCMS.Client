@@ -60,23 +60,23 @@ namespace Wesley.Client.Services
                 int userId = Settings.UserId;
                 var api = RefitServiceBuilder.Build<IReceiptCashApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetReceiptCashsAsync", storeId,
-                    makeuserId,
-                    customerId,
-                    customerName,
-                    payeer,
-                    billNumber,
-                    remark,
-                    auditedStatus,
-                    startTime,
-                    endTime,
-                    showReverse,
-                    sortByAuditedTime,
-                    handleStatus,
-                    pagenumber,
-                    pageSize);
+                //var cacheKey = RefitServiceBuilder.Cacher("GetReceiptCashsAsync", storeId,
+                //    makeuserId,
+                //    customerId,
+                //    customerName,
+                //    payeer,
+                //    billNumber,
+                //    remark,
+                //    auditedStatus,
+                //    startTime,
+                //    endTime,
+                //    showReverse,
+                //    sortByAuditedTime,
+                //    handleStatus,
+                //    pagenumber,
+                //    pageSize);
 
-                var results = await _makeRequest.StartUseCache(api.GetReceiptCashsAsync(storeId,
+                var results = await _makeRequest.Start(api.GetReceiptCashsAsync(storeId,
                     makeuserId,
                     customerId,
                     customerName,
@@ -90,8 +90,7 @@ namespace Wesley.Client.Services
                     sortByAuditedTime,
                     handleStatus,
                     pagenumber,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize, calToken), calToken);
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
@@ -117,7 +116,7 @@ namespace Wesley.Client.Services
                 int storeId = Settings.StoreId;
                 var api = RefitServiceBuilder.Build<IReceiptCashApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetOwecashBillsAsync", storeId,
+                var results = await _makeRequest.Start(api.GetOwecashBillsAsync(storeId,
                     userId,
                     terminalId,
                     billTypeId,
@@ -126,19 +125,8 @@ namespace Wesley.Client.Services
                     startTime,
                     endTime,
                     pageIndex,
-                    pageSize);
-
-                var results = await _makeRequest.StartUseCache(api.GetOwecashBillsAsync(storeId,
-                    userId,
-                    terminalId,
-                    billTypeId,
-                    billNumber,
-                    remark,
-                    startTime,
-                    endTime,
-                    pageIndex,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize,
+                    calToken), calToken);
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
@@ -184,7 +172,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> AuditingAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<ResultData> AuditingAsync(int billId = 0, CancellationToken calToken = default)
         {
             try
             {
@@ -194,13 +182,19 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IReceiptCashApi>(URL);
 
                 var results = await _makeRequest.Start(api.AuditingAsync(storeId, userId, billId, calToken), calToken);
-                return (bool)(results?.Success);
+                return new ResultData
+                {
+                    Success = (bool)(results?.Success),
+                    Message = results?.Message
+                };
             }
             catch (Exception e)
             {
-
-                e.HandleException();
-                return false;
+                return new ResultData
+                {
+                    Success = false,
+                    Message = e.Message
+                };
             }
         }
 
@@ -210,7 +204,7 @@ namespace Wesley.Client.Services
         /// </summary>
         /// <param name="billId"></param>
         /// <returns></returns>
-        public async Task<bool> ReverseAsync(int billId = 0, CancellationToken calToken = default)
+        public async Task<bool> ReverseAsync(int billId = 0, string remark = "", CancellationToken calToken = default)
         {
             try
             {
@@ -219,7 +213,7 @@ namespace Wesley.Client.Services
 
                 var api = RefitServiceBuilder.Build<IReceiptCashApi>(URL);
 
-                var results = await _makeRequest.Start(api.ReverseAsync(storeId, userId, billId, calToken), calToken);
+                var results = await _makeRequest.Start(api.ReverseAsync(storeId, userId, billId, remark, calToken), calToken);
                 return (bool)(results?.Success);
             }
             catch (Exception e)
@@ -243,9 +237,8 @@ namespace Wesley.Client.Services
                 int storeId = Settings.StoreId;
                 int userId = Settings.UserId;
                 var api = RefitServiceBuilder.Build<IReceiptCashApi>(URL);
-
-                var cacheKey = RefitServiceBuilder.Cacher("ReceiptCashService.GetBillAsync", storeId, userId);
-                var results = await _makeRequest.StartUseCache(api.GetBillAsync(storeId, userId, billId, calToken), cacheKey, force, calToken);
+                //var cacheKey = RefitServiceBuilder.Cacher("ReceiptCashService.GetBillAsync", storeId, userId);
+                var results = await _makeRequest.Start(api.GetBillAsync(storeId, userId, billId, calToken), calToken);
                 return results?.Data;
             }
             catch (Exception e)

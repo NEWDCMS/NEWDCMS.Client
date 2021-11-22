@@ -81,7 +81,6 @@ namespace Wesley.Client.Models.Purchases
         public int CollectionAccount { get; set; }
         public decimal CollectionAmount { get; set; }
         public string AuditedUserName { get; set; }
-        public int PrintNum { get; set; }
         public bool Paymented { get; set; }
         public ObservableCollection<PurchaseReturnItemModel> Items { get; set; } = new ObservableCollection<PurchaseReturnItemModel>();
         public ObservableCollection<AccountMaping> PurchaseReturnBillAccountings { get; set; } = new ObservableCollection<AccountMaping>();
@@ -168,6 +167,7 @@ namespace Wesley.Client.Models.Purchases
     /// </summary>
     public class PurchaseReturnItemUpdateModel : Base
     {
+        public string BillNumber { get; set; }
         /// <summary>
         /// 供应商
         /// </summary>

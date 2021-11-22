@@ -38,14 +38,29 @@
                               Grid.RowSpan="5"
                               HorizontalOptions="Start"
                               VerticalOptions="CenterAndExpand"
-                              IsChecked="{Binding Selected,Mode=TwoWay}" />
+                              IsChecked="{Binding Selected,Mode=TwoWay}" CheckedChanged="CheckBox_CheckedChanged" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            Grid.ColumnSpan="3"
-                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding TerminalName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="3"
                            FontSize="{StaticResource FT14}"
-                           
-                           Text="{Binding TerminalName}" />
+                           HorizontalOptions="End">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding UserName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    
                     <Label Grid.Row="0"
                            Grid.Column="4"
                            Grid.RowSpan="4"
@@ -123,13 +138,29 @@
                               Grid.RowSpan="4"
                               HorizontalOptions="Start"
                               VerticalOptions="CenterAndExpand"
-                              IsChecked="{Binding Selected,Mode=TwoWay}" />
+                              IsChecked="{Binding Selected,Mode=TwoWay}"
+                              CheckedChanged="CheckBox_CheckedChanged" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="3"
+                           FontSize="{StaticResource FT14}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding TerminalName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            Grid.ColumnSpan="3"
                            FontSize="{StaticResource FT14}"
-                           
-                           Text="{Binding TerminalName}" />
+                           HorizontalOptions="End">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding UserName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="4"
                            Grid.RowSpan="4"
@@ -201,13 +232,29 @@
                               Grid.RowSpan="5"
                               HorizontalOptions="Start"
                               VerticalOptions="CenterAndExpand"
-                              IsChecked="{Binding Selected,Mode=TwoWay}" />
+                              IsChecked="{Binding Selected,Mode=TwoWay}"
+                              CheckedChanged="CheckBox_CheckedChanged" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="3"
+                           FontSize="{StaticResource FT14}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding TerminalName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            Grid.ColumnSpan="3"
                            FontSize="{StaticResource FT14}"
-                           
-                           Text="{Binding TerminalName}" />
+                           HorizontalOptions="End">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding UserName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="4"
                            Grid.RowSpan="4"
@@ -217,7 +264,7 @@
                            HorizontalOptions="End"
                            TextColor="{StaticResource PrimaryDarkColor}"
                            FontSize="{StaticResource FT14}"
-                           Margin="{StaticResource MR10}"></Label>
+                           Margin="{StaticResource MR10}" />
                     <!--Row 1-->
                     <Label Grid.Row="1"
                            Grid.Column="1"
@@ -272,13 +319,28 @@
                               Grid.RowSpan="5"
                               HorizontalOptions="Start"
                               VerticalOptions="CenterAndExpand"
-                              IsChecked="{Binding Selected,Mode=TwoWay}" />
+                              IsChecked="{Binding Selected,Mode=TwoWay}"
+                              CheckedChanged="CheckBox_CheckedChanged" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            Grid.ColumnSpan="3"
-                           FontSize="{StaticResource FT14}"
-                           
-                           Text="{Binding TerminalName}" />
+                           FontSize="{StaticResource FT14}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding TerminalName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="3"
+                           FontSize="{StaticResource FT14}" HorizontalOptions="End">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding UserName}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     <Label Grid.Row="0"
                            Grid.Column="4"
                            Grid.RowSpan="4"
@@ -342,12 +404,12 @@
                               Grid.RowSpan="5"
                               HorizontalOptions="Start"
                               VerticalOptions="CenterAndExpand"
-                              IsChecked="{Binding Selected,Mode=TwoWay}" />
+                              IsChecked="{Binding Selected,Mode=TwoWay}"
+                              CheckedChanged="CheckBox_CheckedChanged" />
                     <Label Grid.Row="0"
                            Grid.Column="1"
                            Grid.ColumnSpan="3"
                            FontSize="{StaticResource FT14}"
-                           
                            Text="{Binding BillNumber}" />
                     <Label Grid.Row="0"
                            Grid.Column="3"
@@ -400,19 +462,15 @@
     <Grid VerticalOptions="Start"
           Style="{StaticResource GGrid}"
           AbsoluteLayout.LayoutBounds="0,0,1,1"
-          AbsoluteLayout.LayoutFlags="All">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height=".7" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid HorizontalOptions="FillAndExpand"
-              VerticalOptions="Start">
+          AbsoluteLayout.LayoutFlags="All"
+          RowDefinitions="50,.7,*,50"
+          ColumnDefinitions="*">
+        <Grid Grid.Row="0"
+              Grid.Column="0"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="Start" BackgroundColor="#eee">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -423,15 +481,15 @@
                          Grid.Column="0">
                 <Label HorizontalOptions="Start"
                        VerticalOptions="CenterAndExpand"
-                       Margin="{StaticResource ML10}"
-                       Text="员工:"
-                       FontSize="{StaticResource FT14}" />
+                       Margin="15,0,0,0"
+                       Text="选择员工:" />
                 <custom:CustomEntry x:Name="DeliverEntry"
                                     Placeholder="请选择..."
                                     Text="{Binding Filter.BusinessUserName,Mode=TwoWay}"
                                     Margin="{StaticResource ML10}"
                                     HorizontalOptions="FillAndExpand"
                                     VerticalOptions="CenterAndExpand"
+                                    FontSize="16"
                                     Style="{StaticResource DefaultEntry}">
                     <custom:CustomEntry.Behaviors>
                         <b:EventToCommandBehavior EventName="Focused"
@@ -444,13 +502,15 @@
                    Style="{StaticResource DownArrow}"
                    Margin="{StaticResource MR10}">
                 <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding Path=DeliverSelected}"></TapGestureRecognizer>
+                    <TapGestureRecognizer Command="{Binding Path=DeliverSelected}"
+                                          NumberOfTapsRequired="1" />
                 </Label.GestureRecognizers>
             </Label>
         </Grid>
         <BoxView Grid.Row="1"
                  Style="{StaticResource SeparatorGrid}" />
         <CollectionView Grid.Row="2"
+                        Grid.Column="0"
                         ItemsSource="{Binding Bills,Mode=OneWay}"
                         x:Name="Bills"
                         VerticalOptions="Start"
@@ -458,8 +518,49 @@
                         SelectedItem="{Binding Selecter, Mode=TwoWay}"
                         ItemTemplate="{StaticResource BillsTemplate}">
             <CollectionView.EmptyView>
-                <custom:NullView />
+                <StackLayout>
+                    <ActivityIndicator IsRunning="True"
+                                       HorizontalOptions="CenterAndExpand"
+                                       VerticalOptions="CenterAndExpand" />
+                </StackLayout>
             </CollectionView.EmptyView>
         </CollectionView>
+        <Grid Grid.Row="3"
+              Grid.Column="0"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="Start"
+              BackgroundColor="#eee"
+              RowDefinitions="50"
+              ColumnDefinitions="50,50,*,*" Padding="5,0,0,0">
+            
+            <CheckBox Grid.Row="0"
+                      Grid.Column="0"
+                      HorizontalOptions="Start"
+                      VerticalOptions="CenterAndExpand"
+                      IsChecked="{Binding SelectedAll,Mode=TwoWay}" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   Text="全选" HorizontalOptions="Start"/>
+            <Label Grid.Row="0"
+                   Grid.Column="2">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="合计:" />
+                        <Span Text="￥" />
+                        <Span Text="{Binding SumCount}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Button Grid.Row="0"
+                    Grid.Column="3"
+                    Command="{Binding SubmitDataCommand}"
+                    Text="{Binding ConfirmText}"
+                    Padding="0"
+                    CharacterSpacing="0"
+                    TextColor="White"
+                    Margin="5"
+                    BackgroundColor="#3B5998"/>
+
+        </Grid>
     </Grid>
 </pages:BaseContentPage>

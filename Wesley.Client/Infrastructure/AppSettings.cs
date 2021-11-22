@@ -1,6 +1,5 @@
 ﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Shiny.Settings;
 
 namespace Wesley.Client
 {
@@ -12,11 +11,6 @@ namespace Wesley.Client
 
     public class AppSettings : ReactiveObject, IAppSettings
     {
-        public AppSettings(ISettings settings)
-        {
-            settings.Bind(this);
-        }
-
         [Reactive] public string? Token { get; set; }
         [Reactive] public bool UseNotificationsBle { get; set; }
     }

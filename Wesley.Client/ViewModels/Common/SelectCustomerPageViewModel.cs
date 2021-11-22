@@ -1,13 +1,12 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Models.Census;
 using Wesley.Client.Models.Terminals;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -16,11 +15,19 @@ using System.Windows.Input;
 namespace Wesley.Client.ViewModels
 {
     /// <summary>
-    /// 选择终端客户
+    /// 开单选择客户
     /// </summary>
     public class SelectCustomerPageViewModel : ViewModelBaseCutom
     {
         [Reactive] public TerminalModel Selecter { get; set; }
+
+        private readonly ILiteDbService<VisitStore> _conn;
+
+        [Reactive] public bool DataVewEnable { get; set; }
+        [Reactive] public bool NullViewEnable { get; set; }
+        public double Longitude { get; set; } = 0;
+        public double Latitude { get; set; } = 0;
+
 
         public SelectCustomerPageViewModel(INavigationService navigationService,
            IProductService productService,
@@ -28,43 +35,90 @@ namespace Wesley.Client.ViewModels
            IUserService userService,
            IWareHousesService wareHousesService,
            IAccountingService accountingService,
-
-
-           IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+           IDialogService dialogService,
+           ILiteDbService<VisitStore> conn) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
 
             Title = "选择客户";
 
+            _conn = conn;
+
             //搜索
             this.WhenAnyValue(x => x.Filter.SerchKey)
                 .Select(s => s)
+                .Skip(1)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
-                .Subscribe(s => ((ICommand)Load)?.Execute(null)).DisposeWith(DestroyWith);
+                .Subscribe(s => 
+                {
+                    ((ICommand)Load)?.Execute(null);
+                })
+                .DisposeWith(DeactivateWith);
 
             //片区选择
             this.WhenAnyValue(x => x.Filter.DistrictId)
                .Where(s => s > 0)
                .Select(s => s)
                .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
-               .Subscribe(s => ((ICommand)Load)?.Execute(null))
-               .DisposeWith(DestroyWith);
+               .Subscribe(s => 
+               {
+                   ((ICommand)Load)?.Execute(null);
+               })
+               .DisposeWith(DeactivateWith);
 
-
-            //Load
-            this.Load = TerminalsLoader.Load(async () =>
+            //加载数据
+            this.Load = ReactiveCommand.Create(async () =>
             {
-                //重载时排它
-                ItemTreshold = 1;
                 try
                 {
-                    //清除列表
-                    Terminals.Clear();
-                    var items = await _terminalService.GetTerminalsPage(Filter, LineTier, 0, PageSize, this.ForceRefresh, calToken: cts.Token);
-                    foreach (var item in items)
+                    //重载时排它
+                    ItemTreshold = 1;
+
+                    try
                     {
-                        if (Terminals.Count(s => s.Id == item.Id) == 0)
+                        if (Terminals != null && Terminals.Any())
+                            Terminals?.Clear();
+                    }
+                    catch (Exception) { }
+
+                    DataVewEnable = false;
+                    NullViewEnable = true;
+                    using (var dig = UserDialogs.Instance.Loading("加载中..."))
+                    {
+                        this.Longitude = GlobalSettings.Longitude ?? 0;
+                        this.Latitude = GlobalSettings.Latitude ?? 0;
+
+                        string searchStr = Filter?.SerchKey;
+                        int? districtId = Filter?.DistrictId;
+                        int? channelId = Filter?.ChannelId;
+                        int? businessUserId = Filter?.BusinessUserId;
+                        int? rankId = Filter?.RankId;
+                        int pageNumber = 0;
+                        int pageSize = PageSize;
+                        int? lineTierId = Filter?.LineId;
+                        int distanceOrderBy = Filter.DistanceOrderBy;
+
+                        var tuple = await _terminalService.SearchTerminals(searchStr,
+                            districtId,
+                            channelId,
+                            rankId,
+                            lineTierId,
+                            businessUserId,
+                            true,
+                            distanceOrderBy,
+                            GlobalSettings.Latitude ?? 0,
+                            GlobalSettings.Longitude ?? 0,
+                            0.5,
+                            pageNumber,
+                            pageSize);
+
+                        var series = tuple.Item2;
+                        if (series != null && series.Any())
                         {
-                            Terminals.Add(item);
+                            this.Terminals = new AsyncObservableCollection<TerminalModel>(series);
+                        }
+                        else
+                        {
+                            ItemTreshold = -1;
                         }
                     }
                 }
@@ -72,50 +126,78 @@ namespace Wesley.Client.ViewModels
                 {
                     Crashes.TrackError(ex);
                 }
-
-                if (Terminals.Count > 0)
-                    this.Terminals = new ObservableRangeCollection<TerminalModel>(Terminals);
-
-                return Terminals;
+                finally
+                {
+                    NullViewEnable = false;
+                    DataVewEnable = true;
+                }
             });
 
             //以增量方式加载数据
             this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
             {
-                int pageIdex = 0;
-                if (Terminals.Count != 0)
-                    pageIdex = Terminals.Count / (PageSize == 0 ? 1 : PageSize);
-
-                if (PageCounter < pageIdex)
+                if (ItemTreshold == -1) return;
+                try
                 {
-                    PageCounter = pageIdex;
-                    using (var dig = UserDialogs.Instance.Loading("加载中..."))
+                    int pageIdex = Terminals.Count / (PageSize == 0 ? 1 : PageSize);
+                    if (pageIdex > 0)
                     {
-                        try
+                        using (var dig = UserDialogs.Instance.Loading("加载中..."))
                         {
-                            var items = await _terminalService.GetTerminalsPage(Filter, LineTier, pageIdex, PageSize, this.ForceRefresh, calToken: cts.Token);
-                            var previousLastItem = Terminals.Last();
-                            foreach (var item in items)
-                            {
-                                if (Terminals.Count(s => s.Id == item.Id) == 0)
-                                {
-                                    Terminals.Add(item);
-                                }
-                            }
+                            string searchStr = Filter?.SerchKey;
+                            int? districtId = Filter?.DistrictId;
+                            int? channelId = Filter?.ChannelId;
+                            int? businessUserId = Filter?.BusinessUserId;
+                            int? rankId = Filter?.RankId;
+                            int pageNumber = pageIdex;
+                            int pageSize = PageSize;
+                            int? lineTierId = Filter?.LineId;
+                            int distanceOrderBy = Filter.DistanceOrderBy;
 
-                            if (items.Count() == 0 || items.Count() == Terminals.Count)
+                            var tuple = await _terminalService.SearchTerminals(searchStr,
+                                districtId,
+                                channelId,
+                                rankId,
+                                lineTierId,
+                                businessUserId,
+                                true,
+                                distanceOrderBy,
+                                GlobalSettings.Latitude ?? 0,
+                                GlobalSettings.Longitude ?? 0,
+                                0.5,
+                                pageNumber,
+                                pageSize);
+
+                            var series = tuple.Item2;
+                            if (series != null && series.Any())
+                            {
+                                try
+                                {
+                                    foreach (var s in series)
+                                    {
+                                        if (!(this.Terminals?.Select(s => s.Id).Contains(s.Id) ?? false))
+                                        {
+                                            this.Terminals?.Add(s);
+
+                                        }
+                                    }
+                                }
+                                catch (Exception) { }
+  
+                            }
+                            else
                             {
                                 ItemTreshold = -1;
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Crashes.TrackError(ex);
-                            ItemTreshold = -1;
-                        }
                     }
                 }
-            }, this.WhenAny(x => x.Terminals, x => x.GetValue().Count > 0));
+                catch (Exception ex)
+                {
+                    Crashes.TrackError(ex);
+                    ItemTreshold = -1;
+                }
+            });
 
             //选择
             this.WhenAnyValue(x => x.Selecter)
@@ -127,23 +209,18 @@ namespace Wesley.Client.ViewModels
                     Filter.SerchKey = "";
                     await _navigationService.GoBackAsync(("Filter", Filter), ("Terminaler", item));
                 })
-                .DisposeWith(DestroyWith);
+                .DisposeWith(DeactivateWith);
 
-            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
 
-
-        public override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
-        }
 
         public override void OnAppearing()
         {
             base.OnAppearing();
+            if (!this.Terminals.Any())
+                ((ICommand)Load)?.Execute(null);
         }
     }
 }

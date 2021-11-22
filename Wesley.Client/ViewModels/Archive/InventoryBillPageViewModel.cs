@@ -1,16 +1,17 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Enums;
 using Wesley.Client.Models.WareHouses;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive.Disposables;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
-
 namespace Wesley.Client.ViewModels
 {
     public class InventoryBillPageViewModel : ViewModelBaseCutom
@@ -27,9 +28,12 @@ namespace Wesley.Client.ViewModels
            IWareHousesService wareHousesService,
            IAccountingService accountingService,
            IInventoryService inventoryService,
-
-
-           IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+           IDialogService dialogService) : base(navigationService, productService,
+               terminalService,
+               userService,
+               wareHousesService,
+               accountingService,
+               dialogService)
         {
 
             Title = "选择盘点库存";
@@ -42,7 +46,7 @@ namespace Wesley.Client.ViewModels
             {
                 try
                 {
-                    var result = await _wareHousesService.GetWareHousesAsync((int)Enums.WareHouseType.CangKu, force: this.ForceRefresh, calToken: cts.Token);
+                    var result = await _wareHousesService.GetWareHousesAsync(BillTypeEnum.InventoryAllTaskBill, force: this.ForceRefresh, calToken: new System.Threading.CancellationToken());
                     this.WareHouses = new ObservableCollection<WareHouseModel>(result?.ToList());
                 }
                 catch (Exception ex)
@@ -60,7 +64,7 @@ namespace Wesley.Client.ViewModels
              {
                  if (wareHouse != null)
                  {
-                     var pendings = await _inventoryService.CheckInventoryAsync(wareHouse.Id, calToken: cts.Token);
+                     var pendings = await _inventoryService.CheckInventoryAsync(wareHouse.Id, new System.Threading.CancellationToken());
                      if (pendings != null && pendings.Count > 0)
                      {
                          await UserDialogs.Instance.AlertAsync("库存正在盘点中，不能在生成盘点单.", okText: "确定");
@@ -69,10 +73,11 @@ namespace Wesley.Client.ViewModels
                      //转向盘点
                      await this.NavigateAsync("SelectProductPage", ("Reference", this.PageName), ("WareHouse", wareHouse), ("SerchKey", ""));
                  }
-             });
+             })
+             .DisposeWith(DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
 

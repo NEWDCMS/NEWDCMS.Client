@@ -1,18 +1,19 @@
 ﻿using Acr.UserDialogs;
 using Wesley.Client.Models;
 using Wesley.Client.Models.Products;
+using Wesley.Client.Models.WareHouses;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
+using System.Reactive.Disposables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+
 
 namespace Wesley.Client.ViewModels
 {
@@ -21,6 +22,7 @@ namespace Wesley.Client.ViewModels
         [Reactive] public IList<MenuBinding> MathodSeries { get; set; } = new ObservableCollection<MenuBinding>();
         [Reactive] public IReactiveCommand SelectCommand { get; set; }
         [Reactive] public MenuBinding Selecter { get; set; }
+        public AllocationBillModel Bill { get; set; }
 
         public SelectAllocationProductPageViewModel(INavigationService navigationService,
             IProductService productService,
@@ -28,30 +30,27 @@ namespace Wesley.Client.ViewModels
             IUserService userService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-
-
-            IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "加载调拨商品";
-
 
             //载入商品
             this.Load = ReactiveCommand.Create(() =>
             {
                 var lists = new List<MenuBinding>()
                 {
-                     new MenuBinding(){Id=0, Name="获取仓库今天销售的商品" },
-                     new MenuBinding(){Id=1, Name="获取仓库昨天的销售商品" },
-                     new MenuBinding(){Id=2, Name="获取仓库近2天的销售商品" },
-                     new MenuBinding(){Id=3, Name="获取仓库上次调拨的销售商品" },
-                     new MenuBinding(){Id=4, Name="获取仓库今天退货的商品" },
-                     new MenuBinding(){Id=5, Name="获取仓库昨天退货的商品" },
-                     new MenuBinding(){Id=6, Name="获取仓库前天退货的商品" },
-                     new MenuBinding(){Id=7, Name="获取库存所在指定类别的商品" },
+                     new MenuBinding(){ Id=0, Name="获取仓库今天销售的商品" },
+                     new MenuBinding(){ Id=1, Name="获取仓库昨天的销售商品" },
+                     new MenuBinding(){ Id=2, Name="获取仓库近2天的销售商品" },
+                     new MenuBinding(){ Id=3, Name="获取仓库上次调拨的销售商品" },
+                     new MenuBinding(){ Id=4, Name="获取仓库今天退货的商品" },
+                     new MenuBinding(){ Id=5, Name="获取仓库昨天退货的商品" },
+                     new MenuBinding(){ Id=6, Name="获取仓库前天退货的商品" },
+                     new MenuBinding(){ Id=7, Name="获取库存所在指定类别的商品" },
                 };
                 this.MathodSeries = new ObservableCollection<MenuBinding>(lists);
             });
-
 
             //类别选择
             this.SelectCommand = ReactiveCommand.Create<object>(async e =>
@@ -95,11 +94,10 @@ namespace Wesley.Client.ViewModels
                {
                    await _navigationService.GoBackAsync();
                }
-           }, ex => _dialogService.ShortAlert(ex.ToString()));
+           }, ex => _dialogService.ShortAlert(ex.ToString()))
+           .DisposeWith(DeactivateWith);
 
-            this.SelectCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
 
-            this.ExceptionsSubscribe();
             this.BindBusyCommand(Load);
         }
 
@@ -107,6 +105,11 @@ namespace Wesley.Client.ViewModels
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
+
+            parameters.TryGetValue("Bill", out AllocationBillModel bill);
+            if (bill != null)
+                Bill = bill;
+
         }
 
         public override void OnAppearing()

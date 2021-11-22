@@ -19,10 +19,6 @@
         /// </summary>
         void CheckUpdate(UpdateInfo version);
 
-        /// <summary>
-        /// 更新
-        /// </summary>
-        void StartUpdate(UpdateInfo updateInfo);
         void StarInit();
 
         bool CheckNewVersion(UpdateInfo updateInfo);

@@ -9,7 +9,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface IProductApi
     {
         [Post("/archives/product/createOrUpdateProduct/{storeId}/{userId}")]
@@ -25,9 +25,15 @@ namespace Wesley.Client.Services
         Task<APIResult<IList<BrandModel>>> GetBrandsAsync(int storeId, string name = "", int pagenumber = 0, int pageSize = 50, CancellationToken calToken = default);
 
         [Get("/archives/product/getProducts/{storeId}")]
-        Task<APIResult<PageData<ProductModel>>> GetProductsAsync(int storeId, string key = "", [Query(CollectionFormat.Multi)] int[] categoryIds = null, int? terminalid = 0, int wareHouseId = 0, int pageIndex = 0, int pageSize = 20, bool? usablequantity = true, CancellationToken calToken = default);
+        Task<APIResult<PageData<ProductModel>>> GetProductsAsync(int storeId, [Query(CollectionFormat.Multi)] int[] excludeIds = null, string key = "", [Query(CollectionFormat.Multi)] int[] categoryIds = null, int? terminalid = 0, int wareHouseId = 0, int pageIndex = 0, int pageSize = 20, bool? usablequantity = true, CancellationToken calToken = default);
 
         [Get("/archives/product/getSpecificationAttributeOptions/{storeId}")]
         Task<APIResult<SpecificationModel>> GetSpecificationAttributeOptionsAsync(int storeId, CancellationToken calToken = default);
+
+        [Get("/archives/product/getproductbyid/{storeId}/{productId}")]
+        Task<APIResult<ProductModel>> GetProductByIdAsync(int storeId, int productId, CancellationToken calToken = default);
+
+        [Get("/archives/product/getproductbyids/{storeId}/{wareHouseId}")]
+        Task<APIResult<IList<ProductModel>>> GetProductByIdsAsync(int storeId, [Query(CollectionFormat.Multi)] int[] productIds = null, int wareHouseId = 0, CancellationToken calToken = default);
     }
 }

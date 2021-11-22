@@ -24,7 +24,7 @@ namespace Wesley.Client.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             // One-Way converter only
-            throw new NotImplementedException();
+             return null;
         }
     }
 }

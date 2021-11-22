@@ -4,10 +4,10 @@
              xmlns:pages="clr-namespace:Wesley.Client.Pages"
              xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
              xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
-             
-             xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
-                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       
                        x:Class="Wesley.Client.Pages.Common.AddCostPage"
              x:Name="CurrentContentView"
                        Title="{Binding Title}"
@@ -77,7 +77,8 @@
                 <Label Style="{StaticResource SearchArrow}"
                                    Margin="0,0,10,0">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=AccountingSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding Path=AccountingSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -110,7 +111,8 @@
                 <Label Style="{StaticResource SearchArrow}"
                                    Margin="0,0,10,0">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Path=ContractSelected}"></TapGestureRecognizer>
+                        <TapGestureRecognizer Command="{Binding Path=ContractSelected}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
             </StackLayout>
@@ -128,7 +130,8 @@
                        FontSize="{StaticResource FT14}" />
                 <custom:CustomEntry HorizontalOptions="FillAndExpand"
                                     Placeholder="请输入金额..."
-                                    Text="{Binding Model.Amount,Mode=TwoWay,Converter={StaticResource NullableDecimalConverter}}"
+                                     Keyboard="Numeric"
+                                    Text="{Binding Model.Amount,Mode=TwoWay}"
                                     Margin="10,0,0,0"
                                     Padding="0,0,0,0"
                                     VerticalOptions="CenterAndExpand"

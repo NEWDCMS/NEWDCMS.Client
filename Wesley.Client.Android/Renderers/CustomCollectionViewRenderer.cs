@@ -1,15 +1,9 @@
-﻿using Android.Graphics;
+﻿using Android.Content;
+using Android.Graphics;
 using Wesley.Client.CustomViews;
 using Wesley.Client.Droid.Renderers;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Android.Content;
-using Android.Text;
-using Android.Views;
-using Android.Views.InputMethods;
-using Android.Widget;
-using System;
-using Wesley.Client.Services;
 
 [assembly: ExportRenderer(typeof(CustomCollectionView), typeof(CustomCollectionViewRenderer))]
 namespace Wesley.Client.Droid.Renderers

@@ -1,14 +1,17 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Enums;
+using Wesley.Client.Models;
+using Wesley.Client.Models.Census;
 using Wesley.Client.Models.Terminals;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -22,33 +25,46 @@ namespace Wesley.Client.ViewModels
     /// </summary>
     public class CurrentCustomerPageViewModel : ViewModelBaseCutom
     {
+        private readonly ILiteDbService<VisitStore> _conn;
         public ReactiveCommand<object, Unit> LineSelected { get; }
         public ReactiveCommand<object, Unit> OtherCustomerCommand { get; }
         public ReactiveCommand<object, Unit> AddCustomerCommand { get; }
         public ReactiveCommand<TerminalModel, Unit> OpenNavigationToCommand { get; }
         public ReactiveCommand<int, Unit> DistanceOrderCommand { get; }
-
+        [Reactive] public bool DataVewEnable { get; set; }
+        [Reactive] public bool NullViewEnable { get; set; } = true;
         [Reactive] public bool ListVewEnable { get; set; } = true;
         [Reactive] public bool MapVewEnable { get; set; }
         [Reactive] public bool OrderByDistance { get; set; }
         [Reactive] public TerminalModel Selecter { get; set; }
+        public double Longitude { get; set; } = 0;
+        public double Latitude { get; set; } = 0;
+        private static object _tsLock = new object();
 
 
+        bool itemTreshold = false;
         public CurrentCustomerPageViewModel(INavigationService navigationService,
            IProductService productService,
             IUserService userService,
             ITerminalService terminalService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-            IDialogService dialogService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
+            IDialogService dialogService,
+            ILiteDbService<VisitStore> conn) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
-            Title = "选择终端客户";
+            Title = "拜访选择终端客户";
+            _conn = conn;
 
-            //搜索
+            this.PageSize = 20;
+
+
+            //搜索(默认触发Load)
             this.WhenAnyValue(x => x.Filter.SerchKey)
+                .Skip(1)
                 .Select(s => s)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
-                .Subscribe(s => ((ICommand)Load)?.Execute(null)).DisposeWith(DestroyWith);
+                .Subscribe(s => ((ICommand)Load)?.Execute(null))
+                .DisposeWith(DeactivateWith);
 
             //片区选择
             this.WhenAnyValue(x => x.Filter.DistrictId)
@@ -56,79 +72,158 @@ namespace Wesley.Client.ViewModels
                .Select(s => s)
                .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
                .Subscribe(s => ((ICommand)Load)?.Execute(null))
-               .DisposeWith(DestroyWith);
+               .DisposeWith(DeactivateWith);
 
             //距离排序
             this.WhenAnyValue(x => x.Filter.DistanceOrderBy)
+              .Where(s => s > 0)
               .Select(s => s)
+              .Skip(1)
               .Throttle(TimeSpan.FromSeconds(1), RxApp.MainThreadScheduler)
-              .Subscribe(s => ((ICommand)Load)?.Execute(null)).DisposeWith(DestroyWith);
+              .Subscribe(s => ((ICommand)Load)?.Execute(null))
+              .DisposeWith(DeactivateWith);
 
             //加载数据
-            this.Load = TerminalsLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
-                //重载时排它
-                ItemTreshold = 1;
                 try
                 {
-                    //清除列表
-                    Terminals.Clear();
-                    var items = await _terminalService.GetTerminalsPage(Filter, LineTier, 0, PageSize, force: ForceRefresh, calToken: cts.Token);
-                    foreach (var item in items)
+                    System.Diagnostics.Debug.Print("----------------------CurrentCustomerPageViewModel----------------------------->");
+
+                    //重载时排它
+                    ItemTreshold = 1;
+
+                    try
                     {
-                        if (Terminals.Count(s => s.Id == item.Id) == 0)
-                        {
-                            Terminals.Add(item);
-                        }
+                        if (Terminals != null && Terminals.Any())
+                            Terminals?.Clear();
                     }
-                    MessageBus.Current.SendMessage(Terminals, Constants.TRACKTERMINALS_KEY);
+                    catch (Exception) { }
+
+                    PageCounter = 0;
+                    itemTreshold = true;
+
+                    DataVewEnable = false;
+                    NullViewEnable = true;
+
+                    this.Longitude = GlobalSettings.Longitude ?? 0;
+                    this.Latitude = GlobalSettings.Latitude ?? 0;
+
+                    string searchStr = Filter?.SerchKey;
+                    int? districtId = Filter?.DistrictId;
+                    int? channelId = Filter?.ChannelId;
+                    int? businessUserId = Filter?.BusinessUserId;
+                    int? rankId = Filter?.RankId;
+                    int pageNumber = 0;
+                    int pageSize = PageSize;
+                    int? lineTierId = Filter?.LineId;
+                    int distanceOrderBy = Filter.DistanceOrderBy;
+
+                    var tuple = await _terminalService.SearchTerminals(searchStr,
+                        districtId,
+                        channelId,
+                        rankId,
+                        lineTierId,
+                        businessUserId,
+                        true,
+                        distanceOrderBy,
+                        GlobalSettings.Latitude ?? 0,
+                        GlobalSettings.Longitude ?? 0,
+                        1.5,
+                        pageNumber,
+                        pageSize);
+
+
+                    var series = tuple.Item2;
+                    if (series != null && series.Any())
+                    {
+                        this.Terminals = new AsyncObservableCollection<TerminalModel>(series);
+                    }
+                    else
+                    {
+                        ItemTreshold = -1;
+                    }
+
+                    itemTreshold = false;
                 }
                 catch (Exception ex)
                 {
                     Crashes.TrackError(ex);
                 }
-
-                return Terminals;
+                finally  
+                {
+                    DataVewEnable = true;
+                    NullViewEnable = false;
+                }
             });
+
             //以增量方式加载数据
             this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
-            {
-                int pageIdex = 0;
-                if (Terminals.Count != 0)
-                    pageIdex = Terminals.Count / (PageSize == 0 ? 1 : PageSize);
+           {
+               if (ItemTreshold == -1 || itemTreshold) return;
 
-                if (PageCounter < pageIdex)
-                {
-                    PageCounter = pageIdex;
-                    using (var dig = UserDialogs.Instance.Loading("加载中..."))
-                    {
-                        try
-                        {
-                            var items = await _terminalService.GetTerminalsPage(Filter, LineTier, pageIdex, PageSize, force: ForceRefresh, calToken: cts.Token);
-                            var previousLastItem = Terminals.Last();
-                            foreach (var item in items)
-                            {
-                                if (Terminals.Count(s => s.Id == item.Id) == 0)
-                                {
-                                    Terminals.Add(item);
-                                }
-                            }
+               try
+               {
+                   itemTreshold = true;
+                   int pageIdex = Terminals.Count / (PageSize == 0 ? 1 : PageSize);
+                   if (pageIdex > 0)
+                   {
+                       using (var dig = UserDialogs.Instance.Loading("加载中..."))
+                       {
+                           string searchStr = Filter?.SerchKey;
+                           int? districtId = Filter?.DistrictId;
+                           int? channelId = Filter?.ChannelId;
+                           int? businessUserId = Filter?.BusinessUserId;
+                           int? rankId = Filter?.RankId;
+                           int pageNumber = pageIdex;
+                           int pageSize = PageSize;
+                           int? lineTierId = Filter?.LineId;
+                           int distanceOrderBy = Filter.DistanceOrderBy;
 
-                            if (items.Count() == 0 || items.Count() == Terminals.Count)
-                            {
-                                ItemTreshold = -1;
-                            }
+                           var tuple = await _terminalService.SearchTerminals(searchStr,
+                               districtId,
+                               channelId,
+                               rankId,
+                               lineTierId,
+                               businessUserId,
+                               true,
+                               distanceOrderBy,
+                               GlobalSettings.Latitude ?? 0,
+                               GlobalSettings.Longitude ?? 0,
+                               1.5,
+                               pageNumber,
+                               pageSize);
 
-                            MessageBus.Current.SendMessage(Terminals, Constants.TRACKTERMINALS_KEY);
-                        }
-                        catch (Exception ex)
-                        {
-                            Crashes.TrackError(ex);
-                            ItemTreshold = -1;
-                        }
-                    }
-                }
-            }, this.WhenAny(x => x.Terminals, x => x.GetValue().Count > 0));
+                           var series = tuple.Item2;
+                           if (series != null && series.Any())
+                           {
+                               try
+                               {
+                                   foreach (var s in series)
+                                   {
+                                       if (!(this.Terminals?.Select(s => s.Id).Contains(s.Id) ?? true))
+                                       {
+                                           this.Terminals?.Add(s);
+                                       }
+                                   }
+                               }
+                               catch (Exception) { }
+                               itemTreshold = false;
+                           }
+                           else
+                           {
+                               ItemTreshold = -1;
+                           }
+                       }
+                   }
+               }
+               catch (Exception ex)
+               {
+                   Crashes.TrackError(ex);
+                   ItemTreshold = -1;
+               }
+           });
+
 
             //线路选择
             this.LineSelected = ReactiveCommand.Create<object>(async e => await SelectUserLine((data) =>
@@ -139,14 +234,23 @@ namespace Wesley.Client.ViewModels
                     Filter.LineName = data.Name;
                     if (Filter.LineId > 0)
                     {
-                        var series = data.Terminals.OrderByDescending(t => t.Id);
-                        series?.ToList().ForEach(s =>
+                        var dts = data.Terminals;
+                        if (dts != null && dts.Any())
                         {
-                            s.RankName = string.IsNullOrEmpty(s.RankName) ? "A级" : s.RankName;
-                            s.Distance = MapHelper.CalculateDistance(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0, s.Location_Lat ?? 0, s.Location_Lng ?? 0);
-                        });
-                        Terminals = new ObservableRangeCollection<TerminalModel>(series);
-                        MessageBus.Current.SendMessage(Terminals, Constants.TRACKTERMINALS_KEY);
+                            var series = dts.OrderByDescending(t => t.Id);
+
+                            series?.ToList().ForEach(s =>
+                            {
+                                s.RankName = string.IsNullOrEmpty(s.RankName) ? "A级" : s.RankName;
+                                s.Distance = MapHelper.CalculateDistance(GlobalSettings.Latitude ?? 0, GlobalSettings.Longitude ?? 0, s.Location_Lat ?? 0, s.Location_Lng ?? 0);
+                            });
+
+                            if (series.Count() > 0)
+                            {
+                                Terminals = new AsyncObservableCollection<TerminalModel>(series);
+                                MessageBus.Current.SendMessage(Terminals, Constants.TRACKTERMINALS_KEY);
+                            }
+                        }
                     }
                 }
             }, Filter.LineId));
@@ -214,55 +318,53 @@ namespace Wesley.Client.ViewModels
                 {
                     await this.NavigateAsync("VisitStorePage", ("Terminaler", item));
                     this.Selecter = null;
-                });
+                })
+                .DisposeWith(DeactivateWith);
 
 
-            //菜单选择
-            this.SetMenus((x) =>
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
             {
-                switch (x)
-                {
-                    case Enums.MenuEnum.NEARCUSTOMER:
-                        {
-                            if (this != null)
+                 //整单备注
+                { MenuEnum.NEARCUSTOMER, (m,vm) => {
+                   if (this != null)
                             {
                                 Title = "附近客户";
                                 Filter.LineId = 0;
                                 ((ICommand)RefreshCommand)?.Execute(null);
                             }
-                        }
-                        break;
-                    case Enums.MenuEnum.LINESELECT:
-                        {
-                            if (this != null)
+                } }, 
+                //清空单据
+                { MenuEnum.LINESELECT, (m,vm) => {
+                     if (this != null)
                             {
                                 ((ICommand)LineSelected)?.Execute(null);
                             }
-                        }
-                        break;
-                }
-            }, 18, 19);
-
-
-            this.ItemTresholdReachedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-            this.LineSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.DistrictSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.OtherCustomerCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddCustomerCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
+                } }
+            });
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
         }
 
-        public override void OnNavigatedTo(INavigationParameters parameters)
+
+        public void RefreshTerminals()
         {
-            base.OnNavigatedTo(parameters);
+            try
+            {
+                ((ICommand)Load)?.Execute(null);
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
+            }
         }
-
         public override void OnAppearing()
         {
             base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(18, 19);
+            ((ICommand)Load)?.Execute(null);
         }
     }
 }

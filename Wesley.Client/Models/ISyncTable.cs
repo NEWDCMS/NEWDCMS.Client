@@ -1,4 +1,4 @@
-﻿namespace Wesley.Client.Models
+﻿namespace DCMS.Client.Models
 {
     //interface ISyncTable<in TApiDto>
     //{

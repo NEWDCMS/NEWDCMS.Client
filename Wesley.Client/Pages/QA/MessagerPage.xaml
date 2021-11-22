@@ -8,7 +8,7 @@
                        xmlns:dataTemplateSelector="clr-namespace:Wesley.Client.Selector"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        xmlns:pancakeView="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
-                       prism:ViewModelLocator.AutowireViewModel="True"
+                       
                        x:Name="CurrentContentView"
                        BackgroundColor="#eeeeee"
                        x:Class="Wesley.Client.Pages.MessagerPage"

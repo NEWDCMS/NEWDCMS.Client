@@ -1,5 +1,4 @@
-﻿using Wesley.Client.AutoUpdater.Services;
-using Wesley.Client.Models.Users;
+﻿using Wesley.Client.Models.Users;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
@@ -13,16 +12,15 @@ namespace Wesley.Client.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IOperatingSystemVersionProvider _operatingSystemVersionProvider;
+        //private readonly IOperatingSystemVersionProvider _operatingSystemVersionProvider;
         private readonly MakeRequest _makeRequest;
         //LogOutAsync
-        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/dcms/auth";
+        private static string URL => GlobalSettings.BaseEndpoint + "api/v3/Wesley/auth";
 
-        public AuthenticationService(IOperatingSystemVersionProvider operatingSystemVersionProvider,
-            MakeRequest makeRequest)
+        public AuthenticationService(MakeRequest makeRequest)
         {
             _makeRequest = makeRequest;
-            _operatingSystemVersionProvider = operatingSystemVersionProvider;
+            //_operatingSystemVersionProvider = operatingSystemVersionProvider;
         }
 
         /// <summary>
@@ -44,7 +42,7 @@ namespace Wesley.Client.Services
 
             try
             {
-                var api = RefitServiceBuilder.Build<IAuthenticationApi>(URL);
+                var api = RefitServiceBuilder.Build<IAuthenticationApi>(URL, false);
                 result = await _makeRequest.Start(api.LoginAsync(model, calToken), calToken);
                 if (result != null)
                 {
@@ -133,11 +131,8 @@ namespace Wesley.Client.Services
             //认证成功
             if (isAuthenticated)
             {
-                Sync.Run(async () =>
-                {
-                    var _globalService = App.Resolve<IGlobalService>();
-                    await _globalService?.GetAPPFeatures();
-                });
+                var _globalService = App.Resolve<IGlobalService>();
+                _globalService?.GetAPPFeatures();
                 return true;
             }
             else
@@ -147,7 +142,7 @@ namespace Wesley.Client.Services
         }
 
         /// <summary>
-        /// 注销//api/v3/dcms/auth/user/logout/{userId}
+        /// 注销//api/v3/Wesley/auth/user/logout/{userId}
         /// </summary>
         /// <returns></returns>
         public async Task<bool> LogOutAsync(CancellationToken calToken = default)
@@ -212,16 +207,23 @@ namespace Wesley.Client.Services
         {
             try
             {
-                var api = RefitServiceBuilder.Build<IAuthenticationApi>(URL);
+                var api = RefitServiceBuilder.Build<IAuthenticationApi>(URL, false);
                 var result = await _makeRequest.Start(api.RefreshTokenAsync(Settings.AccessToken, calToken), calToken);
                 if (result.Data != null && result.Data.Id > 0)
                     return result.Data;
                 else
                     return null;
             }
-            catch (Exception e)
+            catch (System.Net.Sockets.SocketException)
             {
-                e.HandleException();
+                return null;
+            }
+            catch (Refit.ApiException)
+            {
+                return null;
+            }
+            catch (Exception)
+            {
                 return null;
             }
         }
@@ -232,7 +234,7 @@ namespace Wesley.Client.Services
             {
                 var api = RefitServiceBuilder.Build<IAuthenticationApi>(URL);
                 var result = await _makeRequest.Start(api.QRLoginAsync(uuid, Settings.UserId, calToken), calToken);
-                if (result.Data != null)
+                if (result != null)
                     return result.Data;
                 else
                     return true;

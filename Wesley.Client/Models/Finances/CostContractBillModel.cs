@@ -34,7 +34,6 @@ namespace Wesley.Client.Models.Finances
         public int? AbandonedUserId { get; set; }
         public bool AbandonedStatus { get; set; }
         public DateTime? AbandonedDate { get; set; }
-        public int? PrintNum { get; set; }
         [Reactive] public ObservableCollection<CostContractItemModel> Items { get; set; } = new ObservableCollection<CostContractItemModel>();
         [Reactive] public decimal? TotalAmount { get; set; }
         [Reactive] public int AllNum { get; set; }
@@ -118,6 +117,7 @@ namespace Wesley.Client.Models.Finances
     /// </summary>
     public class CostContractUpdateModel : Base
     {
+        public string BillNumber { get; set; }
         public int CustomerId { get; set; }
         public int LeaderId { get; set; }
         public int EmployeeId { get; set; }

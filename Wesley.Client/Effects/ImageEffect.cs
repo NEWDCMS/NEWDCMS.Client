@@ -2,11 +2,11 @@
 using System.Linq;
 using Xamarin.Forms;
 
-namespace Wesley.Effects
+namespace Wesley.Client.Effects
 {
     public static class ImageEffect
     {
-#pragma warning disable SA1401 // Fields should be private
+
         public static BindableProperty TintColorProperty =
             BindableProperty.CreateAttached(
                 "TintColor",
@@ -14,7 +14,6 @@ namespace Wesley.Effects
                 typeof(ImageEffect),
                 Color.Default,
                 propertyChanged: OnTintColorPropertyPropertyChanged);
-#pragma warning restore SA1401 // Fields should be private
 
         public static Color GetTintColor(BindableObject element)
         {
@@ -33,7 +32,7 @@ namespace Wesley.Effects
         {
             if (!(bindable is Image))
             {
-                throw new InvalidOperationException("Tint effect is only appliable on CachedImage and Image");
+                //throw new InvalidOperationException("Tint effect is only appliable on CachedImage and Image");
             }
 
             AttachEffect((View)bindable, (Color)newValue);
@@ -52,10 +51,7 @@ namespace Wesley.Effects
 
     public class TintableImageEffect : RoutingEffect
     {
-        public static readonly string Name = $"Silly.{nameof(TintableImageEffect)}";
-
-        public TintableImageEffect(Color color)
-            : base(Name)
+        public TintableImageEffect(Color color) : base($"Wesley.Client.{nameof(TintableImageEffect)}")
         {
             TintColor = color;
         }

@@ -1,50 +1,68 @@
-﻿using Wesley.Client.Models.Report;
+﻿using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Report;
 using Wesley.Client.Services;
-using Wesley.Easycharts;
-
+using Wesley.Infrastructure.Helpers;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Wesley.ChartJS.Models;
+using Wesley.Client.Models.Report;
+using Wesley.Client.Services;
+using Wesley.Infrastructure.Helpers;
+using Prism.Navigation;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Forms;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Xamarin.Forms;
+
 namespace Wesley.Client.ViewModels
 {
-    public class SalesRatePageViewModel : ViewModelBase
+    public class SalesRatePageViewModel : ViewModelBaseCutom
     {
         public readonly IReportingService _reportingService;
-
-        [Reactive] public Chart ChartData { get; set; } = null;
         [Reactive] public SaleAnalysis Data { get; set; } = new SaleAnalysis();
-        [Reactive] public string DescriptionChart { get; set; } = "今日销售净额0";
+        [Reactive] public ChartViewConfig DoughnutConfig { get; set; }
+        public ReactiveCommand<object, Unit> ViewDetailCommand { get; }
 
 
         public SalesRatePageViewModel(INavigationService navigationService,
-            IReportingService reportingService,
-
-
-            IDialogService dialogService) : base(navigationService,
-                dialogService)
+                    IProductService productService,
+                    IUserService userService,
+                    ITerminalService terminalService,
+                    IWareHousesService wareHousesService,
+                    IAccountingService accountingService,
+                    IReportingService reportingService,
+                    IDialogService dialogService) : base(navigationService,
+                        productService,
+                        terminalService,
+                        userService,
+                        wareHousesService,
+                        accountingService,
+                        dialogService)
         {
             Title = "今日销售净额";
             _reportingService = reportingService;
 
             this.WhenAnyValue(x => x.Data)
                 .Subscribe(x => { this.IsNull = (x == null); })
-                .DisposeWith(DestroyWith);
+                .DisposeWith(DeactivateWith);
 
-            //this.WhenAny(
-            //        x => x.NotificationTitle,
-            //        x => x.NotificationMessage,
-            //        x => x.ScheduledTime,
-            //        (title, msg, sch) =>
-            //            !title.GetValue().IsEmpty() &&
-            //            !msg.GetValue().IsEmpty() &&
-            //            sch.GetValue() > DateTime.Now
-            //    )
 
             this.WhenAnyValue(
                 x => x.Filter.BusinessUserId,
@@ -56,132 +74,153 @@ namespace Wesley.Client.ViewModels
             {
                 ((ICommand)Load)?.Execute(null);
 
-            }).DisposeWith(DestroyWith);
+            }).DisposeWith(DeactivateWith);
 
-            this.Load = ReactiveCommand.Create(() => Task.Run(async () =>
+            this.Load = ReactiveCommand.CreateFromTask(() => Task.Run(async () =>
             {
                 var businessUserId = Filter.BusinessUserId == 0 ? Settings.UserId : Filter.BusinessUserId;
-                var result = await _reportingService.GetSaleAnalysisAsync(businessUserId, Filter.BrandId, Filter.ProductId, Filter.CatagoryId, this.ForceRefresh, calToken: cts.Token);
-                if (result != null)
-                {
-                    Data = result;
-                    RefreshData(this.Data);
-                    ChartData = CreateDonutChart(this.Data);
-                }
+                var analysis = await _reportingService.GetSaleAnalysisAsync(businessUserId,
+                    Filter.BrandId,
+                    Filter.ProductId,
+                    Filter.CatagoryId,
+                    true,
+                    new System.Threading.CancellationToken());
 
-                //#if DEBUG
-                //                //模拟
-                //                var random = new Random();
-                //                Data = new SaleAnalysis()
-                //                {
-                //                    Today = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    LastWeekSame = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    Yesterday = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    BeforeYesterday = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    LastWeek = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    ThisWeek = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    LastMonth = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    ThisMonth = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    ThisQuarter = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) },
-                //                    ThisYear = new Sale { NetAmount = random.Next(100, 1000), SaleAmount = random.Next(100, 1000), SaleReturnAmount = random.Next(100, 1000) }
-                //                };
-                //                ChartData = CreateDonutChart(this.Data);
-                //                RefreshData(this.Data);
-                //#endif
+                if (analysis != null)
+                {
+                    Data = analysis;
+
+                    var data = new ChartViewConfig()
+                    {
+                        BackgroundColor = Color.White,
+                        ChartConfig = new ChartConfig
+                        {
+                            type = Wesley.ChartJS.ChartTypes.Doughnut,
+                            data = GetChartData(analysis)
+                        }
+                    };
+                    DoughnutConfig = data;
+                }
 
             }));
 
-            this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
-        }
 
-        public Chart CreateDonutChart(SaleAnalysis data)
-        {
-            var entries = new List<ChartEntry>
+            //历史记录选择
+            this.ViewDetailCommand = ReactiveCommand.Create<object>(async e =>
             {
-                new ChartEntry((float)(data?.Today?.NetAmount??0))
+                if (e != null)
                 {
-                    Label = "今日净额",
-                    ValueLabel = (data?.Today?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[0]
-                },
-
-                new ChartEntry((float)(data?.Yesterday?.NetAmount??0))
-                {
-                    Label = "昨天净额",
-                    ValueLabel = (data?.Yesterday?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[1]
-                },
-
-                new ChartEntry((float)(data?.BeforeYesterday?.NetAmount??0))
-                {
-                    Label = "前天净额",
-                    ValueLabel = (data?.BeforeYesterday?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[2]
-                },
-
-                new ChartEntry((float)(data?.LastWeek?.NetAmount??0))
-                {
-                    Label = "上周净额",
-                    ValueLabel = (data?.LastWeek?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[3]
-                },
-
-                new ChartEntry((float)(data?.ThisWeek?.NetAmount??0))
-                {
-                    Label = "本周净额",
-                    ValueLabel = (data?.ThisWeek?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[4]
-                },
-
-                new ChartEntry((float)(data?.LastMonth?.NetAmount??0))
-                {
-                    Label = "上月净额",
-                    ValueLabel = (data?.LastMonth?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[5]
-                },
-
-                new ChartEntry((float)(data?.ThisMonth?.NetAmount??0))
-                {
-                    Label = "本月净额",
-                    ValueLabel = (data?.ThisMonth?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[6]
-                },
-
-                new ChartEntry((float)(data?.ThisQuarter?.NetAmount??0))
-                {
-                    Label = "本季净额",
-                    ValueLabel = (data?.ThisQuarter?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[7]
-                },
-
-                new ChartEntry((float)(data?.ThisYear?.NetAmount??0))
-                {
-                    Label = "本年净额",
-                    ValueLabel = (data?.ThisYear?.NetAmount??0).ToString("#,##0.00"),
-                    Color = ChartDataProvider.Colors[8]
+                    int.TryParse(e.ToString(), out int type);
+                    switch (type)
+                    {
+                        //今日
+                        case 1:
+                            Filter.StartTime = DateTime.Now;
+                            Filter.EndTime = DateTime.Now;
+                            break;
+                        //昨天
+                        case 2:
+                            Filter.StartTime = DateTime.Now.AddDays(-1);
+                            Filter.EndTime = DateTime.Now;
+                            break;
+                        //前天
+                        case 3:
+                            Filter.StartTime = DateTime.Now.AddDays(-2);
+                            Filter.EndTime = DateTime.Now;
+                            break;
+                        //上周
+                        case 4:
+                            Filter.StartTime = DateTime.Now.AddDays(0 - Convert.ToInt16(DateTime.Now.DayOfWeek) - 6);
+                            Filter.EndTime = DateTime.Now.AddDays(6 - Convert.ToInt16(DateTime.Now.DayOfWeek) - 6);
+                            break;
+                        //本周
+                        case 5:
+                            Filter.StartTime = DateTime.Now.AddDays(0 - Convert.ToInt16(DateTime.Now.DayOfWeek) + 1);
+                            Filter.EndTime = DateTime.Now.AddDays(6 - Convert.ToInt16(DateTime.Now.DayOfWeek) + 1);
+                            break;
+                        //上月
+                        case 6:
+                            Filter.StartTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-01")).AddMonths(-1);
+                            Filter.EndTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-01")).AddDays(-1);
+                            break;
+                        //本月
+                        case 7:
+                            Filter.StartTime = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-01"));
+                            Filter.EndTime = DateTime.Now;
+                            break;
+                        //本季
+                        case 8:
+                            var s = DateTime.Now.AddMonths(0 - (DateTime.Now.Month - 1) % 3).AddDays(1 - DateTime.Now.Day);
+                            Filter.StartTime = s;  //本季度初  
+                            Filter.EndTime = s.AddMonths(3).AddDays(-1);  //本季度末  
+                            break;
+                        //本年
+                        case 9:
+                            Filter.StartTime = new DateTime(DateTime.Now.Year, 1, 1);
+                            Filter.EndTime = DateTime.Now;
+                            break;
+                    }
+                    await this.NavigateAsync("SaleSummeryPage", ("Filter", Filter), ("Reference", this.PageName));
                 }
-            };
-            return ChartDataProvider.CreateDonutChart(entries);
+            });
+
+            this.BindBusyCommand(Load);
         }
 
-        private void RefreshData(SaleAnalysis data)
+
+        private ChartData GetChartData(SaleAnalysis analysis)
         {
-            if ((data?.Today?.NetAmount ?? 0) > (data?.LastWeekSame?.NetAmount ?? 0))
+            var labels = new[] { "今日净额", "昨天净额", "前天净额", "上周净额", "本周净额", "上月净额", "本季净额", "本年净额" }.ToList();
+            var dataSets = new List<ChartDecimalDataset>();
+
+            var colors = RandomChartBuilder.GetDefaultColors();
+
+            var datas = new decimal[]
             {
-                DescriptionChart = $"今日销售净额 {(data?.LastWeekSame?.NetAmount ?? 0)},比上周同期增加了 {((data?.Today?.NetAmount ?? 0) - (data?.LastWeekSame?.NetAmount ?? 0))}";
-            }
-            else if ((data?.Today?.NetAmount ?? 0) < (data?.LastWeekSame?.NetAmount ?? 0))
+                analysis.Today?.NetAmount ?? 0,
+                analysis.Yesterday?.NetAmount ?? 0,
+                analysis.BeforeYesterday?.NetAmount ?? 0,
+                analysis.LastWeek?.NetAmount ?? 0,
+                analysis.ThisWeek?.NetAmount ?? 0,
+                analysis.LastMonth?.NetAmount ?? 0,
+                analysis.ThisQuarter?.NetAmount ?? 0,
+                analysis.ThisYear?.NetAmount ?? 0,
+            };
+
+            var descriptionChart = "今日销售净额";
+            if ((analysis?.Today?.NetAmount ?? 0) > (analysis?.LastWeekSame?.NetAmount ?? 0))
             {
-                DescriptionChart = $"今日销售净额 {(data?.LastWeekSame?.NetAmount ?? 0)},比上周同期减少了 {Math.Abs((data?.Today?.NetAmount ?? 0) - (data?.LastWeekSame?.NetAmount ?? 0))}";
+                descriptionChart = $"今日销售净额 {(analysis?.LastWeekSame?.NetAmount ?? 0)},比上周同期增加了 {((analysis?.Today?.NetAmount ?? 0) - (analysis?.LastWeekSame?.NetAmount ?? 0))}";
             }
+            else if ((analysis?.Today?.NetAmount ?? 0) < (analysis?.LastWeekSame?.NetAmount ?? 0))
+            {
+                descriptionChart = $"今日销售净额 {(analysis?.LastWeekSame?.NetAmount ?? 0)},比上周同期减少了 {Math.Abs((analysis?.Today?.NetAmount ?? 0) - (analysis?.LastWeekSame?.NetAmount ?? 0))}";
+            }
+
+            dataSets.Add(new ChartDecimalDataset
+            {
+                type = Wesley.ChartJS.ChartTypes.Doughnut,
+                label = descriptionChart,
+                data = datas,
+                backgroundColor = datas.Select((d, i) =>
+                {
+                    var color = colors[i % colors.Count];
+                    return $"rgb({color.Item1},{color.Item2},{color.Item3})";
+                })
+            });
+
+            return new ChartData()
+            {
+                datasets = dataSets,
+                labels = labels
+            };
         }
+
 
         public override void OnAppearing()
         {
             base.OnAppearing();
-            if (ChartData == null)
-                ((ICommand)Load)?.Execute(null);
+            ((ICommand)Load)?.Execute(null);
         }
     }
 }

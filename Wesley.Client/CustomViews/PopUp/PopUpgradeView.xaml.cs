@@ -1,7 +1,7 @@
 ﻿using Microsoft.AppCenter.Crashes;
 using System;
 using Xamarin.Forms;
-namespace Wesley.Client.CustomViews.Views
+namespace Wesley.Client.CustomViews
 {
 
     public partial class PopUpgradeView : ContentView

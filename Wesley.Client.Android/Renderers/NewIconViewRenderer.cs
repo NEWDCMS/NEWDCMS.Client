@@ -15,7 +15,7 @@ namespace Wesley.Client.Droid.Renderers
     public class NewIconViewRenderer : ViewRenderer<IconView, ImageView>
     {
         private bool _isDisposed;
-        Context _context;
+        private Context _context;
         public NewIconViewRenderer(Context context) : base(context)
         {
             base.AutoPackage = false;

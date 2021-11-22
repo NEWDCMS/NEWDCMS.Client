@@ -21,13 +21,13 @@ namespace Wesley.Infrastructure.Helpers
         /// <returns></returns>
         public static double CalculateDistance(double lat1, double lng1, double lat2, double lng2)
         {
-            double radLat1 = Rad(lat1);
-            double radLng1 = Rad(lng1);
-            double radLat2 = Rad(lat2);
-            double radLng2 = Rad(lng2);
+            double radLat1 = lat1 * Math.PI / 180d;
+            double radLng1 = lng1 * Math.PI / 180d;
+            double radLat2 = lat2 * Math.PI / 180d;
+            double radLng2 = lng2 * Math.PI / 180d;
             double a = radLat1 - radLat2;
             double b = radLng1 - radLng2;
-            double result = 2 * Math.Asin(Math.Sqrt(Math.Pow(Math.Sin(a / 2), 2) + Math.Cos(radLat1) * Math.Cos(radLat2) * Math.Pow(Math.Sin(b / 2), 2))) * EARTH_RADIUS;
+            double result = 2 * Math.Asin(Math.Sqrt(Math.Pow(Math.Sin(a / 2), 2) + Math.Cos(radLat1) * Math.Cos(radLat2) * Math.Pow(Math.Sin(b / 2), 2))) * 6378137;
             return result;
         }
 

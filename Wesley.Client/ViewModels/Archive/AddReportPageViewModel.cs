@@ -5,11 +5,13 @@ using Newtonsoft.Json;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Reactive.Disposables;
 
 namespace Wesley.Client.ViewModels
 {
@@ -18,8 +20,8 @@ namespace Wesley.Client.ViewModels
         [Reactive] public IList<Module> AppList { get; set; } = new ObservableCollection<Module>();
 
         public AddReportPageViewModel(INavigationService navigationService,
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加报表快捷方式";
 
@@ -32,7 +34,7 @@ namespace Wesley.Client.ViewModels
 
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+            this.Load.ThrownExceptions.Subscribe(ex => { Debug.Print(ex.StackTrace); }).DisposeWith(this.DeactivateWith);
         }
 
 

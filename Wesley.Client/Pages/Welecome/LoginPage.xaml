@@ -5,10 +5,10 @@
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
-                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
-                       prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.LoginPage"
                        x:Name="CurrentContentView"
+                       xmlns:prism="http://prismlibrary.com"
+                       prism:ViewModelLocator.AutowireViewModel="True"
                        xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
                        x:TypeArguments="vms:LoginPageViewModel">
     <ContentPage.Resources>
@@ -157,7 +157,8 @@
                         </DataTrigger>
                     </Label.Triggers>
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding AgreementedCmd}" />
+                        <TapGestureRecognizer Command="{Binding AgreementedCmd}"
+                                              NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
                 <custom:HtmlLabel Grid.Column="1"

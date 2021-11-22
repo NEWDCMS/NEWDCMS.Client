@@ -5,12 +5,9 @@ using Plugin.Media.Abstractions;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Java.IO;
-using Wesley.Client.Droid.Utils;
 
 
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(MediaPickerService))]
+//[assembly: Dependency(typeof(ImageEditor))]
 namespace Wesley.Client.Droid.Services
 {
     /// <summary>
@@ -175,7 +172,7 @@ namespace Wesley.Client.Droid.Services
             _image = null;
         }
 
-        void UpdateSize()
+        private void UpdateSize()
         {
             try
             {

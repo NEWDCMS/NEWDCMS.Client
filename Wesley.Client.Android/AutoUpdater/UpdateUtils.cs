@@ -12,6 +12,7 @@ using Environment = Android.OS.Environment;
 using Exception = Java.Lang.Exception;
 using File = Java.IO.File;
 using Uri = Android.Net.Uri;
+using System.Reflection;
 
 namespace Wesley.Client.Droid.AutoUpdater
 {
@@ -101,7 +102,7 @@ namespace Wesley.Client.Droid.AutoUpdater
                 else
                 {
                     //更新新版本
-                    NewVersionUpdateV2(activity, updateInfo);
+                    StarNewVersionUpdateV2(activity, updateInfo);
                 }
             }
             catch (Exception e)
@@ -110,37 +111,38 @@ namespace Wesley.Client.Droid.AutoUpdater
             }
         }
 
-        public void NewVersionUpdateV2(Activity activity, UpdateInfo updateInfo)
-        {
-            string version = GetVersion(activity);
-            var sb = new System.Text.StringBuilder();
-            sb.AppendFormat("当前版本:{0}, 发现新版本:{1}, 是否更新?", version, updateInfo.Version);
+        //public void NewVersionUpdateV2(Activity activity, UpdateInfo updateInfo)
+        //{
+        //    string version = GetVersion(activity);
+        //    var sb = new System.Text.StringBuilder();
+        //    sb.AppendFormat("当前版本:{0}, 发现新版本:{1}, 是否更新?", version, updateInfo.Version);
 
 
-            Dialog dialog = new AlertDialog.Builder(activity)
-                .SetTitle("软件更新")
-                .SetMessage(sb.ToString())
-                //确定
-                .SetPositiveButton("更新下载", async (s, e) =>
-                {
-                    var cancelled = false;
-                    using (var dlg = UserDialogs.Instance.Progress(null, () => cancelled = true, cancelText: "取消"))
-                    {
-                        //下载任务
-                        DownloadFileV2(activity, dlg, updateInfo);
-                        while (!cancelled && dlg.PercentComplete < 100)
-                        {
-                            await Task.Delay(TimeSpan.FromMilliseconds(500));
-                        }
-                    }
-                })
-                //取消
-                .SetNegativeButton("以后更新", (s, e) =>
-                {
+        //    Dialog dialog = new AlertDialog.Builder(activity)
+        //        .SetTitle("软件更新")
+        //        .SetMessage(sb.ToString())
+        //        //确定
+        //        .SetPositiveButton("更新下载", async (s, e) =>
+        //        {
+        //            var cancelled = false;
+        //            using (var dlg = UserDialogs.Instance.Progress(null, () => cancelled = true, cancelText: "取消"))
+        //            {
+        //                //下载任务
+        //                DownloadFileV2(activity, dlg, updateInfo);
+        //                while (!cancelled && dlg.PercentComplete < 100)
+        //                {
+        //                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+        //                }
+        //            }
+        //        })
+        //        //取消
+        //        .SetNegativeButton("以后更新", (s, e) =>
+        //        {
 
-                }).Create();
-            dialog.Show();
-        }
+        //        }).Create();
+
+        //    dialog.Show();
+        //}
 
 
         /// <summary>
@@ -168,168 +170,194 @@ namespace Wesley.Client.Droid.AutoUpdater
         /// </summary>
         /// <param name="activity"></param>
         /// <param name="updateInfo"></param>
-        private void DownloadFileV2(Activity activity, IProgressDialog progressDialog, UpdateInfo updateInfo)
+        private void DownloadFileV2(Activity activity, IProgressDialog pDialog, UpdateInfo updateInfo)
         {
-            //string destPath = activity.GetExternalFilesDir(Environment.DirectoryDownloads).AbsolutePath;
-            //string filePath = Environment
-            //.GetExternalStoragePublicDirectory(Environment.DirectoryDownloads).ToString() + "/";
-            string fullLatestAppFilename;
-            bool downloadedOK = false;
-
-            //判断文件目录是否存在
-            //==  Download/apk/
-            File tempPath = new File(Application.Context.GetExternalFilesDir(Environment.DirectoryDownloads), "apk");
-            if (!tempPath.Exists())
+            try
             {
-                //创建目录
-                try
-                {
-                    tempPath.Mkdir();
-                }
-                catch (Exception e)
-                {
-                    e.PrintStackTrace();
-                }
-            }
-            fullLatestAppFilename = tempPath + "/" + updateInfo.Version + ".apk";
+                //string directory = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+                //完整的最新应用程序文件名
+                string flaName;
+                bool downloadedOK = false;
 
-            //外部存储路径下的apk文件
-            File file = new File(fullLatestAppFilename);
-            //防止文件过多
-            if (file.Exists())
-            {
-                try
-                {
-                    file.Delete();
-                }
-                catch (Exception ex)
-                {
-                    ex.PrintStackTrace();
-                }
-            }
+                //判断文件目录是否存在
+                //==  Download/apk/
 
-            //默认：http://storage.jsdcms.com:5000/api/version/updater/app/download
-            using (var webClient = new WebClient())
-            {
-                //Progress
-                webClient.DownloadProgressChanged += (s, e) =>
+                // "/storage/emulated/0/Android/data/com.dcms.clientv3/files/Download/apk"
+                // "/storage/emulated/0/Android/data/com.dcms.clientv3/files/Download"
+                using (var tempFile = new File(Application.Context.GetExternalFilesDir(Environment.DirectoryDownloads), "apk"))
                 {
-                    var bytesIn = double.Parse(e.BytesReceived.ToString());
-                    var totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
-                    if (totalBytes == 0) totalBytes = 1;
-                     var percentage = (int)(bytesIn / totalBytes * 100);
-                    if (percentage == 100)
+                    if (!tempFile.Exists())
                     {
-                        downloadedOK = true;
+                        //创建目录
+                        try
+                        {
+                            tempFile.Mkdir();
+                        }
+                        catch (Exception e)
+                        {
+                            e.PrintStackTrace();
+                        }
                     }
-                    activity.RunOnUiThread(() =>
-                    {
-                        progressDialog.PercentComplete = percentage;
-                    });
-                };
 
-                //完成
-                webClient.DownloadDataCompleted += (s, e) =>
+                    flaName = tempFile.Path + "/" + updateInfo.Version + ".apk";
+                }
+
+
+                //外部存储路径下的apk文件
+                File file = new File(flaName);
+                //防止文件过多
+                if (file.Exists())
                 {
-                    activity.RunOnUiThread(() =>
+                    try
                     {
-                        //关闭ProgressDialog
-                        progressDialog.Hide();
+                        file.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.PrintStackTrace();
+                    }
+                }
 
-                        //写入流
-                        if (e.Result.Length > 0 && e.Error == null && e.Cancelled == false)
+                //默认：http://storage.jsdcms.com:5000/api/version/updater/app/download
+                using (var webClient = new WebClient())
+                {
+                    //进度
+                    webClient.DownloadProgressChanged += (s, e) =>
+                    {
+                        var bytesIn = double.Parse(e.BytesReceived.ToString());
+                        var totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+                        if (totalBytes == 0) totalBytes = 1;
+                        var percentage = (int)(bytesIn / totalBytes * 100);
+                        if (percentage == 100)
                         {
-                            byte[] buffer = e.Result;
-                            var saveFileStream = new FileStream(fullLatestAppFilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                            using (MemoryStream ms = new MemoryStream(buffer))
-                            {
-                                ms.CopyTo(saveFileStream);
-                            }
+                            downloadedOK = true;
                         }
+                        activity.RunOnUiThread(() =>
+                        {
+                            if (pDialog != null)
+                                pDialog.PercentComplete = percentage;
+                        });
+                    };
 
-                        //外部存储路径下的apk文件
-                        if (!file.Exists())
+                    //完成
+                    webClient.DownloadDataCompleted += (s, e) =>
+                    {
+                        activity.RunOnUiThread(() =>
                         {
-                            return;
-                        }
-                        else
-                        {
-                            //通过在代码中写入linux指令修改此apk文件的权限，改为全局可读可写可执行
-                            String[] command = { "chmod", "777", file.Path };
-                            Java.Lang.ProcessBuilder builder = new Java.Lang.ProcessBuilder(command);
                             try
                             {
-                                builder.Start();
-                            }
-                            catch (Java.IO.IOException ex)
-                            {
-                                ex.PrintStackTrace();
-                            }
-                        }
+                                //关闭ProgressDialog
+                                if (pDialog != null)
+                                    pDialog.Hide();
 
-                        //是否下载
-                        if (downloadedOK)
-                        {
-                            var context = Application.Context;
-                            Uri uri;
-
-                            try
-                            {
-                                //安装
-                                var installApk = new Intent(Intent.ActionView);
-                                installApk.SetFlags(ActivityFlags.NewTask);
-
-                                if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
+                                //写入流
+                                if (e.Result.Length > 0 && e.Error == null && e.Cancelled == false)
                                 {
-                                    uri = FileProvider.GetUriForFile(context, AutoUpdate.Authority, file);
-                                    //Intent.ActionInstallPackage
-                                    installApk.SetAction("android.intent.action.INSTALL_PACKAGE");
-                                    installApk.SetDataAndType(uri, "application/vnd.android.package-archive");
-                                    installApk.AddFlags(ActivityFlags.GrantPersistableUriPermission);
-                                    installApk.AddFlags(ActivityFlags.GrantPrefixUriPermission);
-                                    installApk.AddFlags(ActivityFlags.GrantWriteUriPermission);
-                                    installApk.AddFlags(ActivityFlags.GrantReadUriPermission);
+                                    byte[] buffer = e.Result;
+                                    using (var sfs = new FileStream(flaName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                                    {
+                                        using (MemoryStream ms = new MemoryStream(buffer))
+                                        {
+                                            ms.CopyTo(sfs);
+                                        }
+                                    }
+                                }
+
+                                //外部存储路径下的apk文件
+                                if (!file.Exists())
+                                {
+                                    return;
                                 }
                                 else
                                 {
-                                    uri = Uri.FromFile(file);
-                                    installApk.SetDataAndType(uri, "application/vnd.android.package-archive");
+                                    //通过在代码中写入linux指令修改此apk文件的权限，改为全局可读可写可执行
+                                    string[] command = { "chmod", "777", file.Path };
+                                    Java.Lang.ProcessBuilder builder = new Java.Lang.ProcessBuilder(command);
+                                    try
+                                    {
+                                        builder.Start();
+                                    }
+                                    catch (Java.IO.IOException ex)
+                                    {
+                                        ex.PrintStackTrace();
+                                    }
                                 }
 
-                                context.StartActivity(installApk);
+                                //是否下载
+                                if (downloadedOK)
+                                {
+                                    var context = Application.Context;
+                                    Uri uri;
+
+                                    try
+                                    {
+                                        //安装
+                                        var installApk = new Intent(Intent.ActionView);
+                                        installApk.SetFlags(ActivityFlags.NewTask);
+
+                                        if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
+                                        {
+                                            uri = FileProvider.GetUriForFile(context, AutoUpdate.Authority, file);
+                                            //Intent.ActionInstallPackage
+                                            installApk.SetAction("android.intent.action.INSTALL_PACKAGE");
+                                            installApk.SetDataAndType(uri, "application/vnd.android.package-archive");
+                                            installApk.AddFlags(ActivityFlags.GrantPersistableUriPermission);
+                                            installApk.AddFlags(ActivityFlags.GrantPrefixUriPermission);
+                                            installApk.AddFlags(ActivityFlags.GrantWriteUriPermission);
+                                            installApk.AddFlags(ActivityFlags.GrantReadUriPermission);
+                                        }
+                                        else
+                                        {
+                                            uri = Uri.FromFile(file);
+                                            installApk.SetDataAndType(uri, "application/vnd.android.package-archive");
+                                        }
+
+                                        context.StartActivity(installApk);
+                                    }
+                                    catch (ActivityNotFoundException)
+                                    {
+                                        var errorInstalled = new AlertDialog.Builder(context).Create();
+                                        errorInstalled.SetTitle("出了点问题");
+                                        errorInstalled.SetMessage(string.Format("{0} 不能被安装,请重试", "Wesley " + updateInfo.Version));
+                                        errorInstalled.Show();
+                                    }
+                                    downloadedOK = false;
+                                }
+                                else
+                                {
+                                    try
+                                    {  //删除
+                                        System.IO.File.Delete(flaName);
+                                    }
+                                    catch (ActivityNotFoundException ex)
+                                    {
+                                        ex.PrintStackTrace();
+                                    }
+                                }
+
                             }
-                            catch (ActivityNotFoundException)
+                            catch (TargetInvocationException) { }
+                            catch (WebException) { }
+                            catch (Exception) { }
+                            finally
                             {
-                                var errorInstalled = new AlertDialog.Builder(context).Create();
-                                errorInstalled.SetTitle("出了点问题");
-                                errorInstalled.SetMessage(string.Format("{0} 不能被安装,请重试", "Wesley " + updateInfo.Version));
-                                errorInstalled.Show();
+                                if (file != null)
+                                    file.Dispose();
                             }
-                            downloadedOK = false;
-                        }
-                        else
-                        {
-                            try
-                            {  //删除
-                                System.IO.File.Delete(fullLatestAppFilename);
-                            }
-                            catch (ActivityNotFoundException ex)
-                            {
-                                ex.PrintStackTrace();
-                            }
-                        }
-                    });
+                        });
+
+                    };
+
+                    //开始异步下载
+                    //application/octet-stream
+                    webClient.DownloadDataAsync(new System.Uri(updateInfo.DownLoadUrl), flaName);
                 };
-
-                //下载
-                //application/octet-stream
-                webClient.DownloadDataAsync(new System.Uri(updateInfo.DownLoadUrl), fullLatestAppFilename);
-            };
-
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            { }
+            catch (Exception ex)
+            { }
         }
-
-
-
 
         public async void StarInit()
         {

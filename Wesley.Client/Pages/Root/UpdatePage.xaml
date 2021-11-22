@@ -35,14 +35,19 @@
                    TextColor="{StaticResource PrimaryTextColor}"
                    VerticalOptions="Center"
                    HorizontalOptions="StartAndExpand"
-                   Style="{StaticResource H4-Regular}" />
+                    />
             <Label Grid.Column="1"
                    Grid.Row="0"
-                   Text="{Binding CurrentVersion,StringFormat='V{0}'}"
                    TextColor="{StaticResource DividerColor}"
                    VerticalOptions="Center"
-                   HorizontalOptions="End"
-                   Style="{StaticResource H4-Regular}" />
+                   HorizontalOptions="End">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="V" />
+                        <Span Text="{Binding CurrentVersion}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
             <BoxView Style="{StaticResource SeparatorGrid}"
                      Grid.ColumnSpan="2"
                      Grid.Column="0"
@@ -52,15 +57,19 @@
                    Text="最新版本"
                    TextColor="{StaticResource PrimaryTextColor}"
                    VerticalOptions="Center"
-                   HorizontalOptions="StartAndExpand"
-                   Style="{StaticResource H4-Regular}" />
+                   HorizontalOptions="StartAndExpand"/>
             <Label Grid.Column="1"
                    Grid.Row="2"
-                   Text="{Binding LatestVersion,StringFormat='V{0}'}"
                    TextColor="{StaticResource DividerColor}"
                    VerticalOptions="Center"
-                   HorizontalOptions="End"
-                   Style="{StaticResource H4-Regular}" />
+                   HorizontalOptions="End">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="V" />
+                        <Span Text="{Binding LatestVersion}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
             <BoxView Style="{StaticResource SeparatorGrid}"
                      Grid.Column="0"
                      Grid.ColumnSpan="2"
@@ -73,7 +82,7 @@
                                   FontSize="{StaticResource FT14}"
                                   TextColor="{StaticResource DividerColor}"
                                   HorizontalOptions="FillAndExpand"
-                                  LineHeight="1.5"></custom:HtmlLabel>
+                                  LineHeight="1.5" />
             </ScrollView>
         </Grid>
         <StackLayout VerticalOptions="End"
@@ -82,12 +91,12 @@
                      RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.90}"
                      RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0.1}">
             <!-- Bottom Content -->
-            <Button Margin="10"
-                    CornerRadius="100"
+            <Button Margin="0"
+                    CornerRadius="0"
                     HeightRequest="45"
                     TextColor="White"
                     BackgroundColor="#53a245"
-                    Text="{Binding DownloadInfoText,StringFormat='download {0}'}"
+                    Text="{Binding DownloadInfoText}"
                     FontFamily="FAS"
                     Command="{Binding Path=BindingContext.UpdateCommand,Source={x:Reference CurrentContentView}}" />
         </StackLayout>

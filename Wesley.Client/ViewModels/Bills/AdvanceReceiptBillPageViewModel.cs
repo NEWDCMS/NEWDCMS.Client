@@ -1,18 +1,22 @@
-﻿using Wesley.Client.Enums;
+﻿using Acr.UserDialogs;
+using Wesley.Client.CustomViews;
+using Wesley.Client.Enums;
 using Wesley.Client.Models;
 using Wesley.Client.Models.Finances;
+using Wesley.Client.Pages;
 using Wesley.Client.Services;
 using Wesley.Infrastructure.Helpers;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
-
+using System.Diagnostics;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows.Input;
+using Xamarin.Forms;
 
 namespace Wesley.Client.ViewModels
 {
@@ -31,7 +35,8 @@ namespace Wesley.Client.ViewModels
             ITerminalService terminalService,
             IWareHousesService wareHousesService,
             IAccountingService accountingService,
-            IDialogService dialogService,
+            IDialogService dialogService
+            ,
             IAdvanceReceiptService advanceReceiptService) : base(navigationService, productService, terminalService, userService, wareHousesService, accountingService, dialogService)
         {
             Title = "预收款单据";
@@ -57,41 +62,51 @@ namespace Wesley.Client.ViewModels
            });
 
             //验证
+            var valid_IsReversed = this.ValidationRule(x => x.Bill.ReversedStatus, _isBool, "已红冲单据不能操作");
+            var valid_IsAudited = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
             var valid_TerminalId = this.ValidationRule(x => x.Bill.TerminalId, _isZero, "客户未指定");
             var valid_BusinessUserId = this.ValidationRule(x => x.Bill.AdvanceAmount, _isDZero, "预收金额未指定");
             var valid_SelectesCount = this.ValidationRule(x => x.PaymentMethods.Selectes.Count, _isZero, "请选择支付方式");
-            var valid_IsVieweBill = this.ValidationRule(x => x.Bill.AuditedStatus, _isBool, "已审核单据不能操作");
 
             //提交单据
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.ReceivablesBillsSave);
-
-                var postData = new AdvanceReceiptUpdateModel()
+                if (this.Bill.ReversedStatus)
                 {
-                    CustomerId = Bill.TerminalId,
-                    Payeer = Settings.UserId,
-                    AdvanceAmount = Bill.AdvanceAmount,
-                    DiscountAmount = Bill.DiscountAmount,
-                    OweCash = Bill.OweCash,
-                    Remark = Bill.Remark,
-                    AccountingOptionId = Bill.AccountingOptionId ?? 0,
-                    Accounting = PaymentMethods.Selectes.Select(a =>
+                    _dialogService.ShortAlert("已红冲单据不能操作");
+                    return Unit.Default;
+                }
+
+                return await this.Access(AccessGranularityEnum.ReceivablesBillsSave, async () =>
+                {
+                    var postData = new AdvanceReceiptUpdateModel()
                     {
-                        return new AccountMaping()
+                        BillNumber = this.Bill.BillNumber,
+                        CustomerId = Bill.TerminalId,
+                        Payeer = Settings.UserId,
+                        AdvanceAmount = Bill.AdvanceAmount,
+                        DiscountAmount = Bill.DiscountAmount,
+                        OweCash = Bill.OweCash,
+                        Remark = Bill.Remark,
+                        AccountingOptionId = Bill.AccountingOptionId ?? 0,
+                        Accounting = PaymentMethods.Selectes.Select(a =>
                         {
-                            AccountingOptionId = a.AccountingOptionId,
-                            CollectionAmount = a.CollectionAmount,
-                            Name = a.Name,
-                            BillId = 0,
-                        };
-                    }).ToList(),
-                };
+                            return new AccountMaping()
+                            {
+                                AccountingOptionId = a.AccountingOptionId,
+                                CollectionAmount = a.CollectionAmount,
+                                Name = a.Name,
+                                BillId = 0,
+                            };
+                        }).ToList(),
+                    };
 
-                return await SubmitAsync(postData, Bill.Id, _advanceReceiptService.CreateOrUpdateAsync, (result) =>
-                {
-                    Bill = new AdvanceReceiptBillModel();
-                }, token: cts.Token);
+                    return await SubmitAsync(postData, Bill.Id, _advanceReceiptService.CreateOrUpdateAsync, (result) =>
+                    {
+                        Bill = new AdvanceReceiptBillModel();
+                    }, token: new System.Threading.CancellationToken());
+                });
+
             },
             this.IsValid());
 
@@ -102,7 +117,7 @@ namespace Wesley.Client.ViewModels
                 var c2 = this.Bill.AdvanceAmount != 0 && this.Bill.AdvanceAmount != (Settings.AdvanceReceiptBill?.AdvanceAmount ?? 0);
                 if ((c1 || c2))
                 {
-                    if (!this.Bill.AuditedStatus)
+                    if (!this.Bill.AuditedStatus && !this.Bill.IsSubmitBill)
                     {
                         var ok = await _dialogService.ShowConfirmAsync("你是否要保存单据？", "提示", "确定", "取消");
                         if (ok)
@@ -121,7 +136,6 @@ namespace Wesley.Client.ViewModels
                 }
             });
 
-
             //更改输入
             this.TextChangedCommand = ReactiveCommand.Create<object>(e =>
             {
@@ -138,19 +152,25 @@ namespace Wesley.Client.ViewModels
                 await this.Access(AccessGranularityEnum.ReceivablesBillsApproved);
                 await SubmitAsync(Bill.Id, _advanceReceiptService.AuditingAsync, async (result) =>
                 {
-                    var db = Shiny.ShinyHost.Resolve<LocalDatabase>();
-                    await db.SetPending(SelecterMessage.Id, true);
+                    //红冲审核水印
+                    this.Bill.AuditedStatus = true;
+
+                    var _conn = App.Resolve<ILiteDbService<MessageInfo>>();
+                    var ms = await _conn.Table.FindByIdAsync(SelecterMessage.Id);
+                    if (ms != null)
+                    {
+                        ms.IsRead = true;
+                        await _conn.UpsertAsync(ms);
+                    }
                 });
             }, this.WhenAny(x => x.Bill.Id, (x) => x.GetValue() > 0));
 
-
-            //菜单选择
-            this.SetMenus(async (x) =>
+            //绑定页面菜单
+            _popupMenu = new PopupMenu(this, new Dictionary<MenuEnum, Action<SubMenu, ViewModelBase>>
             {
-                switch (x)
+                //清空单据
+                { MenuEnum.CLEAR,(m,vm)=>
                 {
-                    case Enums.MenuEnum.CLEAR://清空单据
-                        {
                             ClearForm(() =>
                             {
                                 Bill = new AdvanceReceiptBillModel()
@@ -162,21 +182,66 @@ namespace Wesley.Client.ViewModels
                                           BillTypeEnum.AdvanceReceiptBill).Split(',')[1], Settings.StoreId)
                                 };
                             });
-                        }
-                        break;
-                    case Enums.MenuEnum.PRINT://打印
+
+                } },
+                //打印
+                {
+                    MenuEnum.PRINT,async (m,vm)=>{
+
+                         Bill.BillType = BillTypeEnum.AdvanceReceiptBill;
+                         await SelectPrint(Bill);
+
+                } },
+                //审核
+                { MenuEnum.SHENGHE,async (m,vm)=>{
+
+                    ResultData result = null;
+                         using (UserDialogs.Instance.Loading("审核中..."))
+                         {
+                             result = await _advanceReceiptService.AuditingAsync(Bill.Id);
+                         }
+                         if (result!=null&&result.Success)
+                         {
+                            //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.AuditedStatus = true;
+                            await ShowConfirm(true, "审核成功", true, goReceipt: false);
+                         }
+                         else
+                         {
+                             await ShowConfirm(false, $"审核失败！{result?.Message}", false, goReceipt: false);
+                         }
+
+                } },
+                //红冲
+                { MenuEnum.HONGCHOU,async (m,vm) => {
+
+                    var remark = await CrossDiaglogKit.Current.GetInputTextAsync("红冲备注", "",Keyboard.Text);
+                    if (!string.IsNullOrEmpty(remark))
+                    {
+                        bool result = false;
+                        using (UserDialogs.Instance.Loading("红冲中..."))
                         {
-                            await SelectPrint(this.Bill);
+                             //红冲审核水印
+                            this.EnableOperation = true;
+                            this.Bill.ReversedStatus = true;
+                            result = await _advanceReceiptService.ReverseAsync(Bill.Id,remark);
                         }
-                        break;
-                }
-            }, 4, 5);
-
-            this.TextChangedCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AccountingSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.MorePaymentCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-
-            this.ExceptionsSubscribe();
+                        if (result)
+                        {
+                            await ShowConfirm(true, "红冲成功", true);
+                        }
+                        else
+                        {
+                            await ShowConfirm(false, "红冲失败！", false, goReceipt: false);
+                        }
+                    }
+                } },
+                //冲改
+                { MenuEnum.CHOUGAI,async (m,vm)=>{
+                    await _advanceReceiptService.ReverseAsync(Bill.Id);
+                } }
+            });
         }
 
 
@@ -199,12 +264,6 @@ namespace Wesley.Client.ViewModels
                 };
             }
         }
-
-        //private void DoClear()
-        //{
-        //    InitBill(true);
-        //}
-
         public async override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -234,13 +293,15 @@ namespace Wesley.Client.ViewModels
                 if (parameters.ContainsKey("Bill"))
                 {
                     parameters.TryGetValue("Bill", out bill);
+                    parameters.TryGetValue("IsSubmitBill", out bool isSubmitBill);
+                    this.Bill.IsSubmitBill = isSubmitBill;
                 }
 
                 if (parameters.ContainsKey("BillId"))
                 {
                     parameters.TryGetValue("BillId", out int billId);
                     this.BillId = billId;
-                    bill = await _advanceReceiptService.GetBillAsync(billId, calToken: cts.Token);
+                    bill = await _advanceReceiptService.GetBillAsync(billId, calToken: new System.Threading.CancellationToken());
                 }
 
                 if (bill != null)
@@ -251,15 +312,8 @@ namespace Wesley.Client.ViewModels
 
                     this.PaymentMethods = this.ToPaymentMethod(Bill, bill.Items);
 
-                    this.SetMenus((x) =>
-                    {
-                        switch (x)
-                        {
-                            case Enums.MenuEnum.SHENGHE://审核
-                                ((ICommand)AuditingDataCommand)?.Execute(null);
-                                break;
-                        }
-                    }, 34);
+                    //控制显示菜单
+                    _popupMenu?.Show(34);
                 }
             }
             catch (Exception ex)
@@ -289,6 +343,11 @@ namespace Wesley.Client.ViewModels
                 this.PaymentMethods.SubAmount = this.Bill.SumAmount;
                 this.PaymentMethods.OweCash = this.Bill.OweCash;
                 this.PaymentMethods.PreferentialAmount = this.Bill.DiscountAmount ?? 0;
+
+
+                //红冲审核水印
+                if (this.Bill.Id > 0 && this.Bill.AuditedStatus)
+                    this.Bill.AuditedStatus = !this.Bill.ReversedStatus;
             }
             catch (Exception ex)
             {
@@ -296,5 +355,12 @@ namespace Wesley.Client.ViewModels
             }
         }
 
+        public override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            //控制显示菜单
+            _popupMenu?.Show(4, 5);
+        }
     }
 }

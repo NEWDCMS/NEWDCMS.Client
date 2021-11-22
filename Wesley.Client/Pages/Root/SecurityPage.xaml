@@ -2,7 +2,7 @@
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
-                       xmlns:xe="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                       xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        prism:ViewModelLocator.AutowireViewModel="True"
                        x:Class="Wesley.Client.Pages.SecurityPage"
@@ -13,6 +13,7 @@
                        x:TypeArguments="vms:SecurityPageViewModel">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
+            
             <Grid Style="{StaticResource GGrid}"
                   VerticalOptions="Start"
                   RowDefinitions="*,*,*"
@@ -32,7 +33,7 @@
                                TextColor="{StaticResource PrimaryTextColor}"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
-                               Style="{StaticResource H4-Regular}"
+                               
                                Margin="10,0,0,0" />
                         <Switch VerticalOptions="Center"
                                 HorizontalOptions="EndAndExpand"
@@ -57,7 +58,7 @@
                                TextColor="{StaticResource PrimaryTextColor}"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
-                               Style="{StaticResource H4-Regular}"
+                               
                                Margin="10,0,0,0" />
                         <Switch VerticalOptions="Center"
                                 HorizontalOptions="EndAndExpand"
@@ -71,7 +72,7 @@
                 <Grid Grid.Row="2"
                       Style="{StaticResource GGrid}"
                       xe:TouchEffect.Color="LightGray"
-                      xe:Commands.Tap="{Binding BindingContext.UpdatePasswordCommand, Source={x:Reference CurrentContentView}}">
+                      xe:EffectCommands.Tap="{Binding BindingContext.UpdatePasswordCommand, Source={x:Reference CurrentContentView}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="50" />
                         <RowDefinition Height=".7" />
@@ -83,7 +84,7 @@
                                TextColor="{StaticResource PrimaryTextColor}"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
-                               Style="{StaticResource H4-Regular}"
+                               
                                Margin="10,0,0,0" />
                         <Label Text="{StaticResource FontAwesomeRight}"
                                FontFamily="FAS"
@@ -98,31 +99,17 @@
                              Grid.Row="1" />
                 </Grid>
             </Grid>
-            <!--footer-->
-            <Grid Margin="0"
-                  Style="{StaticResource GGrid}"
-                  HorizontalOptions="FillAndExpand"
-                  VerticalOptions="EndAndExpand">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <!--退出账号-->
-                <StackLayout Grid.Row="0"
-                             Grid.Column="0"
-                             HorizontalOptions="FillAndExpand"
-                             VerticalOptions="Center"
-                             Padding="5">
-                    <Button Text="power-off 注销退出"
-                            CornerRadius="50"
-                            HorizontalOptions="FillAndExpand"
-                            Style="{StaticResource CustomIconButtonStyle}"
-                            FontFamily="FAS"
-                            Command="{Binding Path=SignOutCommand}" />
-                </StackLayout>
-            </Grid>
+
+            <!--退出账号-->
+            <Button HeightRequest="45"
+                    Margin="0"
+                    Text="power-off 注销退出"
+                    CornerRadius="0"
+                    VerticalOptions="EndAndExpand"
+                    HorizontalOptions="FillAndExpand"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    FontFamily="FAS"
+                    Command="{Binding Path=SignOutCommand}" />
         </StackLayout>
     </ContentPage.Content>
 </pages:BaseContentPage>

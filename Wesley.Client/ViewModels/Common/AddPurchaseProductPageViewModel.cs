@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Navigation;
 using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-
 namespace Wesley.Client.ViewModels
 {
     public class AddPurchaseProductPageViewModel : ViewModelBase
@@ -22,7 +22,8 @@ namespace Wesley.Client.ViewModels
         public AddPurchaseProductPageViewModel(
             INavigationService navigationService,
             IPurchaseBillService purchaseBillService,
-              IDialogService dialogService) : base(navigationService, dialogService)
+              IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "添加采购商品";
 
@@ -206,15 +207,15 @@ namespace Wesley.Client.ViewModels
                         if (lastprices != null && lastprices.Count > 0)
                         {
                             if (lastprices.Count(l => l.UnitId == product.BigUnitId) > 0)
-                                product.BigPriceUnit.Price = lastprices.FirstOrDefault(l => l.UnitId == product.BigUnitId)?.Price;
+                                product.BigPriceUnit.Price = lastprices.FirstOrDefault(l => l.UnitId == (product.BigUnitId ?? 0))?.Price ?? 0;
 
                             if (lastprices.Count(l => l.UnitId == product.SmallUnitId) > 0)
-                                product.SmallPriceUnit.Price = lastprices.FirstOrDefault(l => l.UnitId == product.SmallUnitId)?.Price;
+                                product.SmallPriceUnit.Price = lastprices.FirstOrDefault(l => l.UnitId == (product.SmallUnitId ?? 0))?.Price ?? 0;
                         }
                     }
                     else //预设进价
                     {
-                        product.BigPriceUnit.Price = product.BigProductPrices.TradePrice;
+                        product.BigPriceUnit.Price = product.BigProductPrices.TradePrice ?? 0;
                         product.SmallPriceUnit.Price = product.SmallProductPrices.TradePrice ?? 0;
                     }
 

@@ -48,10 +48,18 @@ namespace Wesley.Client.ViewModels
                 x => x.Password,
                 (u, p) => !string.IsNullOrEmpty(u) && !string.IsNullOrEmpty(p))
                 .Select(x => x)
-                .Subscribe(x => this.IsEnabled = x).DisposeWith(DestroyWith);
+                .Subscribe(x => this.IsEnabled = x).DisposeWith(DeactivateWith);
 
 #if DEBUG
-            UserName = "13883655199";
+            //13883655199
+            //13379270266
+            //15139466658
+            //15332249255
+            //13379270266
+            //18191173366
+            //15319386295
+
+            UserName = "15319386295";
             Password = "dcms.1";
 #endif
             var name = this
@@ -103,6 +111,7 @@ namespace Wesley.Client.ViewModels
                         if (rcode == 1)
                         {
                             isAuthenticated = true;
+                            Settings.IsAuthenticated = true;
                         }
                     }
                     catch (Exception ex) when (ex is WebException || ex is HttpRequestException)
@@ -137,7 +146,6 @@ namespace Wesley.Client.ViewModels
                 await CrossDiaglogKit.Current.PopViewAsync("免责申明", GlobalSettings.AgreementText);
             });
 
-            this.PerformLogin.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
             this.BindBusyCommand(Load);
         }
 

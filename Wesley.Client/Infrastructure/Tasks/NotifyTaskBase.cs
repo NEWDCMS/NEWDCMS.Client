@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Wesley.Mvvm;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-
-using Wesley.Mvvm;
 
 namespace Wesley.Infrastructure.Tasks
 {
@@ -232,14 +231,17 @@ namespace Wesley.Infrastructure.Tasks
         {
             try
             {
-                //如果需要包含在新线程时
-                if (_inNewTask)
+                if (task != null && task.Status != TaskStatus.Faulted)
                 {
-                    await Task.Run(async () => await task);
-                }
-                else
-                {
-                    await task;
+                    //如果需要包含在新线程时
+                    if (_inNewTask)
+                    {
+                        await Task.Run(async () => await task);
+                    }
+                    else
+                    {
+                        await task;
+                    }
                 }
             }
             catch (TaskCanceledException canceledException)
@@ -252,8 +254,11 @@ namespace Wesley.Infrastructure.Tasks
             }
             finally
             {
-                //调用回调
-                InvokeCallbacks(task);
+                if (task != null)
+                {
+                    //调用回调
+                    InvokeCallbacks(task);
+                }
             }
         }
 

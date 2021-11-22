@@ -35,33 +35,6 @@ namespace Wesley.Client.Droid.Utils
         }
 
 
-        public static bool IsServiceRunning(Context context, string serviceName)
-        {
-            bool isAPPRunning = false;
-            try
-            {
-                if (string.IsNullOrEmpty(serviceName))
-                {
-                    return isAPPRunning;
-                }
-                var myManager = (ActivityManager)context.GetSystemService(Context.ActivityService);
-#pragma warning disable CS0618 // 类型或成员已过时
-                var runningService = myManager.GetRunningServices(50);
-#pragma warning restore CS0618 // 类型或成员已过时
-                foreach (ActivityManager.RunningServiceInfo sInfo in runningService)
-                {
-                    if (sInfo.Service.ClassName.IndexOf(serviceName) >= 0)
-                    {
-                        isAPPRunning = true;
-                        break;
-                    }
-                }
-            }
-            catch (Java.Lang.Exception) { }
-
-            return isAPPRunning;
-        }
-
         public static string GetAppProcessName(Context context)
         {
             //当前应用pid
@@ -101,28 +74,63 @@ namespace Wesley.Client.Droid.Utils
         }
 
 
-        public static string GetProcessName(Context context)
+        public static bool IsServiceExisted(Context context, string className)
         {
-            int pid = Android.OS.Process.MyPid();
-            var mActivityManager = (ActivityManager)context.GetSystemService(Context.ActivityService);
-            var processes = mActivityManager.RunningAppProcesses;
-            if (processes != null)
+            try
             {
-                foreach (ActivityManager.RunningAppProcessInfo appProcess in processes)
+                ActivityManager am = (ActivityManager)context.GetSystemService(Context.ActivityService);
+                var runningApps = am.RunningAppProcesses;
+                if (!(runningApps.Count > 0))
                 {
-                    if (appProcess.Pid == pid)
+                    return false;
+                }
+
+                foreach (ActivityManager.RunningAppProcessInfo procInfo in runningApps)
+                {
+                    if (procInfo.ProcessName.ToLower().Equals(className.ToLower()))
                     {
-                        return appProcess.ProcessName;
+                        return true;
                     }
                 }
+
+                return false;
             }
-            return null;
+            catch (Java.Lang.Exception)
+            {
+                return false;
+            }
         }
 
-        //public static string GetProtectPackageName()
-        //{
-        //    return SharePrefs.Get().GetString(Contants.KEY_PACKAGE_NAME);
-        //}
 
+        /// <summary>
+        /// 获取当前进程名
+        /// </summary>
+        /// <param name="cxt"></param>
+        /// <param name="pid"></param>
+        /// <returns></returns>
+        public static string GetProcessName(Context cxt, int pid)
+        {
+            try
+            {
+                ActivityManager am = (ActivityManager)cxt.GetSystemService(Context.ActivityService);
+                var runningApps = am.RunningAppProcesses;
+                if (runningApps == null)
+                {
+                    return null;
+                }
+                foreach (ActivityManager.RunningAppProcessInfo procInfo in runningApps)
+                {
+                    if (procInfo.Pid == pid)
+                    {
+                        return procInfo.ProcessName;
+                    }
+                }
+                return null;
+            }
+            catch (Java.Lang.Exception)
+            {
+                return null;
+            }
+        }
     }
 }

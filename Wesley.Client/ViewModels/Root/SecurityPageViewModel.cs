@@ -1,12 +1,16 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Models;
+using Wesley.Client.Models.Census;
 using Wesley.Client.Services;
-
 using Prism.Navigation;
 using ReactiveUI;
-
+using Wesley.Client.Models.Terminals;
 using System;
+using Akavache;
 using System.Reactive;
-using System.Reactive.Linq;
+using Xamarin.Forms;
+using System.Threading.Tasks;
+
 namespace Wesley.Client.ViewModels
 {
 
@@ -16,16 +20,38 @@ namespace Wesley.Client.ViewModels
         public IReactiveCommand UpdatePasswordCommand => this.Navigate("ResetPasswordPage");
         public ReactiveCommand<string, Unit> SignOutCommand { get; }
 
+        private readonly ILiteDbService<VisitStore> _conn1;
+        private readonly ILiteDbService<TrackingModel> _conn2;
+        private readonly ILiteDbService<NotificationEvent> _conn3;
+        private readonly ILiteDbService<PushEvent> _conn4;
+        private readonly ILiteDbService<MessageInfo> _conn5;
+        private readonly ILiteDbService<CacheBillData> _conn6;
+        private readonly ILiteDbService<CachePaymentMethod> _conn7;
+        private readonly ILiteDbService<TerminalModel> _conn8;
+
 
         public SecurityPageViewModel(INavigationService navigationService,
             IAuthenticationService authenticationService,
-
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService,
+            ILiteDbService<VisitStore> conn1,
+            ILiteDbService<TrackingModel> conn2,
+            ILiteDbService<NotificationEvent> conn3,
+            ILiteDbService<PushEvent> conn4,
+            ILiteDbService<MessageInfo> conn5,
+            ILiteDbService<CacheBillData> conn6,
+            ILiteDbService<CachePaymentMethod> conn7,
+            ILiteDbService<TerminalModel> conn8) : base(navigationService, dialogService)
         {
-            _navigationService = navigationService;
-            _dialogService = dialogService;
             _authenticationService = authenticationService;
+
+            _conn1 = conn1;
+            _conn2 = conn2;
+            _conn3 = conn3;
+            _conn4 = conn4;
+            _conn5 = conn5;
+            _conn6 = conn6;
+            _conn7 = conn7;
+            _conn8 = conn8;
 
             Title = "账号设置";
 
@@ -36,15 +62,71 @@ namespace Wesley.Client.ViewModels
                 {
                     using (UserDialogs.Instance.Loading("注销中..."))
                     {
-                        await _authenticationService.LogOutAsync();
-                        await this.NavigateAsync("../LoginPage");
+                        try
+                        {
+                            Settings.AccessToken = "";
+                            Settings.IsAuthenticated = false;
+                            Settings.IsInitData = false;
+
+                            Parallel.Invoke(async () =>
+                            {
+                                await _conn1.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn2.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn3.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn4.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn5.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn6.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn7.DeleteAllAsync();
+                            },
+                            async () =>
+                            {
+                                await _conn8.DeleteAllAsync();
+                            },
+                            () =>
+                            {
+                                try
+                                {
+                                    BlobCache.LocalMachine.InvalidateAll();
+                                }
+                                catch (Exception) { }
+
+                            }, async () =>
+                            {
+                                await _authenticationService.LogOutAsync();
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            _dialogService.LongAlert(ex.Message);
+                        }
+                        finally 
+                        {
+                            Device.BeginInvokeOnMainThread(async () =>
+                            {
+                                await this.NavigateAsync("../LoginPage");
+                            });
+                        }
                     };
                 }
             });
-
-            this.UpdatePasswordCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.SignOutCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ExceptionsSubscribe();
         }
     }
 }

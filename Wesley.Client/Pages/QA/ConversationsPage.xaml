@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                       xmlns:effects="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                       xmlns:effects="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
                        xmlns:pages="clr-namespace:Wesley.Client.Pages"
                        xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
                        xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
                        xmlns:pancakeView="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
-                       prism:ViewModelLocator.AutowireViewModel="True"
+                       
                        x:Name="CurrentContentView"
                        BackgroundColor="#eeeeee"
-                       xmlns:xe="clr-namespace:Wesley.Effects;assembly=Wesley.Client"
+                       xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
                        xmlns:customControls="clr-namespace:Wesley.Client.Pages.CustomControls"
                        xmlns:dataTemplates="clr-namespace:Wesley.Client.Pages.DataTemplates"
                        x:Class="Wesley.Client.Pages.ConversationsPage"
@@ -29,8 +29,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <pancakeView:PancakeView 
-                                     CornerRadius="20"
+            <pancakeView:PancakeView CornerRadius="20"
                                      IsVisible="{OnPlatform iOS=False}"
                                      HeightRequest="60">
                 <pancakeView:PancakeView.Margin>
@@ -46,10 +45,10 @@
                                      Margin="15,10,15,10"
                                      HeightRequest="60"
                                      BackgroundColor="White">
-                <pancakeView:PancakeView.Shadow>
+                <!--<pancakeView:PancakeView.Shadow>
                     <pancakeView:DropShadow Color="LightGray"
                                             Opacity="0.6" />
-                </pancakeView:PancakeView.Shadow>
+                </pancakeView:PancakeView.Shadow>-->
                 <Grid Style="{StaticResource GGrid}"
                       Margin="20,10">
                     <Grid.ColumnDefinitions>
@@ -59,7 +58,6 @@
                     <custom:CustomEntry Placeholder="搜索"
                                         Text="{Binding Filter.SerchKey,Mode=TwoWay}"
                                         VerticalOptions="Center"
-                                        
                                         FontAttributes="Bold">
                         <Entry.Effects>
                             <effects:BorderlessEntryEffect />
@@ -81,7 +79,7 @@
                                          ToggleOptionTitle="全部"
                                          Grid.Row="1"
                                          ToggleCommand="{Binding FilterOptionChangedCommand}"
-                                         NotToggledOptionTitle="{Binding OnLineCount,    StringFormat='在线（{0:F2}）' }" />
+                                         NotToggledOptionTitle="{Binding OnLineCount,StringFormat='在线（{0:F2}）' }" />
             <CollectionView ItemsSource="{Binding Conversations,Mode=TwoWay}"
                             Grid.Row="2"
                             VerticalOptions="FillAndExpand"
@@ -89,13 +87,13 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid  xe:TouchEffect.Color="LightGray"
-                               xe:Commands.Tap="{Binding BindingContext.ConversationSelectedCommand, Source={x:Reference CurrentContentView}}"
-                               xe:Commands.TapParameter="{Binding .}">
+                               xe:EffectCommands.Tap="{Binding BindingContext.ConversationSelectedCommand, Source={x:Reference CurrentContentView}}"
+                               xe:EffectCommands.TapParameter="{Binding .}">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition Height=".7" />
                             </Grid.RowDefinitions>
-                            <dataTemplates:SimpleUserProfileTemplate HeightRequest="{OnPlatform Android=100, iOS=80}" />
+                            <dataTemplates:SimpleUserProfileTemplate HeightRequest="100" />
                             <BoxView BackgroundColor="#D8D8D8"
                                      HeightRequest="1"
                                      Grid.Row="1" />
@@ -113,7 +111,6 @@
                            HeightRequest="50"
                            WidthRequest="50" />
         <pancakeView:PancakeView HeightRequest="30"
-                              
                                  Grid.Row="1"
                                  IsVisible="False"
                                  CornerRadius="50"

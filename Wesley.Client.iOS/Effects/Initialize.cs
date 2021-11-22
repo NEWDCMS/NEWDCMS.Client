@@ -1,9 +1,9 @@
-﻿using Wesley.Effects.iOS.GestureCollectors;
-using Wesley.Effects.iOS.Renderers;
+﻿using Wesley.Client.Effects.iOS.GestureCollectors;
+using Wesley.Client.Effects.iOS.Renderers;
 using System;
 using UIKit;
 
-namespace Wesley.Effects.iOS
+namespace Wesley.Client.Effects.iOS
 {
     public static class Effects
     {

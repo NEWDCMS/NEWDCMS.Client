@@ -5,11 +5,11 @@ using UIKit;
 using Xamarin.Forms;
 using System.Threading.Tasks;
 using CoreGraphics;
-using Wesley.Effects.iOS.GestureCollectors;
+using Wesley.Client.Effects.iOS.GestureCollectors;
 using System.Threading;
 using CoreFoundation;
 
-namespace Wesley.Effects.iOS.GestureRecognizers {
+namespace Wesley.Client.Effects.iOS.GestureRecognizers {
     public class TouchGestureRecognizer : UIGestureRecognizer {
         public class TouchArgs : EventArgs {
             public TouchState State { get; }

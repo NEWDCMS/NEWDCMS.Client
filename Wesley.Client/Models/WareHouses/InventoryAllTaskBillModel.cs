@@ -224,7 +224,7 @@ namespace Wesley.Client.Models.WareHouses
     /// </summary>
     public class InventoryAllTaskUpdateModel : Base
     {
-
+        public string BillNumber { get; set; }
 
         //("盘点人", "盘点人
         [Reactive] public int InventoryPerson { get; set; }

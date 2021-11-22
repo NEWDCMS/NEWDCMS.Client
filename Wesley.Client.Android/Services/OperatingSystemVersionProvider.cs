@@ -5,11 +5,7 @@ using Wesley.Client.CustomViews;
 using Wesley.Client.Droid.AutoUpdater;
 using Java.Lang;
 using MySettings = Android.Provider.Settings;
-using Process = Android.OS.Process;
 
-
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(OperatingSystemVersionProvider))]
 namespace Wesley.Client.Droid.Services
 {
     /// <summary>
@@ -38,6 +34,7 @@ namespace Wesley.Client.Droid.Services
             updateUtils.StarInit();
         }
 
+
         public async void CheckUpdate(UpdateInfo updateInfo)
         {
             //版本检查
@@ -54,12 +51,15 @@ namespace Wesley.Client.Droid.Services
                 else
                 {
                     //退出Activity
-                    ActivityCollector.FinishAll();
+                    //ActivityCollector.FinishAll();
 
-                    //强制退出应用程序
-                    Process.KillProcess(Process.MyPid());
-                    //正常退出
-                    JavaSystem.Exit(0);
+                    MainActivity.Instance.FinishAffinity();
+                    Xamarin.Forms.Application.Current.Quit();
+
+                    ////强制退出应用程序
+                    //Process.KillProcess(Process.MyPid());
+                    ////正常退出
+                    //JavaSystem.Exit(0);
 
                     Settings.IsNextTimeUpdate = true;
                 }
@@ -69,14 +69,11 @@ namespace Wesley.Client.Droid.Services
 
         public bool CheckNewVersion(UpdateInfo updateInfo)
         {
-            return updateUtils.CheckNewVersion(AutoUpdate.Context, updateInfo);
-        }
-
-
-        public void StartUpdate(UpdateInfo updateInfo)
-        {
-            //更新
-            updateUtils.NewVersionUpdateV2(AutoUpdate.Context, updateInfo);
+            try
+            {
+                return updateUtils.CheckNewVersion(AutoUpdate.Context, updateInfo);
+            }
+            catch (Exception) { return false; }
         }
 
         public string GetVersion()
@@ -92,7 +89,7 @@ namespace Wesley.Client.Droid.Services
             return Id;
         }
 
-        string id = string.Empty;
+        private string id = string.Empty;
         public string Id
         {
             get

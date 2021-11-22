@@ -1,14 +1,16 @@
 ﻿using Acr.UserDialogs;
+using Wesley.Client.Enums;
 using Microsoft.AppCenter.Crashes;
-using Prism.Ioc;
 using Prism.Navigation;
 using ReactiveUI;
+using Rg.Plugins.Popup.Pages;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Wesley.Client.Enums;
+using Xamarin.Forms;
 
 
 namespace Wesley.Client
@@ -18,8 +20,6 @@ namespace Wesley.Client
     /// </summary>
     public static class NavigationExtension
     {
-
-
         /// <summary>
         /// 尝试导航并捕获异常
         /// </summary>
@@ -29,7 +29,8 @@ namespace Wesley.Client
         /// <returns></returns>
         public static async Task TryNavigateAsync(this INavigationService navigationService, Uri uri, INavigationParameters parameters = null)
         {
-            var result = await navigationService.NavigateAsync(uri, parameters, false, true);
+            //var result = await navigationService.NavigateAsync(uri, parameters, false);
+            var result = await navigationService.NavigateAsync(uri, parameters);
             HandleNavigationResult(result);
         }
 
@@ -43,7 +44,7 @@ namespace Wesley.Client
         /// <returns></returns>
         public static async Task TryNavigateModallyAsync(this INavigationService navigationService, Uri uri, INavigationParameters parameters = null, bool animated = true)
         {
-            var result = await navigationService.NavigateAsync(uri, parameters, animated, true);
+            var result = await navigationService.NavigateAsync(uri, parameters);
             HandleNavigationResult(result);
         }
 
@@ -56,7 +57,7 @@ namespace Wesley.Client
         /// <returns></returns>
         public static async Task TryNavigateAsync(this INavigationService navigationService, string path, INavigationParameters parameters = null)
         {
-            var result = await navigationService.NavigateAsync(path, parameters, false, true);
+            var result = await navigationService.NavigateAsync(path, parameters);
             HandleNavigationResult(result);
         }
 
@@ -69,9 +70,7 @@ namespace Wesley.Client
         /// <returns></returns>
         public static async Task TryNavigateModallyAsync(this INavigationService navigationService, string path, INavigationParameters parameters = null)
         {
-
-            //NavigateAsync(Uri uri, INavigationParameters parameters, bool? useModalNavigation, bool animated);
-            var result = await navigationService.NavigateAsync(path, parameters, false, true);
+            var result = await navigationService.NavigateAsync(path, parameters);
             HandleNavigationResult(result);
         }
 
@@ -92,31 +91,30 @@ namespace Wesley.Client
         /// 捕获异常
         /// </summary>
         /// <param name="navigationResult"></param>
-        private static void HandleNavigationResult(INavigationResult result)
+        private static void HandleNavigationResult(INavigationResult navigationResult)
         {
-            if (!result.Success)
+            if (!navigationResult.Success)
             {
-                //Exception ex = new InvalidNavigationException();
-                //if (navigationResult.Exception != null)
-                //    ex = navigationResult.Exception;
+                Exception ex = new InvalidNavigationException();
 
-                switch (result.Exception)
-                {
-                    case NavigationException ne:
-                        HandleNavigationException(ne);
-                        break;
-                    default:
-                        break;
-                }
+                if (navigationResult.Exception != null)
+                    ex = navigationResult.Exception;
+                //An unknown error occurred. You may need to specify whether to Use Modal Navigation or not
+                SetMainPageFromException(ex);
             }
         }
 
 
-
-
-        public static void HandleNavigationException(Exception ex)
+        public static void SetMainPageFromException(Exception ex)
         {
-            Crashes.TrackError(ex, new System.Collections.Generic.Dictionary<string, string>() { { "Navigation", "SetMainPageFromException" } });
+            try
+            {
+                Crashes.TrackError(ex, new System.Collections.Generic.Dictionary<string, string>() 
+                {
+                    { "Navigation", "SetMainPageFromException" }
+                });
+            }
+            catch (Exception) { }
 
             //var layout = new StackLayout
             //{
@@ -173,8 +171,6 @@ namespace Wesley.Client
             if (!result.Success)
                 Console.WriteLine("[NAV FAIL] " + result.Exception);
         }
-        //===============
-
 
 
         public static async Task<bool> RequestAccess(this IUserDialogs dialogs, Func<Task<AccessState>> request)
@@ -220,20 +216,20 @@ namespace Wesley.Client
 
         public static async Task Navigate(this INavigationService nav, string uri, INavigationParameters parms, bool useModal = false)
         {
-            var result = await nav.NavigateAsync(uri, parms, useModal, true);
+            var result = await nav.NavigateAsync(uri, parms);
             if (!result.Success)
             {
-               
+                System.Diagnostics.Debug.Write(result.Exception);
             }
         }
 
 
         public static async Task Navigate(this INavigationService nav, string uri, bool useModal = false, params (string, object)[] args)
         {
-            var result = await nav.NavigateAsync(uri, ToParameters(args), useModal, true);
+            var result = await nav.NavigateAsync(uri, ToParameters(args));
             if (!result.Success)
             {
-               
+                System.Diagnostics.Debug.Write(result.Exception);
             }
         }
 
@@ -285,13 +281,11 @@ namespace Wesley.Client
             }
         }
 
-
         public static INavigationParameters Set(this INavigationParameters parms, string key, object value)
         {
             parms.Add(key, value);
             return parms;
         }
-
 
         public static INavigationParameters ToParameters(params (string, object)[] args)
         {
@@ -307,7 +301,10 @@ namespace Wesley.Client
             return parms;
         }
 
-
-
+        public static async Task PushPopupAsync(this INavigationService nav, PopupPage page)
+        {
+            if (page != null)
+                await PopupNavigation.Instance.PushAsync(page);
+        }
     }
 }

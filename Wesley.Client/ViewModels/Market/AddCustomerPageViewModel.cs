@@ -1,5 +1,4 @@
 ﻿using Acr.UserDialogs;
-using Wesley.Client.CustomViews;
 using Wesley.Client.Enums;
 using Wesley.Client.Models.Census;
 using Wesley.Client.Models.Media;
@@ -7,18 +6,15 @@ using Wesley.Client.Models.Terminals;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Newtonsoft.Json;
-using Plugin.Media;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
-
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Disposables;
 using System.Windows.Input;
 
 
@@ -65,8 +61,11 @@ namespace Wesley.Client.ViewModels
                 var result = await _terminalService.CheckTerminalAsync(s);
                 if (result)
                 {
-                    _dialogService.LongAlert("终端名称已经存在！");
-                    PostMData.Name = "";
+                    var ok = await _dialogService.ShowConfirmAsync("终端名称已经存在,是否继续添加。？", "提示", "确定", "取消");
+                    if (!ok)
+                    {
+                        PostMData.Name = "";
+                    }
                 }
             });
 
@@ -75,9 +74,12 @@ namespace Wesley.Client.ViewModels
             {
                 await SelectDistrict((data) =>
                  {
-                     PostMData.DistrictId = data.Id;
-                     PostMData.DistrictName = data.Name;
-                     Storage();
+                     if (data != null)
+                     {
+                         PostMData.DistrictId = data.Id;
+                         PostMData.DistrictName = data.Name;
+                         Storage();
+                     }
                  });
             });
 
@@ -86,22 +88,27 @@ namespace Wesley.Client.ViewModels
             {
                 await SelectChannel((data) =>
                 {
-                    PostMData.ChannelId = data.Id;
-                    PostMData.ChannelName = data.Name;
-                    Storage();
+                    if (data != null)
+                    {
+                        PostMData.ChannelId = data.Id;
+                        PostMData.ChannelName = data.Name;
+                        Storage();
+                    }
                 });
-
             });
 
             //线路选择
             this.LineSelected = ReactiveCommand.Create<object>(async e =>
             {
                 await SelectLine((data) =>
-                 {
-                     PostMData.LineId = data.Id;
-                     PostMData.LineName = data.Name;
-                     Storage();
-                 });
+                {
+                    if (data != null)
+                    {
+                        PostMData.LineId = data.Id;
+                        PostMData.LineName = data.Name;
+                        Storage();
+                    }
+                });
             });
 
             //地图定位
@@ -114,10 +121,13 @@ namespace Wesley.Client.ViewModels
             this.RankSelected = ReactiveCommand.Create<object>(async e =>
             {
                 await SelectRank((data) =>
-                 {
-                     PostMData.RankId = data.Id;
-                     PostMData.RankName = data.Name;
-                     Storage();
+                {
+                     if (data != null)
+                     {
+                         PostMData.RankId = data.Id;
+                         PostMData.RankName = data.Name;
+                         Storage();
+                     }
                  });
             });
 
@@ -132,20 +142,28 @@ namespace Wesley.Client.ViewModels
             //保存
             this.SubmitDataCommand = ReactiveCommand.CreateFromTask<object, Unit>(async _ =>
             {
-                await this.Access(AccessGranularityEnum.EndPointListSave);
-
-                if (PostMData.DoorwayPhoto.Equals("nophoto.png"))
+                return await this.Access(AccessGranularityEnum.EndPointListSave, async () =>
                 {
-                    _dialogService.LongAlert("请添加门头照片！");
-                    return Unit.Default;
-                }
+                    if (PostMData.DoorwayPhoto.Equals("PhotoIcon.png"))
+                    {
+                        _dialogService.LongAlert("请添加门头照片！");
+                        return Unit.Default;
+                    }
 
-                var postMData = Storage();
-                return await SubmitAsync(postMData, _terminalService.CreateOrUpdateAsync, (result) =>
-               {
-                   GlobalSettings.TempAddCustomerStore = null;
-                   PostMData = new TerminalModel();
-               });
+                    var postMData = Storage();
+
+                    return await SubmitAsync(postMData, _terminalService.CreateOrUpdateAsync, async (result) =>
+                    {
+                        try
+                        {
+                            GlobalSettings.TempAddCustomerStore = null;
+                            PostMData = new TerminalModel();
+                        }
+                        catch (Exception ex)
+                        { }
+
+                    }, reffPage: this.PageName);
+                });
             }, this.IsValid());
 
             this.AddSaveCommand = ReactiveCommand.Create<object>(e =>
@@ -156,83 +174,82 @@ namespace Wesley.Client.ViewModels
             //上传门头
             this.UploadFaceCommand = ReactiveCommand.Create(() =>
             {
-                Stream convertStream = null;
                 RapidTapPreventor(async () =>
                 {
-                    await CrossMedia.Current.Initialize();
-
-                    if (!CrossMedia.Current.IsTakePhotoSupported || !CrossMedia.Current.IsCameraAvailable)
-                    {
-                        await _dialogService.ShowAlertAsync("抱歉,没有检测到相机...", "提示", "取消");
-                        return;
-                    }
-
-                    if (GlobalSettings.IsNotConnected)
-                    {
-                        _dialogService.LongAlert("操作失败，没有检测到网络！");
-                        return;
-                    }
-
-                    var resultMedia = await CrossDiaglogKit.Current.GetMediaResultAsync("请选择", "");
-                    if (resultMedia != null)
-                    {
-                        byte[] base64Stream = Convert.FromBase64String(resultMedia.ToString());
-                        convertStream = new MemoryStream(base64Stream);
-                        if (convertStream == null)
-                        {
-                            return;
-                        }
-
-                        //上传图片
-                        using (UserDialogs.Instance.Loading("上传中..."))
-                        {
-                            try
-                            {
-                                var content = new MultipartFormDataContent
-                                {
-                                    { new StreamContent(convertStream), "\"file\"", $"\"face.jpg\"" }
-                                };
-
-                                var url = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
-                                var result = await httpClientHelper.PostAsync(url, content);
-                                await Task.Delay(1000);
-                                var uploadResult = new UploadResult();
-
-                                if (!string.IsNullOrEmpty(result))
-                                {
-                                    uploadResult = JsonConvert.DeserializeObject<UploadResult>(result);
-                                }
-
-                                if (uploadResult != null)
-                                {
-                                    var facePath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + uploadResult.Id + "";
-                                    PostMData.DoorwayPhoto = facePath;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Crashes.TrackError(ex);
-                            }
-                            finally
-                            {
-                                if (convertStream != null)
-                                    convertStream.Dispose();
-                            }
-                        };
-                    }
+                    await this.NavigateAsync("CameraViewPage", ("TakeType", "AddCustomer"));
                 });
             });
 
-            this.DistrictSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.ChannelSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.LineSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddressSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.RankSelected.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
-            this.AddSaveCommand.ThrownExceptions.Subscribe(ex => System.Diagnostics.Debug.WriteLine(ex));
+            //拍照上传
+            MessageBus
+                .Current
+                .Listen<byte[]?>(string.Format(Constants.CAMERA_KEY, "AddCustomer"))
+                .Subscribe(bit =>
+                {
+                    if (bit != null && bit.Length > 0)
+                    {
+                        UploadPhotograph((u) =>
+                        {
+                            var facePath = $"{GlobalSettings.FileCenterEndpoint}HRXHJS/document/image/" + u.Id + "";
+                            PostMData.DoorwayPhoto = facePath;
+                            Storage();
 
-            this.ExceptionsSubscribe();
+                        }, new MemoryStream(bit));
+                    }
+                }).DisposeWith(DeactivateWith);
         }
 
+        private async void UploadPhotograph(Action<UploadResult> action, MemoryStream stream)
+        {
+            //上传图片
+            using (UserDialogs.Instance.Loading("上传中..."))
+            {
+                try
+                {
+                    if (stream != null)
+                    {
+                        var scb = new StreamContent(stream);
+                        var content = new MultipartFormDataContent { { scb, "\"file\"", $"\"takephotograph.jpg\"" } };
+                        var url = $"{GlobalSettings.FileCenterEndpoint}document/reomte/fileupload/HRXHJS";
+                        var result = await httpClientHelper.PostAsync(url, content);
+
+                        var uploadResult = new UploadResult();
+
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            uploadResult = JsonConvert.DeserializeObject<UploadResult>(result);
+                        }
+
+                        if (uploadResult != null)
+                        {
+                            action.Invoke(uploadResult);
+                        }
+
+
+                        if (content != null)
+                            content.Dispose();
+
+                        if (scb != null)
+                            scb.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Debug.Print(ex.StackTrace);
+                    _dialogService.LongAlert("服务器错误，上传失败！");
+                }
+                finally
+                {
+                    if (stream != null)
+                        stream.Dispose();
+                }
+            };
+        }
+
+        /// <summary>
+        /// 共享存储
+        /// </summary>
+        /// <returns></returns>
         private TerminalModel Storage()
         {
             try
@@ -301,29 +318,42 @@ namespace Wesley.Client.ViewModels
             base.OnNavigatedTo(parameters);
             try
             {
+                //编辑时
                 if (this.Edit)
                 {
                     Title = "编辑客户档案";
-                    this.PostMData = this.Terminal;
+                    if (this.Terminal != null)
+                    {
+                        this.PostMData = this.Terminal;
+                        this.PostMData.Id = this.Terminal.Id;
+                    }
                 }
                 else
                 {
+                    //添加时
                     if (GlobalSettings.TempAddCustomerStore != null)
                     {
                         this.PostMData = GlobalSettings.TempAddCustomerStore;
                     }
+                    this.PostMData.Id = 0;
                 }
 
-                this.PostMData.DoorwayPhoto = string.IsNullOrEmpty(this.PostMData.DoorwayPhoto) ? "nophoto.png" : this.PostMData.DoorwayPhoto;
-
-                if (parameters.ContainsKey("AddGpsEvent"))
+                if (this.PostMData != null)
                 {
-                    parameters.TryGetValue("AddGpsEvent", out TrackingModel gps);
-                    PostMData.Address = string.IsNullOrEmpty(gps.Address) ? "没有获取到位置信息！" : gps.Address;
-                    PostMData.Location_Lat = gps.Latitude;
-                    PostMData.Location_Lng = gps.Longitude;
-                }
+                    this.PostMData.DoorwayPhoto = string.IsNullOrEmpty(this.PostMData.DoorwayPhoto) ? "PhotoIcon.png" : this.PostMData.DoorwayPhoto;
 
+                    if (parameters.ContainsKey("AddGpsEvent"))
+                    {
+                        parameters.TryGetValue("AddGpsEvent", out TrackingModel gps);
+                        if (gps != null)
+                        {
+                            PostMData.Address = string.IsNullOrEmpty(gps.Address) ? "没有获取到位置信息！" : gps.Address;
+                            PostMData.Location_Lat = GlobalSettings.Latitude;
+                            PostMData.Location_Lng = GlobalSettings.Longitude;
+                            Storage();
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -335,11 +365,6 @@ namespace Wesley.Client.ViewModels
         {
             base.OnAppearing();
             _permissionsService?.RequestLocationAndCameraPermission();
-        }
-
-        public override void OnDisappearing()
-        {
-            base.OnDisappearing();
         }
     }
 }

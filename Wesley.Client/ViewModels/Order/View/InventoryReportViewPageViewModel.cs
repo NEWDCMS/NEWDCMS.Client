@@ -1,10 +1,14 @@
-﻿using Wesley.Client.Models.WareHouses;
+﻿using Acr.UserDialogs;
+using Wesley.Client.Models.WareHouses;
 using Wesley.Client.Services;
 using Microsoft.AppCenter.Crashes;
 using Prism.Navigation;
+using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Input;
 
 namespace Wesley.Client.ViewModels
@@ -26,18 +30,22 @@ namespace Wesley.Client.ViewModels
             IReturnBillService returnBillService,
             ISaleReservationBillService saleReservationBillService,
             IWareHousesService wareHousesService,
-
-            ISaleBillService saleBillService) : base(navigationService, globalService, allocationService, advanceReceiptService, receiptCashService, costContractService, costExpenditureService, inventoryService, purchaseBillService, returnReservationBillService, returnBillService, saleReservationBillService, saleBillService, dialogService)
+            ISaleBillService saleBillService
+            ) : base(navigationService, globalService, allocationService, advanceReceiptService, receiptCashService, costContractService, costExpenditureService, inventoryService, purchaseBillService, returnReservationBillService, returnBillService, saleReservationBillService, saleBillService, dialogService)
         {
 
             Title = "库存上报";
 
             _wareHousesService = wareHousesService;
 
-            this.Load = BillsLoader.Load(async () =>
+            this.Load = ReactiveCommand.Create(async () =>
             {
-                var results = await Sync.Run(() =>
+                ItemTreshold = 1;
+                PageCounter = 0;
+
+                try
                 {
+                    Bills?.Clear();
                     var pending = new List<InventoryReportSummaryModel>();
 
                     int? makeuserId = Settings.UserId;
@@ -48,13 +56,12 @@ namespace Wesley.Client.ViewModels
                     int? rankId = null;
                     int? districtId = null;
 
-                    DateTime? startTime = DateTime.Now.AddMonths(-1);
-                    DateTime? endTime = DateTime.Now;
-                    int pageIndex = 0;
-                    int pageSize = 20;
+                    string billNumber = Filter.SerchKey;
+                    DateTime? startTime = Filter.StartTime ?? DateTime.Now.AddMonths(-1);
+                    DateTime? endTime = Filter.EndTime ?? DateTime.Now;
 
 
-                    var result = _wareHousesService.GetInventoryReportAsync(makeuserId, businessUserId, terminalId, channelId, rankId, districtId, productId, startTime, endTime, pageIndex, pageSize, this.ForceRefresh, calToken: cts.Token).Result;
+                    var result = await _wareHousesService.GetInventoryReportAsync(makeuserId, businessUserId, terminalId, channelId, rankId, districtId, productId, startTime, endTime, 0, PageSize, this.ForceRefresh, new System.Threading.CancellationToken());
 
 
                     if (result != null)
@@ -64,21 +71,85 @@ namespace Wesley.Client.ViewModels
                             var sm = s;
                             sm.IsLast = !(result?.LastOrDefault()?.BillNumber == s.BillNumber);
                             return sm;
-                        }).ToList();
+                        }).Where(s => s.MakeUserId == Settings.UserId || s.BusinessUserId == Settings.UserId).ToList();
                     }
+                    if (pending.Any())
+                        Bills = new System.Collections.ObjectModel.ObservableCollection<InventoryReportSummaryModel>(pending);
 
-                    Title = $"库存上报({pending.Count})";
-                    return pending;
-                }, (ex) => { Crashes.TrackError(ex); });
 
-                Bills = results;
-                return results;
+                    UpdateTitle();
+                }
+                catch (Exception ex)
+                {
+                    Crashes.TrackError(ex);
+                }
+
+
             });
 
+
+            this.ItemTresholdReachedCommand = ReactiveCommand.Create(async () =>
+            {
+                int pageIdex = 0;
+                if (Bills?.Count != 0)
+                    pageIdex = Bills.Count / (PageSize == 0 ? 1 : PageSize);
+
+                if (PageCounter < pageIdex)
+                {
+                    PageCounter = pageIdex;
+                    using (var dig = UserDialogs.Instance.Loading("加载中..."))
+                    {
+                        try
+                        {
+                            int? makeuserId = Settings.UserId;
+                            int? terminalId = null;
+                            int? businessUserId = null;
+                            int? productId = null;
+                            int? channelId = null;
+                            int? rankId = null;
+                            int? districtId = null;
+
+                            string billNumber = Filter.SerchKey;
+                            DateTime? startTime = Filter.StartTime ?? DateTime.Now.AddMonths(-1);
+                            DateTime? endTime = Filter.EndTime ?? DateTime.Now;
+
+
+                            var result = await _wareHousesService.GetInventoryReportAsync(makeuserId, businessUserId, terminalId, channelId, rankId, districtId, productId, startTime, endTime, 0, PageSize, this.ForceRefresh, new System.Threading.CancellationToken());
+
+                            if (result != null)
+                            {
+                                foreach (var item in result)
+                                {
+                                    if ((item.MakeUserId == Settings.UserId || item.BusinessUserId == Settings.UserId) && Bills.Count(s => s.Id == item.Id) == 0)
+                                    {
+                                        Bills.Add(item);
+                                    }
+                                }
+
+                                foreach (var s in Bills)
+                                {
+                                    s.IsLast = !(Bills.LastOrDefault()?.BillNumber == s.BillNumber);
+                                }
+                            }
+
+                            UpdateTitle();
+                        }
+                        catch (Exception ex)
+                        {
+                            Crashes.TrackError(ex);
+                        }
+                    }
+                }
+            }, this.WhenAny(x => x.Bills, x => x.GetValue().Count > 0));
+
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
+        private void UpdateTitle()
+        {
+            Title = $"库存上报({Bills?.Count ?? 0})";
+        }
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
@@ -87,9 +158,10 @@ namespace Wesley.Client.ViewModels
         public override void OnAppearing()
         {
             base.OnAppearing();
-            ((ICommand)Load)?.Execute(null);
+            ThrottleLoad(() =>
+            {
+                ((ICommand)Load)?.Execute(null);
+            }, (Bills?.Count == 0));
         }
-
-
     }
 }

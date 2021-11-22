@@ -9,35 +9,26 @@ namespace Wesley.Client.Pages.Bills
 
     public partial class ReceiptBillPage : BaseContentPage<ReceiptBillPageViewModel>
     {
-        protected override void OnAppearing()
+        public ReceiptBillPage()
         {
-            base.OnAppearing();
-            if (Content == null)
+            try
             {
-                Device.StartTimer(TimeSpan.FromSeconds(0), () =>
-                {
-                    try
-                    {
-                        InitializeComponent();
-                        ToolbarItems.Clear();
+                InitializeComponent();
+               
 
-                        string btnIco = "\uf0c7";
-                        foreach (var toolBarItem in this.GetToolBarItems<ReceiptBillPageViewModel>(ViewModel, true, btnIco).ToList())
-                        {
-                            ToolbarItems.Add(toolBarItem);
-                        }
-                        //Refresh();
-                    }
-                    catch (Exception ex)
-                    {
-                        Crashes.TrackError(ex);
-                    }
-                    return false;
-                });
-                return;
+                ToolbarItems?.Clear();
+                string btnIco = "保存";
+                foreach (var toolBarItem in this.GetToolBarItems(ViewModel, true, btnIco).ToList())
+                {
+                    ToolbarItems.Add(toolBarItem);
+                }
+                //Refresh();
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
             }
         }
-
 
         private void CustomEntry_TextChanged(object sender, TextChangedEventArgs e)
         {

@@ -29,6 +29,7 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IManufacturerApi>(URL);
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetManufacturersAsync", storeId, userId);
+
                 var results = await _makeRequest.StartUseCache(api.GetManufacturersAsync(storeId, calToken), cacheKey, force, calToken);
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
@@ -52,6 +53,7 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IManufacturerApi>(URL);
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetAdvancePaymentBalanceAsync", storeId, manufacturerId);
+
                 var results = await _makeRequest.StartUseCache(api.GetAdvancePaymentBalanceAsync(storeId, manufacturerId, calToken), cacheKey, force, calToken);
                 return results?.Data;
             }
@@ -72,6 +74,7 @@ namespace Wesley.Client.Services
                 var api = RefitServiceBuilder.Build<IManufacturerApi>(URL);
 
                 var cacheKey = RefitServiceBuilder.Cacher("GetManufacturerBalance", storeId, manufacturerId);
+
                 var results = await _makeRequest.StartUseCache(api.GetManufacturerBalance(storeId, manufacturerId, calToken), cacheKey, force, calToken);
                 return results?.Data;
             }

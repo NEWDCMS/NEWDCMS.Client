@@ -151,13 +151,25 @@ namespace Wesley.Client.Models.Sales
         public string Name { get; set; }
         public string UnitName { get; set; }
         public int Quantity { get; set; }
+
+        /// <summary>
+        /// 大单位转化量
+        /// </summary>
+        public int BigQuantity { get; set; }
+
+        /// <summary>
+        /// 中单位转换量
+        /// </summary>
+        public int StrokeQuantity { get; set; }
+
+        public string QuantityFormat { get; set; }
         public decimal Amount { get; set; }
+        public decimal GAmount { get; set; }
     }
 
     public class AccountProductGroup : List<AccountProductModel>
     {
         public string CategoryName { get; private set; }
-
         public AccountProductGroup(string categoryName, List<AccountProductModel> products) : base(products)
         {
             CategoryName = categoryName;

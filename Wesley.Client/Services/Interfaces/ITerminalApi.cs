@@ -12,7 +12,7 @@ namespace Wesley.Client.Services
 {
 
     //[WebApi(GlobalSettings.BaseEndpoint + "api/v3/dcms", true, isAutoRegistrable: false), Cache(CacheMode.GetAndFetch, "00:05:00"), Trace]
-    //[Headers("Authorization: Bearer")]
+    [Headers("Authorization: Bearer")]
     public interface ITerminalApi
     {
         [Get("/census/vist/getAllUserVisitedList/{storeId}")]
@@ -48,8 +48,17 @@ namespace Wesley.Client.Services
         [Get("/archives/terminal/{storeId}")]
         Task<APIResult<TerminalModel>> GetTerminalAsync(int storeId, int? terminalId, CancellationToken calToken = default);
 
+
+
+
         [Get("/archives/terminal/getTerminals/{storeId}/{userId}")]
         Task<APIResult<IList<TerminalModel>>> GetTerminalsAsync(int storeId, int userId, string searchStr = "", int? districtId = 0, int? channelId = 0, int? rankId = 0, bool status = true, int pageIndex = 0, int pageSize = 20, CancellationToken calToken = default);
+
+        [Get("/archives/terminal/getTerminals/{storeId}/{userId}/{lat}/{lng}/{range}")]
+        Task<APIResult<IList<TerminalModel>>> GetTerminalsAsync(int storeId, int userId, string searchStr = "", int? districtId = 0, int? channelId = 0, int? rankId = 0, bool status = true, double lat = 0, double lng = 0, double range = 0, int pageIndex = 0, int pageSize = 20, CancellationToken calToken = default);
+
+
+
 
         [Get("/census/vist/getUserTracking/{storeId}")]
         Task<APIResult<IList<TrackingModel>>> GetUserTrackingAsync(int storeId, int? businessUserId = 0, DateTime? start = null, DateTime? end = null, CancellationToken calToken = default);
@@ -73,9 +82,9 @@ namespace Wesley.Client.Services
         Task<APIResult<TerminalModel>> CreateOrUpdateAsync(TerminalModel data, int storeId, int userId, CancellationToken calToken = default);
 
         [Post("/archives/terminal/updateterminal/{storeId}")]
-        Task<APIResult<dynamic>> UpdateterminalAsync(int storeId, int? terminalId, double location_lat, double location_lng, CancellationToken calToken = default);
+        Task<APIResult<bool>> UpdateterminalAsync(int storeId, int? terminalId, double location_lat, double location_lng, CancellationToken calToken = default);
 
         [Get("/archives/terminal/checkTerminal/{store}")]
-        Task<APIResult<dynamic>> CheckTerminalAsync(int store, string name, CancellationToken calToken = default);
+        Task<APIResult<bool>> CheckTerminalAsync(int store, string name, CancellationToken calToken = default);
     }
 }

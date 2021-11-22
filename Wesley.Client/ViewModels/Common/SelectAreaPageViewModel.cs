@@ -3,11 +3,13 @@ using Wesley.Client.Services;
 using Prism.Navigation;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive.Disposables;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+
 namespace Wesley.Client.ViewModels
 {
     public class SelectAreaPageViewModel : ViewModelBase
@@ -22,9 +24,8 @@ namespace Wesley.Client.ViewModels
 
         public SelectAreaPageViewModel(INavigationService navigationService,
             ITerminalService terminalService,
-
-
-            IDialogService dialogService) : base(navigationService, dialogService)
+            IDialogService dialogService
+            ) : base(navigationService, dialogService)
         {
             Title = "选择片区";
 
@@ -32,7 +33,7 @@ namespace Wesley.Client.ViewModels
 
             this.Load = ReactiveCommand.CreateFromTask(async () =>
             {
-                var result = await _terminalService.GetDistrictsAsync(this.ForceRefresh, calToken: cts.Token);
+                var result = await _terminalService.GetDistrictsAsync(true, new System.Threading.CancellationToken());
                 if (result != null)
                 {
                     var series = result;
@@ -71,10 +72,10 @@ namespace Wesley.Client.ViewModels
            {
                item.Selected = !item.Selected;
                this.Selecter = null;
-           });
+           }).DisposeWith(DeactivateWith);
 
             this.BindBusyCommand(Load);
-            this.ExceptionsSubscribe();
+
         }
 
 

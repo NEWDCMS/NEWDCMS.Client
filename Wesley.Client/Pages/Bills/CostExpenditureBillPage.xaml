@@ -19,18 +19,9 @@
     <RelativeLayout>
         <Grid Style="{StaticResource GGrid}"
               RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
-              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height=".7" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+              RowDefinitions="40,.7,40,.7,*"
+              ColumnDefinitions="*,*">
             <!--0-->
             <StackLayout Orientation="Horizontal"
                          HeightRequest="{StaticResource RH45}"
@@ -113,7 +104,8 @@
                             x:Name="BillItems"
                             ItemSizingStrategy="MeasureAllItems"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Selecter}">
+                            SelectedItem="{Binding Selecter}" 
+                            VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
                     <custom:HeaderView ControlTemplate="{StaticResource CostExpenditureBillPage_Template}" />
                 </CollectionView.Header>
@@ -162,7 +154,13 @@
                IsVisible="{Binding Bill.AuditedStatus}"
                WidthRequest="100"
                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
-               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}"></Image>
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--红冲水印-->
+        <Image Source="have_gray.png"
+               IsVisible="{Binding Bill.ReversedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
         <!--footer-->
         <Grid HeightRequest="90"
               Style="{StaticResource GGrid}"

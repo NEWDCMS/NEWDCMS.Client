@@ -1,5 +1,4 @@
-﻿
-using Wesley.Client.Models.Sales;
+﻿using Wesley.Client.Models.Sales;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +40,7 @@ namespace Wesley.Client.Services.Sales
 
                 var api = RefitServiceBuilder.Build<IFinanceReceiveAccountApi>(URL);
 
-                var cacheKey = RefitServiceBuilder.Cacher("GetFinanceReceiveAccounts", storeId,
+                var results = await _makeRequest.Start(api.GetFinanceReceiveAccounts(storeId,
                     start,
                     end,
                     businessUserId,
@@ -49,18 +48,7 @@ namespace Wesley.Client.Services.Sales
                     accountingOptionId,
                     billNumber,
                     pageIndex,
-                    pageSize);
-
-                var results = await _makeRequest.StartUseCache(api.GetFinanceReceiveAccounts(storeId,
-                    start,
-                    end,
-                    businessUserId,
-                    payeer,
-                    accountingOptionId,
-                    billNumber,
-                    pageIndex,
-                    pageSize, calToken),
-                    cacheKey, force, calToken);
+                    pageSize, calToken), calToken);
 
                 if (results != null && results?.Code >= 0)
                     return results?.Data.ToList();
@@ -69,7 +57,6 @@ namespace Wesley.Client.Services.Sales
             }
             catch (Exception e)
             {
-
                 e.HandleException();
                 return null;
             }

@@ -1,13 +1,11 @@
 ﻿using Android;
 using Android.OS;
 using AndroidX.Core.Content;
-using Wesley.Client.Droid.Utils;
 using Wesley.Client.Services;
 using Google.Android.Material.Snackbar;
 using System.Threading.Tasks;
 
-using Wesley.Client.Droid.Services;
-[assembly: Xamarin.Forms.Dependency(typeof(MicrophoneService))]
+
 namespace Wesley.Client.Droid.Services
 {
     internal class MicrophoneService : IMicrophoneService
@@ -27,7 +25,7 @@ namespace Wesley.Client.Droid.Services
             }
             else
             {
-                var currentActivity = AppUtils.GetAppContext(); //MainActivity.Instance;
+                var currentActivity = Android.App.Application.Context;
                 if (ContextCompat.CheckSelfPermission(currentActivity, Manifest.Permission.RecordAudio) != (int)Android.Content.PM.Permission.Granted)
                 {
                     RequestMicPermission();
@@ -47,7 +45,7 @@ namespace Wesley.Client.Droid.Services
             if (currentActivity.ShouldShowRequestPermissionRationale(Manifest.Permission.RecordAudio))
             {
                 Snackbar.Make(currentActivity.FindViewById(Android.Resource.Id.Content),
-                    "App requires microphone permission.",
+                    "应用程序需要麦克风权限.",
                     Snackbar.LengthIndefinite).SetAction("Ok",
                     v =>
                     {

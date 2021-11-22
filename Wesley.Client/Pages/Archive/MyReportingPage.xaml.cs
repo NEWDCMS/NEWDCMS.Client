@@ -19,7 +19,7 @@ namespace Wesley.Client.Pages.Archive
                 try
                 {
                     InitializeComponent();
-                    ToolbarItems.Clear();
+                    ToolbarItems?.Clear();
                     foreach (var toolBarItem in this.GetToolBarItems7<MyReportingPageViewModel>(ViewModel).ToList())
                     {
                         ToolbarItems.Add(toolBarItem);

@@ -81,7 +81,7 @@ namespace Wesley.Client.Droid.Renderers
             if (((this.Width / 2) - (Element.TextMargin * 4)) < bounds.Width())
             {
                 float ratio = (float)((this.Width / 2) - Element.TextMargin * 4) / (float)bounds.Width();
-                paint.TextSize = paint.TextSize * ratio;
+                paint.TextSize *= ratio;
                 paint.GetTextBounds(Element.Text.ToString(), 0, Element.Text.ToString().Length, bounds);
             }
 

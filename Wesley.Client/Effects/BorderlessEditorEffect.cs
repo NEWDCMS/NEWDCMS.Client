@@ -1,11 +1,8 @@
-﻿using System;
-using Xamarin.Forms;
-
-namespace Wesley.Effects
+﻿namespace Wesley.Client.Effects
 {
     public class BorderlessEditorEffect : BaseFreechatEffect
     {
-        public BorderlessEditorEffect() :base(nameof(BorderlessEditorEffect))
+        public BorderlessEditorEffect() : base($"Wesley.Client.{nameof(BorderlessEditorEffect)}")
         {
         }
     }
