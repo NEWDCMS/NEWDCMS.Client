@@ -21,8 +21,16 @@ Wesley 计划开源打造国内首套基于Saas的轻量级新零售快消CRM/ER
 
   - 开箱即用: 
     提供通用权限管理(Admin)、基础数据(Common)、任务调度(Quartz)、代码生成(CodeGenerator)等模块，开箱即用，让您专注于自己的业务开发。
-
+    
 ## 客户端
+
+|项目|库|描述|
+|-------------|-----|-----------|
+|Wesley|[GitHub](https://github.com/dorisoy/Wesley) | 基于Xamarin.Forms5.0+ 支持Android 5.0+/IOS|
+|Wesley.Light|[GitHub](https://github.com/dorisoy/Wesley.Light) | 微信小程序客户端|
+
+
+## APP截屏
 
 <img align="left"  src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(8).jpg" width="260" vspace="20"/>
 <img align="left"  src="https://raw.githubusercontent.com/dorisoy/Wesley/main/d%20(1).jpg" width="260" vspace="20"/>
