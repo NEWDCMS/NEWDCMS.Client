@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.NewsViewerPage"
+                       Title="{Binding Title}"
+                       x:TypeArguments="vms:NewsViewerPageViewModel">
+    <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                           ViewModelLoader="{Binding NewsLoader}"
+                           VerticalOptions="Fill"
+                           HorizontalOptions="Fill">
+        <Grid Style="{StaticResource GGrid}"
+              RowDefinitions="*">
+            <custom:BrowserControl HorizontalOptions="Fill"
+                                   VerticalOptions="Fill">
+                <custom:BrowserControl.Source HorizontalOptions="Fill"
+                                              VerticalOptions="Fill">
+                    <HtmlWebViewSource Html="{Binding Html}" />
+                </custom:BrowserControl.Source>
+            </custom:BrowserControl>
+        </Grid>
+    </custom:TaskLoaderView>
+</pages:BaseContentPage>
+

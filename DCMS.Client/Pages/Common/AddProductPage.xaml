@@ -1,0 +1,452 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.AddProductPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AddProductPageViewModel">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="TableToolButtonStyle"
+                   TargetType="Button">
+                <Setter Property="FontFamily"
+                        Value="FAS" />
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="FontSize"
+                        Value="12" />
+                <Setter Property="BackgroundColor"
+                        Value="#ffffff" />
+                <Setter Property="BorderColor"
+                        Value="{StaticResource DividerColor}" />
+                <Setter Property="BorderRadius"
+                        Value="50" />
+                <Setter Property="CornerRadius"
+                        Value="50" />
+                <Setter Property="BorderWidth"
+                        Value="0.7" />
+                <Setter Property="HeightRequest"
+                        Value="25" />
+                <Setter Property="WidthRequest"
+                        Value="50" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="HorizontalOptions"
+                        Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <AbsoluteLayout>
+        <CollectionView AbsoluteLayout.LayoutBounds="0,0,1,1"
+                        AbsoluteLayout.LayoutFlags="All"
+                        x:Name="ProductRepeater"
+                        Margin="0,0,0,45"
+                        ItemsSource="{Binding ProductSeries,Mode=TwoWay}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Orientation="Vertical"
+                                 Spacing="0">
+                        <StackLayout Orientation="Horizontal"
+                                     Spacing="0"
+                                     Padding="{StaticResource PLR10}"
+                                     HeightRequest="{StaticResource RH45}"
+                                     BackgroundColor="#eeeeee">
+                            <Label Text="{Binding Name}"
+                                   LineBreakMode="TailTruncation"
+                                   HorizontalOptions="StartAndExpand"
+                                   VerticalOptions="Center"></Label>
+                            <Button HorizontalOptions="End"
+                                    VerticalOptions="Center"
+                                    Text="&#xf1f8;"
+                                    Style="{StaticResource TableToolButtonStyle}"
+                                    Margin="0,0,10,0"
+                                    Command="{Binding Path=BindingContext.RemoveCommend,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="{Binding Id}" />
+                            <Button HorizontalOptions="End"
+                                    VerticalOptions="Center"
+                                    Text="clone"
+                                    Style="{StaticResource TableToolButtonStyle}"
+                                    Command="{Binding Path=BindingContext.CopyCommend,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="{Binding Id}" />
+                        </StackLayout>
+                        <Grid Style="{StaticResource GGrid}"
+                              Padding="5,0,5,0"
+                              VerticalOptions="Start"
+                              HorizontalOptions="FillAndExpand"
+                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vms:AddProductPageViewModel}}, Path=IsEditPrduceDate}"
+                              RowDefinitions="40,.7"
+                              ColumnDefinitions="*,*,*">
+
+                            <StackLayout   Grid.Row="0"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="3"
+                                           Padding="0,0,0,0"
+                                           Spacing="0"
+                                           Orientation="Horizontal"
+                                           HorizontalOptions="FillAndExpand">
+                                <Label Text="生产日期:"
+                                       Margin="5,0,5,0"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Center" />
+                                <custom:CustomEntry x:Name="ManufactureDateStrEntry"
+                                    Margin="{StaticResource ML8}"
+                                                    Keyboard="Numeric"
+                                    Placeholder="在这里填写生产日期..."
+                                    Text="{Binding ManufactureDateStr,Mode=TwoWay}"
+                                    HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}" />
+                            </StackLayout>
+                            <BoxView Grid.Row="1"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                        </Grid >
+                        <Grid Style="{StaticResource GGrid}"
+                              Padding="5,0,5,0"
+                              VerticalOptions="Start"
+                              HorizontalOptions="FillAndExpand"
+                              RowDefinitions="40,.7,40,.7,40,.7,40,.7,40,.7,40,.7"
+                              ColumnDefinitions="*,*,*">
+                            <!--//////////大单位价格///////////-->
+                            <StackLayout Spacing="0"
+                                         Grid.Row="0"
+                                         Grid.Column="0"
+                                         Padding="5,0,5,0"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand">
+                                <custom:CustomEntry Keyboard="Numeric"
+                                                    Placeholder="大单位数量..."
+                                                    Text="{Binding BigPriceUnit.Quantity,Converter={StaticResource NullableIntConverter},Mode=TwoWay}"
+                                                    HorizontalOptions="FillAndExpand"
+                                                    VerticalOptions="CenterAndExpand"
+                                                    Style="{StaticResource FormEntry}">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Unfocused"
+                                                                  Command="{Binding Path=BindingContext.BigEntryUnfocused,Source={x:Reference CurrentContentView}}"
+                                                                  CommandParameter="{Binding .}" />
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+                                <Label Text="{Binding BigPriceUnit.UnitName}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Center" />
+                            </StackLayout>
+                            <StackLayout Grid.Row="0"
+                                         Grid.Column="1"
+                                         Padding="5,0,5,0"
+                                         Spacing="0"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand">
+                                <custom:CustomEntry x:Name="BigPriceUnit_Price"
+                                                    Keyboard="Numeric"
+                                                    Text="{Binding BigPriceUnit.Price,Mode=TwoWay}"
+                                                    HorizontalOptions="FillAndExpand"
+                                                    VerticalOptions="CenterAndExpand"
+                                                    Style="{StaticResource FormEntry}"
+                                                    Placeholder="选择单价">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Unfocused"
+                                                                  Command="{Binding Path=BindingContext.BigEntryUnfocused,Source={x:Reference CurrentContentView}}"
+                                                                  CommandParameter="{Binding .}"></b:EventToCommandBehavior>
+                                        
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+                                <Label x:Name="Big_PopDropdown_Price"
+                                       Margin="5,0,0,0"
+                                       Style="{StaticResource DownArrow}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                                Command="{Binding Path=BindingContext.BigPriceSelected,Source={x:Reference CurrentContentView}}"
+                                                              CommandParameter="{Binding Id}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </StackLayout>
+                            <StackLayout  Grid.Row="0"
+                                          Grid.Column="2"
+                                          Padding="5,0,5,0"
+                                          Spacing="0"
+                                          Orientation="Horizontal"
+                                          HorizontalOptions="FillAndExpand">
+                                <Label 
+                                                    Padding="5,0,0,0"
+                                       Text="{Binding BigPriceUnit.Amount, Mode=OneWay}"
+                                                    HorizontalOptions="EndAndExpand"
+                                                    VerticalOptions="CenterAndExpand" />
+                            </StackLayout>
+                            <BoxView Grid.Row="1"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                            <!--//////////小单位价格///////////-->
+                            <StackLayout Grid.Row="2"
+                                         Grid.Column="0"
+                                         Padding="5,0,5,0"
+                                         Spacing="0"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand">
+                                <custom:CustomEntry Keyboard="Numeric"
+                                                    Placeholder="小单位数量..."
+                                                    Text="{Binding SmallPriceUnit.Quantity,Converter={StaticResource NullableIntConverter},Mode=TwoWay}"
+                                                    HorizontalOptions="FillAndExpand"
+                                                    VerticalOptions="CenterAndExpand"
+                                                    Style="{StaticResource FormEntry}">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Unfocused"
+                                                                  Command="{Binding Path=BindingContext.SmallEntryUnfocused,Source={x:Reference CurrentContentView}}"
+                                                                  CommandParameter="{Binding .}"></b:EventToCommandBehavior>
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+                                <Label Text="{Binding SmallPriceUnit.UnitName}"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center"
+                                       FontSize="{StaticResource FT14}" />
+                            </StackLayout>
+                            <StackLayout Grid.Row="2"
+                                         Grid.Column="1"
+                                         Padding="5,0,5,0"
+                                         Spacing="0"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand">
+                                <custom:CustomEntry x:Name="SmallPriceUnit_Price"
+                                                    Keyboard="Numeric"
+                                                    Text="{Binding SmallPriceUnit.Price, Mode=TwoWay}"
+                                                    HorizontalOptions="FillAndExpand"
+                                                    VerticalOptions="CenterAndExpand"
+                                                    Style="{StaticResource FormEntry}"
+                                                    Placeholder="选择单价">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Unfocused"
+                                                                  Command="{Binding Path=BindingContext.SmallEntryUnfocused,Source={x:Reference CurrentContentView}}"
+                                                                  CommandParameter="{Binding .}"></b:EventToCommandBehavior>
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+                                <Label x:Name="Small_PopDropdown_Price"
+                                       Margin="5,0,0,0"
+                                       Style="{StaticResource DownArrow}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Path=BindingContext.SmallPriceSelected,Source={x:Reference CurrentContentView}}"
+                                                              CommandParameter="{Binding Id}"
+                                                              NumberOfTapsRequired="1" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </StackLayout>
+                            <StackLayout   Grid.Row="2"
+                                           Grid.Column="2"
+                                           Padding="5,0,5,0"
+                                           Spacing="0"
+                                           Orientation="Horizontal"
+                                           HorizontalOptions="FillAndExpand">
+                                <Label 
+                                                    Padding="5,0,0,0"
+                                       Text="{Binding SmallPriceUnit.Amount, Mode=OneWay}"
+                                       HorizontalOptions="EndAndExpand"
+                                                    VerticalOptions="CenterAndExpand" />
+                            </StackLayout>
+                            <BoxView Grid.Row="3"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                            <!--//////////赠送///////////-->
+                            <StackLayout Grid.Row="4"
+                                         Grid.Column="0"
+                                         Padding="5,0,5,0"
+                                         Spacing="0"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand">
+                                <custom:CustomEntry Keyboard="Numeric"
+                                                    Placeholder="大单位赠量..."
+                                                    Text="{Binding GiveProduct.BigUnitQuantity,Converter={StaticResource NullableIntConverter}}"
+                                                    HorizontalOptions="FillAndExpand"
+                                                    VerticalOptions="CenterAndExpand"
+                                                    Style="{StaticResource FormEntry}" />
+                                <Label Text="{Binding BigPriceUnit.UnitName}"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center"
+                                       FontSize="{StaticResource FT14}" />
+                            </StackLayout>
+                            <StackLayout Grid.Row="4"
+                                         Grid.Column="1"
+                                         Padding="5,0,5,0"
+                                         Spacing="0"
+                                         Orientation="Horizontal"
+                                         HorizontalOptions="FillAndExpand">
+                                <custom:CustomEntry Keyboard="Numeric"
+                                                    Placeholder="小单位赠量..."
+                                                    Text="{Binding GiveProduct.SmallUnitQuantity,Converter={StaticResource NullableIntConverter}}"
+                                                    HorizontalOptions="FillAndExpand"
+                                                    VerticalOptions="CenterAndExpand"
+                                                    Style="{StaticResource FormEntry}" />
+                                <Label Text="{Binding SmallPriceUnit.UnitName}"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center"
+                                       FontSize="{StaticResource FT14}" />
+                            </StackLayout>
+                            <BoxView Grid.Row="5"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                            <!--大单位备注-->
+                            <StackLayout   Grid.Row="6"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="3"
+                                           Padding="0,0,0,0"
+                                           Spacing="0"
+                                           Orientation="Horizontal"
+                                           HorizontalOptions="FillAndExpand">
+                                <Label Text="备注:"
+                                       Margin="5,0,5,0"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Center" />
+                                <custom:CustomEntry Margin="5,0,0,0"
+                                                    Placeholder="填写大单位备注..."
+                                                    Text="{Binding BigPriceUnit.Remark,Mode=TwoWay}"
+                                                    Style="{StaticResource FormEntry}"
+                                                    VerticalOptions="Center">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Focused"
+                                                                  Command="{Binding RemarkSelected}"
+                                                                  CommandParameter="{Binding BigPriceUnit}" />
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+                                <Label Margin="0,0,10,0"
+                                       Style="{StaticResource DownArrow}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding RemarkSelected}"
+                                                              CommandParameter="{Binding BigPriceUnit}"
+                                                              NumberOfTapsRequired="1" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </StackLayout>
+                            <BoxView Grid.Row="7"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                            <!--小单位备注-->
+                            <StackLayout   Grid.Row="8"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="3"
+                                           Padding="5,0,0,0"
+                                           Spacing="0"
+                                           Orientation="Horizontal"
+                                           HorizontalOptions="FillAndExpand">
+                                <Label Text="备注:"
+                                       Margin="0,0,5,0"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Center" />
+                                <custom:CustomEntry Margin="5,0,0,0"
+                                                    Placeholder="填写小单位备注..."
+                                                    Text="{Binding SmallPriceUnit.Remark,Mode=TwoWay}"
+                                                    Style="{StaticResource FormEntry}"
+                                                    VerticalOptions="Center">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Focused"
+                                                                  Command="{Binding RemarkSelected}"
+                                                                  CommandParameter="{Binding SmallPriceUnit}" />
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+                                <Label Margin="0,0,10,0"
+                                       Style="{StaticResource DownArrow}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding RemarkSelected}"
+                                                              CommandParameter="{Binding SmallPriceUnit}"
+                                                              NumberOfTapsRequired="1" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </StackLayout>
+                            <BoxView Grid.Row="9"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                            <!--赠送备注-->
+                            <StackLayout   Grid.Row="10"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="3"
+                                           Padding="5,0,0,0"
+                                           Spacing="0"
+                                           Orientation="Horizontal"
+                                           HorizontalOptions="FillAndExpand">
+                                <Label Text="备注:"
+                                       Margin="0,0,5,0"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Center" />
+                                <custom:CustomEntry Margin="5,0,0,0"
+                                                    Placeholder="填写赠送备注..."
+                                                    Text="{Binding GiveProduct.Remark,Mode=TwoWay}"
+                                                    Style="{StaticResource FormEntry}"
+                                                    VerticalOptions="Center">
+                                    <custom:CustomEntry.Behaviors>
+                                        <b:EventToCommandBehavior EventName="Focused"
+                                                                  Command="{Binding RemarkSelected}"
+                                                                  CommandParameter="{Binding GiveProduct}" />
+                                    </custom:CustomEntry.Behaviors>
+                                </custom:CustomEntry>
+
+                                <Label
+                                       Margin="0,0,10,0"
+                                       Style="{StaticResource DownArrow}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding RemarkSelected}"
+                                                              CommandParameter="{Binding GiveProduct}"
+                                                              NumberOfTapsRequired="1" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </StackLayout>
+                            <BoxView Grid.Row="11"
+                                     Grid.ColumnSpan="3"
+                                     Style="{StaticResource SeparatorGrid}" />
+                        </Grid>
+                        <!--//////////主仓库存///////////-->
+                        <StackLayout  Padding="5,0,5,0"
+                                      Spacing="0"
+                                      HeightRequest="{StaticResource RH45}"
+                                      Orientation="Horizontal"
+                                      HorizontalOptions="FillAndExpand">
+                            <Label Margin="5,0,0,0"
+                                   Text="{Binding UsableQuantityConversion,StringFormat='库存: {0}'}"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}"></Label>
+                            <Label Margin="0,0,5,0"
+                                   Text="{Binding UnitConversion,StringFormat='单位换算: {0}'}"
+                                   HorizontalOptions="EndAndExpand"
+                                   VerticalOptions="Center"
+                                   FontSize="{StaticResource FT14}"></Label>
+                        </StackLayout>
+                        <BoxView VerticalOptions="Start"
+                                 Style="{StaticResource SeparatorGrid}"
+                                 Margin="0" />
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <!--footer-->
+        <Grid HeightRequest="45"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button 
+                    Margin="0"
+                    Text="确定"
+                
+                    CornerRadius="0"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    HeightRequest="45"
+                    Command="{Binding Path=SaveCommand}" />
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

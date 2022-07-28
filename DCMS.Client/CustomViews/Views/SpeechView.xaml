@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView x:Class="Wesley.Client.CustomViews.SpeechView"
+             xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             
+             xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             xmlns:textRes="clr-namespace:Wesley.Client.Resources">
+    <Grid Style="{StaticResource GGrid}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="150" />
+            <RowDefinition Height="500" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0"
+               Grid.Row="0"
+               Text="{x:Static textRes:TextResources.EnableMicrophone}"
+               TextColor="{StaticResource PrimaryTextColor}"
+               VerticalOptions="CenterAndExpand"
+               HorizontalOptions="Start"
+               
+               
+               Margin="0,0,0,0" />
+        <Switch Grid.Column="1"
+                Grid.Row="0"
+                x:Name="EnableMicrophoneCommand"
+                VerticalOptions="Center"
+                HorizontalOptions="End"
+                OnColor="#53a245"
+                ThumbColor="#53a245"
+                IsToggled="{Binding EnableMicrophone,Mode=TwoWay}" />
+
+        <Frame Grid.Row="1"
+               Grid.ColumnSpan="2" 
+               CornerRadius="10" 
+               Margin="0"
+               HasShadow="True"
+               BackgroundColor="#eeeeee">
+            <Label  
+                    x:Name="RecognitionText"
+                    FontSize="{StaticResource FT16}"
+                    Text="{Binding RecognitionText}"
+                    Padding="5"
+                    HorizontalOptions="Center"
+                   VerticalOptions="CenterAndExpand" />
+        </Frame>
+
+        <AbsoluteLayout Grid.Row="2"
+                        Grid.ColumnSpan="2">
+            <!--脉冲动画-->
+            <custom:Pulse AbsoluteLayout.LayoutBounds=".5,0,300,300"
+                          AbsoluteLayout.LayoutFlags="XProportional"
+                          PulseColor="#EEEEEE"
+                          Speed="10"
+                          VerticalOptions="FillAndExpand"
+                          HorizontalOptions="FillAndExpand">
+                <custom:Pulse.Triggers>
+                    <DataTrigger TargetType="custom:Pulse"
+                                 Binding="{Binding EnableMicrophone}"
+                                 Value="True">
+                        <Setter Property="AutoStart"
+                                Value="True" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="custom:Pulse"
+                                 Binding="{Binding EnableMicrophone}"
+                                 Value="False">
+                        <Setter Property="AutoStart"
+                                Value="False" />
+                    </DataTrigger>
+                </custom:Pulse.Triggers>
+            </custom:Pulse>
+            
+            <!--开始语音识别-->
+            <Button AbsoluteLayout.LayoutBounds=".5,0.272,60,60"
+                                AbsoluteLayout.LayoutFlags="PositionProportional"
+                                Text="{Binding IconCounter}"
+                                FontSize="35"
+                                HeightRequest="60"
+                                WidthRequest="60"
+                                
+                                Style="{StaticResource AppButtonStyle}"
+                                Command="{Binding RecognitionCommand}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding EnableMicrophone}"
+                                 Value="True">
+                        <Setter Property="TextColor"
+                                Value="#53a245"></Setter>
+                        <Setter Property="IsEnabled"
+                                Value="True"></Setter>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding EnableMicrophone}"
+                                 Value="False">
+                        <Setter Property="TextColor"
+                                Value="Gray"></Setter>
+                        <Setter Property="IsEnabled"
+                                Value="False"></Setter>
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+        </AbsoluteLayout>
+    </Grid>
+</ContentView>

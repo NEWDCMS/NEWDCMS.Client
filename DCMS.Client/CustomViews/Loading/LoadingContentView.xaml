@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             mc:Ignorable="d"
+             x:Class="Wesley.Client.CustomViews.LoadingContentView">
+  <ContentView.Content>
+        <StackLayout VerticalOptions="CenterAndExpand"
+                     HorizontalOptions="CenterAndExpand">
+            <!--样式2-->
+            <!--<ffimageloading:CachedImage x:Name="loadingImage" 
+                                        HorizontalOptions="Center"
+                                            VerticalOptions="Center"
+                                            WidthRequest="100"
+                                            HeightRequest="100"
+                                            DownsampleToViewSize="true"
+                                        Source="loading.gif"/>-->
+            <ActivityIndicator IsRunning="true"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+            <!--<Label Text="努力加载中..."
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource SecondaryAccentColor}"
+                   HorizontalOptions="Center" />-->
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>

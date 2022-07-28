@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:effects="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pancakeView="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       
+                       x:Name="CurrentContentView"
+                       BackgroundColor="#eeeeee"
+                       xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
+                       xmlns:customControls="clr-namespace:Wesley.Client.Pages.CustomControls"
+                       xmlns:dataTemplates="clr-namespace:Wesley.Client.Pages.DataTemplates"
+                       x:Class="Wesley.Client.Pages.ConversationsPage"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:ConversationsPageViewModel">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Style="{StaticResource GGrid}"
+              Grid.RowSpan="2"
+              Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <pancakeView:PancakeView CornerRadius="20"
+                                     IsVisible="{OnPlatform iOS=False}"
+                                     HeightRequest="60">
+                <pancakeView:PancakeView.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android"
+                            Value="15,20,15,-8" />
+                        <On Platform="iOS"
+                            Value="15,25,15,-8" />
+                    </OnPlatform>
+                </pancakeView:PancakeView.Margin>
+            </pancakeView:PancakeView>
+            <pancakeView:PancakeView CornerRadius="10"
+                                     Margin="15,10,15,10"
+                                     HeightRequest="60"
+                                     BackgroundColor="White">
+                <!--<pancakeView:PancakeView.Shadow>
+                    <pancakeView:DropShadow Color="LightGray"
+                                            Opacity="0.6" />
+                </pancakeView:PancakeView.Shadow>-->
+                <Grid Style="{StaticResource GGrid}"
+                      Margin="20,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <custom:CustomEntry Placeholder="搜索"
+                                        Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                                        VerticalOptions="Center"
+                                        FontAttributes="Bold">
+                        <Entry.Effects>
+                            <effects:BorderlessEntryEffect />
+                        </Entry.Effects>
+                    </custom:CustomEntry>
+                    <Label Style="{StaticResource FontAwesomeLabel}"
+                           Text="{StaticResource FontAwesomeSearch}"
+                           FontFamily="FAS"
+                           Grid.Column="1"
+                           FontSize="Large"
+                           TextColor="LightGray"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Grid>
+            </pancakeView:PancakeView>
+            <customControls:ToggleButton HorizontalOptions="Start"
+                                         Margin="15,10,15,10"
+                                         VerticalOptions="Center"
+                                         ToggleOptionTitle="全部"
+                                         Grid.Row="1"
+                                         ToggleCommand="{Binding FilterOptionChangedCommand}"
+                                         NotToggledOptionTitle="{Binding OnLineCount,StringFormat='在线（{0:F2}）' }" />
+            <CollectionView ItemsSource="{Binding Conversations,Mode=TwoWay}"
+                            Grid.Row="2"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid  xe:TouchEffect.Color="LightGray"
+                               xe:EffectCommands.Tap="{Binding BindingContext.ConversationSelectedCommand, Source={x:Reference CurrentContentView}}"
+                               xe:EffectCommands.TapParameter="{Binding .}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition Height=".7" />
+                            </Grid.RowDefinitions>
+                            <dataTemplates:SimpleUserProfileTemplate HeightRequest="100" />
+                            <BoxView BackgroundColor="#D8D8D8"
+                                     HeightRequest="1"
+                                     Grid.Row="1" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           Grid.RowSpan="2"
+                           Color="{StaticResource AccentColor}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           HeightRequest="50"
+                           WidthRequest="50" />
+        <pancakeView:PancakeView HeightRequest="30"
+                                 Grid.Row="1"
+                                 IsVisible="False"
+                                 CornerRadius="50"
+                                 BackgroundColor="White">
+            <pancakeView:PancakeView.Margin>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android"
+                        Value="0,0,0,-15" />
+                    <On Platform="iOS"
+                        Value="0,0,0,-1" />
+                </OnPlatform>
+            </pancakeView:PancakeView.Margin>
+        </pancakeView:PancakeView>
+    </Grid>
+</pages:BaseContentPage>

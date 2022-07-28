@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<t:SlideMenuView xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:t="clr-namespace:DCMS.SlideOverKit;assembly=DCMS.SlideOverKit"
+                 x:Class="DCMS.Client.Pages.RightSideMasterPage" x:Name="SideMaster">
+
+    <CollectionView ItemsSource="{Binding Source={x:Reference SideMaster},Path=MenuItems,Mode=TwoWay}"
+                    x:Name="RepeaterOptions"
+                    Margin="0,0,0,0"
+                    ItemSizingStrategy="MeasureAllItems"
+                    SelectionMode="Single">
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Grid Margin="10,0,10,0"
+                      Style="{StaticResource GGrid}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectedCommand}"
+                                              CommandParameter="{Binding MenuEnum}"
+                                              NumberOfTapsRequired="1" />
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           x:Name="Text"
+                           FontFamily="FAS"
+                           Text="{Binding Text}"
+                           FontSize="{StaticResource FT14}"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Start" />
+                    <BoxView Grid.Row="1"
+                             Grid.ColumnSpan="2"
+                             Style="{StaticResource SeparatorGrid}" />
+                </Grid>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</t:SlideMenuView>

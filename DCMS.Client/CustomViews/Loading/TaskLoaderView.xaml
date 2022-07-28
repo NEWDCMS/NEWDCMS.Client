@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView x:Class="Wesley.Client.CustomViews.TaskLoaderView"
+             xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Name="LoaderView">
+
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ButtonReload"
+                   TargetType="Button">
+                <Setter Property="TextColor"
+                        Value="White" />
+                <Setter Property="HeightRequest"
+                        Value="40" />
+                <Setter Property="BackgroundColor"
+                        Value="Accent" />
+            </Style>
+            <Style x:Key="TextCenter"
+                   TargetType="Label">
+                <Setter Property="HorizontalTextAlignment"
+                        Value="Center" />
+                <Setter Property="VerticalTextAlignment"
+                        Value="Center" />
+            </Style>
+            <Style x:Key="TextError"
+                   BasedOn="{StaticResource TextCenter}"
+                   TargetType="Label">
+                <Setter Property="FontSize"
+                        Value="14" />
+                <Setter Property="LineBreakMode"
+                        Value="CharacterWrap" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <ContentView.Content>
+        <StackLayout x:Name="Grid">
+            <ContentView x:Name="ContainerView"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="FillAndExpand" />
+
+            <!--<ffimageloading:CachedImage x:Name="Loader"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="CenterAndExpand"
+                                        WidthRequest="100"
+                                        HeightRequest="100"
+                                        DownsampleToViewSize="true"
+                                        Source="loading.gif" Margin="0,100,0,0"/>-->
+            
+            <ActivityIndicator x:Name="Loader"
+                               Margin="0,100,0,0"
+                               IsRunning="true"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsBusy}" />
+
+            <!--错误视图-->
+            <StackLayout x:Name="ErrorView"
+                         HorizontalOptions="Center"
+                         VerticalOptions="CenterAndExpand"
+                         Orientation="Vertical">
+                <Image x:Name="ErrorViewImage"
+                       WidthRequest="80"
+                       HeightRequest="90"
+                       Margin="0,0,0,10"
+                       HorizontalOptions="Center" />
+                <Label x:Name="ErrorViewLabel"
+                       Style="{StaticResource TextError}"
+                       WidthRequest="300"
+                       Margin="0,0,0,20"
+                       HorizontalTextAlignment="Center" />
+                <!--<Button x:Name="ErrorViewButton"
+                        Style="{StaticResource ButtonReload}"
+                        HorizontalOptions="Center"
+                        Text="重试" />-->
+            </StackLayout>
+
+            <!--空视图-->
+            <StackLayout x:Name="EmptyStateView"
+                         HorizontalOptions="Center"
+                         VerticalOptions="CenterAndExpand"
+                         Orientation="Vertical">
+                <Image x:Name="EmptyStateImage"
+                       WidthRequest="80"
+                       HeightRequest="90"
+                       Margin="0,0,0,10"
+                       HorizontalOptions="Center" />
+                <Label x:Name="EmptyStateLabel"
+                       Style="{StaticResource TextError}"
+                       WidthRequest="300"
+                       HorizontalTextAlignment="Center" />
+            </StackLayout>
+
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>

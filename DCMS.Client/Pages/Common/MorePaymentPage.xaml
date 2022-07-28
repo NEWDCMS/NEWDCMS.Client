@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:controls="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.MorePaymentPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:MorePaymentPageViewModel">
+    <AbsoluteLayout>
+        <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                               ViewModelLoader="{Binding AccountLoader}"
+                               BackgroundColor="White"
+                               AbsoluteLayout.LayoutBounds="0,0,1,1"
+                               AbsoluteLayout.LayoutFlags="All">
+            <StackLayout>
+                <yummy:PancakeView 
+                                   Margin="10"
+                                   IsClippedToBounds="true"
+                                   CornerRadius="5"
+                                   BackgroundColor="#eeeeee">
+                    <Grid Padding="10" ColumnDefinitions="50,*">
+                        <Label Grid.Column="0"
+                               Grid.Row="0"
+                               FontSize="12"
+                               Text="info 提示"
+                               FontFamily="FAS"
+                               TextColor="#5A89FF"></Label>
+                        <Label  Grid.Column="1"
+                                Grid.Row="0"
+                                Text="1.不同类型科目只能选择2种支付方式." FontSize="12"></Label>
+                        <Label  Grid.Column="1"
+                                Grid.Row="1"
+                                Text="2.同类型科目子类只能选择一种支付方式."
+                                FontSize="12"></Label>
+                    </Grid>
+                </yummy:PancakeView>
+                
+                <controls:TreeView BackgroundColor="White"
+                                   x:Name="TheTreeView"
+                                   Margin="0" />
+            </StackLayout>
+        
+        </custom:TaskLoaderView>
+        <!--footer-->
+        <Grid Margin="0"
+              HeightRequest="50"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Style="{StaticResource SeparatorGrid}"
+                     Margin="0" />
+            <Button Text="确定"
+                    Grid.Row="1"
+                    Margin="5"
+                    Style="{StaticResource CustomIconButtonStyle}"
+                    Command="{Binding Path=SaveCommand}"></Button>
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

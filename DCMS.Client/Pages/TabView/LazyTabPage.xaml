@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="DCMS.Client.Pages.LazyTabPage"
+             xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:DCMS.Client.Pages"
+             xmlns:vm="clr-namespace:DCMS.Client.ViewModels"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit">
+    <ContentPage.Content>
+        <Grid>
+            <xct:TabView TabContentBackgroundColor="Yellow"
+                         TabIndicatorColor="Yellow"
+                         TabStripBackgroundColor="Blue"
+                         TabStripHeight="60"
+                         TabStripPlacement="Top">
+
+                <xct:TabViewItem FontSize="12"
+                                 Text="Tab Lazy 2"
+                                 TextColor="White"
+                                 TextColorSelected="Yellow">
+                    <xct:TabViewItem.Icon>
+                        <FontImageSource FontFamily="FAS"
+                                         Glyph="&#xf015;" />
+                    </xct:TabViewItem.Icon>
+                    <xct:LazyView x:TypeArguments="local:LazyTestView"
+                                  BindingContext="{x:Static vm:LazyTestViewModel.Current}"
+                                  IsLoaded="{Binding Loaded}" />
+                </xct:TabViewItem>
+
+                <xct:TabViewItem FontSize="12"
+                                 Text="Tab Lazy 4"
+                                 TextColor="White"
+                                 TextColorSelected="Yellow">
+                    <xct:TabViewItem.Icon>
+                        <FontImageSource FontFamily="FAS"
+                                         Glyph="&#xf015;" />
+                    </xct:TabViewItem.Icon>
+                    <xct:LazyView x:TypeArguments="local:LazyTestView"
+                                  BindingContext="{x:Static vm:LazyTestViewModel.Current}" />
+                </xct:TabViewItem>
+            </xct:TabView>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

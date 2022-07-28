@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:ca="clr-namespace:Wesley.Client.Camera;assembly=Wesley.Client"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.CameraViewPage"
+                       x:TypeArguments="vms:CameraPageViewModel"
+                       Title="{Binding Title}">
+    <pages:BaseContentPage.Resources>
+        <ca:MediaCapturedEventArgsConverter x:Key="MediaCapturedEventArgsConverter" />
+    </pages:BaseContentPage.Resources>
+    <RelativeLayout>
+        <Grid RowDefinitions="*"
+              ColumnDefinitions="*"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+                                                                       Property=Height,
+                                                                       Factor=1,
+                                                                       Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+                                                                      Property=Width,
+                                                                      Factor=1,
+                                                                      Constant=0}">
+            <xct:CameraView Grid.Row="0"
+                            x:Name="MyCameraView"
+                            CaptureMode="Photo"
+                            CameraOptions="Back"
+                            IsAvailable="{Binding IsCameraAvailable, Mode=OneWayToSource}"
+                            FlashMode="{Binding CameraFlashMode, Mode=OneWay}"
+                            IsBusy="{Binding IsCameraBusy, Mode=OneWayToSource}"
+                            HorizontalOptions="FillAndExpand"
+                            VerticalOptions="FillAndExpand">
+                <!--捕获照片-->
+                <xct:CameraView.Behaviors>
+                    <xct:EventToCommandBehavior EventName="MediaCaptured"
+                                                Command="{Binding MediaCapturedCommand}"
+                                                EventArgsConverter="{StaticResource MediaCapturedEventArgsConverter}" />
+                </xct:CameraView.Behaviors>
+            </xct:CameraView>
+            <ca:OverlayView Grid.Row="0"
+                            Shape="{Binding OverlayShape, Mode=OneWay}"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand"
+                            Margin="-10,-200,-10,-100" />
+        </Grid>
+
+        <StackLayout RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.25}"
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Constant=-100}"
+                     BackgroundColor="Transparent"
+                     Orientation="Horizontal"
+                     HorizontalOptions="Center">
+
+            <Button WidthRequest="50"
+                    CornerRadius="50"
+                    Text="&#xf0e7;"
+                    BackgroundColor="#3B5998"
+                    TextColor="White"
+                    FontSize="22"
+                    FontFamily="FAS"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" Margin="0,0,80,0"/>
+
+            <Button WidthRequest="50"
+                    CornerRadius="50"
+                    Command="{Binding ShutterCommand, Source={x:Reference MyCameraView}}"
+                    IsEnabled="{Binding IsSnapButtonEnabled, Mode=OneWay}"
+                    Text="&#xf030;"
+                    BackgroundColor="#3B5998"
+                    TextColor="White"
+                    FontSize="22"
+                    FontFamily="FAS"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+        </StackLayout>
+    </RelativeLayout>
+</pages:BaseContentPage>

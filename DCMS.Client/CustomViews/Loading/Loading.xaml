@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             mc:Ignorable="d"
+             x:Class="Wesley.Client.CustomViews.Loading">
+    <ContentView.Content>
+        <StackLayout VerticalOptions="CenterAndExpand"
+                     HorizontalOptions="CenterAndExpand">
+            <!--样式1-->
+            <ActivityIndicator IsRunning="true"
+                               HorizontalOptions="Center"
+                               IsVisible="{Binding IsBusy}"/>
+            <!--样式2-->
+            <!--<ffimageloading:CachedImage x:Name="loadingImage"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        WidthRequest="100"
+                                        HeightRequest="100"
+                                        DownsampleToViewSize="true"
+                                        Source="loading.gif"
+                                        IsVisible="{Binding IsBusy}" />-->
+            <Label FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource SecondaryAccentColor}"
+                   HorizontalOptions="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding IsNull}"
+                                 Value="False">
+                        <Setter Property="Text"
+                                Value="空空如也，刷新试试~" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>

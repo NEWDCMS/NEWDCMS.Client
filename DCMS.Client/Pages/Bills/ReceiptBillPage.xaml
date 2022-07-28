@@ -1,0 +1,477 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:converters="clr-namespace:Wesley.Client.Converters;assembly=Wesley.Client"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Bills.ReceiptBillPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:ReceiptBillPageViewModel">
+    <ContentPage.Resources>
+        <converters:StringArrayConverter x:Key="stringArrayConverter" />
+    </ContentPage.Resources>
+    <RelativeLayout>
+        <Grid Style="{StaticResource GGrid}"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height,Factor=1,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width,Factor=1, Constant=0}"
+              RowDefinitions="40,.7,40,.7,40,.7,*"
+              ColumnDefinitions="*,*">
+            <!--0-->
+            <Label HorizontalOptions="Start"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="{StaticResource ML10}"
+                   Grid.Row="0"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   Text="{Binding Bill.BillNumber,Mode=OneWay}"
+                   FontSize="{StaticResource FT14}" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="EndAndExpand"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="{StaticResource MR10}"
+                   Text="{Binding Bill.CreatedOnUtc,Converter={StaticResource DateTimeToStringConverter},ConverterParameter='yyyy-MM-dd',Mode=OneWay}"
+                   FontSize="{StaticResource FT14}" />
+            <!--1-->
+            <BoxView Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--2-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="2"
+                         Grid.Column="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="客户:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry x:Name="SelectCustom"
+                                    HorizontalOptions="FillAndExpand"
+                                    Placeholder="请选择客..."
+                                    FontSize="{StaticResource FT14}"
+                                    Margin="{StaticResource ML8}"
+                                    Text="{Binding Bill.TerminalName,Mode=TwoWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.CustomSelected,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="0" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource DownArrow}" />
+            </StackLayout>
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="2"
+                         Grid.Column="1">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="{StaticResource ML10}"
+                       Text="业务:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:CustomEntry x:Name="SelectStock"
+                                    Placeholder="选择业务员..."
+                                    FontSize="{StaticResource FT14}"
+                                    Margin="{StaticResource ML8}"
+                                    HorizontalOptions="FillAndExpand"
+                                    WidthRequest="80"
+                                    ShowVirtualKeyboardOnFocus="False"
+                                    Text="{Binding Bill.BusinessUserName,Mode=TwoWay}"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    IsEnabled="{Binding EnableOperation}">
+                    <custom:CustomEntry.Behaviors>
+                        <b:EventToCommandBehavior EventName="Focused"
+                                                  Command="{Binding Path=BindingContext.DeliverSelected,Source={x:Reference CurrentContentView}}"
+                                                  CommandParameter="0" />
+                    </custom:CustomEntry.Behaviors>
+                </custom:CustomEntry>
+                <Label Style="{StaticResource DownArrow}"
+                       Margin="{StaticResource MR10}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=BindingContext.DeliverSelected}"
+                                              NumberOfTapsRequired="1" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <!--3-->
+            <BoxView Grid.Row="3"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--4-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="4"
+                         Grid.Column="0">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="5,0,0,0"
+                       Text="开始:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:NullableDatePicker Margin="{StaticResource ML8}"
+                                           NullableDate="{Binding Filter.StartTime,Mode=TwoWay}"
+                                           PlaceHolder="选择时间..."
+                                           FontSize="{StaticResource FT14}"
+                                           HorizontalOptions="FillAndExpand"
+                                           IsEnabled="{Binding EnableOperation}"></custom:NullableDatePicker>
+                <Label Text="&#xf017;"
+                       FontFamily="FAS"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="{StaticResource FT14}"
+                       IsEnabled="{Binding EnableOperation}" />
+            </StackLayout>
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="{StaticResource RH45}"
+                         Grid.Row="4"
+                         Grid.Column="1">
+                <Label HorizontalOptions="Start"
+                       VerticalOptions="CenterAndExpand"
+                       Margin="{StaticResource ML10}"
+                       Text="结束:"
+                       FontSize="{StaticResource FT14}" />
+                <custom:NullableDatePicker Margin="{StaticResource ML8}"
+                                           NullableDate="{Binding Filter.EndTime,Mode=TwoWay}"
+                                           PlaceHolder="选择时间..."
+                                           FontSize="{StaticResource FT14}"
+                                           HorizontalOptions="FillAndExpand"
+                                           IsEnabled="{Binding EnableOperation}"></custom:NullableDatePicker>
+                <Label Text="&#xf017;"
+                       FontFamily="FAS"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="End"
+                       TextColor="{StaticResource PrimaryDarkColor}"
+                       FontSize="{StaticResource FT14}"
+                       Margin="{StaticResource MR10}"
+                       IsEnabled="{Binding EnableOperation}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Path=CrearFrom}"
+                                              NumberOfTapsRequired="1" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+            <!--5-->
+            <BoxView Grid.Row="5"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <!--6-->
+            <!--列表-->
+            <custom:TaskLoaderView Grid.Row="6"
+                                   Grid.ColumnSpan="2"
+                                   Style="{StaticResource WesleyTaskLoader}"
+                                   ViewModelLoader="{Binding BillItemsLoader}"
+                                   Padding="0,0,0,80">
+                <CollectionView ItemsSource="{Binding Bill.Items,Mode=TwoWay}"
+                                x:Name="BillItems"
+                                ItemSizingStrategy="MeasureAllItems"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                                SelectionChangedCommandParameter="{x:Reference BillItems}"
+                                SelectionMode="None"
+                                VerticalScrollBarVisibility="Always">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Orientation="Vertical"
+                                         Spacing="0">
+                                <StackLayout Orientation="Horizontal"
+                                             VerticalOptions="Start"
+                                             Padding="{StaticResource PLR10}"
+                                             HeightRequest="{StaticResource RH45}"
+                                             BackgroundColor="#eeeeee"
+                                             Spacing="0">
+                                    <!--单据编号-->
+                                    <Label Text="{Binding BillNumber}"
+                                           HorizontalOptions="StartAndExpand"
+                                           FontSize="{StaticResource FT14}"
+                                           VerticalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding RedirectCommand}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <!--开单日期-->
+                                    <Label Text="{Binding MakeBillDate}"
+                                           FontSize="{StaticResource FT14}"
+                                           HorizontalOptions="EndAndExpand"
+                                           VerticalOptions="Center" />
+                                </StackLayout>
+                                <Grid Style="{StaticResource GGrid}"
+                                      Margin="{StaticResource PLR10}"
+                                      VerticalOptions="Start"
+                                      HorizontalOptions="FillAndExpand">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="45" />
+                                        <RowDefinition Height=".7" />
+                                        <RowDefinition Height="45" />
+                                        <RowDefinition Height=".7" />
+                                        <RowDefinition Height="45" />
+                                        <RowDefinition Height=".7" />
+                                        <RowDefinition Height="45" />
+                                        <RowDefinition Height=".7" />
+                                        <RowDefinition Height="45" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="75" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="75" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="单据金额："
+                                           Grid.Column="0"
+                                           Grid.Row="0"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <Label Grid.Column="1"
+                                           Grid.Row="0"
+                                           Text="{Binding Amount,StringFormat='{0:F2}', Mode=OneWay}"
+                                           HorizontalOptions="FillAndExpand"
+                                           VerticalOptions="CenterAndExpand"
+                                           TextColor="#78919f"
+                                           FontSize="{StaticResource FT14}"></Label>
+
+                                    <Label Text="应收金额："
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           Grid.Row="0"
+                                           Grid.Column="2"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="3"
+                                           Text="{Binding AmountReceivable,StringFormat='{0:F2}', Mode=OneWay}"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Fill"
+                                           TextColor="#78919f"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <BoxView Grid.Row="1"
+                                             VerticalOptions="Start"
+                                             Grid.ColumnSpan="4"
+                                             Style="{StaticResource SeparatorGrid}" />
+                                    <Label Text="已收金额："
+                                           Grid.Row="2"
+                                           Grid.Column="0"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <Label Text="{Binding PaymentedAmount,StringFormat='{0:F2}', Mode=OneWay}"
+                                           Grid.Row="2"
+                                           Grid.Column="1"
+                                           HorizontalOptions="FillAndExpand"
+                                           VerticalOptions="CenterAndExpand"
+                                           TextColor="#78919f"
+                                           FontSize="{StaticResource FT14}"></Label>
+
+                                    <Label Text="已优惠额："
+                                           Grid.Row="2"
+                                           Grid.Column="2"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <Label Text="{Binding DiscountAmount,StringFormat='{0:F2}',Mode=OneWay}"
+                                           Grid.Row="2"
+                                           Grid.Column="3"
+                                           HorizontalOptions="FillAndExpand"
+                                           VerticalOptions="CenterAndExpand"
+                                           TextColor="#78919f"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <BoxView Grid.Row="3"
+                                             VerticalOptions="Start"
+                                             Grid.ColumnSpan="4"
+                                             Style="{StaticResource SeparatorGrid}" />
+
+                                    <Label Text="本次收款："
+                                           Grid.Row="4"
+                                           Grid.Column="0"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <custom:CustomEntry Placeholder="金额..."
+                                                        Keyboard="Numeric"
+                                                        Grid.Row="4"
+                                                        Grid.Column="1"
+                                                        Text="{Binding ReceivableAmountOnce, Mode=TwoWay}"
+                                                        HorizontalOptions="FillAndExpand"
+                                                        VerticalOptions="CenterAndExpand"
+                                                        Style="{StaticResource FormEntry}"
+                                                        TextColor="{StaticResource PrimaryDarkColor}">
+                                        <custom:CustomEntry.Behaviors>
+                                            <b:EventToCommandBehavior EventName="TextChanged"
+                                                                      Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
+                                                                      CommandParameter="{Binding BillId}" />
+                                        </custom:CustomEntry.Behaviors>
+                                    </custom:CustomEntry>
+
+                                    <Label Text="本次优惠："
+                                           Grid.Row="4"
+                                           Grid.Column="2"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <custom:CustomEntry Placeholder="金额..."
+                                                        Grid.Row="4"
+                                                        Grid.Column="3"
+                                                        Keyboard="Numeric"
+                                                        Text="{Binding DiscountAmountOnce, Mode=TwoWay}"
+                                                        HorizontalOptions="FillAndExpand"
+                                                        VerticalOptions="CenterAndExpand"
+                                                        Style="{StaticResource FormEntry}"
+                                                        TextColor="{StaticResource PrimaryDarkColor}">
+                                        <custom:CustomEntry.Behaviors>
+                                            <b:EventToCommandBehavior EventName="TextChanged"
+                                                                      Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
+                                                                      CommandParameter="{Binding BillId}" />
+                                        </custom:CustomEntry.Behaviors>
+                                    </custom:CustomEntry>
+                                    <BoxView Grid.Row="5"
+                                             VerticalOptions="Start"
+                                             Grid.ColumnSpan="4"
+                                             Style="{StaticResource SeparatorGrid}" />
+
+                                    <Label Text="尚欠金额："
+                                           Grid.Row="6"
+                                           Grid.Column="0"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           FontSize="{StaticResource FT14}"></Label>
+                                    <Label Grid.Row="6"
+                                           Grid.Column="1"
+                                           Grid.ColumnSpan="3"
+                                           Text="{Binding AmountOwedAfterReceipt,StringFormat='{0:F2}', Mode=OneWay}"
+                                           HorizontalOptions="FillAndExpand"
+                                           VerticalOptions="CenterAndExpand"
+                                           TextColor="{StaticResource PrimaryDarkColor}"
+                                           FontSize="{StaticResource FT14}" />
+
+                                    <BoxView Grid.Row="7"
+                                             VerticalOptions="Start"
+                                             Grid.ColumnSpan="4"
+                                             Style="{StaticResource SeparatorGrid}" />
+                                    <Label  Grid.Row="8"
+                                            Grid.Column="0"
+                                            Text="项目备注："
+                                            HorizontalOptions="Start"
+                                            VerticalOptions="Center"
+                                            Margin="0,0,0,0"
+                                            FontSize="{StaticResource FT14}"></Label>
+                                    <custom:CustomEntry Grid.Row="8"
+                                                        Grid.Column="1"
+                                                         Placeholder="在这里备注..."
+                                                         Text="{Binding Remark,Mode=TwoWay}"
+                                                         HorizontalOptions="FillAndExpand"
+                                                         VerticalOptions="Center"
+                                                         Style="{StaticResource FormEntry}" />
+                                </Grid>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <custom:NullView />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </custom:TaskLoaderView>
+        </Grid>
+        <!--红冲/审核水印-->
+        <Image Source="have_black.png"
+               IsVisible="{Binding Bill.AuditedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--红冲水印-->
+        <Image Source="have_gray.png"
+               IsVisible="{Binding Bill.ReversedStatus}"
+               WidthRequest="100"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,Property=X,Factor=0,Constant=250}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Y,Factor=0,Constant=100}" />
+        <!--footer-->
+        <Grid HeightRequest="90"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              BackgroundColor="White"
+              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,Property=Height,Factor=1,Constant=0}"
+              RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,Property=Width, Factor=1,Constant=0}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <StackLayout Grid.Row="1"
+                         Grid.ColumnSpan="2"
+                         HeightRequest="{StaticResource RH45}"
+                         Orientation="Horizontal"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="CenterAndExpand"
+                         BackgroundColor="#eeeeee">
+                <!--支付方式-->
+                <custom:HtmlLabel FontSize="{StaticResource FT14}"
+                                  Margin="5,0,5,0"
+                                  VerticalOptions="CenterAndExpand" />
+                <custom:HtmlLabel Text="{Binding Bill.TotalArrearsAmountOnce,StringFormat='应收合计：{0:F2}'}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="{StaticResource MR10}" />
+                <custom:HtmlLabel Text="{Binding Bill.TotalAmountOwedAfterReceipt,StringFormat='尚欠合计：{0:F2}'}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="{StaticResource MR10}" />
+            </StackLayout>
+            <StackLayout Grid.Row="2"
+                         Grid.Column="0"
+                         Orientation="Horizontal"
+                         HorizontalOptions="Start"
+                         Padding="5,0,0,0">
+                <!--总收款-->
+                <custom:HtmlLabel Text="{Binding Bill.TotalReceivableAmountOnce,StringFormat='本次收款：{0:F2}'}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="5,0,5,0" />
+                <!--总优惠-->
+                <custom:HtmlLabel Text="{Binding Bill.TotalDiscountAmountOnce,StringFormat='惠：{0:F2}'}"
+                                  FontSize="{StaticResource FT14}"
+                                  VerticalOptions="CenterAndExpand"
+                                  Margin="{StaticResource MR5}" />
+                <!--欠款-->
+                <!--<custom:HtmlLabel  Text="{Binding Bill.OweCash,StringFormat='欠：{0:F2}'}"
+                                   FontSize="{StaticResource FT14}"
+                                   VerticalOptions="CenterAndExpand"
+                                   Margin="{StaticResource MR5}" />-->
+                <!--支付方式-->
+                <custom:HtmlLabel Text="{Binding Bill.Accountings,Mode=OneWay,Converter={StaticResource stringArrayConverter},
+                        ConverterParameter=''}"
+                                  FontSize="{StaticResource FT14}"
+                                  Margin="{StaticResource MR5}"
+                                  VerticalOptions="CenterAndExpand" />
+            </StackLayout>
+            <StackLayout Grid.Row="2"
+                         Grid.Column="1"
+                         HorizontalOptions="Center"
+                         Padding="5">
+                <Button x:Name="AddProductBtn"
+                        Text="支付方式"
+                        FontSize="{StaticResource FT14}"
+                        HorizontalOptions="End"
+                        WidthRequest="80"
+                        Command="{Binding Path=MorePaymentCommand}"
+                        Style="{StaticResource FooterButtonStyle}"
+                        IsEnabled="{Binding EnableOperation}" />
+            </StackLayout>
+        </Grid>
+    </RelativeLayout>
+</pages:BaseContentPage>

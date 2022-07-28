@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="d"
+                    x:Class="Wesley.Client.Styles.Colors">
+
+    <Color x:Key="TextPrimaryColor">#333333</Color>
+    <Color x:Key="TextSecondaryColor">#80000000</Color>
+    <Color x:Key="TextTernaryColor">#C8C8C8</Color>
+    <Color x:Key="Primary">#008DA8</Color>
+    <Color x:Key="Accent">#008DA8</Color>
+    <Color x:Key="TransparentAccent">#00008DA8</Color>
+
+    <Color x:Key="AccentColor">#3B5998</Color>
+    <Color x:Key="SecondaryAccentColor">#bcbcbc</Color>
+    <Color x:Key="LightDarkWhite">#F4F5F9</Color>
+    <Color x:Key="PrimaryTextColor">#333333</Color>
+    <Color x:Key="SecondaryTextColor">#979DAB</Color>
+    <Color x:Key="ConnectedColor">#53a245</Color>
+
+    <!--#region 颜色 3B5998-->
+    <Color x:Key="PrimaryColor">#53a245</Color>
+    <Color x:Key="PrimaryDarkColor">#53a245</Color>
+    <Color x:Key="PrimaryBaseColor">#3B5998</Color>
+    <Color x:Key="DividerColor">#bcbcbc</Color>
+    <Color x:Key="WindowBackgroundColor">#f1f1f1</Color>
+    <Color x:Key="PrimaryTitleTextColor">#ffffff</Color>
+    <Color x:Key="PrimaryToolBarColor">#ffffff</Color>
+    <Color x:Key="PrimaryDesTextColor">#ebecef</Color>
+    <Color x:Key="SpliterLineHColor">#ebecef</Color>
+    <Color x:Key="SpliterLineColor">#ebecef</Color>
+
+</ResourceDictionary>
+    

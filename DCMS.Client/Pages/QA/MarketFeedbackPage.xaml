@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:controls="clr-namespace:Wesley.Client.CustomViews"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.MarketFeedbackPage"
+                       Title="{Binding Title}"
+                       Padding="0"
+                       BackgroundColor="White"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:MarketFeedbackPageViewModel">
+    <ScrollView>
+    <Grid Style="{StaticResource GGrid}"
+          RowDefinitions="45,200,45,200,45,65,*"
+          ColumnDefinitions="*" Margin="15">
+        <Label Text="本品问题描述*"
+               FontAttributes="Bold"
+               FontSize="{StaticResource FT16}"
+               Grid.Row="0"
+               Grid.Column="0"
+               VerticalOptions="Center" />
+        <StackLayout Grid.Row="1"
+                     Grid.Column="0" Padding="0">
+            <yummy:PancakeView CornerRadius="10"
+                               BackgroundColor="#eeeeee"
+                               HorizontalOptions="FillAndExpand"
+                               VerticalOptions="FillAndExpand"
+                               Padding="10" Margin="0">
+                <StackLayout>
+                    <controls:CustomEditor Placeholder="请至少用10个字描述问题，并添加最多5张截图..."
+                                           Text="{Binding CompetitiveDescribe,Mode=TwoWay}"
+                                           CharacterSpacing="0"
+                                           FontSize="{StaticResource FT14}"
+                                           HeightRequest="150"
+                                           VerticalOptions="Start">
+                        <controls:CustomEditor.Behaviors>
+                            <b:EventToCommandBehavior EventName="TextChanged"
+                                                      Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
+                                                      CommandParameter="" />
+                        </controls:CustomEditor.Behaviors>
+                    </controls:CustomEditor>
+                    <Label Text="{Binding TextCounterTxt1}"
+                           HorizontalOptions="End"
+                           FontSize="{StaticResource FT12}" />
+                </StackLayout>
+            </yummy:PancakeView>
+        </StackLayout>
+
+        <Label Text="竞品问题描述"
+               FontAttributes="Bold"
+               FontSize="{StaticResource FT16}"
+               Grid.Row="2"
+               Grid.Column="0"
+               VerticalOptions="Center" />
+        <StackLayout Grid.Row="3"
+                     Grid.Column="0"
+                     Padding="0">
+            <yummy:PancakeView CornerRadius="10"
+                               BackgroundColor="#eeeeee"
+                               HorizontalOptions="FillAndExpand"
+                               VerticalOptions="FillAndExpand"
+                               Padding="10"
+                               Margin="0">
+                <StackLayout>
+                    <controls:CustomEditor Placeholder="请至少用10个字描述问题，并添加最多5张截图..."
+                                           Text="{Binding ConditionDescribe,Mode=TwoWay}"
+                                           CharacterSpacing="0"
+                                           FontSize="{StaticResource FT14}"
+                                           HeightRequest="150"
+                                           VerticalOptions="Start">
+                        <controls:CustomEditor.Behaviors>
+                            <b:EventToCommandBehavior EventName="TextChanged"
+                                                      Command="{Binding Path=BindingContext.TextChangedCommand,Source={x:Reference CurrentContentView}}"
+                                                      CommandParameter="" />
+                        </controls:CustomEditor.Behaviors>
+                    </controls:CustomEditor>
+                    <Label Text="{Binding TextCounterTxt2}"
+                           HorizontalOptions="End"
+                           FontSize="{StaticResource FT12}" />
+                </StackLayout>
+            </yummy:PancakeView>
+        </StackLayout>
+
+        <Label Text="上传影像照片"
+               FontAttributes="Bold"
+               FontSize="{StaticResource FT16}"
+               Grid.Row="4"
+               Grid.Column="0"
+               VerticalOptions="Center" />
+        <StackLayout Grid.Row="5"
+                     Grid.Column="0"
+                     Orientation="Horizontal">
+            <CollectionView HorizontalOptions="End"
+                            ItemsSource="{Binding DisplayPhotos}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ffimageloading:CachedImage Grid.Row="0"
+                                                        Grid.Column="0"
+                                                        WidthRequest="45"
+                                                        HeightRequest="{StaticResource RH45}"
+                                                        VerticalOptions="Start"
+                                                        HorizontalOptions="Start"
+                                                        DownsampleToViewSize="true"
+                                                        Source="{Binding DisplayPath,Mode=OneWay}">
+                                <ffimageloading:CachedImage.Transformations>
+                                    <fftransformations:RoundedTransformation BorderSize="4"
+                                                                             BorderHexColor="#ffffff" />
+                                </ffimageloading:CachedImage.Transformations>
+                            </ffimageloading:CachedImage>
+                            <Button Grid.Row="0"
+                                    Grid.Column="0"
+                                    Text="&#xf057;"
+                                    FontFamily="FAS"
+                                    VerticalOptions="End"
+                                    HorizontalOptions="End"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource PrimaryDarkColor}"
+                                    FontSize="20"
+                                    WidthRequest="50"
+                                    Margin="25,0,0,0"
+                                    Command="{Binding Path=BindingContext.RemoveCommand,Source={x:Reference CurrentContentView}}"
+                                    CommandParameter="{Binding DisplayPath}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="&#xf067;"
+                    TextColor="White"
+                    CornerRadius="10"
+                    FontSize="25"
+                    HorizontalOptions="Start"
+                    BackgroundColor="#eeeeee"
+                    FontFamily="FAS"
+                    WidthRequest="45"
+                    Margin="0,0,0,20"
+                    Command="{Binding CameraPhotoCmd}" />
+        </StackLayout>
+        
+        <StackLayout Grid.Row="6"
+                     Grid.Column="0"
+                     Padding="0,0,0,10">
+            <Button Text="check-circle 提交"
+                    TextColor="White"
+                    CornerRadius="50"
+                    FontFamily="FAS"
+                    FontSize="{StaticResource FT14}"
+                    HeightRequest="45"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="EndAndExpand"
+                    BackgroundColor="{StaticResource PrimaryColor}"
+                    Command="{Binding SubmitCommand}"
+                    IsEnabled="{Binding IsEnabled}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding IsEnabled}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="#53a245" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button"
+                                 Binding="{Binding IsEnabled}"
+                                 Value="False">
+                        <Setter Property="BackgroundColor"
+                                Value="#eeeeee" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </StackLayout>
+    </Grid>
+    </ScrollView>
+</pages:BaseContentPage>

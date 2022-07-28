@@ -1,0 +1,565 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.AddCustomerPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       BackgroundColor="#eeeeee"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AddCustomerPageViewModel" >
+    <ScrollView HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+        <StackLayout>
+            <!--门头-->
+            <StackLayout Orientation="Horizontal"
+                         HeightRequest="50"
+                         Padding="10"
+                         BackgroundColor="White">
+                <Label Text="门头"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="StartAndExpand"
+                       
+                       FontAttributes="Bold"
+                       FontSize="16"
+                       Margin="{StaticResource ML10}" />
+                <ffimageloading:CachedImage LoadingPlaceholder="PhotoIcon.png"
+                                            ErrorPlaceholder="PhotoIcon.png"
+                                            Aspect="AspectFill"
+                                            WidthRequest="50"
+                                            Source="{Binding PostMData.DoorwayPhoto}">
+                    <ffimageloading:CachedImage.Transformations>
+                        <fftransformations:CircleTransformation BorderSize="2"
+                                                                BorderHexColor="#dddddd" />
+                    </ffimageloading:CachedImage.Transformations>
+                    <ffimageloading:CachedImage.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UploadFaceCommand}"
+                                              NumberOfTapsRequired="1" />
+                    </ffimageloading:CachedImage.GestureRecognizers>
+                </ffimageloading:CachedImage>
+            </StackLayout>
+            <Label Text="基本信息"
+                   TextColor="{StaticResource PrimaryColor}"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="StartAndExpand"
+                   
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   Margin="15,10,0,0" />
+            <yummy:PancakeView Margin="10"
+                               CornerRadius="10"
+                               VerticalOptions="Start"
+                               Padding="10"
+                               BackgroundColor="White">
+                <Grid VerticalOptions="Start"
+                      Margin="10,0,10,0"
+                      Style="{StaticResource GGrid}"
+                      RowDefinitions="50,.7,50,.7,50,.7,50,.7,50,.7,50,.7,50,.7,50,.7,50,.7,50,.7,50"
+                      ColumnDefinitions="80,*,50">
+                    <!--0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="客户名称"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="0"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Placeholder="客户名称不能为空"
+                                        Text="{Binding PostMData.Name,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryNameUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <!--1-->
+                    <BoxView Grid.Row="1"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--2-->
+                    <Label Grid.Row="2"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="老板姓名"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="2"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Placeholder="老板姓名不能为空"
+                                        Text="{Binding PostMData.BossName,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <!--3-->
+                    <BoxView Grid.Row="3"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--4-->
+                    <Label Grid.Row="4"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="联系电话"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="4"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Keyboard="Telephone"
+                                        Placeholder="联系电话不能为空"
+                                        Text="{Binding PostMData.BossCall,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <!--5-->
+                    <BoxView Grid.Row="5"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--6-->
+                    <Label  Grid.Row="6"
+                            Grid.Column="0"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="Start"
+                            Text="片       区"
+                            FontAttributes="Bold"
+                            FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry  Grid.Row="6"
+                                         Grid.Column="1"
+                                         HorizontalOptions="FillAndExpand"
+                                         x:Name="DistrictName"
+                                         Placeholder="请填选择片区..."
+                                         Text="{Binding PostMData.DistrictName,Mode=TwoWay}"
+                                         VerticalOptions="CenterAndExpand"
+                                         Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Focused"
+                                                      Command="{Binding Path=BindingContext.DistrictSelected,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <Button Grid.Row="6"
+                            Grid.Column="2"
+                            WidthRequest="50"
+                            FontFamily="FAS"
+                            FontSize="25"
+                            HorizontalOptions="End"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            Text="{StaticResource FontAwesomeDown}"
+                            Command="{Binding DistrictSelected}" />
+                    <!--7-->
+                    <BoxView Grid.Row="7"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--8-->
+                    <Label Grid.Row="8"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="渠       道"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="8"
+                                        Grid.Column="1"
+                                        HorizontalOptions="FillAndExpand"
+                                        x:Name="ChannelName"
+                                        Placeholder="渠道不能为空"
+                                        Text="{Binding PostMData.ChannelName,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Focused"
+                                                      Command="{Binding Path=BindingContext.ChannelSelected,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <Button Grid.Row="8"
+                            Grid.Column="2"
+                            WidthRequest="50"
+                            FontFamily="FAS"
+                            FontSize="25"
+                            HorizontalOptions="End"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            Text="{StaticResource FontAwesomeDown}"
+                            Command="{Binding ChannelSelected}" />
+                    <!--9-->
+                    <BoxView Grid.Row="9"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--10-->
+                    <Label Grid.Row="10"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="线       路"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="10"
+                                        Grid.Column="1"
+                                        HorizontalOptions="FillAndExpand"
+                                        x:Name="LineName"
+                                        Placeholder="请填选择线路..."
+                                        Text="{Binding PostMData.LineName,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Focused"
+                                                      Command="{Binding Path=BindingContext.LineSelected,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <Button Grid.Row="10"
+                            Grid.Column="2"
+                            WidthRequest="50"
+                            FontFamily="FAS"
+                            FontSize="25"
+                            HorizontalOptions="End"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            Text="{StaticResource FontAwesomeDown}"
+                            Command="{Binding LineSelected}" />
+                    <!--11-->
+                    <BoxView Grid.Row="11"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--12-->
+                    <Label Grid.Row="12"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="客户等级"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="12"
+                                        Grid.Column="1"
+                                        HorizontalOptions="FillAndExpand"
+                                        x:Name="RankName"
+                                        Placeholder="请填选择等级..."
+                                        Text="{Binding PostMData.RankName,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Focused"
+                                                      Command="{Binding Path=BindingContext.RankSelected,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <Button Grid.Row="12"
+                            Grid.Column="2"
+                            x:Name="PopDropdown_Rank"
+                            WidthRequest="50"
+                            FontFamily="FAS"
+                            FontSize="25"
+                            HorizontalOptions="End"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            Text="{StaticResource FontAwesomeDown}"
+                            Command="{Binding RankSelected}" />
+                    <!--13-->
+                    <BoxView Grid.Row="13"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--14-->
+                    <Label Grid.Row="14"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="终端编码"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="14"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Keyboard="Numeric"
+                                        Placeholder="终端编码/可为空..."
+                                        Text="{Binding PostMData.Code,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <!--15-->
+                    <BoxView Grid.Row="15"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--16-->
+                    <Label Grid.Row="16"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="营业编号"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="16"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Placeholder="营业编号/可为空..."
+                                        Text="{Binding PostMData.BusinessNo,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <!--17-->
+                    <BoxView Grid.Row="17"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--18-->
+                    <Label Grid.Row="18"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="地       址"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="18"
+                                        Grid.Column="1"
+                                        HorizontalOptions="FillAndExpand"
+                                        Placeholder="请填写详细地址..."
+                                        Text="{Binding PostMData.Address,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <Button Grid.Row="18"
+                            Grid.Column="2"
+                            Text="map-marker"
+                            FontFamily="FAS"
+                            WidthRequest="50"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="EndAndExpand"
+                            TextColor="{StaticResource PrimaryDarkColor}"
+                            FontSize="25"
+                            BackgroundColor="Transparent"
+                            Command="{Binding AddressSelected}" />
+                    <!--19-->
+                    <BoxView Grid.Row="19"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--20-->
+                    <Label  Grid.Row="20"
+                            Grid.Column="0"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="Start"
+                            Text="备       注"
+                            FontAttributes="Bold"
+                            FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry  Grid.Row="20"
+                                         Grid.Column="1"
+                                         Grid.ColumnSpan="2"
+                                         HorizontalOptions="FillAndExpand"
+                                         Placeholder="在这里填写备注..."
+                                         Text="{Binding PostMData.Remark,Mode=TwoWay}"
+                                         VerticalOptions="CenterAndExpand"
+                                         Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+
+                </Grid>
+            </yummy:PancakeView>
+            <Label Text="协议/合作"
+                   TextColor="{StaticResource PrimaryColor}"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="StartAndExpand"
+                   
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   Margin="15,0,0,0" />
+            <yummy:PancakeView Margin="10"
+                               CornerRadius="10"
+                               VerticalOptions="Start"
+                               Padding="10"
+                               BackgroundColor="White">
+                <Grid VerticalOptions="Start"
+                      Margin="10,0,10,0"
+                      HeightRequest="300"
+                      Style="{StaticResource GGrid}"
+                      RowDefinitions="50,.7,50,.7,50,.7,50,.7,50,.7,50"
+                      ColumnDefinitions="100,*,50">
+                    <!--0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="是否协议店"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <CheckBox Grid.Row="0"
+                              Grid.Column="1"
+                              Grid.ColumnSpan="2"
+                              HorizontalOptions="End"
+                              VerticalOptions="CenterAndExpand"
+                              Color="{StaticResource PrimaryDarkColor}"
+                              IsChecked="{Binding PostMData.IsAgreement,Mode=TwoWay}" />
+                    <!--1-->
+                    <BoxView Grid.Row="1"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--2-->
+                    <Label Grid.Row="2"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="合作意向"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="2"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Placeholder="在这里填写备注..."
+                                        Text="{Binding PostMData.Cooperation,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Unfocused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <!--3-->
+                    <BoxView Grid.Row="3"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--4-->
+                    <Label Grid.Row="4"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="展示是否陈列"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <Switch Grid.Row="4"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End"
+                            OnColor="#53a245"
+                            ThumbColor="#53a245"
+                            IsToggled="{Binding PostMData.IsDisplay,Mode=TwoWay}" />
+                    <!--5-->
+                    <BoxView Grid.Row="5"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--6-->
+                    <Label  Grid.Row="6"
+                            Grid.Column="0"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="Start"
+                            Text="展示是否生动化"
+                            FontAttributes="Bold"
+                            FontSize="{StaticResource FT14}" />
+                    <Switch Grid.Row="6"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End"
+                            OnColor="#53a245"
+                            ThumbColor="#53a245"
+                            IsToggled="{Binding PostMData.IsVivid,Mode=TwoWay}" />
+                    <!--7-->
+                    <BoxView Grid.Row="7"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--8-->
+                    <Label Grid.Row="8"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="展示是否促销"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <Switch Grid.Row="8"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End"
+                            OnColor="#53a245"
+                            ThumbColor="#53a245"
+                            IsToggled="{Binding PostMData.IsPromotion,Mode=TwoWay}" />
+                    <!--9-->
+                    <BoxView Grid.Row="9"
+                             Grid.ColumnSpan="3"
+                             Style="{StaticResource SeparatorGrid}"
+                             Margin="0" />
+                    <!--10-->
+                    <Label Grid.Row="10"
+                           Grid.Column="0"
+                           VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="Start"
+                           Text="展示其它"
+                           FontAttributes="Bold"
+                           FontSize="{StaticResource FT14}" />
+                    <custom:CustomEntry Grid.Row="10"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalOptions="FillAndExpand"
+                                        Placeholder="在这里填写备注..."
+                                        Text="{Binding PostMData.OtherRamark,Mode=TwoWay}"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Focused"
+                                                      Command="{Binding Path=BindingContext.EntryUnfocused,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                </Grid>
+            </yummy:PancakeView>
+            <Button Margin="0"
+                    Text="check-circle 保存"
+                    FontFamily="FAS"
+                    CornerRadius="0"
+                    HeightRequest="45"
+                    TextColor="White"
+                    BackgroundColor="#53a245"
+                    Command="{Binding Path=SubmitDataCommand}" />
+        </StackLayout>
+    </ScrollView>
+</pages:BaseContentPage>

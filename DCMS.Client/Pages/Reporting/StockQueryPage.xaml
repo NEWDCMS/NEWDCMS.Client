@@ -1,0 +1,290 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:converters="clr-namespace:Wesley.Client.Converters;assembly=Wesley.Client"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:b="clr-namespace:Prism.Behaviors;assembly=Prism.Forms"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Reporting.StockQueryPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:StockQueryPageViewModel">
+    <ContentPage.Resources>
+        <converters:StringArrayConverter x:Key="stringArrayConverter" />
+    </ContentPage.Resources>
+    <AbsoluteLayout>
+        <StackLayout Orientation="Vertical"
+                     HorizontalOptions="FillAndExpand"
+                     Padding="0,0,0,45"
+                     Spacing="0"
+                     AbsoluteLayout.LayoutBounds="0,0,1,1"
+                     AbsoluteLayout.LayoutFlags="All">
+            <!--搜索-->
+            <Grid Style="{StaticResource GGrid}"
+                  VerticalOptions="Start"
+                  BackgroundColor="#dddddd">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackLayout Orientation="Horizontal"
+                             HeightRequest="{StaticResource RH45}"
+                             Grid.Row="0"
+                             Grid.Column="0">
+                    <custom:CustomEntry HorizontalOptions="Start"
+                                        Margin="{StaticResource ML10}"
+                                        x:Name="SerchKey"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}"
+                                        FontSize="{StaticResource FT14}"
+                                        Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                                        TextChanged="SearchBar_TextChanged"
+                                        Placeholder="首拼/名称" />
+                    <Label Style="{StaticResource SearchArrow}"
+                           Margin="{StaticResource MR10}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Path=SerchCommand}"
+                                                  CommandParameter="{Binding Text,Source={x:Reference SerchKey}}"
+                                                  NumberOfTapsRequired="1" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal"
+                             HeightRequest="{StaticResource RH45}"
+                             Grid.Row="0"
+                             Grid.Column="1">
+                    <custom:CustomEntry x:Name="SelectStock"
+                                        Placeholder="仓库:"
+                                        Text="{Binding Filter.WareHouseName,Mode=TwoWay}"
+                                        Margin="{StaticResource ML8}"
+                                        HorizontalOptions="FillAndExpand"
+                                        ShowVirtualKeyboardOnFocus="False"
+                                        WidthRequest="80"
+                                        VerticalOptions="CenterAndExpand"
+                                        Style="{StaticResource DefaultEntry}">
+                        <custom:CustomEntry.Behaviors>
+                            <b:EventToCommandBehavior EventName="Focused"
+                                                      Command="{Binding Path=BindingContext.StockSelected,Source={x:Reference CurrentContentView}}" />
+                        </custom:CustomEntry.Behaviors>
+                    </custom:CustomEntry>
+                    <Label Style="{StaticResource DownArrow}"
+                           Margin="{StaticResource MR10}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Path=StockSelected}"
+                                                  NumberOfTapsRequired="1" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+            </Grid>
+            <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
+                         Command="{Binding RefreshCommand}"
+                         RefreshColor="{StaticResource PrimaryDarkColor}">
+ 
+                    <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                                           ViewModelLoader="{Binding StockSeriesLoader}">
+                        <CollectionView ItemsSource="{Binding StockSeries,Mode=TwoWay}"
+                                        ItemSizingStrategy="MeasureAllItems"
+                                        RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                                        RemainingItemsThreshold="{Binding ItemTreshold}"
+                                        SelectionMode="Single"
+                                        IsGrouped="True"
+                                        VerticalScrollBarVisibility="Always">
+                            <CollectionView.GroupHeaderTemplate>
+                                <DataTemplate>
+                                    <Grid Style="{StaticResource GGrid}"
+                                          BackgroundColor="#eeeeee">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="40" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="4" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <BoxView Grid.Row="0"
+                                                 Grid.Column="0"
+                                                 Grid.RowSpan="2"
+                                                 HeightRequest="4"
+                                                 BackgroundColor="{StaticResource PrimaryColor}" />
+                                        <Label Grid.Row="0"
+                                               Grid.Column="0"
+                                               Grid.ColumnSpan="2"
+                                               Margin="{StaticResource ML10}"
+                                               Text="{Binding CategoryName}"
+                                               
+                                               FontSize="{StaticResource FT14}"
+                                               HorizontalOptions="Start"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.GroupHeaderTemplate>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Style="{StaticResource GGrid}"
+                                          VerticalOptions="CenterAndExpand"
+                                          HorizontalOptions="FillAndExpand">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height=".7" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <!--商品名称-->
+                                        <Label Grid.Row="0"
+                                               Grid.Column="0"
+                                               Grid.ColumnSpan="2"
+                                               Text="{Binding ProductName}"
+                                               LineBreakMode="WordWrap"
+                                               FontSize="{StaticResource FT14}"
+                                               HorizontalOptions="FillAndExpand"
+                                               TextColor="{StaticResource PrimaryTextColor}"
+                                               VerticalOptions="CenterAndExpand"
+                                               Margin="10,10,0,0"></Label>
+                                        <!--现货库存数量-->
+                                        <Label Grid.Row="1"
+                                               Grid.Column="0"
+                                               Text="现货库存:"
+                                               TextColor="{StaticResource DividerColor}"
+                                               HorizontalOptions="Start"
+                                               FontSize="{StaticResource FT14}"
+                                               VerticalOptions="Center"
+                                               Margin="10,0,10,0" />
+                                        <Label Grid.Row="1"
+                                               Grid.Column="1"
+                                               Text="{Binding CurrentQuantityConversion}"
+                                               TextColor="{StaticResource PrimaryColor}"
+                                               HorizontalOptions="End"
+                                               FontSize="{StaticResource FT14}"
+                                               VerticalOptions="Center"
+                                               Margin="{StaticResource MR10}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding CurrentQuantity}"
+                                                             Value="0">
+                                                    <Setter Property="Text"
+                                                            Value="不足" />
+                                                    <Setter Property="TextColor"
+                                                            Value="{StaticResource PrimaryDarkColor}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <!--可用库存数量-->
+                                        <Label Grid.Row="2"
+                                               Grid.Column="0"
+                                               Text="可用库存:"
+                                               TextColor="{StaticResource DividerColor}"
+                                               HorizontalOptions="Start"
+                                               FontSize="{StaticResource FT14}"
+                                               VerticalOptions="Center"
+                                               Margin="10,0,10,0" />
+                                        <Label Grid.Row="2"
+                                               Grid.Column="1"
+                                               Text="{Binding UsableQuantityConversion}"
+                                               TextColor="{StaticResource PrimaryColor}"
+                                               HorizontalOptions="End"
+                                               FontSize="{StaticResource FT14}"
+                                               VerticalOptions="Center"
+                                               Margin="{StaticResource MR10}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding UsableQuantity}"
+                                                             Value="0">
+                                                    <Setter Property="Text"
+                                                            Value="不足" />
+                                                    <Setter Property="TextColor"
+                                                            Value="{StaticResource PrimaryDarkColor}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <!--预占库存数量-->
+                                        <Label Grid.Row="3"
+                                               Grid.Column="0"
+                                               Text="预占库存:"
+                                               TextColor="{StaticResource DividerColor}"
+                                               HorizontalOptions="Start"
+                                               FontSize="{StaticResource FT14}"
+                                               VerticalOptions="Center"
+                                               Margin="10,0,10,10" />
+                                        <Label Grid.Row="3"
+                                               Grid.Column="1"
+                                               Text="{Binding OrderQuantityConversion}"
+                                               TextColor="{StaticResource PrimaryColor}"
+                                               HorizontalOptions="End"
+                                               FontSize="{StaticResource FT14}"
+                                               VerticalOptions="Center"
+                                               Margin="0,0,10,10">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding OrderQuantity}"
+                                                             Value="0">
+                                                    <Setter Property="Text"
+                                                            Value="无" />
+                                                    <Setter Property="TextColor"
+                                                            Value="{StaticResource PrimaryDarkColor}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <BoxView Grid.Row="4"
+                                                 Grid.ColumnSpan="2"
+                                                 Style="{StaticResource SeparatorGrid}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <custom:NullView />
+                            </CollectionView.EmptyView>
+                        </CollectionView>
+                    </custom:TaskLoaderView>
+     
+            </RefreshView>
+        </StackLayout>
+        <!--footer-->
+        <Grid HeightRequest="{StaticResource RH45}"
+              Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="End"
+              AbsoluteLayout.LayoutBounds="0,1,1,1"
+              AbsoluteLayout.LayoutFlags="All"
+              BackgroundColor="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <BoxView Grid.Row="0"
+                     Grid.ColumnSpan="2"
+                     Style="{StaticResource SeparatorGrid}" />
+            <Label Grid.Row="1"
+                   Grid.Column="0"
+                   Text="成本合计"
+                   HorizontalOptions="FillAndExpand"
+                   
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="10,5,0,5" />
+            <Label Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding TotalAmount,StringFormat='{0:F2}'}"
+                   
+                   HorizontalOptions="EndAndExpand"
+                   FontSize="{StaticResource FT14}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="5,5,10,5" />
+        </Grid>
+    </AbsoluteLayout>
+</pages:BaseContentPage>

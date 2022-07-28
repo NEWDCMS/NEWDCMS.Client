@@ -1,0 +1,405 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:chart="clr-namespace:Wesley.ChartJS;assembly=Wesley.ChartJS"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:xe="clr-namespace:Wesley.Client.Effects;assembly=Wesley.Client"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.Home.SalesRatePage"
+                       Title="{Binding Title}"
+                       x:TypeArguments="vms:SalesRatePageViewModel">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="StatsNumberLabel"
+                   TargetType="Label">
+                <Setter Property="TextColor"
+                        Value="{StaticResource PrimaryDarkColor}" />
+                <Setter Property="HorizontalTextAlignment"
+                        Value="Center" />
+                <Setter Property="FontAttributes"
+                        Value="Bold" />
+                <Setter Property="FontSize"
+                        Value="14" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid BackgroundColor="White"
+          VerticalOptions="Start"
+          RowDefinitions="250,50.7,50.7,50.7,50.7,50.7,50.7,50.7,50.7,50.7"
+          ColumnDefinitions="*"
+          RowSpacing="0"
+          ColumnSpacing="0">
+
+        <!--图表-->
+        <chart:ChartView Grid.Row="0"
+                         Grid.Column="0"
+                         Config="{Binding DoughnutConfig}"
+                         HeightRequest="250" />
+        <StackLayout Grid.Row="0"
+                     Grid.Column="0"
+                     HeightRequest="250"
+                     IsVisible="{Binding IsBusy}">
+            <ActivityIndicator IsRunning="True"
+                               HorizontalOptions="Center"
+                               VerticalOptions="CenterAndExpand" />
+        </StackLayout>
+
+        <!--统计数-->
+        <Grid Grid.Row="1"
+              Grid.Column="0"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <!--TH-->
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource StatsNumberLabel}"
+                   Text="日期" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="End"
+                   Style="{StaticResource StatsNumberLabel}"
+                   Text="净额" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="End"
+                   Style="{StaticResource StatsNumberLabel}"
+                   Text="销售" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="End"
+                   Style="{StaticResource StatsNumberLabel}"
+                   Text="退货" />
+        </Grid>
+
+        <Grid Grid.Row="2"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="1"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="今日" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.Today.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.Today.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.Today.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+
+        </Grid>
+
+        <Grid Grid.Row="3"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="2"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="昨日" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.Yesterday.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.Yesterday.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.Yesterday.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="4"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="3"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="前天" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.BeforeYesterday.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.BeforeYesterday.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.BeforeYesterday.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="5"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="3"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="上周" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.LastWeek.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.LastWeek.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.LastWeek.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="6"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="5"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="本周" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisWeek.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisWeek.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisWeek.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="7"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="6"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="上月" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.LastMonth.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.LastMonth.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.LastMonth.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="8"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="7"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="本月" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisMonth.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisMonth.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisMonth.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="9"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="8"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="本季" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisQuarter.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisQuarter.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisQuarter.SaleReturnAmount,StringFormat='{0:F2}'}" />
+            <!--TR-->
+            <BoxView  Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Style="{StaticResource SeparatorGrid}" />
+        </Grid>
+
+        <Grid Grid.Row="10"
+              Grid.Column="0"
+              xe:TouchEffect.Color="LightGray"
+              xe:EffectCommands.Tap="{Binding BindingContext.ViewDetailCommand, Source={x:Reference CurrentContentView}}"
+              xe:EffectCommands.TapParameter="9"
+              RowDefinitions="50,.7"
+              ColumnDefinitions="*,*,*,*"
+              Style="{StaticResource GGrid}"
+              Padding="10,0,10,0">
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalOptions="Start"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="本年" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisYear.NetAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="2"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisYear.SaleAmount,StringFormat='{0:F2}'}" />
+            <Label Grid.Row="0"
+                   Grid.Column="3"
+                   HorizontalOptions="End"
+                   Style="{StaticResource GridCellStyle}"
+                   Text="{Binding Data.ThisYear.SaleReturnAmount,StringFormat='{0:F2}'}" />
+        </Grid>
+
+    </Grid>
+</pages:BaseContentPage>

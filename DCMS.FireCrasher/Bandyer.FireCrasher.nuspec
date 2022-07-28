@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+    <metadata>
+    <id>Bandyer.FireCrasher</id>
+    <version>1.0.2</version>
+    <title>Bandyer.FireCrasher</title>
+    <authors>Bandyer</authors>
+    <owners>Bandyer</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>bandyer,android,firecrasher,xamarin</tags>
+    <license type="expression">Apache-2.0</license>
+    <copyright>Copyright © Bandyer</copyright>
+    <description>Bandyer's Bandyer bindings for Xamarin</description>
+    <summary>Bandyer's FireCrasher bindings for Xamarin</summary>
+    <dependencies>
+        <group targetFramework="MonoAndroid">
+            <dependency id="Karamunting.Kotlin.Android.Extensions.Runtime" version="1.3.50.2" />
+            <dependency id="Xamarin.Kotlin.StdLib" version="1.3.50.1" />
+        </group>
+    </dependencies>
+    </metadata>
+    <files>
+        <file src="./bin/Release/Bandyer.FireCrasher.*" target="lib/MonoAndroid" />
+    </files>
+</package>

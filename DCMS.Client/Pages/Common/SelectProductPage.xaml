@@ -1,0 +1,372 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:ffimageLoader="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                       xmlns:ffimageTransform="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+                       xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Common.SelectProductPage"
+                       x:Name="CurrentContentView"
+                       Title="{Binding Title}"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:SelectProductPageViewModel">
+
+    <xct:DockLayout LastChildFill="False">
+
+        <Grid Style="{StaticResource GGrid}"
+              HorizontalOptions="FillAndExpand"
+              VerticalOptions="Start"
+              xct:DockLayout.Dock="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition Height=".7" />
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackLayout Spacing="0"
+                         Orientation="Horizontal"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="CenterAndExpand"
+                         Grid.Row="0"
+                         Grid.Column="0">
+                <custom:CustomEntry HorizontalOptions="FillAndExpand"
+                                    Margin="{StaticResource ML10}"
+                                    x:Name="SerchKey"
+                                    VerticalOptions="CenterAndExpand"
+                                    Style="{StaticResource DefaultEntry}"
+                                    FontSize="{StaticResource FT14}"
+                                    Text="{Binding Filter.SerchKey,Mode=TwoWay}"
+                                    Placeholder="商品首拼/名称/编号/条码尾号" />
+                <Button Text="search"
+                        FontFamily="FAS"
+                        BackgroundColor="Transparent"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="End"
+                        TextColor="{StaticResource PrimaryDarkColor}"
+                        FontSize="18"
+                        WidthRequest="50"
+                        Margin="{StaticResource MR10}"
+                        Command="{Binding Path=SerchCommand}"
+                        CommandParameter="{Binding Text,Source={x:Reference SerchKey}}" />
+
+            </StackLayout>
+
+            <BoxView   Grid.Row="1"
+                       Grid.Column="0"
+                       Style="{StaticResource SeparatorGrid}"
+                       VerticalOptions="Start"
+                       Margin="0"
+                       BackgroundColor="#ddd" />
+
+            <StackLayout Grid.Row="2"
+                         Grid.Column="0"
+                         HeightRequest="50"
+                         Orientation="Horizontal"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="CenterAndExpand"
+                         BackgroundColor="#eee">
+
+                <Label Text="显示收藏"
+                       FontSize="14"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       HorizontalOptions="EndAndExpand"
+                       Margin="5,0,0,0" />
+                <Switch VerticalOptions="Center"
+                        HorizontalOptions="End"
+                        Margin="0"
+                        OnColor="#53a245"
+                        ThumbColor="#53a245"
+                        IsToggled="{Binding UsableFavorite,Mode=TwoWay}" />
+
+                <Label Text="显库存商品"
+                       FontSize="14"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       HorizontalOptions="End"
+                       Margin="0,0,0,0" />
+                <Switch VerticalOptions="Center"
+                        HorizontalOptions="End"
+                        Margin="0"
+                        OnColor="#53a245"
+                        ThumbColor="#53a245"
+                        IsToggled="{Binding UsableQuantity,Mode=TwoWay}" />
+
+                <!--<Label Text="政策"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       HorizontalOptions="End"
+                       Margin="0,0,0,0" />-->
+                <Button Text="gift 政策"
+                        FontFamily="FAS"
+                        WidthRequest="80"
+                        BackgroundColor="White"
+                        HorizontalOptions="End"
+                        CornerRadius="50"
+                        Margin="8"
+                        TextColor="{StaticResource PrimaryDarkColor}"
+                        Command="{Binding Path=SelectGiftsCommand}"
+                        FontSize="12"
+                        IsVisible="{Binding ShowGift}" />
+
+            </StackLayout>
+        </Grid>
+
+        <CollectionView xct:DockLayout.Dock="Left"
+                        WidthRequest="100"
+                        BackgroundColor="#f5f5f7"
+                        ItemsSource="{Binding BindCategories}"
+                        Margin="0,0,0,0"
+                        x:Name="RepeaterOptions"
+                        ItemSizingStrategy="MeasureAllItems"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding Selecter, Mode=TwoWay}"
+                        VerticalScrollBarVisibility="Always">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="45" />
+                            <RowDefinition Height=".7" />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0"
+                               Grid.Column="0"
+                               Margin="0"
+                               HorizontalOptions="Center"
+                               Text="{Binding Name}" />
+                        <BoxView Grid.Row="1"
+                                 Grid.Column="0"
+                                 Style="{StaticResource SeparatorGrid}"
+                                 BackgroundColor="#ddd" />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid"
+                                         Binding="{Binding Selected}"
+                                         Value="True">
+                                <Setter Property="BackgroundColor"
+                                        Value="#ddd" />
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid xct:DockLayout.Dock="Right"
+              RowDefinitions="*"
+              ColumnDefinitions="*"
+              x:Name="DockRight">
+
+            <ActivityIndicator Grid.Row="0"
+                               Grid.Column="0"
+                               IsRunning="True"
+                               IsVisible="{Binding NullViewEnable}"
+                               HorizontalOptions="FillAndExpand"
+                               VerticalOptions="CenterAndExpand"
+                               Margin="0,0,0,0" />
+            <RefreshView   IsVisible="{Binding DataVewEnable}"
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
+                           Command="{Binding RefreshCommand}"
+                           RefreshColor="{StaticResource PrimaryDarkColor}">
+                <CollectionView ItemsSource="{Binding ProductSeries}"
+                                IsVisible="{Binding DataVewEnable}"
+                                x:Name="ProductSeries"
+                                ItemSizingStrategy="MeasureAllItems"
+                                RemainingItemsThresholdReachedCommand="{Binding ItemTresholdReachedCommand}"
+                                RemainingItemsThreshold="{Binding ItemTreshold}"
+                                SelectionMode="None"
+                                VerticalScrollBarVisibility="Always">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}"
+                                  HorizontalOptions="FillAndExpand">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                </Grid.ColumnDefinitions>
+                                <StackLayout Grid.Row="0"
+                                             Grid.Column="0"
+                                             Grid.RowSpan="2"
+                                             Spacing="0"
+                                             Padding="10">
+                                    <yummy:PancakeView CornerRadius="10"
+                                                       BackgroundColor="#f5f5f7">
+                                        <ffimageLoader:CachedImage HorizontalOptions="Center"
+                                                                   VerticalOptions="Start"
+                                                                   HeightRequest="60"
+                                                                   WidthRequest="60"
+                                                                   Source="PhotoIcon.png"
+                                                                   Aspect="AspectFill">
+                                            <ffimageLoader:CachedImage.Transformations>
+                                                <ffimageTransform:CircleTransformation />
+                                            </ffimageLoader:CachedImage.Transformations>
+                                        </ffimageLoader:CachedImage>
+                                    </yummy:PancakeView>
+                                </StackLayout>
+                                <!--商品名称-->
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Name}"
+                                       FontSize="{StaticResource FT14}"
+                                       HorizontalOptions="FillAndExpand"
+                                       TextColor="{StaticResource PrimaryTextColor}"
+                                       VerticalOptions="Center"
+                                       Margin="{StaticResource ML10}"></Label>
+                                <!--选择商品-->
+                                <CheckBox Grid.Row="0"
+                                          Grid.Column="2"
+                                          Margin="{StaticResource MR10}"
+                                          HorizontalOptions="End"
+                                          VerticalOptions="Center"
+                                          IsChecked="{Binding Selected,Mode=TwoWay}" />
+                                <StackLayout  Grid.Row="1"
+                                              Grid.Column="1"
+                                              Grid.ColumnSpan="2"
+                                              Spacing="0"
+                                              Padding="0,0,0,10">
+                                    <!--转换-->
+                                    <Label Grid.Row="1"
+                                           Grid.Column="1"
+                                           Grid.ColumnSpan="5"
+                                           Text="{Binding UnitConversion,StringFormat='转换 : {0}'}"
+                                           HorizontalOptions="Start"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           Margin="{StaticResource ML10}" />
+                                    <!--单位-->
+                                    <Label HorizontalOptions="Start"
+                                           Margin="{StaticResource ML10}"
+                                           Text="{Binding UnitName,StringFormat='单位 : {0}'}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center" />
+                                    <!--仓库-->
+                                    <Label HorizontalOptions="Start"
+                                           Margin="{StaticResource ML10}"
+                                           Text="{Binding CurWareHouseName,StringFormat='仓库 : {0}'}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding ShowCurWareHouseName}" />
+                                    <!--可用库存-->
+                                    <Label HorizontalOptions="Start"
+                                           Margin="{StaticResource ML10}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding IsShowStock}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="可用 : " />
+                                                <Span Text="{Binding UsableQuantityConversion}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <!--现货库存-->
+                                    <Label HorizontalOptions="Start"
+                                           Margin="{StaticResource ML10}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding IsShowStock}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="现货 : " />
+                                                <Span Text="{Binding CurrentQuantityConversion}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <!--预占库存-->
+                                    <!--<Label HorizontalOptions="Start"
+                                           Margin="{StaticResource ML10}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding IsShowStock}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="预占库存 : " />
+                                                <Span Text="{Binding OrderQuantityConversion}" />
+
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>-->
+                                    <!--锁定库存-->
+                                    <!--<Label HorizontalOptions="Start"
+                                           Margin="{StaticResource ML10}"
+                                           FontSize="{StaticResource FT14}"
+                                           TextColor="{StaticResource DividerColor}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding IsShowStock}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="锁定库存 : " />
+                                                <Span Text="{Binding LockQuantityConversion}" />
+
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>-->
+                                </StackLayout>
+
+                                <!--收藏Favorites &#xf004; &#xf08a;-->
+                                <StackLayout Grid.Row="1"
+                                             Grid.Column="2">
+                                    <Button WidthRequest="40"
+                                            HeightRequest="45"
+                                            Text="&#xf004;"
+                                            TextColor="#ddd"
+                                            FontFamily="FAS"
+                                            FontSize="20"
+                                            BackgroundColor="White"
+                                            VerticalOptions="EndAndExpand"
+                                            Command="{Binding Path=BindingContext.FavoriteCommand,Source={x:Reference CurrentContentView}}"
+                                            CommandParameter="{Binding .}">
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button"
+                                                         Binding="{Binding Favorited}"
+                                                         Value="False">
+                                                <Setter Property="TextColor"
+                                                        Value="#ddd" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Button"
+                                                         Binding="{Binding Favorited}"
+                                                         Value="True">
+                                                <Setter Property="TextColor"
+                                                        Value="#53a245" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+                                </StackLayout>
+
+                                <BoxView Grid.Row="2"
+                                         Grid.ColumnSpan="3"
+                                         Style="{StaticResource SeparatorGrid}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <custom:NullView />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
+
+    </xct:DockLayout>
+
+</pages:BaseContentPage>

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:pages="clr-namespace:Wesley.Client.Pages"
+            xmlns:prism="http://prismlibrary.com"
+            prism:ViewModelLocator.AutowireViewModel="True"
+            UnselectedTabColor="#bcbcbc"
+            SelectedTabColor="#53a245"
+            x:Class="Wesley.Client.Pages.MainLayoutPage">
+
+    <TabbedPage.Children>
+        <pages:HomePage Title="首页">
+            <ContentPage.IconImageSource>
+                <FontImageSource FontFamily="FAS"
+                                 Glyph="&#xf015;" />
+            </ContentPage.IconImageSource>
+        </pages:HomePage>
+
+        <pages:MessagesPage Title="待办">
+            <ContentPage.IconImageSource>
+                <FontImageSource  FontFamily="FAS"
+                                  Glyph="&#xf005;" />
+            </ContentPage.IconImageSource>
+        </pages:MessagesPage>
+
+        <pages:AllfunPage Title="应用">
+            <ContentPage.IconImageSource>
+                <FontImageSource  FontFamily="FAS"
+                                  Glyph="&#xf00a;" />
+            </ContentPage.IconImageSource>
+        </pages:AllfunPage>
+
+        <pages:NotificationsPage Title="通知">
+            <ContentPage.IconImageSource>
+                <FontImageSource FontFamily="FAS"
+                                 Glyph="&#xf075;" />
+            </ContentPage.IconImageSource>
+        </pages:NotificationsPage>
+
+        <pages:ProfilePage Title="我的">
+            <ContentPage.IconImageSource>
+                <FontImageSource  FontFamily="FAS"
+                                  Glyph="&#xf007;" />
+            </ContentPage.IconImageSource>
+        </pages:ProfilePage>
+    </TabbedPage.Children>
+
+</TabbedPage>

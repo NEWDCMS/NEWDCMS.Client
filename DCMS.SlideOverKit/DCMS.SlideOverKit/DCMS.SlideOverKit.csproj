@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>3.1.5</Version>
+    <Company>China Resources Snow Beer China Limited (Xi'an) Branch</Company>
+    <Description>DCMS is a SaaS based fast consumer solution for distributors of China Resources Snow Beer China Limited (Xi'an) branch. Both of them are meeting the fast changing needs of regional marketing management business. Android xamarin is used as the client app/ Xamarin.Forms Support all the latest Android versions above Android 5.0</Description>
+    <Copyright>DCMS © 2020 China Resources Snow Beer China Limited (Xi'an) Branch</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>czhcom@163.com</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
+
+  </ItemGroup>
+
+</Project>

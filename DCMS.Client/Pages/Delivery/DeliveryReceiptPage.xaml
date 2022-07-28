@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseTabbedPage  xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:market="clr-namespace:Wesley.Client.Pages.Market;assembly=Wesley.Client"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.Market.DeliveryReceiptPage"
+                       Title="{Binding Title}"
+                       BarBackgroundColor="White"
+                       SelectedTabIndex="{Binding SelectedTab}"
+                       BarTextColor="#53a245"
+                       x:TypeArguments="vms:DeliveryReceiptPageViewModel" >
+    <pages:BaseTabbedPage.Children>
+        <market:UnOrderPage  Title="订单签收" />
+        <market:UnCostExpenditurePage Title="费用签收" />
+        <market:UnSalePage Title="销单签收" />
+        <market:DeliveriedPage Title="已签收" />
+    </pages:BaseTabbedPage.Children>
+</pages:BaseTabbedPage>

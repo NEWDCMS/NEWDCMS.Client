@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+             
+             x:Class="Wesley.Client.Pages.Order.InventoryReportView"
+             x:Name="Current_InventoryReportView">
+    <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="{StaticResource PrimaryDarkColor}">
+  
+   
+                <CollectionView ItemsSource="{Binding Bills}"
+                                x:Name="orders"
+                                ItemSizingStrategy="MeasureAllItems"
+                                SelectionMode="Single"
+                                VerticalScrollBarVisibility="Always">
+                    <CollectionView.Header>
+                        <custom:HeaderView ControlTemplate="{StaticResource InventoryReportView_Template}" />
+                    </CollectionView.Header>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Style="{StaticResource GGrid}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <!--业务员-->
+                                <Label Grid.Column="0"
+                                       Text="{Binding BusinessUserName}"
+                                       LineBreakMode="TailTruncation"
+                                       FontSize="{StaticResource FT14}"
+                                       HorizontalOptions="Start"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="10,5,5,5" />
+                                <!--客户-->
+                                <Label Grid.Column="1"
+                                       Text="{Binding TerminalName}"
+                                       HorizontalOptions="Start"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="CenterAndExpand" />
+                                <!--状态-->
+                                <Label Grid.Column="2"
+                                       Grid.RowSpan="2"
+                                       Text="未审核"
+                                       TextColor="{StaticResource PrimaryColor}"
+                                       HorizontalOptions="End"
+                                       FontAttributes="Bold"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="0,5,10,5">
+                                </Label>
+                                <!--商品名称-->
+                                <Label Grid.Row="1"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding ProductName}"
+                                       LineBreakMode="WordWrap"
+                                       TextColor="{StaticResource SecondaryTextColor}"
+                                       HorizontalOptions="Start"
+                                       FontSize="10"
+                                       VerticalOptions="Start"
+                                       Margin="10,0,10,5" />
+                                <!--开单时间-->
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       TextColor="{StaticResource SecondaryTextColor}"
+                                       Text="{Binding BeginDate}"
+                                       HorizontalOptions="Start"
+                                       FontSize="10"
+                                       VerticalOptions="Start"
+                                       Margin="0,0,10,5" />
+                                <custom:DashedBar Grid.Row="2"
+                                                  Grid.Column="0"
+                                                  Grid.ColumnSpan="3"
+                                                  IsVisible="{Binding IsLast}" />
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                            Command="{Binding Path=BindingContext.SelectedCommand,Source={x:Reference Current_InventoryReportView}}"
+                                                          CommandParameter="{Binding .}"
+                                                          NumberOfTapsRequired="1" />
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <custom:NullView />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+     
+  
+    </RefreshView>
+</ContentView>

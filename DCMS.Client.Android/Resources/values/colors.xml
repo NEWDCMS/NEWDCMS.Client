@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+	<color name="launcher_background">#2dc9d6</color>
+	<color name="colorPrimary">#81c14b</color>
+	<color name="colorPrimaryDark">#53a245</color>
+	<color name="colorAccent">#53a245</color>
+	<color name="statusBarTextColor">#656565</color>
+	<color name="normal">@android:color/transparent</color>
+	<color name="selected">#2dc9d6</color>
+
+	<color name="ListViewSelected">#eeeeee</color>
+	<color name="ListViewHighlighted">#ffffff</color>
+	<color name="bg_color">#2dc9d6</color>
+
+	<!--81c14b-->
+	<array name="refreshColors">
+		<item>@color/colorPrimary</item>
+	</array>
+
+	<!--<color name="launcher_background">#FFFFFF</color>
+	<color name="colorPrimary">#2196F3</color>
+	<color name="colorPrimaryDark">#1976D2</color>-->
+
+	<color name="colorOverlay">#78ffffff</color>
+
+</resources>

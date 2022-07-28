@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:custom="clr-namespace:Wesley.Client.CustomViews;assembly=Wesley.Client"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Name="CurrentContentView"
+                       x:Class="Wesley.Client.Pages.Archive.InventoryBillPage"
+                       Title="{Binding Title}"
+                       x:TypeArguments="vms:InventoryBillPageViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="AppButtonStyle30"
+                   TargetType="Button">
+                <Setter Property="TextColor"
+                        Value="#ffffff" />
+                <Setter Property="FontSize"
+                        Value="12" />
+                <Setter Property="BackgroundColor"
+                        Value="{StaticResource PrimaryColor}" />
+                <Setter Property="BorderColor"
+                        Value="{StaticResource PrimaryColor}" />
+                <Setter Property="BorderRadius"
+                        Value="50" />
+                <Setter Property="CornerRadius"
+                        Value="50" />
+                <Setter Property="BorderWidth"
+                        Value="0.7" />
+                <Setter Property="HeightRequest"
+                        Value="30" />
+                <Setter Property="WidthRequest"
+                        Value="30" />
+                <Setter Property="HorizontalOptions"
+                        Value="Center" />
+            </Style>
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <StackLayout Orientation="Vertical"
+                 HorizontalOptions="FillAndExpand"
+                 VerticalOptions="Start"
+                 
+                 
+                 >
+        <Grid Style="{StaticResource GGrid}" VerticalOptions="StartAndExpand"
+              HorizontalOptions="FillAndExpand"
+              BackgroundColor="#eeeeee"
+              Margin="{StaticResource PLR10}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Text="盘点仓库"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="Start"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="1"
+                   Text="仓库编号"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="End"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Grid.Column="2"
+                   Text="操作"
+                   FontSize="{StaticResource FT14}"
+                   HorizontalOptions="End"
+                   VerticalOptions="CenterAndExpand"
+                   Margin="{StaticResource MR5}"></Label>
+        </Grid>
+        <BoxView Style="{StaticResource SeparatorGrid}"
+                  />
+        <RefreshView IsRefreshing="{Binding Path=ForceRefresh, Mode=OneWay}"
+                     Command="{Binding RefreshCommand}"
+                     RefreshColor="{StaticResource PrimaryDarkColor}">
+            <custom:TaskLoaderView Style="{StaticResource WesleyTaskLoader}"
+                                   ViewModelLoader="{Binding WareHousesLoader}">
+
+                <CollectionView ItemsSource="{Binding WareHouses,Mode=TwoWay}"
+                                x:Name="BillItems"
+                                SelectionMode="Single"
+                                SelectedItem="{Binding Selecter, Mode=TwoWay}" VerticalScrollBarVisibility="Always">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+
+                            <Grid Style="{StaticResource GGrid}"
+                                  Margin="{StaticResource PLR10}"
+                                  VerticalOptions="Start"
+                                  HorizontalOptions="FillAndExpand">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="45" />
+                                    <RowDefinition Height=".7" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackLayout Grid.Row="0"
+                                             Grid.Column="0"
+                                             Orientation="Horizontal">
+                                    <Label HorizontalOptions="Start"
+                                           Text="&#xf01c;"
+                                           FontFamily="FAS"
+                                           TextColor="#dddddd"
+                                           FontSize="{StaticResource FT14}" />
+
+                                    <Label Text="{Binding Name}"
+                                           HorizontalOptions="Start"
+                                           FontSize="{StaticResource FT14}"
+                                           VerticalOptions="Center"></Label>
+                                </StackLayout>
+
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding Code}"
+                                       HorizontalOptions="End"
+                                       FontSize="{StaticResource FT14}"
+                                       VerticalOptions="Center"></Label>
+
+                                <Label  Grid.Row="0"
+                                        Grid.Column="2"
+                                        HorizontalOptions="End"
+                                        Text="&#xf04b;"
+                                        FontFamily="FAS"
+                                        TextColor="{StaticResource PrimaryDarkColor}"
+                                        FontSize="{StaticResource FT14}" />
+
+                                <BoxView VerticalOptions="Start"
+                                         Grid.Row="1"
+                                         Grid.ColumnSpan="3"
+                                         Style="{StaticResource SeparatorGrid}" />
+                            </Grid>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </custom:TaskLoaderView>
+        </RefreshView>
+    </StackLayout>
+</pages:BaseContentPage>

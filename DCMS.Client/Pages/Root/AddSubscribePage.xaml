@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:loading="clr-namespace:Wesley.Client.CustomViews"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.AddSubscribePage"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       x:TypeArguments="vms:AddSubscribePageViewModel"
+                       Title="订阅">
+    <NavigationPage.TitleView>
+        <StackLayout Orientation="Horizontal">
+            <Label Text="{Binding Title}"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="CenterAndExpand" />
+            <Switch IsToggled="{Binding SelectedALL,Mode=TwoWay}"
+                    HorizontalOptions="EndAndExpand" />
+        </StackLayout>
+    </NavigationPage.TitleView>
+    <CollectionView ItemsSource="{Binding AppList,Mode=TwoWay}">
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Grid Style="{StaticResource GGrid}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height=".7" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <!--0-->
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Text="{Binding Icon,Converter={StaticResource IconConverter}}"
+                           FontFamily="FAS"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource PrimaryDarkColor}"
+                           FontSize="20" />
+                    <Label  Grid.Row="0"
+                            Grid.Column="1"
+                            FontSize="{StaticResource FT16}"
+                            Text="{Binding Title}"
+                            
+                            TextColor="{StaticResource PrimaryTextColor}"
+                            VerticalOptions="Center" />
+                    <Switch Grid.Row="0"
+                            Grid.Column="1"
+                            VerticalOptions="Center"
+                            HorizontalOptions="EndAndExpand"
+                            Margin="{StaticResource MR10}"
+                            OnColor="#53a245"
+                            ThumbColor="#53a245"
+                            IsToggled="{Binding Selected,Mode=TwoWay}"/>
+                    <!--1-->
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           Margin="0,0,10,5"
+                           Text="{Binding Description}"
+                           TextColor="{StaticResource DividerColor}"
+                           VerticalOptions="Start"
+                            />
+                    <!--2-->
+                    <BoxView HeightRequest=".7"
+                             Grid.Row="2"
+                             Grid.Column="1"
+                             BackgroundColor="{StaticResource SpliterLineColor}" />
+                </Grid>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+        <CollectionView.EmptyView>
+            <loading:LoadingContentView />
+        </CollectionView.EmptyView>
+    </CollectionView>
+</pages:BaseContentPage>

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:chart="clr-namespace:Wesley.ChartJS;assembly=Wesley.ChartJS"
+                       xmlns:pages="clr-namespace:Wesley.Client.Pages"
+                       xmlns:vms="clr-namespace:Wesley.Client.ViewModels"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="Wesley.Client.Pages.Archive.MyReportingPage"
+                       Title="{Binding Title}"
+                       x:Name="CurrentContentView"
+                       x:TypeArguments="vms:MyReportingPageViewModel">
+
+        <CollectionView x:Name="ChartsRepeater"
+                    ItemsSource="{Binding ChartDatas,Mode=OneWay}"
+                    VerticalScrollBarVisibility="Always">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid BackgroundColor="White"
+                          RowDefinitions="50,300"
+                          ColumnDefinitions="*"
+                          VerticalOptions="FillAndExpand"
+                          RowSpacing="0"
+                          ColumnSpacing="0">
+
+                        <StackLayout Grid.Row="0"
+                                     Grid.Column="0"
+                                     Orientation="Horizontal"
+                                     HeightRequest="{StaticResource RH45}"
+                                     BackgroundColor="#eeeeee">
+                            <BoxView WidthRequest="4"
+                                     BackgroundColor="{StaticResource PrimaryColor}" />
+                            <Label Text="{Binding Title}"
+                                   FontSize="{StaticResource FT16}"
+                                   FontAttributes="Bold"
+                                   Margin="{StaticResource ML10}"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="StartAndExpand" />
+                            <Label Text="(今日)"
+                                   TextColor="{StaticResource PrimaryDarkColor}"
+                                   FontSize="{StaticResource FT14}"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   Margin="{StaticResource MR10}"
+                                   HorizontalOptions="End" />
+                        </StackLayout>
+
+                        <!--图表-->
+                        <chart:ChartView Grid.Row="1"
+                                         Grid.Column="0"
+                                         Config="{Binding ChartConfig}"
+                                         HeightRequest="300" />
+                        <StackLayout Grid.Row="1"
+                                     Grid.Column="0"
+                                     HeightRequest="300"
+                                     IsVisible="{Binding Path=BindingContext.IsBusy,Source={x:Reference CurrentContentView}}">
+                            <ActivityIndicator IsRunning="True"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="CenterAndExpand" />
+                        </StackLayout>
+
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <StackLayout>
+                    <ActivityIndicator IsRunning="True"
+                                       HorizontalOptions="CenterAndExpand"
+                                       VerticalOptions="CenterAndExpand" />
+                </StackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+
+</pages:BaseContentPage>

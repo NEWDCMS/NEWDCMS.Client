@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:prism="http://prismlibrary.com"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:pages="clr-namespace:DCMS.Client.Pages"
+                       xmlns:vms="clr-namespace:DCMS.Client.ViewModels"
+                       x:TypeArguments="vms:LogPageViewModel"
+                       x:Class="DCMS.Client.Pages.LogPage"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       Title="工作日志">
+
+    <pages:BaseContentPage.ToolbarItems>
+        <ToolbarItem Text="清除"
+                     Command="{Binding Clear}" />
+    </pages:BaseContentPage.ToolbarItems>
+
+    <pages:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="NoDataLabel"
+                   TargetType="Label">
+                <Setter Property="FontSize"
+                        Value="14" />
+                <Setter Property="HorizontalTextAlignment"
+                        Value="Center" />
+                <Setter Property="HorizontalOptions"
+                        Value="FillAndExpand" />
+                <Setter Property="VerticalTextAlignment"
+                        Value="Center" />
+                <Setter Property="VerticalOptions"
+                        Value="FillAndExpand" />
+            </Style>
+        </ResourceDictionary>
+    </pages:BaseContentPage.Resources>
+    
+    <pages:BaseContentPage.Content>
+        <StackLayout>
+            <Label Text="无作业日志！"
+                   Style="{StaticResource NoDataLabel}"
+                   IsVisible="{Binding HasLogs, Converter={StaticResource WrongBoolConverter}}" />
+
+            <ListView ItemsSource="{Binding Logs}"
+                      IsVisible="{Binding HasLogs}"
+                      IsRefreshing="{Binding IsBusy}"
+                      RefreshCommand="{Binding Load}"
+                      IsPullToRefreshEnabled="True">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding Text}"
+                                  Detail="{Binding Detail}"
+                                  Command="{Binding PrimaryCommand}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </pages:BaseContentPage.Content>
+</pages:BaseContentPage>

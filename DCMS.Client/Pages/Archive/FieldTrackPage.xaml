@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:custom="clr-namespace:DCMS.Client.CustomViews;assembly=DCMS.Client"
+             xmlns:maps="clr-namespace:DCMS.Client.BaiduMaps;assembly=DCMS.Client"
+             
+                          xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             xmlns:pages="clr-namespace:DCMS.Client.Pages"
+                       xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+                       prism:ViewModelLocator.AutowireViewModel="True"
+                       x:Class="DCMS.Client.Pages.Archive.FieldTrackPage"
+             x:Name="CurrentContentView"
+                          Title="{Binding Title}"
+                          xmlns:vms="clr-namespace:DCMS.Client.ViewModels"
+                          x:TypeArguments="vms:FieldTrackPageViewModel">
+
+
+
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+
+            
+            <!--App Button-->
+            <Style x:Key="AppButtonStyle"
+                   TargetType="Button">
+                <Setter Property="TextColor"
+                        Value="#FFFFFF" />
+                <Setter Property="FontSize"
+                        Value="12" />
+                <Setter Property="BackgroundColor"
+                        Value="#53a245" />
+                <Setter Property="BorderColor"
+                        Value="#53a245" />
+                <Setter Property="BorderRadius"
+                        Value="50" />
+                <Setter Property="CornerRadius"
+                        Value="50" />
+                <Setter Property="BorderWidth"
+                        Value="0.7" />
+                <Setter Property="HeightRequest"
+                        Value="40" />
+                <Setter Property="WidthRequest"
+                        Value="40" />
+                <Setter Property="HorizontalOptions"
+                        Value="Center" />
+            </Style>
+
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
+
+    <ContentPage.Content>
+        <Grid Style="{StaticResource GGrid}">
+            <Grid.RowDefinitions>
+                <RowDefinition>
+                    <RowDefinition.Height>
+                        <OnPlatform x:TypeArguments="GridLength"
+                                    Android="45"
+                                    iOS="60" />
+                    </RowDefinition.Height>
+                </RowDefinition>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--工具栏-->
+            <ContentView Grid.Row="0"
+                         BackgroundColor="#3B5998">
+                <Grid Style="{StaticResource GGrid}" VerticalOptions="CenterAndExpand" Padding="15,0,15,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition  Width="*" />
+                        <ColumnDefinition  Width="*" />
+                        <ColumnDefinition  Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0"
+                           Text="&#xf060;"
+                           FontFamily="FAS"
+                           TextColor="White"
+                           FontSize="{StaticResource FT16}"
+                           HorizontalOptions="Start">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoBackAsync}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <StackLayout Grid.Column="1"
+                                 Orientation="Horizontal">
+                        <Label 
+                            Text="&#xf0d9;"
+                            FontFamily="FAS"
+                            TextColor="White"
+                            FontSize="22">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChangeDateCmd}"
+                                                      CommandParameter="0" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Label Text="{Binding TrackDate,StringFormat='{0:yyyy-MM-dd}'}" FontSize="{StaticResource FT14}" 
+                               TextColor="White" Margin="8,0,8,0"/>
+                        <Label 
+                            Text="&#xf0da;"
+                            FontFamily="FAS"
+                            TextColor="White"
+                            FontSize="22">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChangeDateCmd}" CommandParameter="1" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </StackLayout>
+                    <Label Grid.Column="2"
+                                       Text = "&#xf2bd;"
+                                       FontFamily="FAS"
+                                       TextColor="White"
+                                       FontSize="{StaticResource FT16}"
+                                       HorizontalOptions="End">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding BusinessSelected}"
+                                                  CommandParameter="1" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </ContentView>
+
+                <AbsoluteLayout Grid.Row="1">
+                    
+                    <!--baidu地图插件-->
+                    <maps:Map x:Name="map"
+                              ShowZoomControl="True"
+                              AbsoluteLayout.LayoutFlags="All"
+                              AbsoluteLayout.LayoutBounds="0, 0, 1.0, 1.0" />
+
+                    <custom:DynamicStackLayout ItemsSource="{Binding BusinessUsers,Mode=TwoWay}"
+                                               HorizontalOptions="Fill"
+                                               Orientation="Horizontal"
+                                               AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"
+                                               AbsoluteLayout.LayoutBounds="0.1, 0, 1.0, 90"
+                                               
+                                               Margin="12">
+       
+                            <custom:DynamicStackLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <yummy:PancakeView IsClippedToBounds="true"
+                                                        CornerRadius="2.5"
+                                                    BackgroundColor="{Binding BgColor,Mode=OneWay}"
+                                                         HorizontalOptions="FillAndExpand" Margin="5" >
+                                    <Frame 
+                                           
+                                           HasShadow="False"
+                                           CornerRadius="0"
+                                           BackgroundColor="Transparent"
+                                           BorderColor="Transparent">
+                                        <StackLayout Orientation="Horizontal"
+                                                     Padding="5"
+                                                     >
+                                            <!--<imageCircle:CircleImage HorizontalOptions="Center"
+                                                                     VerticalOptions="Center"
+                                                                     Margin="8"
+                                                                     WidthRequest="30"
+                                                                     HeightRequest="30"
+                                                                     Source="profile_placeholder.png"
+                                                                     Aspect="AspectFit"
+                                                                     Style="{StaticResource CustomerStyle}" />-->
+                                            <ffimageloading:CachedImage HorizontalOptions="Center"
+                                                                        VerticalOptions="Center"
+                                                                        LoadingPlaceholder="profile_placeholder.png"
+                                                                        ErrorPlaceholder="profile_placeholder.png"
+                                                                        DownsampleToViewSize="true"
+                                                                        Margin="8"
+                                                                        Aspect="AspectFill"
+                                                                        WidthRequest="30"
+                                                                        HeightRequest="30"
+                                                                        Source="profile_placeholder.png">
+                                                <ffimageloading:CachedImage.Transformations>
+                                                    <fftransformations:CircleTransformation BorderSize="4"
+                                                                                            BorderHexColor="#ffffff" />
+                       
+                                                </ffimageloading:CachedImage.Transformations>
+
+                                            </ffimageloading:CachedImage>
+                                            <StackLayout >
+                                                <StackLayout Orientation="Horizontal"
+                                                             >
+                                                    <Label Text="{Binding BusinessUserName}"
+                                                           FontSize="{StaticResource FT14}"
+                                                           TextColor="{Binding TxtColor,Mode=OneWay}"
+                                                           Margin="0,0,8,0" />
+                                                    <Label Text="业务员"
+                                                           FontSize="10"
+                                                           TextColor="{Binding TxtColor,Mode=OneWay}"
+                                                           VerticalOptions="End" />
+                                                </StackLayout>
+                                                <Label Text="{Binding ExceptVisitCount,StringFormat='异常拜访：{0}'}"
+                                                       FontSize="9"
+                                                       TextColor="{Binding TxtColor,Mode=OneWay}"
+                                                       Margin="0,2,0,2" />
+                                                <StackLayout Orientation="Horizontal"
+                                                             >
+                                                    <Label Text="{Binding VisitedCount,StringFormat='拜访：{0}'}"
+                                                           FontSize="9"
+                                                           TextColor="{Binding TxtColor,Mode=OneWay}"
+                                                           Margin="{StaticResource MR5}" />
+                                                    <Label Text="{Binding NoVisitedCount,StringFormat='未拜访：{0}'}"
+                                                           FontSize="9"
+                                                           TextColor="{Binding TxtColor,Mode=OneWay}" />
+                                                </StackLayout>
+                                            </StackLayout>
+                                        </StackLayout>
+                                        <Frame.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Path=BindingContext.UserSelected,Source={x:Reference CurrentContentView}}"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Frame.GestureRecognizers>
+                                    </Frame>
+
+                                       
+                                </yummy:PancakeView>
+                                </DataTemplate>
+                            </custom:DynamicStackLayout.ItemTemplate>
+      
+                    </custom:DynamicStackLayout>
+                    
+
+                    <!--播放轨迹-->
+                <Grid Style="{StaticResource GGrid}" x:Name="PlayPanel"
+                          Margin="12"
+                          AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"
+                          AbsoluteLayout.LayoutBounds="0.0, 1.0, 1.0, AutoSize">
+                        <StackLayout >
+                            <Button  
+                                Text="&#xf04b;"
+                                FontFamily="FAS"
+                                x:Name="btnTrack"
+                                Style="{StaticResource AppButtonStyle}" HorizontalOptions="Start"/>
+                            
+                        </StackLayout>
+                    </Grid>
+   
+                </AbsoluteLayout>
+
+        </Grid>
+    </ContentPage.Content>
+</pages:BaseContentPage>
