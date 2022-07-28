@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DCMS.Client", "Wesley.Client\DCMS.Client.csproj", "{3EB60B72-F56C-464C-95E4-0E79782B93C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DCMS.Client", "DCMS.Client\DCMS.Client.csproj", "{3EB60B72-F56C-464C-95E4-0E79782B93C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCMS.Client.Android", "Wesley.Client.Android\DCMS.Client.Android.csproj", "{264639DF-49DB-47AE-AF7E-EDC9D04897EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCMS.Client.Android", "DCMS.Client.Android\DCMS.Client.Android.csproj", "{264639DF-49DB-47AE-AF7E-EDC9D04897EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCMS.Client.iOS", "Wesley.Client.iOS\DCMS.Client.iOS.csproj", "{134D1C97-DDCE-40B8-AC2D-D7230E1E8A30}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCMS.Client.iOS", "DCMS.Client.iOS\DCMS.Client.iOS.csproj", "{134D1C97-DDCE-40B8-AC2D-D7230E1E8A30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaiduMapBinding", "Wesley.Map\BaiduMapBinding.csproj", "{248DAAAE-A59C-45B0-9751-E859BBEB8F53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaiduMapBinding", "DCMS.Map\BaiduMapBinding.csproj", "{248DAAAE-A59C-45B0-9751-E859BBEB8F53}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{89BEC21E-14F3-4390-BDDE-85DA8E671728}"
 EndProject
